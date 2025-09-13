@@ -1,18 +1,30 @@
 // Authentication Service
+console.log('Loading AuthService...');
 app.service('AuthService', ['$http', '$q', 'APP_CONFIG', function($http, $q, APP_CONFIG) {
+    console.log('AuthService - APP_CONFIG received:', APP_CONFIG);
     var baseUrl = APP_CONFIG.API_BASE_URL || 'https://localhost:5256/api';
+    
+    // Debug log
+    console.log('AuthService - API Base URL:', baseUrl);
+    console.log('APP_CONFIG.API_BASE_URL:', APP_CONFIG.API_BASE_URL);
     
     // Login function
     this.login = function(loginData) {
+        var loginUrl = baseUrl + '/auth/login';
+        console.log('Login URL:', loginUrl);
+        
         return $http({
             method: 'POST',
-            url: baseUrl + '/auth/login',
+            url: loginUrl,
             data: {
                 email: loginData.email,
                 password: loginData.password
             },
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization'
             }
         });
     };
@@ -24,7 +36,10 @@ app.service('AuthService', ['$http', '$q', 'APP_CONFIG', function($http, $q, APP
             url: baseUrl + '/auth/register',
             data: registerData,
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization'
             }
         });
     };

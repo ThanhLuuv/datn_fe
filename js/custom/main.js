@@ -15,11 +15,15 @@ $(document).ready(function() {
     // Smooth scrolling for anchor links
     $('a[href*="#"]').on('click', function(e) {
         e.preventDefault();
-        var target = $(this.hash);
-        if (target.length) {
-            $('html, body').animate({
-                scrollTop: target.offset().top - 70
-            }, 1000);
+        var hash = this.hash;
+        // Skip AngularJS hash routes
+        if (hash && hash.indexOf('#!/') === -1) {
+            var target = $(hash);
+            if (target.length) {
+                $('html, body').animate({
+                    scrollTop: target.offset().top - 70
+                }, 1000);
+            }
         }
     });
 

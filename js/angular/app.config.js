@@ -1,7 +1,8 @@
 // Application Configuration
+console.log('Loading APP_CONFIG...');
 app.constant('APP_CONFIG', {
     // API Configuration
-    API_BASE_URL: 'http://localhost:3000/api',
+    API_BASE_URL: 'http://localhost:5256/api',
     API_TIMEOUT: 10000,
     
     // Application Settings
@@ -41,6 +42,9 @@ app.constant('APP_CONFIG', {
         LANGUAGE: 'language'
     }
 });
+
+// Debug log
+console.log('APP_CONFIG loaded - API_BASE_URL:', 'https://localhost:5256/api');
 
 // Environment Configuration
 app.constant('ENV', {
