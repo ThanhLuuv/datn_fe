@@ -1,0 +1,134 @@
+<!-- Login View -->
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <h3 class="mb-0">
+                        <i class="bi bi-book"></i> BookStore
+                    </h3>
+                    <p class="mb-0 mt-2">Đăng nhập vào tài khoản</p>
+                </div>
+                <div class="card-body p-5">
+                    <!-- Alert Messages -->
+                    <alert-message 
+                        message="errorMessage"
+                        type="'danger'"
+                        show="showError">
+                    </alert-message>
+                    
+                    <alert-message 
+                        message="successMessage"
+                        type="'success'"
+                        show="showSuccess">
+                    </alert-message>
+
+                    <!-- Login Form -->
+                    <form name="loginForm" ng-submit="login()" novalidate>
+                        <div class="mb-4">
+                            <label for="email" class="form-label">
+                                <i class="bi bi-envelope"></i> Email
+                            </label>
+                            <input type="email" 
+                                   class="form-control" 
+                                   id="email" 
+                                   ng-model="loginData.email" 
+                                   ng-class="{'is-invalid': loginForm.email.$invalid && loginForm.email.$touched}"
+                                   placeholder="Nhập email của bạn"
+                                   required>
+                            <div class="invalid-feedback" ng-show="loginForm.email.$invalid && loginForm.email.$touched">
+                                <span ng-show="loginForm.email.$error.required">Email là bắt buộc</span>
+                                <span ng-show="loginForm.email.$error.email">Email không hợp lệ</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="password" class="form-label">
+                                <i class="bi bi-lock"></i> Mật khẩu
+                            </label>
+                            <div class="input-group">
+                                <input type="{{showPassword ? 'text' : 'password'}}" 
+                                       class="form-control" 
+                                       id="password" 
+                                       ng-model="loginData.password"
+                                       ng-class="{'is-invalid': loginForm.password.$invalid && loginForm.password.$touched}"
+                                       placeholder="Nhập mật khẩu"
+                                       required>
+                                <button class="btn btn-outline-secondary" 
+                                        type="button" 
+                                        ng-click="togglePassword()">
+                                    <i class="bi" ng-class="showPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+                                </button>
+                            </div>
+                            <div class="invalid-feedback" ng-show="loginForm.password.$invalid && loginForm.password.$touched">
+                                Mật khẩu là bắt buộc
+                            </div>
+                        </div>
+
+                        <div class="mb-4 form-check">
+                            <input type="checkbox" 
+                                   class="form-check-input" 
+                                   id="rememberMe" 
+                                   ng-model="loginData.rememberMe">
+                            <label class="form-check-label" for="rememberMe">
+                                Ghi nhớ đăng nhập
+                            </label>
+                        </div>
+
+                        <div class="d-grid mb-3">
+                            <button type="submit" 
+                                    class="btn btn-primary btn-lg" 
+                                    ng-disabled="loginForm.$invalid || isLoading">
+                                <span ng-if="!isLoading">
+                                    <i class="bi bi-box-arrow-in-right"></i> Đăng nhập
+                                </span>
+                                <span ng-if="isLoading">
+                                    <span class="spinner-border spinner-border-sm me-2"></span>
+                                    Đang đăng nhập...
+                                </span>
+                            </button>
+                        </div>
+
+                        <div class="text-center">
+                            <p class="mb-0">
+                                Chưa có tài khoản? 
+                                <a href="#!/register" class="text-decoration-none">
+                                    Đăng ký ngay
+                                </a>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Demo Accounts -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="bi bi-info-circle"></i> Tài khoản demo
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-4">
+                            <small class="text-muted">Admin</small><br>
+                            <code>admin@bookstore.com</code>
+                        </div>
+                        <div class="col-4">
+                            <small class="text-muted">Employee</small><br>
+                            <code>staff@bookstore.com</code>
+                        </div>
+                        <div class="col-4">
+                            <small class="text-muted">Customer</small><br>
+                            <code>user@bookstore.com</code>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <small class="text-muted">Mật khẩu: <code>123456</code></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

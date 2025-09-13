@@ -1,0 +1,180 @@
+<!-- API Test View -->
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="text-center mb-5">
+                <h1 class="display-4 text-gradient mb-3">API Test Dashboard</h1>
+                <p class="lead">Kiểm tra các API endpoints của BookStore</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Public API Test -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-globe"></i> Public API
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>Test endpoint không cần authentication</p>
+                    <div class="mb-3">
+                        <code>GET /api/test/public</code>
+                    </div>
+                    <button class="btn btn-success" ng-click="testPublicAPI()">
+                        <i class="bi bi-play"></i> Test Public API
+                    </button>
+                    <div class="mt-3" ng-if="publicApiResult">
+                        <div class="alert" ng-class="publicApiResult.success ? 'alert-success' : 'alert-danger'">
+                            <strong>Kết quả:</strong> {{publicApiResult.message}}
+                        </div>
+                        <pre ng-if="publicApiResult.data">{{publicApiResult.data | json}}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Protected API Test -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-shield-lock"></i> Protected API
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>Test endpoint cần authentication</p>
+                    <div class="mb-3">
+                        <code>GET /api/test/protected</code>
+                    </div>
+                    <button class="btn btn-warning" ng-click="testProtectedAPI()" ng-disabled="!isAuthenticated">
+                        <i class="bi bi-play"></i> Test Protected API
+                    </button>
+                    <div class="mt-3" ng-if="protectedApiResult">
+                        <div class="alert" ng-class="protectedApiResult.success ? 'alert-success' : 'alert-danger'">
+                            <strong>Kết quả:</strong> {{protectedApiResult.message}}
+                        </div>
+                        <pre ng-if="protectedApiResult.data">{{protectedApiResult.data | json}}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin API Test -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-person-gear"></i> Admin Only API
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>Test endpoint chỉ dành cho ADMIN</p>
+                    <div class="mb-3">
+                        <code>GET /api/test/admin-only</code>
+                    </div>
+                    <button class="btn btn-danger" ng-click="testAdminAPI()" ng-disabled="!isAdmin">
+                        <i class="bi bi-play"></i> Test Admin API
+                    </button>
+                    <div class="mt-3" ng-if="adminApiResult">
+                        <div class="alert" ng-class="adminApiResult.success ? 'alert-success' : 'alert-danger'">
+                            <strong>Kết quả:</strong> {{adminApiResult.message}}
+                        </div>
+                        <pre ng-if="adminApiResult.data">{{adminApiResult.data | json}}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Staff API Test -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-people"></i> Staff API
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>Test endpoint dành cho EMPLOYEE và ADMIN</p>
+                    <div class="mb-3">
+                        <code>GET /api/test/staff-only</code>
+                    </div>
+                    <button class="btn btn-info" ng-click="testStaffAPI()" ng-disabled="!isStaff">
+                        <i class="bi bi-play"></i> Test Staff API
+                    </button>
+                    <div class="mt-3" ng-if="staffApiResult">
+                        <div class="alert" ng-class="staffApiResult.success ? 'alert-success' : 'alert-danger'">
+                            <strong>Kết quả:</strong> {{staffApiResult.message}}
+                        </div>
+                        <pre ng-if="staffApiResult.data">{{staffApiResult.data | json}}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Authentication Status -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle"></i> Trạng thái xác thực
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Đã đăng nhập:</strong> 
+                                <span class="badge" ng-class="isAuthenticated ? 'bg-success' : 'bg-danger'">
+                                    {{isAuthenticated ? 'Có' : 'Không'}}
+                                </span>
+                            </p>
+                            <p ng-if="currentUser"><strong>Email:</strong> {{currentUser.email}}</p>
+                            <p ng-if="currentUser"><strong>Role ID:</strong> {{currentUser.roleId}}</p>
+                            <p ng-if="currentUser"><strong>Role:</strong> 
+                                <span ng-if="currentUser.roleId === 1">CUSTOMER</span>
+                                <span ng-if="currentUser.roleId === 2">EMPLOYEE</span>
+                                <span ng-if="currentUser.roleId === 3">ADMIN</span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Token:</strong> 
+                                <span ng-if="token">{{token.substring(0, 20)}}...</span>
+                                <span ng-if="!token" class="text-muted">Không có</span>
+                            </p>
+                            <p><strong>Quyền Admin:</strong> 
+                                <span class="badge" ng-class="isAdmin ? 'bg-success' : 'bg-danger'">
+                                    {{isAdmin ? 'Có' : 'Không'}}
+                                </span>
+                            </p>
+                            <p><strong>Quyền Staff:</strong> 
+                                <span class="badge" ng-class="isStaff ? 'bg-success' : 'bg-danger'">
+                                    {{isStaff ? 'Có' : 'Không'}}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="#!/login" class="btn btn-primary me-2" ng-if="!isAuthenticated">
+                <i class="bi bi-box-arrow-in-right"></i> Đăng nhập
+            </a>
+            <a href="#!/register" class="btn btn-success me-2" ng-if="!isAuthenticated">
+                <i class="bi bi-person-plus"></i> Đăng ký
+            </a>
+            <button class="btn btn-danger" ng-click="logout()" ng-if="isAuthenticated">
+                <i class="bi bi-box-arrow-right"></i> Đăng xuất
+            </button>
+        </div>
+    </div>
+</div>
+

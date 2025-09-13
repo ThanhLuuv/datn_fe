@@ -1,0 +1,257 @@
+<!-- Employee Dashboard View -->
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Nhân viên</span>
+                </h6>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#!/employee">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#!/employee/books">
+                            <i class="bi bi-book"></i> Quản lý sách
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#!/employee/orders">
+                            <i class="bi bi-cart-check"></i> Xử lý đơn hàng
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#!/employee/customers">
+                            <i class="bi bi-people"></i> Khách hàng
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Dashboard Nhân viên</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-download"></i> Export
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Đơn hàng chờ xử lý
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{stats.pendingOrders}}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-clock fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Đơn hàng hôm nay
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{stats.todayOrders}}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-cart-check fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                        Sách cần nhập
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{stats.lowStockBooks}}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-exclamation-triangle fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Doanh thu hôm nay
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{stats.todayRevenue | currency:'VND '}}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-currency-dollar fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Orders -->
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Đơn hàng gần đây</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Mã đơn hàng</th>
+                                            <th>Khách hàng</th>
+                                            <th>Ngày đặt</th>
+                                            <th>Tổng tiền</th>
+                                            <th>Trạng thái</th>
+                                            <th>Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="order in recentOrders">
+                                            <td>{{order.orderId}}</td>
+                                            <td>{{order.customer}}</td>
+                                            <td>{{order.orderDate | date:'dd/MM/yyyy'}}</td>
+                                            <td>{{order.total | currency:'VND '}}</td>
+                                            <td>
+                                                <span class="badge" ng-class="'bg-' + order.statusClass">
+                                                    {{order.status}}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-primary" ng-click="viewOrder(order)">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-success" ng-click="processOrder(order)" ng-if="order.status === 'Chờ xử lý'">
+                                                    <i class="bi bi-check"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Thông báo</h6>
+                        </div>
+                        <div class="card-body">
+                            <div ng-repeat="notification in notifications" class="alert alert-info alert-dismissible fade show">
+                                <i class="bi bi-info-circle"></i> {{notification.message}}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Sách sắp hết</h6>
+                        </div>
+                        <div class="card-body">
+                            <div ng-repeat="book in lowStockBooks" class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <strong>{{book.title}}</strong><br>
+                                    <small class="text-muted">Còn lại: {{book.stock}}</small>
+                                </div>
+                                <button class="btn btn-sm btn-warning" ng-click="restockBook(book)">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<style>
+.sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    padding: 48px 0 0;
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+}
+
+.sidebar .nav-link {
+    font-weight: 500;
+    color: #333;
+}
+
+.sidebar .nav-link.active {
+    color: #007bff;
+}
+
+.sidebar .nav-link:hover {
+    color: #007bff;
+}
+
+.border-left-primary {
+    border-left: 0.25rem solid #4e73df !important;
+}
+
+.border-left-success {
+    border-left: 0.25rem solid #1cc88a !important;
+}
+
+.border-left-info {
+    border-left: 0.25rem solid #36b9cc !important;
+}
+
+.border-left-warning {
+    border-left: 0.25rem solid #f6c23e !important;
+}
+
+.text-xs {
+    font-size: 0.7rem;
+}
+
+.text-gray-800 {
+    color: #5a5c69 !important;
+}
+
+.text-gray-300 {
+    color: #dddfeb !important;
+}
+</style>
+
