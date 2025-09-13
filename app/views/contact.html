@@ -1,0 +1,125 @@
+<!-- Contact View -->
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="text-center mb-5">
+                <h1 class="display-4 text-gradient mb-3">{{title}}</h1>
+                <p class="lead">Liên hệ với chúng tôi</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Contact Form -->
+        <div class="col-lg-8 mb-4">
+            <div class="card contact-form">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-envelope"></i> Gửi tin nhắn</h4>
+                </div>
+                <div class="card-body">
+                    <form name="contactForm" ng-submit="submitForm()" novalidate>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="name" class="form-label">Họ và tên *</label>
+                                <input type="text" class="form-control" id="name" ng-model="contactForm.name" required>
+                                <div class="invalid-feedback">
+                                    Vui lòng nhập họ và tên.
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email *</label>
+                                <input type="email" class="form-control" id="email" ng-model="contactForm.email" required>
+                                <div class="invalid-feedback">
+                                    Vui lòng nhập email hợp lệ.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">Chủ đề *</label>
+                            <input type="text" class="form-control" id="subject" ng-model="contactForm.subject" required>
+                            <div class="invalid-feedback">
+                                Vui lòng nhập chủ đề.
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Nội dung *</label>
+                            <textarea class="form-control" id="message" rows="5" ng-model="contactForm.message" required></textarea>
+                            <div class="invalid-feedback">
+                                Vui lòng nhập nội dung tin nhắn.
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="button" class="btn btn-outline-secondary me-md-2" ng-click="resetForm()">
+                                <i class="bi bi-arrow-clockwise"></i> Làm mới
+                            </button>
+                            <button type="submit" class="btn btn-primary" ng-disabled="sending">
+                                <span ng-if="!sending">
+                                    <i class="bi bi-send"></i> Gửi tin nhắn
+                                </span>
+                                <span ng-if="sending">
+                                    <span class="spinner-border spinner-border-sm me-2"></span>
+                                    Đang gửi...
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Success Message -->
+                    <alert-message 
+                        message="'Tin nhắn đã được gửi thành công! Chúng tôi sẽ phản hồi sớm nhất có thể.'"
+                        type="'success'"
+                        show="submitted">
+                    </alert-message>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="bi bi-info-circle"></i> Thông tin liên hệ</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h6><i class="bi bi-geo-alt text-primary"></i> Địa chỉ</h6>
+                        <p class="text-muted">{{contactInfo.address}}</p>
+                    </div>
+                    <div class="mb-4">
+                        <h6><i class="bi bi-telephone text-primary"></i> Điện thoại</h6>
+                        <p class="text-muted">{{contactInfo.phone}}</p>
+                    </div>
+                    <div class="mb-4">
+                        <h6><i class="bi bi-envelope text-primary"></i> Email</h6>
+                        <p class="text-muted">{{contactInfo.email}}</p>
+                    </div>
+                    <div class="mb-4">
+                        <h6><i class="bi bi-clock text-primary"></i> Giờ làm việc</h6>
+                        <p class="text-muted">{{contactInfo.hours}}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Media -->
+            <div class="card mt-3">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="bi bi-share"></i> Mạng xã hội</h5>
+                </div>
+                <div class="card-body text-center">
+                    <a href="#" class="btn btn-outline-primary me-2 mb-2" data-bs-toggle="tooltip" title="Facebook">
+                        <i class="bi bi-facebook"></i>
+                    </a>
+                    <a href="#" class="btn btn-outline-info me-2 mb-2" data-bs-toggle="tooltip" title="Twitter">
+                        <i class="bi bi-twitter"></i>
+                    </a>
+                    <a href="#" class="btn btn-outline-danger me-2 mb-2" data-bs-toggle="tooltip" title="YouTube">
+                        <i class="bi bi-youtube"></i>
+                    </a>
+                    <a href="#" class="btn btn-outline-dark me-2 mb-2" data-bs-toggle="tooltip" title="GitHub">
+                        <i class="bi bi-github"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

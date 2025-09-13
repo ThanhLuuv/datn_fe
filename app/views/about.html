@@ -1,0 +1,87 @@
+<!-- About View -->
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="text-center mb-5">
+                <h1 class="display-4 text-gradient mb-3">{{title}}</h1>
+                <p class="lead">Tìm hiểu thêm về chúng tôi</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Company Info -->
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-custom">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4">{{aboutInfo.company}}</h2>
+                    <p class="lead text-center mb-4">{{aboutInfo.description}}</p>
+                    <div class="row text-center">
+                        <div class="col-md-6">
+                            <i class="bi bi-calendar-event display-4 text-primary"></i>
+                            <h4>Thành lập</h4>
+                            <p>{{aboutInfo.founded}}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <i class="bi bi-geo-alt display-4 text-primary"></i>
+                            <h4>Địa chỉ</h4>
+                            <p>TP. Hồ Chí Minh, Việt Nam</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="text-center mb-4">Đội ngũ của chúng tôi</h2>
+        </div>
+        <div class="col-md-4 mb-4" ng-repeat="member in aboutInfo.team">
+            <div class="card team-member h-100">
+                <div class="card-body">
+                    <i class="bi {{member.avatar}} team-avatar"></i>
+                    <h5 class="card-title">{{member.name}}</h5>
+                    <p class="card-text text-muted">{{member.position}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Technologies Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="text-center mb-4">Công nghệ sử dụng</h2>
+            <div class="text-center">
+                <span class="tech-tag" ng-repeat="tech in aboutInfo.technologies">
+                    {{tech}}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mission & Vision -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-bullseye"></i> Sứ mệnh</h4>
+                </div>
+                <div class="card-body">
+                    <p>Chúng tôi cam kết mang đến những giải pháp công nghệ tiên tiến, giúp khách hàng phát triển bền vững và thành công trong kỷ nguyên số.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="bi bi-eye"></i> Tầm nhìn</h4>
+                </div>
+                <div class="card-body">
+                    <p>Trở thành công ty công nghệ hàng đầu Việt Nam, được khách hàng tin tưởng và đối tác đánh giá cao về chất lượng dịch vụ.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

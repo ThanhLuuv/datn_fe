@@ -1,0 +1,100 @@
+<!-- Home View -->
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="text-center mb-5">
+                <h1 class="display-4 text-gradient mb-3">{{title}}</h1>
+                <p class="lead">{{message}}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="text-center mb-4">Tính năng nổi bật</h2>
+            <loading-spinner loading="loading"></loading-spinner>
+        </div>
+    </div>
+
+    <div class="row" ng-show="!loading">
+        <div class="col-md-4 mb-4" ng-repeat="feature in features">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="bi {{feature.icon}} feature-icon"></i>
+                    <h5 class="card-title">{{feature.title}}</h5>
+                    <p class="card-text">{{feature.description}}</p>
+                    <button class="btn btn-outline-primary" ng-click="removeFeature($index)">
+                        <i class="bi bi-trash"></i> Xóa
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Feature Form -->
+    <div class="row mt-4">
+        <div class="col-md-6 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Thêm tính năng mới</h5>
+                </div>
+                <div class="card-body">
+                    <form ng-submit="addFeature()">
+                        <div class="mb-3">
+                            <label for="newFeature" class="form-label">Tên tính năng</label>
+                            <input type="text" class="form-control" id="newFeature" ng-model="newFeature" 
+                                   placeholder="Nhập tên tính năng..." required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Thêm
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h2 class="text-center mb-4">Thống kê</h2>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center bg-gradient-primary text-white">
+                <div class="card-body">
+                    <i class="bi bi-people display-4"></i>
+                    <h3>{{features.length}}</h3>
+                    <p class="mb-0">Tính năng</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center bg-success text-white">
+                <div class="card-body">
+                    <i class="bi bi-check-circle display-4"></i>
+                    <h3>100%</h3>
+                    <p class="mb-0">Hoàn thành</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center bg-info text-white">
+                <div class="card-body">
+                    <i class="bi bi-lightning display-4"></i>
+                    <h3>Fast</h3>
+                    <p class="mb-0">Tốc độ</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center bg-warning text-white">
+                <div class="card-body">
+                    <i class="bi bi-shield-check display-4"></i>
+                    <h3>Secure</h3>
+                    <p class="mb-0">Bảo mật</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

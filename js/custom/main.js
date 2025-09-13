@@ -1,0 +1,73 @@
+// Custom jQuery and JavaScript
+$(document).ready(function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Initialize popovers
+    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+        return new bootstrap.Popover(popoverTriggerEl);
+    });
+
+    // Smooth scrolling for anchor links
+    $('a[href*="#"]').on('click', function(e) {
+        e.preventDefault();
+        var target = $(this.hash);
+        if (target.length) {
+            $('html, body').animate({
+                scrollTop: target.offset().top - 70
+            }, 1000);
+        }
+    });
+
+    // Back to top button
+    var backToTop = $('<button class="btn btn-primary position-fixed" style="bottom: 20px; right: 20px; z-index: 1000; display: none;" id="backToTop"><i class="bi bi-arrow-up"></i></button>');
+    $('body').append(backToTop);
+
+    $(window).scroll(function() {
+        if ($(this).scrollTop() > 100) {
+            $('#backToTop').fadeIn();
+        } else {
+            $('#backToTop').fadeOut();
+        }
+    });
+
+    $('#backToTop').click(function() {
+        $('html, body').animate({scrollTop: 0}, 1000);
+    });
+
+    // Form validation
+    $('form').on('submit', function(e) {
+        var form = $(this);
+        if (form[0].checkValidity() === false) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        form.addClass('was-validated');
+    });
+
+    // Auto-hide alerts
+    $('.alert').each(function() {
+        var alert = $(this);
+        setTimeout(function() {
+            alert.alert('close');
+        }, 5000);
+    });
+});
+
+// Global functions
+window.showNotification = function(message, type = 'info') {
+    var alertClass = 'alert-' + type;
+    var alertHtml = '<div class="alert ' + alertClass + ' alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 9999;">' +
+                   message +
+                   '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                   '</div>';
+    $('body').append(alertHtml);
+    
+    setTimeout(function() {
+        $('.alert').last().alert('close');
+    }, 3000);
+};

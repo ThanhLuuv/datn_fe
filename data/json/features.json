@@ -1,0 +1,38 @@
+[
+    {
+        "id": 1,
+        "title": "Responsive Design",
+        "description": "Thiết kế đáp ứng trên mọi thiết bị từ desktop đến mobile",
+        "icon": "bi-phone"
+    },
+    {
+        "id": 2,
+        "title": "Modern UI/UX",
+        "description": "Giao diện người dùng hiện đại với Bootstrap 5",
+        "icon": "bi-palette"
+    },
+    {
+        "id": 3,
+        "title": "AngularJS Framework",
+        "description": "Sử dụng AngularJS để xây dựng ứng dụng SPA",
+        "icon": "bi-gear"
+    },
+    {
+        "id": 4,
+        "title": "jQuery Integration",
+        "description": "Tích hợp jQuery cho các tương tác DOM",
+        "icon": "bi-lightning"
+    },
+    {
+        "id": 5,
+        "title": "Custom Components",
+        "description": "Các component tùy chỉnh được xây dựng sẵn",
+        "icon": "bi-puzzle"
+    },
+    {
+        "id": 6,
+        "title": "Data Management",
+        "description": "Quản lý dữ liệu với services và filters",
+        "icon": "bi-database"
+    }
+]
