@@ -14,10 +14,10 @@ $(document).ready(function() {
 
     // Smooth scrolling for anchor links
     $('a[href*="#"]').on('click', function(e) {
-        e.preventDefault();
         var hash = this.hash;
-        // Skip AngularJS hash routes
-        if (hash && hash.indexOf('#!/') === -1) {
+        // Skip AngularJS hash routes and only prevent default for internal page anchors
+        if (hash && hash.indexOf('#!/') === -1 && hash.length > 1) {
+            e.preventDefault();
             var target = $(hash);
             if (target.length) {
                 $('html, body').animate({

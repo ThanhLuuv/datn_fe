@@ -1,0 +1,200 @@
+<!-- Admin Categories Management View -->
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex align-items-center">
+                    <a href="#!/admin" class="btn btn-outline-secondary me-3">
+                        <i class="bi bi-arrow-left"></i> Quay lại
+                    </a>
+                    <h2 class="mb-0"><i class="bi bi-tags"></i> Quản lý danh mục</h2>
+                </div>
+                <button class="btn btn-primary" ng-click="openCreateModal()">
+                    <i class="bi bi-plus-circle"></i> Thêm danh mục
+                </button>
+            </div>
+
+            <!-- Loading State -->
+            <div ng-if="loading" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Đang tải...</span>
+                </div>
+                <p class="mt-3 text-muted">Đang tải danh sách danh mục...</p>
+            </div>
+
+            <!-- Search Box -->
+            <search-box 
+                ng-if="!loading"
+                placeholder="Tìm kiếm danh mục..." 
+                search-term="searchTerm" 
+                on-search="searchCategories()"
+                on-clear="clearSearch()">
+            </search-box>
+
+            <!-- Error State -->
+            <error-state 
+                show="showError" 
+                message="errorMessage" 
+                dismissible="true">
+            </error-state>
+
+            <!-- Success Message -->
+            <success-message 
+                show="showSuccess" 
+                message="successMessage">
+            </success-message>
+
+            <!-- Categories Table -->
+            <div class="card" ng-if="!loading && !showError">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Tên danh mục</th>
+                                    <th>Mô tả</th>
+                                    <th>Số sách</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="category in categories | filter:searchTerm">
+                                    <td>{{category.categoryId}}</td>
+                                    <td>
+                                        <strong>{{category.name}}</strong>
+                                    </td>
+                                    <td>
+                                        <span ng-if="category.description">{{category.description | truncate:50}}</span>
+                                        <span ng-if="!category.description" class="text-muted">Không có mô tả</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{category.bookCount || 0}}</span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-info" ng-click="viewCategory(category)" title="Xem chi tiết">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-warning" ng-click="openEditModal(category)" title="Chỉnh sửa">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger" ng-click="confirmDelete(category)" title="Xóa">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <empty-state 
+                show="!loading && !showError && categories.length === 0" 
+                title="Chưa có danh mục nào"
+                message="Hệ thống chưa có danh mục sách nào để hiển thị"
+                action-text="Thêm danh mục đầu tiên"
+                action="openCreateModal()">
+            </empty-state>
+
+            <!-- Pagination -->
+            <pagination 
+                current-page="currentPage" 
+                total-pages="totalPages" 
+                on-page-change="goToPage(page)">
+            </pagination>
+        </div>
+    </div>
+</div>
+
+<!-- Create/Edit Category Modal -->
+<div class="modal fade" id="categoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-tag"></i> {{isEditMode ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới'}}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form name="categoryForm" ng-submit="saveCategory()">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="categoryName" class="form-label">Tên danh mục <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="categoryName" ng-model="categoryData.name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="categoryDescription" class="form-label">Mô tả</label>
+                        <textarea class="form-control" id="categoryDescription" ng-model="categoryData.description" rows="3" auto-resize></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary" ng-disabled="categoryForm.$invalid || isSaving">
+                        <span ng-if="isSaving" class="spinner-border spinner-border-sm me-2"></span>
+                        {{isEditMode ? 'Cập nhật' : 'Tạo mới'}}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Category Detail Modal -->
+<div class="modal fade" id="categoryDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-tag"></i> Chi tiết danh mục
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" ng-if="selectedCategory">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>ID danh mục</h6>
+                        <p>{{selectedCategory.categoryId}}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Tên danh mục</h6>
+                        <p><strong>{{selectedCategory.name}}</strong></p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Số lượng sách</h6>
+                        <p><span class="badge bg-primary">{{selectedCategory.bookCount || 0}}</span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Trạng thái</h6>
+                        <p><span class="badge bg-success">Hoạt động</span></p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <h6>Mô tả</h6>
+                        <p>{{selectedCategory.description || 'Không có mô tả'}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-warning" ng-click="openEditModal(selectedCategory)">
+                    <i class="bi bi-pencil"></i> Chỉnh sửa
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Delete Modal -->
+<confirm-dialog 
+    show="showDeleteConfirm" 
+    title="Xác nhận xóa danh mục"
+    message="Bạn có chắc chắn muốn xóa danh mục '{{categoryToDelete.name}}'? Hành động này không thể hoàn tác."
+    on-confirm="deleteCategory()">
+</confirm-dialog>

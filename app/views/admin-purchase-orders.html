@@ -1,0 +1,304 @@
+<!-- Admin Purchase Orders Management View -->
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex align-items-center">
+                    <a href="#!/admin" class="btn btn-outline-secondary me-3">
+                        <i class="bi bi-arrow-left"></i> Quay lại
+                    </a>
+                    <h2 class="mb-0"><i class="bi bi-cart-plus"></i> Quản lý đơn đặt hàng</h2>
+                </div>
+                <button class="btn btn-primary" ng-click="openCreateModal()">
+                    <i class="bi bi-plus-circle"></i> Tạo đơn đặt hàng
+                </button>
+            </div>
+
+            <!-- Loading State -->
+            <div ng-if="loading" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Đang tải...</span>
+                </div>
+                <p class="mt-3 text-muted">Đang tải danh sách đơn đặt hàng...</p>
+            </div>
+
+            <!-- Search Box -->
+            <search-box 
+                ng-if="!loading"
+                placeholder="Tìm kiếm đơn đặt hàng..." 
+                search-term="searchTerm" 
+                on-search="searchPurchaseOrders()"
+                on-clear="clearSearch()">
+            </search-box>
+
+            <!-- Error State -->
+            <error-state 
+                show="showError" 
+                message="errorMessage" 
+                dismissible="true">
+            </error-state>
+
+            <!-- Success Message -->
+            <success-message 
+                show="showSuccess" 
+                message="successMessage">
+            </success-message>
+
+            <!-- Purchase Orders Table -->
+            <div class="card" ng-if="!loading && !showError">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Mã đơn</th>
+                                    <th>Nhà xuất bản</th>
+                                    <th>Ngày đặt</th>
+                                    <th>Người tạo</th>
+                                    <th>Số lượng</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Ghi chú</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="po in purchaseOrders | filter:searchTerm">
+                                    <td>
+                                        <code>PO-{{po.poId}}</code>
+                                    </td>
+                                    <td>
+                                        <strong>{{po.publisherName}}</strong>
+                                    </td>
+                                    <td>
+                                        {{po.orderedAt | date}}
+                                    </td>
+                                    <td>
+                                        {{po.createdByName}}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{po.totalQuantity}}</span>
+                                    </td>
+                                    <td>
+                                        <strong class="text-success">{{po.totalAmount | currency}}</strong>
+                                    </td>
+                                    <td>
+                                        <span ng-if="po.note">{{po.note | truncate:30}}</span>
+                                        <span ng-if="!po.note" class="text-muted">Không có ghi chú</span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-info" ng-click="viewPurchaseOrder(po)" title="Xem chi tiết">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-warning" ng-click="openEditModal(po)" title="Chỉnh sửa">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger" ng-click="confirmDelete(po)" title="Xóa">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <empty-state 
+                show="!loading && !showError && purchaseOrders.length === 0" 
+                title="Chưa có đơn đặt hàng nào"
+                message="Hệ thống chưa có đơn đặt hàng nào để hiển thị"
+                action-text="Tạo đơn đặt hàng đầu tiên"
+                action="openCreateModal()">
+            </empty-state>
+
+            <!-- Pagination -->
+            <pagination 
+                current-page="currentPage" 
+                total-pages="totalPages" 
+                on-page-change="goToPage(page)">
+            </pagination>
+        </div>
+    </div>
+</div>
+
+<!-- Create/Edit Purchase Order Modal -->
+<div class="modal fade" id="purchaseOrderModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-cart-plus"></i> {{isEditMode ? 'Chỉnh sửa đơn đặt hàng' : 'Tạo đơn đặt hàng mới'}}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form name="purchaseOrderForm" ng-submit="savePurchaseOrder()">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div class="mb-3">
+                                <label for="poPublisher" class="form-label">Nhà xuất bản <span class="text-danger">*</span></label>
+                                <select class="form-select" id="poPublisher" ng-model="purchaseOrderData.publisherId" ng-change="onPublisherChange()" required>
+                                    <option value="">Chọn nhà xuất bản</option>
+                                    <option ng-repeat="publisher in publishers" value="{{publisher.publisherId}}">
+                                        {{publisher.name}}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="poNote" class="form-label">Ghi chú</label>
+                                <textarea class="form-control" id="poNote" ng-model="purchaseOrderData.note" rows="3" auto-resize></textarea>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="card summary-card h-100">
+                                <div class="card-header bg-primary text-white">
+                                    <h6 class="mb-0"><i class="bi bi-calculator me-2"></i>Tổng kết đơn hàng</h6>
+                                </div>
+                                <div class="card-body d-flex flex-column justify-content-center">
+                                    <div class="summary-item">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <span class="text-muted">Tổng số lượng:</span>
+                                            <strong class="text-primary fs-4">{{getTotalQuantity()}}</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="text-muted">Tổng tiền:</span>
+                                            <strong class="text-success fs-4">{{getTotalAmount() | currency}}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Purchase Order Lines -->
+                    <div class="row">
+                        <div class="col-12">
+                            <h6>Chi tiết đơn hàng</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Sách</th>
+                                            <th>Số lượng</th>
+                                            <th>Đơn giá</th>
+                                            <th>Thành tiền</th>
+                                            <th>Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="line in purchaseOrderData.lines track by $index">
+                                            <td>
+                                                <select class="form-select form-select-sm" ng-model="line.isbn" ng-change="updateLineBook($index)">
+                                                    <option value="">Chọn sách</option>
+                                                    <option ng-repeat="book in availableBooks" value="{{book.isbn}}">
+                                                        {{book.title}} - {{book.isbn}}
+                                                    </option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input type="number" class="form-control form-control-sm" ng-model="line.qtyOrdered" min="1" ng-change="updateLineTotal($index)" number-input>
+                                            </td>
+                                            <td>
+                                                <input type="number" class="form-control form-control-sm" ng-model="line.unitPrice" step="0.01" min="0" ng-change="updateLineTotal($index)" currency-input>
+                                            </td>
+                                            <td>
+                                                <strong>{{line.lineTotal | currency}}</strong>
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" ng-click="removeLine($index)">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-primary" ng-click="addLine()">
+                                <i class="bi bi-plus"></i> Thêm dòng
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary" ng-disabled="purchaseOrderForm.$invalid || isSaving || purchaseOrderData.lines.length === 0">
+                        <span ng-if="isSaving" class="spinner-border spinner-border-sm me-2"></span>
+                        {{isEditMode ? 'Cập nhật' : 'Tạo mới'}}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Purchase Order Detail Modal -->
+<div class="modal fade" id="purchaseOrderDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-cart-plus"></i> Chi tiết đơn đặt hàng
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" ng-if="selectedPurchaseOrder">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6>Thông tin đơn hàng</h6>
+                        <p><strong>Mã đơn:</strong> PO-{{selectedPurchaseOrder.poId}}</p>
+                        <p><strong>Nhà xuất bản:</strong> {{selectedPurchaseOrder.publisherName}}</p>
+                        <p><strong>Ngày đặt:</strong> {{selectedPurchaseOrder.orderedAt | datetime}}</p>
+                        <p><strong>Người tạo:</strong> {{selectedPurchaseOrder.createdByName}}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Tổng kết</h6>
+                        <p><strong>Tổng số lượng:</strong> {{selectedPurchaseOrder.totalQuantity}}</p>
+                        <p><strong>Tổng tiền:</strong> <span class="h5 text-success">{{selectedPurchaseOrder.totalAmount | currency}}</span></p>
+                        <p><strong>Ghi chú:</strong> {{selectedPurchaseOrder.note || 'Không có ghi chú'}}</p>
+                    </div>
+                </div>
+                
+                <h6>Chi tiết đơn hàng</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ISBN</th>
+                                <th>Tên sách</th>
+                                <th>Số lượng</th>
+                                <th>Đơn giá</th>
+                                <th>Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="line in selectedPurchaseOrder.lines">
+                                <td><code>{{line.isbn}}</code></td>
+                                <td>{{line.bookTitle}}</td>
+                                <td><span class="badge bg-primary">{{line.qtyOrdered}}</span></td>
+                                <td>{{line.unitPrice | currency}}</td>
+                                <td><strong>{{line.lineTotal | currency}}</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-warning" ng-click="openEditModal(selectedPurchaseOrder)">
+                    <i class="bi bi-pencil"></i> Chỉnh sửa
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Delete Modal -->
+<confirm-dialog 
+    show="showDeleteConfirm" 
+    title="Xác nhận xóa đơn đặt hàng"
+    message="Bạn có chắc chắn muốn xóa đơn đặt hàng PO-{{purchaseOrderToDelete.poId}}? Hành động này không thể hoàn tác."
+    on-confirm="deletePurchaseOrder()">
+</confirm-dialog>

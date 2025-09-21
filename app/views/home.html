@@ -1,100 +1,155 @@
-<!-- Home View -->
-<div class="container">
-    <div class="row">
-        <div class="col-12">
-            <div class="text-center mb-5">
-                <h1 class="display-4 text-gradient mb-3">{{title}}</h1>
-                <p class="lead">{{message}}</p>
+<!-- BookStore Homepage -->
+<div class="bookstore-homepage">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center min-vh-75">
+                <div class="col-lg-6">
+                    <div class="hero-content">
+                        <h1 class="hero-title">
+                            <span class="text-gradient">Khám phá thế giới</span><br>
+                            qua những trang sách
+                        </h1>
+                        <p class="hero-description">
+                            Hệ thống quản lý hiệu sách hiện đại với hàng nghìn đầu sách đa dạng, 
+                            từ văn học kinh điển đến sách khoa học công nghệ mới nhất.
+                        </p>
+                        <div class="hero-actions">
+                            <a href="#!/books" class="btn btn-primary btn-lg me-3">
+                                <i class="bi bi-book-half me-2"></i>Xem sách
+                            </a>
+                            <a href="#!/categories" class="btn btn-outline-primary btn-lg">
+                                <i class="bi bi-tags me-2"></i>Danh mục
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="hero-image">
+                        <div class="book-stack">
+                            <div class="book book-1"></div>
+                            <div class="book book-2"></div>
+                            <div class="book book-3"></div>
+                            <div class="book book-4"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- Features Section -->
-    <div class="row mb-5">
-        <div class="col-12">
-            <h2 class="text-center mb-4">Tính năng nổi bật</h2>
-            <loading-spinner loading="loading"></loading-spinner>
-        </div>
-    </div>
-
-    <div class="row" ng-show="!loading">
-        <div class="col-md-4 mb-4" ng-repeat="feature in features">
-            <div class="card h-100">
-                <div class="card-body text-center">
-                    <i class="bi {{feature.icon}} feature-icon"></i>
-                    <h5 class="card-title">{{feature.title}}</h5>
-                    <p class="card-text">{{feature.description}}</p>
-                    <button class="btn btn-outline-primary" ng-click="removeFeature($index)">
-                        <i class="bi bi-trash"></i> Xóa
-                    </button>
+    <section class="features-section py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h2 class="section-title">Tại sao chọn chúng tôi?</h2>
+                    <p class="section-subtitle">Những ưu điểm vượt trội của hệ thống quản lý hiệu sách</p>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Add Feature Form -->
-    <div class="row mt-4">
-        <div class="col-md-6 mx-auto">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Thêm tính năng mới</h5>
-                </div>
-                <div class="card-body">
-                    <form ng-submit="addFeature()">
-                        <div class="mb-3">
-                            <label for="newFeature" class="form-label">Tên tính năng</label>
-                            <input type="text" class="form-control" id="newFeature" ng-model="newFeature" 
-                                   placeholder="Nhập tên tính năng..." required>
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6" ng-repeat="feature in features">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi {{feature.icon}}"></i>
                         </div>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-plus-circle"></i> Thêm
-                        </button>
-                    </form>
+                        <h5 class="feature-title">{{feature.title}}</h5>
+                        <p class="feature-description">{{feature.description}}</p>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <!-- Statistics Section -->
-    <div class="row mt-5">
-        <div class="col-12">
-            <h2 class="text-center mb-4">Thống kê</h2>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card text-center bg-gradient-primary text-white">
-                <div class="card-body">
-                    <i class="bi bi-people display-4"></i>
-                    <h3>{{features.length}}</h3>
-                    <p class="mb-0">Tính năng</p>
+    <!-- Stats Section -->
+    <section class="stats-section py-5">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card text-center">
+                        <div class="stat-icon">
+                            <i class="bi bi-book"></i>
+                        </div>
+                        <h3 class="stat-number">{{stats.totalBooks || '3,500+'}}</h3>
+                        <p class="stat-label">Đầu sách</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card text-center">
+                        <div class="stat-icon">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <h3 class="stat-number">{{stats.totalUsers || '1,250+'}}</h3>
+                        <p class="stat-label">Khách hàng</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card text-center">
+                        <div class="stat-icon">
+                            <i class="bi bi-cart-check"></i>
+                        </div>
+                        <h3 class="stat-number">{{stats.totalOrders || '500+'}}</h3>
+                        <p class="stat-label">Đơn hàng</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card text-center">
+                        <div class="stat-icon">
+                            <i class="bi bi-star-fill"></i>
+                        </div>
+                        <h3 class="stat-number">4.9/5</h3>
+                        <p class="stat-label">Đánh giá</p>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="card text-center bg-success text-white">
-                <div class="card-body">
-                    <i class="bi bi-check-circle display-4"></i>
-                    <h3>100%</h3>
-                    <p class="mb-0">Hoàn thành</p>
+    </section>
+
+    <!-- Categories Preview -->
+    <section class="categories-section py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h2 class="section-title">Danh mục sách phổ biến</h2>
+                    <p class="section-subtitle">Khám phá các thể loại sách đa dạng</p>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6" ng-repeat="category in categories">
+                    <div class="category-card">
+                        <div class="category-icon">
+                            <i class="bi {{category.icon}}"></i>
+                        </div>
+                        <h5 class="category-title">{{category.name}}</h5>
+                        <p class="category-count">{{category.bookCount}} cuốn sách</p>
+                        <a href="#!/categories" class="btn btn-outline-primary btn-sm">Xem chi tiết</a>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="card text-center bg-info text-white">
-                <div class="card-body">
-                    <i class="bi bi-lightning display-4"></i>
-                    <h3>Fast</h3>
-                    <p class="mb-0">Tốc độ</p>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <div class="cta-content">
+                        <h2 class="cta-title">Bắt đầu hành trình đọc sách của bạn</h2>
+                        <p class="cta-description">
+                            Tham gia cộng đồng yêu sách và khám phá những cuốn sách tuyệt vời
+                        </p>
+                        <div class="cta-actions">
+                            <a href="#!/register" class="btn btn-primary btn-lg me-3">
+                                <i class="bi bi-person-plus me-2"></i>Đăng ký ngay
+                            </a>
+                            <a href="#!/login" class="btn btn-outline-light btn-lg">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Đăng nhập
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="card text-center bg-warning text-white">
-                <div class="card-body">
-                    <i class="bi bi-shield-check display-4"></i>
-                    <h3>Secure</h3>
-                    <p class="mb-0">Bảo mật</p>
-                </div>
-            </div>
-        </div>
-    </div>
+    </section>
 </div>

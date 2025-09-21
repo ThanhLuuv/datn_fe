@@ -1,7 +1,7 @@
 // Authentication Controllers
 
 // Login Controller
-app.controller('LoginController', ['$scope', '$location', 'AuthService', 'APP_CONFIG', function($scope, $location, AuthService, APP_CONFIG) {
+app.controller('LoginController', ['$scope', '$location', '$window', '$rootScope', '$timeout', 'AuthService', 'APP_CONFIG', function($scope, $location, $window, $rootScope, $timeout, AuthService, APP_CONFIG) {
     $scope.title = 'Đăng nhập';
     $scope.loginData = {
         email: '',
@@ -22,49 +22,85 @@ app.controller('LoginController', ['$scope', '$location', 'AuthService', 'APP_CO
 
     // Login function
     $scope.login = function() {
-        if ($scope.loginForm.$valid) {
-            $scope.isLoading = true;
-            $scope.showError = false;
-            $scope.showSuccess = false;
+        try {
+            console.log('LOGIN FUNCTION CALLED!');
+            console.log('Form valid:', $scope.loginForm.$valid);
+            if ($scope.loginForm.$valid) {
+                $scope.isLoading = true;
+                $scope.showError = false;
+                $scope.showSuccess = false;
 
-            AuthService.login($scope.loginData)
-                .then(function(response) {
-                    $scope.isLoading = false;
-                    $scope.showSuccess = true;
-                    $scope.successMessage = 'Đăng nhập thành công!';
-                    
-                    // Store token and user info
-                    if (response.data && response.data.token) {
-                        localStorage.setItem('token', response.data.token);
-                        localStorage.setItem('user', JSON.stringify(response.data.user));
+                AuthService.login($scope.loginData)
+                    .then(function(response) {
+                        console.log('LOGIN SUCCESS RESPONSE:', response);
+                        $scope.isLoading = false;
+                        $scope.showSuccess = true;
+                        $scope.successMessage = 'Đăng nhập thành công!';
                         
-                        // Redirect based on role
-                        setTimeout(function() {
-                            var user = response.data.user;
-                            if (user.roleId === 3) {
-                                $location.path('/admin');
-                            } else if (user.roleId === 2) {
-                                $location.path('/employee');
-                            } else {
-                                $location.path('/home');
+                        // Store token and user info
+                        if (response.data && response.data.data && response.data.data.token) {
+                            localStorage.setItem('token', response.data.data.token);
+                            
+                            // Create user object with correct structure
+                            var user = {
+                                email: response.data.data.email,
+                                roleId: response.data.data.role === 'ADMIN' ? 1 : 
+                                       response.data.data.role === 'SALES_EMPLOYEE' ? 2 :
+                                       response.data.data.role === 'DELIVERY_EMPLOYEE' ? 3 : 4,
+                                role: response.data.data.role
+                            };
+                            localStorage.setItem('user', JSON.stringify(user));
+                            
+                            console.log('Login successful, user created:', user);
+                            
+                            // Update global auth state
+                            $rootScope.isAuthenticated = true;
+                            $rootScope.currentUser = user;
+                            
+                            console.log('Redirecting immediately...');
+                            
+                            // Redirect based on role with timeout
+                            try {
+                                $timeout(function() {
+                                    if (user.roleId === 1) {
+                                        console.log('Redirecting to admin page');
+                                        console.log('Current location before:', $location.path());
+                                        $location.path('/admin');
+                                        console.log('Current location after:', $location.path());
+                                        console.log('Full URL:', $location.url());
+                                    } else if (user.roleId === 2 || user.roleId === 3) {
+                                        console.log('Redirecting to employee page');
+                                        $location.path('/employee');
+                                    } else {
+                                        console.log('Redirecting to home page');
+                                        $location.path('/home');
+                                    }
+                                }, 0);
+                            } catch (error) {
+                                console.error('REDIRECT ERROR:', error);
                             }
-                        }, 1500);
-                    }
-                })
-                .catch(function(error) {
-                    $scope.isLoading = false;
-                    $scope.showError = true;
-                    
-                    if (error.data && error.data.message) {
-                        $scope.errorMessage = error.data.message;
-                    } else if (error.status === 401) {
-                        $scope.errorMessage = 'Email hoặc mật khẩu không đúng!';
-                    } else if (error.status === 0) {
-                        $scope.errorMessage = 'Không thể kết nối đến server. Vui lòng thử lại sau!';
-                    } else {
-                        $scope.errorMessage = 'Có lỗi xảy ra. Vui lòng thử lại!';
-                    }
-                });
+                        }
+                    })
+                    .catch(function(error) {
+                        $scope.isLoading = false;
+                        $scope.showError = true;
+                        
+                        if (error.data && error.data.message) {
+                            $scope.errorMessage = error.data.message;
+                        } else if (error.status === 401) {
+                            $scope.errorMessage = 'Email hoặc mật khẩu không đúng!';
+                        } else if (error.status === 0) {
+                            $scope.errorMessage = 'Không thể kết nối đến server. Vui lòng thử lại sau!';
+                        } else {
+                            $scope.errorMessage = 'Có lỗi xảy ra. Vui lòng thử lại!';
+                        }
+                    });
+            }
+        } catch (error) {
+            console.error('LOGIN FUNCTION ERROR:', error);
+            $scope.isLoading = false;
+            $scope.showError = true;
+            $scope.errorMessage = 'Có lỗi xảy ra: ' + error.message;
         }
     };
 

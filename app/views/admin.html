@@ -1,44 +1,73 @@
 <!-- Admin Dashboard View -->
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
-            <div class="position-sticky pt-3">
-                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                    <span>Quản trị hệ thống</span>
-                </h6>
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#!/admin">
-                            <i class="bi bi-speedometer2"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#!/admin/users">
-                            <i class="bi bi-people"></i> Quản lý người dùng
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#!/admin/books">
-                            <i class="bi bi-book"></i> Quản lý sách
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#!/admin/orders">
-                            <i class="bi bi-cart-check"></i> Đơn hàng
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#!/admin/reports">
-                            <i class="bi bi-graph-up"></i> Báo cáo
-                        </a>
-                    </li>
-                </ul>
+<div class="admin-layout">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 d-md-block admin-sidebar">
+                <div class="admin-sidebar-content">
+                    <div class="admin-sidebar-header">
+                        <h5 class="admin-sidebar-title">
+                            <i class="bi bi-shield-check"></i>
+                            Quản trị hệ thống
+                        </h5>
+                    </div>
+                    <nav class="admin-nav">
+                        <ul class="admin-nav-list">
+                            <li class="admin-nav-item">
+                                <a class="admin-nav-link active" href="#!/admin">
+                                    <i class="bi bi-speedometer2"></i>
+                                    <span>Dashboard</span>
+                                </a>
+                            </li>
+                            <li class="admin-nav-item">
+                                <a class="admin-nav-link" href="#!/admin/categories">
+                                    <i class="bi bi-tags"></i>
+                                    <span>Danh mục</span>
+                                </a>
+                            </li>
+                            <li class="admin-nav-item">
+                                <a class="admin-nav-link" href="#!/admin/books">
+                                    <i class="bi bi-book"></i>
+                                    <span>Quản lý sách</span>
+                                </a>
+                            </li>
+                            <li class="admin-nav-item">
+                                <a class="admin-nav-link" href="#!/admin/purchase-orders">
+                                    <i class="bi bi-cart-check"></i>
+                                    <span>Đơn đặt hàng</span>
+                                </a>
+                            </li>
+                            <li class="admin-nav-item">
+                                <a class="admin-nav-link" href="#!/admin/goods-receipts">
+                                    <i class="bi bi-box-seam"></i>
+                                    <span>Phiếu nhập</span>
+                                </a>
+                            </li>
+                            <li class="admin-nav-item">
+                                <a class="admin-nav-link" href="#!/admin/users">
+                                    <i class="bi bi-people"></i>
+                                    <span>Người dùng</span>
+                                </a>
+                            </li>
+                            <li class="admin-nav-item">
+                                <a class="admin-nav-link" href="#!/admin/reports">
+                                    <i class="bi bi-graph-up"></i>
+                                    <span>Báo cáo</span>
+                                </a>
+                            </li>
+                            <li class="admin-nav-item">
+                                <a class="admin-nav-link" href="#!/admin/settings">
+                                    <i class="bi bi-gear"></i>
+                                    <span>Cài đặt</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
             </div>
-        </div>
 
-        <!-- Main content -->
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 admin-main-content">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 class="h2">Dashboard Admin</h1>
                 <div class="btn-toolbar mb-2 mb-md-0">
@@ -51,73 +80,73 @@
             </div>
 
             <!-- Stats Cards -->
-            <div class="row mb-4">
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-left-primary shadow h-100 py-2">
-                        <div class="card-body">
+            <div class="row mb-md">
+                <div class="col-xl-3 col-md-6 mb-md">
+                    <div class="card card-sm card-primary">
+                        <div class="card-body p-md">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-sm">
                                         Tổng người dùng
                                     </div>
                                     <div class="h5 mb-0 font-weight-bold text-gray-800">{{stats.totalUsers}}</div>
                                 </div>
                                 <div class="col-auto">
-                                    <i class="bi bi-people fa-2x text-gray-300"></i>
+                                    <i class="bi bi-people icon-lg text-gray-300"></i>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-left-success shadow h-100 py-2">
-                        <div class="card-body">
+                <div class="col-xl-3 col-md-6 mb-md">
+                    <div class="card card-sm card-success">
+                        <div class="card-body p-md">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-sm">
                                         Tổng sách
                                     </div>
                                     <div class="h5 mb-0 font-weight-bold text-gray-800">{{stats.totalBooks}}</div>
                                 </div>
                                 <div class="col-auto">
-                                    <i class="bi bi-book fa-2x text-gray-300"></i>
+                                    <i class="bi bi-book icon-lg text-gray-300"></i>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-left-info shadow h-100 py-2">
-                        <div class="card-body">
+                <div class="col-xl-3 col-md-6 mb-md">
+                    <div class="card card-sm card-info">
+                        <div class="card-body p-md">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-sm">
                                         Đơn hàng hôm nay
                                     </div>
                                     <div class="h5 mb-0 font-weight-bold text-gray-800">{{stats.todayOrders}}</div>
                                 </div>
                                 <div class="col-auto">
-                                    <i class="bi bi-cart-check fa-2x text-gray-300"></i>
+                                    <i class="bi bi-cart-check icon-lg text-gray-300"></i>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-left-warning shadow h-100 py-2">
-                        <div class="card-body">
+                <div class="col-xl-3 col-md-6 mb-md">
+                    <div class="card card-sm card-warning">
+                        <div class="card-body p-md">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-sm">
                                         Doanh thu tháng
                                     </div>
                                     <div class="h5 mb-0 font-weight-bold text-gray-800">{{stats.monthlyRevenue | currency:'VND '}}</div>
                                 </div>
                                 <div class="col-auto">
-                                    <i class="bi bi-currency-dollar fa-2x text-gray-300"></i>
+                                    <i class="bi bi-currency-dollar icon-lg text-gray-300"></i>
                                 </div>
                             </div>
                         </div>
@@ -128,31 +157,31 @@
             <!-- Recent Activity -->
             <div class="row">
                 <div class="col-lg-8">
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Hoạt động gần đây</h6>
+                    <div class="card mb-md">
+                        <div class="card-header">
+                            <h6 class="m-0 font-weight-bold text-primary text-sm">Hoạt động gần đây</h6>
                         </div>
-                        <div class="card-body">
+                        <div class="card-body p-md">
                             <div class="table-responsive">
-                                <table class="table table-bordered" width="100%" cellspacing="0">
+                                <table class="table table-sm table-bordered" width="100%" cellspacing="0">
                                     <thead>
                                         <tr>
-                                            <th>Thời gian</th>
-                                            <th>Người dùng</th>
-                                            <th>Hành động</th>
-                                            <th>Chi tiết</th>
+                                            <th class="text-sm">Thời gian</th>
+                                            <th class="text-sm">Người dùng</th>
+                                            <th class="text-sm">Hành động</th>
+                                            <th class="text-sm">Chi tiết</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr ng-repeat="activity in recentActivities">
-                                            <td>{{activity.timestamp | date:'dd/MM/yyyy HH:mm'}}</td>
-                                            <td>{{activity.user}}</td>
+                                            <td class="text-sm">{{activity.timestamp | date:'dd/MM/yyyy HH:mm'}}</td>
+                                            <td class="text-sm">{{activity.user}}</td>
                                             <td>
-                                                <span class="badge" ng-class="'bg-' + activity.type">
+                                                <span class="badge badge-sm" ng-class="'bg-' + activity.type">
                                                     {{activity.action}}
                                                 </span>
                                             </td>
-                                            <td>{{activity.details}}</td>
+                                            <td class="text-sm">{{activity.details}}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -162,29 +191,29 @@
                 </div>
 
                 <div class="col-lg-4">
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Thống kê nhanh</h6>
+                    <div class="card mb-md">
+                        <div class="card-header">
+                            <h6 class="m-0 font-weight-bold text-primary text-sm">Thống kê nhanh</h6>
                         </div>
-                        <div class="card-body">
+                        <div class="card-body p-md">
                             <div class="text-center">
-                                <div class="mb-3">
-                                    <i class="bi bi-graph-up text-success" style="font-size: 3rem;"></i>
+                                <div class="mb-md">
+                                    <i class="bi bi-graph-up text-success icon-3xl"></i>
                                 </div>
-                                <h4 class="text-success">{{stats.growthRate}}%</h4>
-                                <p class="text-muted">Tăng trưởng so với tháng trước</p>
+                                <h4 class="text-success text-2xl">{{stats.growthRate}}%</h4>
+                                <p class="text-muted text-sm">Tăng trưởng so với tháng trước</p>
                             </div>
                             
-                            <hr>
+                            <hr class="my-md">
                             
                             <div class="row text-center">
                                 <div class="col-6">
-                                    <h5 class="text-primary">{{stats.newUsers}}</h5>
-                                    <small class="text-muted">Người dùng mới</small>
+                                    <h5 class="text-primary text-lg">{{stats.newUsers}}</h5>
+                                    <small class="text-muted text-xs">Người dùng mới</small>
                                 </div>
                                 <div class="col-6">
-                                    <h5 class="text-success">{{stats.soldBooks}}</h5>
-                                    <small class="text-muted">Sách đã bán</small>
+                                    <h5 class="text-success text-lg">{{stats.soldBooks}}</h5>
+                                    <small class="text-muted text-xs">Sách đã bán</small>
                                 </div>
                             </div>
                         </div>
@@ -196,64 +225,197 @@
 </div>
 
 <style>
-.sidebar {
+/* Admin Layout Styles */
+.admin-layout {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    background-color: var(--gray-50);
+    min-height: 100vh;
     position: fixed;
     top: 0;
-    bottom: 0;
     left: 0;
-    z-index: 100;
-    padding: 48px 0 0;
-    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
 }
 
-.sidebar-sticky {
-    position: relative;
+.admin-sidebar {
+    background: linear-gradient(180deg, var(--primary-color), var(--primary-dark));
+    height: 100vh;
+    padding: 0;
+    box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
+    position: fixed;
     top: 0;
-    height: calc(100vh - 48px);
-    padding-top: .5rem;
-    overflow-x: hidden;
+    left: 0;
+    z-index: 1000;
+}
+
+.admin-sidebar-content {
+    padding: 2rem 0;
+    height: 100vh;
     overflow-y: auto;
 }
 
-.sidebar .nav-link {
+.admin-sidebar-header {
+    padding: 0 1.5rem 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 1rem;
+}
+
+.admin-sidebar-title {
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.admin-nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.admin-nav-item {
+    margin: 0.25rem 0;
+}
+
+.admin-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
     font-weight: 500;
-    color: #333;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+    position: relative;
 }
 
-.sidebar .nav-link.active {
-    color: #007bff;
+.admin-nav-link:hover {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-left-color: var(--primary-light);
+    transform: translateX(5px);
 }
 
-.sidebar .nav-link:hover {
-    color: #007bff;
+.admin-nav-link.active {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.15);
+    border-left-color: white;
+    font-weight: 600;
 }
 
+.admin-nav-link i {
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+}
+
+.admin-main-content {
+    background-color: var(--gray-50);
+    padding: 2rem;
+    height: 100vh;
+    overflow-y: auto;
+    margin-left: 0;
+}
+
+/* Stats Cards */
 .border-left-primary {
-    border-left: 0.25rem solid #4e73df !important;
+    border-left: 4px solid var(--primary-color) !important;
 }
 
 .border-left-success {
-    border-left: 0.25rem solid #1cc88a !important;
+    border-left: 4px solid var(--success-color) !important;
 }
 
 .border-left-info {
-    border-left: 0.25rem solid #36b9cc !important;
+    border-left: 4px solid var(--info-color) !important;
 }
 
 .border-left-warning {
-    border-left: 0.25rem solid #f6c23e !important;
+    border-left: 4px solid var(--warning-color) !important;
 }
 
 .text-xs {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .text-gray-800 {
-    color: #5a5c69 !important;
+    color: var(--gray-800) !important;
+    font-weight: 700;
 }
 
 .text-gray-300 {
-    color: #dddfeb !important;
+    color: var(--gray-300) !important;
+}
+
+/* Card Enhancements */
+.card {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(30, 58, 138, 0.08);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(30, 58, 138, 0.15);
+}
+
+.card-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    border-radius: 16px 16px 0 0 !important;
+    border: none;
+    padding: 1.5rem;
+    font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .admin-sidebar {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 280px;
+        transition: left 0.3s ease;
+        z-index: 1050;
+        height: 100vh;
+    }
+    
+    .admin-sidebar.show {
+        left: 0;
+    }
+    
+    .admin-main-content {
+        margin-left: 0;
+        padding: 1rem;
+    }
+}
+
+/* Scrollbar Styling */
+.admin-sidebar-content::-webkit-scrollbar {
+    width: 4px;
+}
+
+.admin-sidebar-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.admin-sidebar-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+}
+
+.admin-sidebar-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
 }
 </style>
 

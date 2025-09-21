@@ -1,0 +1,323 @@
+<!-- Admin Books Management View -->
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex align-items-center">
+                    <a href="#!/admin" class="btn btn-outline-secondary me-3">
+                        <i class="bi bi-arrow-left"></i> Quay lại
+                    </a>
+                    <h2 class="mb-0"><i class="bi bi-book"></i> Quản lý sách</h2>
+                </div>
+                <button class="btn btn-primary" ng-click="openCreateModal()">
+                    <i class="bi bi-plus-circle"></i> Thêm sách
+                </button>
+            </div>
+
+            <!-- Loading State -->
+            <div ng-if="loading" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Đang tải...</span>
+                </div>
+                <p class="mt-3 text-muted">Đang tải danh sách sách...</p>
+            </div>
+
+            <!-- Search and Filter -->
+            <div class="row mb-4" ng-if="!loading">
+                <div class="col-md-4">
+                    <search-box 
+                        placeholder="Tìm kiếm sách..." 
+                        search-term="searchTerm" 
+                        on-search="searchBooks()"
+                        on-clear="clearSearch()">
+                    </search-box>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" ng-model="selectedCategoryId" ng-change="filterByCategory()">
+                        <option value="">Tất cả danh mục</option>
+                        <option ng-repeat="category in categories" value="{{category.categoryId}}">
+                            {{category.name}}
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" ng-model="selectedPublisherId" ng-change="filterByPublisher()">
+                        <option value="">Tất cả nhà xuất bản</option>
+                        <option ng-repeat="publisher in publishers" value="{{publisher.publisherId}}">
+                            {{publisher.name}}
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-outline-secondary w-100" ng-click="resetFilters()">
+                        <i class="bi bi-arrow-clockwise"></i> Reset
+                    </button>
+                </div>
+            </div>
+
+
+            <!-- Error State -->
+            <error-state 
+                show="showError" 
+                message="errorMessage" 
+                dismissible="true">
+            </error-state>
+
+            <!-- Success Message -->
+            <success-message 
+                show="showSuccess" 
+                message="successMessage">
+            </success-message>
+
+            <!-- Books Table -->
+            <div class="card" ng-if="!loading && !showError">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ISBN</th>
+                                    <th>Tên sách</th>
+                                    <th>Danh mục</th>
+                                    <th>Nhà xuất bản</th>
+                                    <th>Giá</th>
+                                    <th>Năm XB</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="book in books | filter:searchTerm">
+                                    <td>
+                                        <code>{{book.isbn}}</code>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img ng-if="book.imageUrl" ng-src="{{book.imageUrl}}" alt="{{book.title}}" class="me-2" style="width: 40px; height: 50px; object-fit: cover;">
+                                            <i ng-if="!book.imageUrl" class="bi bi-book me-2 text-muted"></i>
+                                            <div>
+                                                <strong>{{book.title | truncate:30}}</strong><br>
+                                                <small class="text-muted">{{book.pageCount}} trang</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{book.categoryName}}</span>
+                                    </td>
+                                    <td>{{book.publisherName}}</td>
+                                    <td>
+                                        <strong class="text-primary">{{book.unitPrice | currency}}</strong>
+                                    </td>
+                                    <td>{{book.publishYear}}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-info" ng-click="viewBook(book)" title="Xem chi tiết">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-warning" ng-click="openEditModal(book)" title="Chỉnh sửa">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger" ng-click="confirmDelete(book)" title="Xóa">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <empty-state 
+                show="!loading && !showError && books.length === 0" 
+                title="Chưa có sách nào"
+                message="Hệ thống chưa có sách nào để hiển thị"
+                action-text="Thêm sách đầu tiên"
+                action="openCreateModal()">
+            </empty-state>
+
+            <!-- Pagination -->
+            <pagination 
+                current-page="currentPage" 
+                total-pages="totalPages" 
+                on-page-change="goToPage(page)">
+            </pagination>
+        </div>
+    </div>
+</div>
+
+<!-- Create/Edit Book Modal -->
+<div class="modal fade" id="bookModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-book"></i> {{isEditMode ? 'Chỉnh sửa sách' : 'Thêm sách mới'}}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form name="bookForm" ng-submit="saveBook()">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="bookIsbn" class="form-label">ISBN <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="bookIsbn" ng-model="bookData.isbn" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="bookTitle" class="form-label">Tên sách <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="bookTitle" ng-model="bookData.title" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="bookCategory" class="form-label">Danh mục <span class="text-danger">*</span></label>
+                                <select class="form-select" id="bookCategory" ng-model="bookData.categoryId" required>
+                                    <option value="">Chọn danh mục</option>
+                                    <option ng-repeat="category in categories" value="{{category.categoryId}}">
+                                        {{category.name}}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="bookPublisher" class="form-label">Nhà xuất bản <span class="text-danger">*</span></label>
+                                <select class="form-select" id="bookPublisher" ng-model="bookData.publisherId" required>
+                                    <option value="">Chọn nhà xuất bản</option>
+                                    <option ng-repeat="publisher in publishers" value="{{publisher.publisherId}}">
+                                        {{publisher.name}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="bookPrice" class="form-label">Giá bán <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="bookPrice" ng-model="bookData.unitPrice" step="0.01" min="0" currency-input required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="bookYear" class="form-label">Năm xuất bản <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="bookYear" ng-model="bookData.publishYear" min="1900" max="2024" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="bookPages" class="form-label">Số trang <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="bookPages" ng-model="bookData.pageCount" min="1" number-input required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="bookImage" class="form-label">URL hình ảnh</label>
+                                <input type="url" class="form-control" id="bookImage" ng-model="bookData.imageUrl">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label for="bookAuthors" class="form-label">Tác giả</label>
+                                <div class="d-flex gap-2 mb-2">
+                                    <select class="form-select" ng-model="selectedAuthorId">
+                                        <option value="">Chọn tác giả</option>
+                                        <option ng-repeat="author in authors" value="{{author.authorId}}">
+                                            {{author.fullName}}
+                                        </option>
+                                    </select>
+                                    <button type="button" class="btn btn-outline-primary" ng-click="addAuthor()">
+                                        <i class="bi bi-plus"></i> Thêm
+                                    </button>
+                                </div>
+                                <div class="d-flex flex-wrap gap-1">
+                                    <span ng-repeat="author in bookData.authors" class="badge bg-secondary">
+                                        {{author.fullName}}
+                                        <button type="button" class="btn-close btn-close-white ms-1" ng-click="removeAuthor($index)"></button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary" ng-disabled="bookForm.$invalid || isSaving">
+                        <span ng-if="isSaving" class="spinner-border spinner-border-sm me-2"></span>
+                        {{isEditMode ? 'Cập nhật' : 'Tạo mới'}}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Book Detail Modal -->
+<div class="modal fade" id="bookDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-book"></i> Chi tiết sách
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" ng-if="selectedBook">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <img ng-if="selectedBook.imageUrl" ng-src="{{selectedBook.imageUrl}}" alt="{{selectedBook.title}}" class="img-fluid rounded">
+                            <i ng-if="!selectedBook.imageUrl" class="bi bi-book display-1 text-muted"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <h4>{{selectedBook.title}}</h4>
+                        <p class="text-muted">ISBN: {{selectedBook.isbn}}</p>
+                        
+                        <div class="row mb-3">
+                            <div class="col-sm-6">
+                                <strong>Danh mục:</strong><br>
+                                <span class="badge bg-primary">{{selectedBook.categoryName}}</span>
+                            </div>
+                            <div class="col-sm-6">
+                                <strong>Nhà xuất bản:</strong><br>
+                                {{selectedBook.publisherName}}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-sm-6">
+                                <strong>Năm xuất bản:</strong><br>
+                                {{selectedBook.publishYear}}
+                            </div>
+                            <div class="col-sm-6">
+                                <strong>Số trang:</strong><br>
+                                {{selectedBook.pageCount}} trang
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-sm-6">
+                                <strong>Giá bán:</strong><br>
+                                <span class="h5 text-primary">{{selectedBook.unitPrice | currency}}</span>
+                            </div>
+                        </div>
+                        
+                        <div ng-if="selectedBook.authors && selectedBook.authors.length > 0">
+                            <strong>Tác giả:</strong><br>
+                            <div ng-repeat="author in selectedBook.authors">
+                                <span class="badge bg-secondary me-1">{{author.fullName}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-warning" ng-click="openEditModal(selectedBook)">
+                    <i class="bi bi-pencil"></i> Chỉnh sửa
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Delete Modal -->
+<confirm-dialog 
+    show="showDeleteConfirm" 
+    title="Xác nhận xóa sách"
+    message="Bạn có chắc chắn muốn xóa sách '{{bookToDelete.title}}'? Hành động này không thể hoàn tác."
+    on-confirm="deleteBook()">
+</confirm-dialog>

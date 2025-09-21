@@ -1,6 +1,16 @@
 // AngularJS Application Module
 var app = angular.module('myApp', ['ngRoute', 'ngAnimate']);
 
+// Global controller for navbar visibility
+app.controller('AppController', ['$scope', '$location', function($scope, $location) {
+    $scope.isAdminPage = false;
+    
+    $scope.$on('$routeChangeSuccess', function() {
+        var path = $location.path();
+        $scope.isAdminPage = path.indexOf('/admin') === 0;
+    });
+}]);
+
 // Route Configuration
 app.config(['$routeProvider', function($routeProvider) {
     $routeProvider
@@ -28,23 +38,18 @@ app.config(['$routeProvider', function($routeProvider) {
             templateUrl: 'app/views/admin.html',
             controller: 'AdminController',
             resolve: {
-                auth: ['AuthService', function(AuthService) {
-                    if (!AuthService.isAdmin()) {
-                        window.location.href = '#!/login';
+                checkAuth: ['AuthService', '$location', function(AuthService, $location) {
+                    if (!AuthService.isAdminOrTeacher()) {
+                        $location.path('/home');
+                        return false;
                     }
+                    return true;
                 }]
             }
         })
         .when('/employee', {
             templateUrl: 'app/views/employee.html',
-            controller: 'EmployeeController',
-            resolve: {
-                auth: ['AuthService', function(AuthService) {
-                    if (!AuthService.isStaff()) {
-                        window.location.href = '#!/login';
-                    }
-                }]
-            }
+            controller: 'EmployeeController'
         })
         .when('/about', {
             templateUrl: 'app/views/about.html',
@@ -57,6 +62,66 @@ app.config(['$routeProvider', function($routeProvider) {
         .when('/api-test', {
             templateUrl: 'app/views/api-test.html',
             controller: 'ApiTestController'
+        })
+        .when('/categories', {
+            templateUrl: 'app/views/categories.html',
+            controller: 'CategoriesController'
+        })
+        .when('/admin/categories', {
+            templateUrl: 'app/views/admin-categories.html',
+            controller: 'AdminCategoriesController',
+            resolve: {
+                checkAuth: ['AuthService', '$location', function(AuthService, $location) {
+                    if (!AuthService.isAdminOrTeacher()) {
+                        $location.path('/home');
+                        return false;
+                    }
+                    return true;
+                }]
+            }
+        })
+        .when('/books', {
+            templateUrl: 'app/views/books.html',
+            controller: 'BooksController'
+        })
+        .when('/admin/books', {
+            templateUrl: 'app/views/admin-books.html',
+            controller: 'AdminBooksController',
+            resolve: {
+                checkAuth: ['AuthService', '$location', function(AuthService, $location) {
+                    if (!AuthService.isAdminOrTeacher()) {
+                        $location.path('/home');
+                        return false;
+                    }
+                    return true;
+                }]
+            }
+        })
+        .when('/admin/purchase-orders', {
+            templateUrl: 'app/views/admin-purchase-orders.html',
+            controller: 'AdminPurchaseOrdersController',
+            resolve: {
+                checkAuth: ['AuthService', '$location', function(AuthService, $location) {
+                    if (!AuthService.isAdminOrTeacher()) {
+                        $location.path('/home');
+                        return false;
+                    }
+                    return true;
+                }]
+            }
+        })
+        .when('/admin/goods-receipts', {
+            templateUrl: 'app/views/admin-goods-receipts.html',
+            controller: 'AdminGoodsReceiptsController',
+            resolve: {
+                checkAuth: ['AuthService', '$location', function(AuthService, $location) {
+                    if (!AuthService.isAdminOrTeacher()) {
+                        $location.path('/home');
+                        return false;
+                    }
+                    return true;
+                }]
+            }
         })
         .otherwise({
             redirectTo: '/'

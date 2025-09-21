@@ -1,18 +1,4 @@
 // Custom Directives
-app.directive('loadingSpinner', function() {
-    return {
-        restrict: 'E',
-        template: '<div class="text-center" ng-show="loading">' +
-                  '<div class="spinner-border text-primary" role="status">' +
-                  '<span class="visually-hidden">Đang tải...</span>' +
-                  '</div>' +
-                  '</div>',
-        scope: {
-            loading: '='
-        }
-    };
-});
-
 app.directive('alertMessage', function() {
     return {
         restrict: 'E',

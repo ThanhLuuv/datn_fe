@@ -1,0 +1,112 @@
+<!-- Categories View - Xem danh sách danh mục -->
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="bi bi-tags"></i> Danh mục sách</h2>
+                <div class="text-muted">
+                    Tổng cộng: {{categories.length}} danh mục
+                </div>
+            </div>
+
+            <!-- Search Box -->
+            <search-box 
+                placeholder="Tìm kiếm danh mục..." 
+                search-term="searchTerm" 
+                on-search="searchCategories()"
+                on-clear="clearSearch()">
+            </search-box>
+
+            <!-- Loading State -->
+            <loading-spinner loading="isLoading"></loading-spinner>
+
+            <!-- Error State -->
+            <error-state 
+                show="showError" 
+                message="errorMessage" 
+                dismissible="true">
+            </error-state>
+
+            <!-- Success Message -->
+            <success-message 
+                show="showSuccess" 
+                message="successMessage">
+            </success-message>
+
+            <!-- Categories Grid -->
+            <div class="row" ng-if="!isLoading && !showError">
+                <div class="col-md-6 col-lg-4 mb-4" ng-repeat="category in categories | filter:searchTerm">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="bi bi-tag"></i> {{category.name}}
+                            </h5>
+                            <p class="card-text text-muted">
+                                {{category.description || 'Không có mô tả'}}
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="bi bi-book"></i> {{category.bookCount || 0}} sách
+                                </small>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-primary" ng-click="viewCategory(category)">
+                                        <i class="bi bi-eye"></i> Xem
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <empty-state 
+                show="!isLoading && !showError && categories.length === 0" 
+                title="Chưa có danh mục nào"
+                message="Hệ thống chưa có danh mục sách nào để hiển thị">
+            </empty-state>
+
+            <!-- Pagination -->
+            <pagination 
+                current-page="currentPage" 
+                total-pages="totalPages" 
+                on-page-change="goToPage(page)">
+            </pagination>
+        </div>
+    </div>
+</div>
+
+<!-- Category Detail Modal -->
+<div class="modal fade" id="categoryDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-tag"></i> Chi tiết danh mục
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" ng-if="selectedCategory">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Tên danh mục</h6>
+                        <p>{{selectedCategory.name}}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Số lượng sách</h6>
+                        <p><span class="badge bg-primary">{{selectedCategory.bookCount || 0}}</span></p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <h6>Mô tả</h6>
+                        <p>{{selectedCategory.description || 'Không có mô tả'}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>

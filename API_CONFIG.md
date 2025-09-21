@@ -16,6 +16,24 @@
 - `GET /api/test/admin-only` - Test admin API (chỉ ADMIN)
 - `GET /api/test/staff-only` - Test staff API (EMPLOYEE và ADMIN)
 
+### Publisher APIs
+- `GET /api/publisher` - Lấy danh sách nhà xuất bản (cần authentication)
+  - Query: `pageNumber`, `pageSize`, `searchTerm`
+  - Response: `{ success: true, data: { publishers: [...], totalCount, pageNumber, pageSize, totalPages } }`
+
+### Book APIs
+- `GET /api/book` - Lấy danh sách sách (cần authentication)
+  - Query: `pageNumber`, `pageSize`, `searchTerm`, `categoryId`, `publisherId`, `minPrice`, `maxPrice`, `sortBy`, `sortOrder`
+  - Response: `{ success: true, data: { books: [...], totalCount, pageNumber, pageSize, totalPages } }`
+- `GET /api/book/by-publisher/{publisherId}` - Lấy danh sách sách theo nhà xuất bản (cần authentication)
+  - Query: `pageNumber`, `pageSize`, `searchTerm`
+  - Response: `{ success: true, data: { books: [...], totalCount, pageNumber, pageSize, totalPages } }`
+
+### Category APIs
+- `GET /api/category` - Lấy danh sách danh mục (cần authentication)
+  - Query: `pageNumber`, `pageSize`, `searchTerm`
+  - Response: `{ success: true, data: { categories: [...], totalCount, pageNumber, pageSize, totalPages } }`
+
 ## 🔧 Configuration
 
 API configuration được định nghĩa trong `js/angular/app.config.js`:

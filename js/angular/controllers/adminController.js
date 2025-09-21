@@ -1,5 +1,12 @@
 // Admin Controller
-app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', function($scope, AuthService, APP_CONFIG) {
+app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$location', function($scope, AuthService, APP_CONFIG, $location) {
+    // Check if user has admin or teacher access
+    if (!AuthService.isAdminOrTeacher()) {
+        console.log('Access denied: User does not have admin or teacher role');
+        $location.path('/home');
+        return;
+    }
+
     $scope.title = 'Admin Dashboard';
     $scope.stats = {
         totalUsers: 0,

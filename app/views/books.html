@@ -1,0 +1,168 @@
+<!-- Books View - Xem danh sách sách -->
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="bi bi-book"></i> Danh sách sách</h2>
+                <div class="text-muted">
+                    Tổng cộng: {{books.length}} cuốn sách
+                </div>
+            </div>
+
+            <!-- Search and Filter -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <search-box 
+                        placeholder="Tìm kiếm sách..." 
+                        search-term="searchTerm" 
+                        on-search="searchBooks()"
+                        on-clear="clearSearch()">
+                    </search-box>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" ng-model="selectedCategoryId" ng-change="filterByCategory()">
+                        <option value="">Tất cả danh mục</option>
+                        <option ng-repeat="category in categories" value="{{category.categoryId}}">
+                            {{category.name}}
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" ng-model="selectedPublisherId" ng-change="filterByPublisher()">
+                        <option value="">Tất cả nhà xuất bản</option>
+                        <option ng-repeat="publisher in publishers" value="{{publisher.publisherId}}">
+                            {{publisher.name}}
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <loading-spinner loading="isLoading"></loading-spinner>
+
+            <!-- Error State -->
+            <error-state 
+                show="showError" 
+                message="errorMessage" 
+                dismissible="true">
+            </error-state>
+
+            <!-- Success Message -->
+            <success-message 
+                show="showSuccess" 
+                message="successMessage">
+            </success-message>
+
+            <!-- Books Grid -->
+            <div class="row" ng-if="!isLoading && !showError">
+                <div class="col-md-6 col-lg-4 mb-4" ng-repeat="book in books | filter:searchTerm">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <img ng-if="book.imageUrl" ng-src="{{book.imageUrl}}" alt="{{book.title}}" class="img-fluid" style="max-height: 180px;">
+                            <i ng-if="!book.imageUrl" class="bi bi-book display-1 text-muted"></i>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title" ng-bind-html="book.title | highlight:searchTerm"></h5>
+                            <p class="card-text">
+                                <small class="text-muted">
+                                    <i class="bi bi-tag"></i> {{book.categoryName}}<br>
+                                    <i class="bi bi-building"></i> {{book.publisherName}}<br>
+                                    <i class="bi bi-calendar"></i> {{book.publishYear}}
+                                </small>
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="h5 text-primary mb-0">{{book.unitPrice | currency}}</span>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-primary" ng-click="viewBook(book)">
+                                        <i class="bi bi-eye"></i> Xem
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <empty-state 
+                show="!isLoading && !showError && books.length === 0" 
+                title="Chưa có sách nào"
+                message="Hệ thống chưa có sách nào để hiển thị">
+            </empty-state>
+
+            <!-- Pagination -->
+            <pagination 
+                current-page="currentPage" 
+                total-pages="totalPages" 
+                on-page-change="goToPage(page)">
+            </pagination>
+        </div>
+    </div>
+</div>
+
+<!-- Book Detail Modal -->
+<div class="modal fade" id="bookDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-book"></i> Chi tiết sách
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" ng-if="selectedBook">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <img ng-if="selectedBook.imageUrl" ng-src="{{selectedBook.imageUrl}}" alt="{{selectedBook.title}}" class="img-fluid rounded">
+                            <i ng-if="!selectedBook.imageUrl" class="bi bi-book display-1 text-muted"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <h4>{{selectedBook.title}}</h4>
+                        <p class="text-muted">{{selectedBook.isbn}}</p>
+                        
+                        <div class="row mb-3">
+                            <div class="col-sm-6">
+                                <strong>Danh mục:</strong><br>
+                                <span class="badge bg-primary">{{selectedBook.categoryName}}</span>
+                            </div>
+                            <div class="col-sm-6">
+                                <strong>Nhà xuất bản:</strong><br>
+                                {{selectedBook.publisherName}}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-sm-6">
+                                <strong>Năm xuất bản:</strong><br>
+                                {{selectedBook.publishYear}}
+                            </div>
+                            <div class="col-sm-6">
+                                <strong>Số trang:</strong><br>
+                                {{selectedBook.pageCount}} trang
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-sm-6">
+                                <strong>Giá bán:</strong><br>
+                                <span class="h5 text-primary">{{selectedBook.unitPrice | currency}}</span>
+                            </div>
+                        </div>
+                        
+                        <div ng-if="selectedBook.authors && selectedBook.authors.length > 0">
+                            <strong>Tác giả:</strong><br>
+                            <div ng-repeat="author in selectedBook.authors">
+                                <span class="badge bg-secondary me-1">{{author.fullName}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>

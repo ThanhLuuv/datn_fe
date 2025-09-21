@@ -10,6 +10,8 @@ app.service('AuthService', ['$http', '$q', 'APP_CONFIG', function($http, $q, APP
     
     // Login function
     this.login = function(loginData) {
+        console.log('AUTHSERVICE.LOGIN CALLED!');
+        console.log('Login data:', loginData);
         var loginUrl = baseUrl + '/auth/login';
         console.log('Login URL:', loginUrl);
         
@@ -85,24 +87,59 @@ app.service('AuthService', ['$http', '$q', 'APP_CONFIG', function($http, $q, APP
         return user && user.roleId === roleId;
     };
 
-    // Check if user is admin
+    // Check if user is admin (RoleId: 1)
     this.isAdmin = function() {
-        return this.hasRole(3);
-    };
-
-    // Check if user is employee
-    this.isEmployee = function() {
-        return this.hasRole(2);
-    };
-
-    // Check if user is customer
-    this.isCustomer = function() {
         return this.hasRole(1);
     };
 
-    // Check if user is staff (employee or admin)
+    // Check if user is sales employee (RoleId: 2)
+    this.isSalesEmployee = function() {
+        return this.hasRole(2);
+    };
+
+    // Check if user is delivery employee (RoleId: 3)
+    this.isDeliveryEmployee = function() {
+        return this.hasRole(3);
+    };
+
+    // Check if user is customer (RoleId: 4)
+    this.isCustomer = function() {
+        return this.hasRole(4);
+    };
+
+    // Check if user is staff (sales, delivery employee or admin)
     this.isStaff = function() {
-        return this.isEmployee() || this.isAdmin();
+        return this.isSalesEmployee() || this.isDeliveryEmployee() || this.isAdmin();
+    };
+
+    // Check if user is admin or teacher (admin or sales employee)
+    this.isAdminOrTeacher = function() {
+        return this.isAdmin() || this.isSalesEmployee();
+    };
+
+    // Check if user can manage categories (admin only)
+    this.canManageCategories = function() {
+        return this.isAdmin();
+    };
+
+    // Check if user can manage products (admin only)
+    this.canManageProducts = function() {
+        return this.isAdmin();
+    };
+
+    // Check if user can manage purchase orders (sales employee and admin)
+    this.canManagePurchaseOrders = function() {
+        return this.isSalesEmployee() || this.isAdmin();
+    };
+
+    // Check if user can manage goods receipts (delivery employee and admin)
+    this.canManageGoodsReceipts = function() {
+        return this.isDeliveryEmployee() || this.isAdmin();
+    };
+
+    // Check if user can view books and categories (all authenticated users)
+    this.canViewBooks = function() {
+        return this.isAuthenticated();
     };
 
     // Test API endpoints
