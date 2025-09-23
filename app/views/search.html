@@ -32,6 +32,11 @@
                             <span class="price-old">{{book.unitPrice | currency:'':0}} VNĐ</span>
                         </div>
                         <p class="book-price" ng-if="!hasPromo(book)">{{book.unitPrice | currency:'':0}} VNĐ</p>
+                        <div class="mt-2">
+                            <button class="btn btn-sm btn-primary" ng-click="addToCart(book)">
+                                <i class="bi bi-cart-plus me-1"></i>Thêm vào giỏ
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

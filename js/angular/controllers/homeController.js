@@ -1,5 +1,5 @@
 // Home Controller
-app.controller('HomeController', ['$scope', '$http', 'DataService', 'BookstoreService', function($scope, $http, DataService, BookstoreService) {
+app.controller('HomeController', ['$scope', '$http', 'DataService', 'BookstoreService', 'CartService', function($scope, $http, DataService, BookstoreService, CartService) {
     $scope.title = 'BookStore - Khám phá thế giới qua những trang sách';
     $scope.message = 'Hệ thống quản lý hiệu sách hiện đại';
     $scope.features = [];
@@ -24,6 +24,21 @@ app.controller('HomeController', ['$scope', '$http', 'DataService', 'BookstoreSe
         return Math.min.apply(null, candidates);
     };
     $scope.hasPromo = function(book) { return $scope.getFinalPrice(book) < (book.unitPrice || 0); };
+
+    $scope.addToCart = function(book) {
+        if (!book) return;
+        var finalPrice = $scope.getFinalPrice(book);
+        CartService.addItem({
+            isbn: book.isbn,
+            title: book.title,
+            unitPrice: finalPrice,
+            imageUrl: book.imageUrl,
+            qty: 1
+        });
+        if (window.showNotification) {
+            window.showNotification('Đã thêm "' + book.title + '" vào giỏ', 'success');
+        }
+    };
 
     // Initialize controller
     $scope.init = function() {

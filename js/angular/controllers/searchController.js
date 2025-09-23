@@ -1,4 +1,4 @@
-app.controller('SearchController', ['$scope', '$location', 'BookstoreService', function($scope, $location, BookstoreService) {
+app.controller('SearchController', ['$scope', '$location', 'BookstoreService', 'CartService', function($scope, $location, BookstoreService, CartService) {
     $scope.query = ($location.search().q || '').trim();
     $scope.page = parseInt($location.search().page || '1');
     $scope.pageSize = parseInt($location.search().pageSize || '12');
@@ -20,6 +20,21 @@ app.controller('SearchController', ['$scope', '$location', 'BookstoreService', f
         return Math.min.apply(null, candidates);
     };
     $scope.hasPromo = function(book) { return $scope.getFinalPrice(book) < (book.unitPrice || 0); };
+
+    $scope.addToCart = function(book) {
+        if (!book) return;
+        var finalPrice = $scope.getFinalPrice(book);
+        CartService.addItem({
+            isbn: book.isbn,
+            title: book.title,
+            unitPrice: finalPrice,
+            imageUrl: book.imageUrl,
+            qty: 1
+        });
+        if (window.showNotification) {
+            window.showNotification('Đã thêm "' + book.title + '" vào giỏ', 'success');
+        }
+    };
 
     $scope.doSearch = function() {
         if (!$scope.query) {
