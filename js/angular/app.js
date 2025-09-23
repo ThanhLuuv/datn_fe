@@ -65,6 +65,14 @@ app.config(['$routeProvider', function($routeProvider) {
             templateUrl: 'app/views/contact.html',
             controller: 'ContactController'
         })
+        .when('/cart', {
+            templateUrl: 'app/views/cart.html',
+            controller: 'CartController'
+        })
+        .when('/checkout', {
+            templateUrl: 'app/views/checkout.html',
+            controller: 'CheckoutController'
+        })
         .when('/search', {
             templateUrl: 'app/views/search.html',
             controller: 'SearchController'
