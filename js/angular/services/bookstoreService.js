@@ -170,6 +170,34 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
+    // ==================== STOREFRONT APIs ====================
+    // Bestsellers in last N days
+    this.getBestSellers = function(days, top) {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/storefront/bestsellers',
+            params: { days: days || 30, top: top || 10 }
+        });
+    };
+
+    // New books in last N days
+    this.getNewBooks = function(days, top) {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/storefront/new-books',
+            params: { days: days || 30, top: top || 10 }
+        });
+    };
+
+    // Search by title
+    this.searchBooksByTitle = function(title, page, pageSize) {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/storefront/search',
+            params: { title: title || '', page: page || 1, pageSize: pageSize || 12 }
+        });
+    };
+
     // ==================== PURCHASE ORDER APIs ====================
     
     // Lấy danh sách đơn đặt mua

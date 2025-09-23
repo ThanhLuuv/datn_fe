@@ -6,12 +6,17 @@ app.controller('HomeController', ['$scope', '$http', 'DataService', 'BookstoreSe
     $scope.categories = [];
     $scope.stats = {};
     $scope.loading = true;
+    $scope.bestSellers = [];
+    $scope.newBooks = [];
+    $scope.error = '';
 
     // Initialize controller
     $scope.init = function() {
         $scope.loadFeatures();
         $scope.loadCategories();
         $scope.loadStats();
+        $scope.loadBestSellers();
+        $scope.loadNewBooks();
     };
 
     // Load features data
@@ -56,6 +61,31 @@ app.controller('HomeController', ['$scope', '$http', 'DataService', 'BookstoreSe
             }
         ];
         $scope.loading = false;
+    };
+
+    // Load bestsellers (last 30 days, top 10)
+    $scope.loadBestSellers = function() {
+        BookstoreService.getBestSellers(30, 10)
+            .then(function(res) {
+                $scope.bestSellers = (res.data && res.data.data) ? res.data.data : [];
+            })
+            .catch(function() {
+                $scope.bestSellers = [];
+                $scope.error = 'Không tải được danh sách bán chạy';
+            });
+    };
+
+    // Load new books (last 30 days, top 10)
+    $scope.loadNewBooks = function() {
+        BookstoreService.getNewBooks(30, 10)
+            .then(function(res) {
+                $scope.newBooks = (res.data && res.data.data) ? res.data.data : [];
+            })
+            .catch(function() {
+                $scope.newBooks = [];
+                $scope.error = 'Không tải được sách mới';
+            })
+            .finally(function() { $scope.loading = false; });
     };
 
     // Load categories data
