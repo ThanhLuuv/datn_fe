@@ -17,6 +17,16 @@ app.controller('CartController', ['$scope', 'CartService', function($scope, Cart
         compute();
     };
 
+    $scope.increment = function(it) {
+        CartService.increment(it.isbn, it.unitPrice);
+        compute();
+    };
+
+    $scope.decrement = function(it) {
+        CartService.decrement(it.isbn, it.unitPrice);
+        compute();
+    };
+
     // init
     $scope.cart = { items: [] };
     compute();

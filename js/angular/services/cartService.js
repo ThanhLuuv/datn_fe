@@ -1,4 +1,4 @@
-app.factory('CartService', [function() {
+app.factory('CartService', ['$rootScope', function($rootScope) {
     var STORAGE_KEY = 'bookstore_cart_v1';
 
     function readCart() {
@@ -16,6 +16,9 @@ app.factory('CartService', [function() {
     function writeCart(cart) {
         cart.updatedAt = new Date().toISOString();
         localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+        if ($rootScope && $rootScope.$broadcast) {
+            $rootScope.$broadcast('cart:changed');
+        }
     }
 
     function findIndex(items, isbn, unitPrice) {
@@ -32,6 +35,10 @@ app.factory('CartService', [function() {
     return {
         getCart: function() {
             return computeTotals(readCart());
+        },
+        getTotalQuantity: function() {
+            var cart = readCart();
+            return cart.items.reduce(function(sum, it) { return sum + (it.qty || 0); }, 0);
         },
         clear: function() {
             writeCart({ items: [] });
@@ -60,6 +67,24 @@ app.factory('CartService', [function() {
             var idx = findIndex(cart.items, isbn, unitPrice);
             if (idx >= 0) {
                 cart.items[idx].qty = Math.max(1, parseInt(qty || '1'));
+                writeCart(computeTotals(cart));
+            }
+            return cart;
+        },
+        increment: function(isbn, unitPrice) {
+            var cart = readCart();
+            var idx = findIndex(cart.items, isbn, unitPrice);
+            if (idx >= 0) {
+                cart.items[idx].qty += 1;
+                writeCart(computeTotals(cart));
+            }
+            return cart;
+        },
+        decrement: function(isbn, unitPrice) {
+            var cart = readCart();
+            var idx = findIndex(cart.items, isbn, unitPrice);
+            if (idx >= 0) {
+                cart.items[idx].qty = Math.max(1, (cart.items[idx].qty || 1) - 1);
                 writeCart(computeTotals(cart));
             }
             return cart;

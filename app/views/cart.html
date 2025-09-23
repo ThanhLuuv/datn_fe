@@ -39,7 +39,11 @@
                                         </td>
                                         <td class="text-end">{{it.unitPrice | currency:'':0}} VNĐ</td>
                                         <td class="text-center">
-                                            <input type="number" min="1" class="form-control form-control-sm d-inline-block" style="width:80px" ng-model="it.qty" ng-change="updateQty(it)">
+                                            <div class="input-group input-group-sm" style="width:120px;margin:0 auto;">
+                                                <button class="btn btn-outline-secondary" type="button" ng-click="decrement(it)">-</button>
+                                                <input type="number" min="1" class="form-control text-center" ng-model="it.qty" ng-change="updateQty(it)">
+                                                <button class="btn btn-outline-secondary" type="button" ng-click="increment(it)">+</button>
+                                            </div>
                                         </td>
                                         <td class="text-end">{{(it.unitPrice * it.qty) | currency:'':0}} VNĐ</td>
                                         <td class="text-end">
