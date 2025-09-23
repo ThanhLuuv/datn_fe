@@ -1,0 +1,51 @@
+<div class="search-page py-4">
+    <div class="container">
+        <div class="row mb-3">
+            <div class="col-12 d-flex align-items-center">
+                <h4 class="mb-0">Kết quả tìm kiếm</h4>
+                <span class="ms-2 text-muted" ng-if="query">cho "{{query}}"</span>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <input type="text" class="form-control" placeholder="Nhập từ khóa..." ng-model="query" ng-keypress="$event.which === 13 && doSearch()">
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100" ng-click="doSearch()">
+                    <i class="bi bi-search me-1"></i>Tìm kiếm
+                </button>
+            </div>
+        </div>
+
+        <div class="row g-4" ng-if="results.length > 0">
+            <div class="col-lg-3 col-md-4 col-sm-6" ng-repeat="book in results">
+                <div class="book-card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
+                     title="<strong>{{book.title}}</strong><br>Giá: {{book.unitPrice | currency:'':0}} VNĐ">
+                    <div class="book-image">
+                        <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.jpg'}}" alt="{{book.title}}" class="img-fluid">
+                    </div>
+                    <div class="book-info">
+                        <h6 class="book-title">{{book.title}}</h6>
+                        <p class="book-price">{{book.unitPrice | currency:'':0}} VNĐ</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" ng-if="results.length === 0 && loaded">
+            <div class="col-12 text-center text-muted">
+                Không có kết quả phù hợp
+            </div>
+        </div>
+
+        <div class="row mt-4" ng-if="total > pageSize">
+            <div class="col-12 d-flex justify-content-center gap-2">
+                <button class="btn btn-outline-secondary" ng-disabled="page === 1" ng-click="goPage(page - 1)">Trước</button>
+                <span class="align-self-center">Trang {{page}} / {{Math.ceil(total / pageSize)}}</span>
+                <button class="btn btn-outline-secondary" ng-disabled="page >= total / pageSize" ng-click="goPage(page + 1)">Sau</button>
+            </div>
+        </div>
+    </div>
+</div>
+

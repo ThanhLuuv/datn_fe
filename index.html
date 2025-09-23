@@ -38,8 +38,8 @@
             <!-- Search Bar -->
             <div class="navbar-search d-none d-lg-flex">
                 <div class="search-input-group">
-                    <input type="text" class="form-control search-input" placeholder="Tìm kiếm sách, tác giả...">
-                    <button class="btn btn-search" type="button">
+                    <input type="text" class="form-control search-input" placeholder="Tìm kiếm sách, tác giả..." ng-model="searchQuery" ng-keypress="$event.which === 13 && goSearch()">
+                    <button class="btn btn-search" type="button" ng-click="goSearch()">
                         <i class="bi bi-search"></i>
                     </button>
                 </div>
@@ -171,6 +171,7 @@
     <script src="js/angular/controllers/apiTestController.js"></script>
     <script src="js/angular/controllers/categoryController.js"></script>
     <script src="js/angular/controllers/bookController.js"></script>
+    <script src="js/angular/controllers/searchController.js"></script>
     <script src="js/angular/controllers/purchaseOrderController.js"></script>
     <script src="js/angular/controllers/goodsReceiptController.js"></script>
     <!-- Directives -->

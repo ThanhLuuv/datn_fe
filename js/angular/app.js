@@ -4,6 +4,12 @@ var app = angular.module('myApp', ['ngRoute', 'ngAnimate']);
 // Global controller for navbar visibility
 app.controller('AppController', ['$scope', '$location', function($scope, $location) {
     $scope.isAdminPage = false;
+    $scope.searchQuery = '';
+    $scope.goSearch = function() {
+        if ($scope.searchQuery && $scope.searchQuery.trim().length > 0) {
+            $location.path('/search').search({ q: $scope.searchQuery.trim(), page: 1, pageSize: 12 });
+        }
+    };
     
     $scope.$on('$routeChangeSuccess', function() {
         var path = $location.path();
@@ -58,6 +64,10 @@ app.config(['$routeProvider', function($routeProvider) {
         .when('/contact', {
             templateUrl: 'app/views/contact.html',
             controller: 'ContactController'
+        })
+        .when('/search', {
+            templateUrl: 'app/views/search.html',
+            controller: 'SearchController'
         })
         .when('/api-test', {
             templateUrl: 'app/views/api-test.html',
