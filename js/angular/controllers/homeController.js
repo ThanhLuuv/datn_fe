@@ -68,6 +68,12 @@ app.controller('HomeController', ['$scope', '$http', 'DataService', 'BookstoreSe
         BookstoreService.getBestSellers(30, 10)
             .then(function(res) {
                 $scope.bestSellers = (res.data && res.data.data) ? res.data.data : [];
+                // Initialize tooltips after data is loaded
+                setTimeout(function() {
+                    if (typeof initializeTooltips === 'function') {
+                        initializeTooltips();
+                    }
+                }, 100);
             })
             .catch(function() {
                 $scope.bestSellers = [];
@@ -80,6 +86,12 @@ app.controller('HomeController', ['$scope', '$http', 'DataService', 'BookstoreSe
         BookstoreService.getNewBooks(30, 10)
             .then(function(res) {
                 $scope.newBooks = (res.data && res.data.data) ? res.data.data : [];
+                // Initialize tooltips after data is loaded
+                setTimeout(function() {
+                    if (typeof initializeTooltips === 'function') {
+                        initializeTooltips();
+                    }
+                }, 100);
             })
             .catch(function() {
                 $scope.newBooks = [];
