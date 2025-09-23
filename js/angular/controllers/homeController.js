@@ -13,6 +13,8 @@ app.controller('HomeController', ['$scope', '$http', 'DataService', 'BookstoreSe
     // Compute promotional price per rules: prefer percent, show lowest
     $scope.getFinalPrice = function(book) {
         if (!book) return 0;
+        // prefer server-calculated effective price if present
+        if (book.effectivePrice != null) return Math.round(book.effectivePrice);
         var base = book.unitPrice || 0;
         var percent = book.promoPercent || book.discountPercent || null;
         var amount = book.promoAmount || book.discountAmount || null;
@@ -98,6 +100,13 @@ app.controller('HomeController', ['$scope', '$http', 'DataService', 'BookstoreSe
         BookstoreService.getBestSellers(30, 10)
             .then(function(res) {
                 $scope.bestSellers = (res.data && res.data.data) ? res.data.data : [];
+                // fetch effective prices in parallel (best effort)
+                $scope.bestSellers.forEach(function(b){
+                    BookstoreService.getEffectivePrice(b.isbn).then(function(r){
+                        var d = r.data && (r.data.data || r.data);
+                        if (d && typeof d.effectivePrice !== 'undefined') b.effectivePrice = d.effectivePrice;
+                    }).catch(function(){});
+                });
                 // Initialize tooltips after data is loaded
                 setTimeout(function() {
                     if (typeof initializeTooltips === 'function') {
@@ -116,6 +125,12 @@ app.controller('HomeController', ['$scope', '$http', 'DataService', 'BookstoreSe
         BookstoreService.getNewBooks(30, 10)
             .then(function(res) {
                 $scope.newBooks = (res.data && res.data.data) ? res.data.data : [];
+                $scope.newBooks.forEach(function(b){
+                    BookstoreService.getEffectivePrice(b.isbn).then(function(r){
+                        var d = r.data && (r.data.data || r.data);
+                        if (d && typeof d.effectivePrice !== 'undefined') b.effectivePrice = d.effectivePrice;
+                    }).catch(function(){});
+                });
                 // Initialize tooltips after data is loaded
                 setTimeout(function() {
                     if (typeof initializeTooltips === 'function') {

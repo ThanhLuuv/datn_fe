@@ -48,6 +48,13 @@ app.controller('SearchController', ['$scope', '$location', 'BookstoreService', '
                 var data = res.data || {};
                 $scope.results = data.items || data.data || [];
                 $scope.total = data.total || 0;
+                // best-effort fetch effective prices
+                $scope.results.forEach(function(b){
+                    BookstoreService.getEffectivePrice(b.isbn).then(function(r){
+                        var d = r.data && (r.data.data || r.data);
+                        if (d && typeof d.effectivePrice !== 'undefined') b.effectivePrice = d.effectivePrice;
+                    }).catch(function(){});
+                });
                 $scope.loaded = true;
                 setTimeout(function() { if (typeof initializeTooltips === 'function') initializeTooltips(); }, 100);
             })
