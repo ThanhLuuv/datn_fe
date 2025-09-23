@@ -53,6 +53,29 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
             });
     };
 
+    // Điều hướng sang trang Phiếu nhập, kèm theo chọn sẵn PO
+    $scope.goToGoodsReceipt = function(order) {
+        if (!order) return;
+        var isApproved = (order.statusId === 3) || (order.statusName && String(order.statusName).toLowerCase() === 'approved');
+        if (!isApproved) {
+            alert('Chỉ tạo phiếu nhập cho đơn đã Approved.');
+            return;
+        }
+        // Chuyển trang; có thể truyền qua query/hash hoặc localStorage
+        sessionStorage.setItem('selected_po_id', order.poId || order.id);
+        window.location.href = '#!/admin/goods-receipts';
+    };
+    // View purchase order details in modal
+    $scope.viewPurchaseOrder = function(order) {
+        if (!order) return;
+        $scope.selectedPurchaseOrder = order;
+        var modalEl = document.getElementById('purchaseOrderDetailModal');
+        if (modalEl) {
+            var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
+    };
+
     // Load purchase orders
     $scope.loadPurchaseOrders = function() {
         $scope.loading = true;
@@ -64,15 +87,28 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
             searchTerm: $scope.searchTerm
         })
             .then(function(response) {
-                // Ensure purchaseOrders is always an array
-                if (response.data && Array.isArray(response.data.data)) {
-                    $scope.purchaseOrders = response.data.data;
-                } else if (response.data && Array.isArray(response.data)) {
-                    $scope.purchaseOrders = response.data;
-                } else {
-                    $scope.purchaseOrders = [];
+                // Normalize API response to expected shape
+                var payload = response && response.data ? response.data : null;
+                var list = [];
+                var totalPages = 0;
+
+                if (payload) {
+                    // New backend format: { success, message, data: { purchaseOrders: [...], totalPages, ... } }
+                    if (payload.data && Array.isArray(payload.data.purchaseOrders)) {
+                        list = payload.data.purchaseOrders;
+                        totalPages = payload.data.totalPages || 0;
+                    // Legacy formats
+                    } else if (Array.isArray(payload.data)) {
+                        list = payload.data;
+                        totalPages = payload.totalPages || 0;
+                    } else if (Array.isArray(payload)) {
+                        list = payload;
+                        totalPages = 0;
+                    }
                 }
-                $scope.totalPages = (response.data && response.data.totalPages) || 0;
+
+                $scope.purchaseOrders = list;
+                $scope.totalPages = totalPages;
                 $scope.loading = false;
             })
             .catch(function(error) {
@@ -201,6 +237,12 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
 
     // Delete purchase order
     $scope.deletePurchaseOrder = function(order) {
+        // Chỉ cho phép xóa nếu trạng thái là Pending (1)
+        var isPending = order && ((order.statusId === 1) || (order.statusName && String(order.statusName).toLowerCase() === 'pending'));
+        if (!isPending) {
+            alert('Chỉ được xóa đơn hàng ở trạng thái Pending.');
+            return;
+        }
         if (confirm('Bạn có chắc chắn muốn xóa đơn đặt hàng này?')) {
             $scope.loading = true;
             $scope.error = null;
@@ -224,6 +266,66 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
                     console.error('Error deleting purchase order:', error);
                 });
         }
+    };
+
+    // Gửi đơn đặt hàng: chuyển từ Pending (1) → Shipped (2)
+    $scope.sendPurchaseOrder = function(order) {
+        if (!order) return;
+        var isPending = (order.statusId === 1) || (order.statusName && String(order.statusName).toLowerCase() === 'pending');
+        if (!isPending) {
+            alert('Chỉ có thể gửi đơn ở trạng thái Pending.');
+            return;
+        }
+
+        if (!confirm('Gửi đơn đặt hàng PO-' + (order.poId || order.id) + ' cho NXB?')) {
+            return;
+        }
+
+        $scope.loading = true;
+        BookstoreService.changePurchaseOrderStatus(order.poId || order.id, 2, 'Send to publisher')
+            .then(function() {
+                $scope.loading = false;
+                $scope.success = 'Đã gửi đơn đặt hàng thành công!';
+                $scope.loadPurchaseOrders();
+                setTimeout(function() {
+                    $scope.$apply(function() { $scope.success = null; });
+                }, 3000);
+            })
+            .catch(function(error) {
+                $scope.loading = false;
+                $scope.error = error.data?.message || 'Gửi đơn thất bại.';
+                console.error('Error sending PO:', error);
+            });
+    };
+
+    // Xác nhận đơn: chuyển từ Shipped (2) → Approved (3)
+    $scope.approvePurchaseOrder = function(order) {
+        if (!order) return;
+        var isShipped = (order.statusId === 2) || (order.statusName && String(order.statusName).toLowerCase() === 'shipped');
+        if (!isShipped) {
+            alert('Chỉ có thể xác nhận đơn ở trạng thái Shipped.');
+            return;
+        }
+
+        if (!confirm('Xác nhận đơn đặt hàng PO-' + (order.poId || order.id) + ' ?')) {
+            return;
+        }
+
+        $scope.loading = true;
+        BookstoreService.changePurchaseOrderStatus(order.poId || order.id, 3, 'Approve order')
+            .then(function() {
+                $scope.loading = false;
+                $scope.success = 'Đã xác nhận đơn đặt hàng!';
+                $scope.loadPurchaseOrders();
+                setTimeout(function() {
+                    $scope.$apply(function() { $scope.success = null; });
+                }, 3000);
+            })
+            .catch(function(error) {
+                $scope.loading = false;
+                $scope.error = error.data?.message || 'Xác nhận đơn thất bại.';
+                console.error('Error approve PO:', error);
+            });
     };
 
     // Get status display name
@@ -377,24 +479,32 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
         return total;
     };
 
-    // Save purchase order
+    // Save purchase order (modal)
     $scope.savePurchaseOrder = function() {
         if ($scope.purchaseOrderData.lines.length === 0) {
             alert('Vui lòng thêm ít nhất một dòng sản phẩm');
             return;
         }
 
-        if (!$scope.purchaseOrderData.publisherName.trim()) {
-            alert('Vui lòng nhập tên nhà xuất bản');
+        if (!$scope.purchaseOrderData.publisherId) {
+            alert('Vui lòng chọn nhà xuất bản');
             return;
         }
+
+        // Resolve publisherName from selected publisherId if available
+        var selectedPublisher = null;
+        if (Array.isArray($scope.publishers) && $scope.publishers.length > 0) {
+            selectedPublisher = $scope.publishers.find(function(p) { return String(p.publisherId) === String($scope.purchaseOrderData.publisherId); });
+        }
+        var publisherName = selectedPublisher ? (selectedPublisher.name || selectedPublisher.publisherName) : ($scope.purchaseOrderData.publisherName || '');
 
         $scope.isSaving = true;
         $scope.error = null;
         
         // Prepare data for API
         var orderData = {
-            publisherName: $scope.purchaseOrderData.publisherName,
+            publisherId: $scope.purchaseOrderData.publisherId,
+            publisherName: publisherName,
             orderedAt: $scope.purchaseOrderData.orderedAt,
             createdByName: $scope.purchaseOrderData.createdByName || 'Current User',
             totalQuantity: $scope.purchaseOrderData.totalQuantity,

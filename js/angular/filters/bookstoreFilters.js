@@ -215,3 +215,4 @@ app.filter('highlight', function($sce) {
         return $sce.trustAsHtml(highlighted);
     };
 });
+

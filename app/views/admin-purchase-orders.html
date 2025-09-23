@@ -57,6 +57,7 @@
                                     <th>Người tạo</th>
                                     <th>Số lượng</th>
                                     <th>Tổng tiền</th>
+                                    <th>Trạng thái</th>
                                     <th>Ghi chú</th>
                                     <th>Thao tác</th>
                                 </tr>
@@ -82,6 +83,19 @@
                                         <strong class="text-success">{{po.totalAmount | currency}}</strong>
                                     </td>
                                     <td>
+                                        <span class="badge"
+                                              ng-class="{
+                                                'bg-warning': (po.statusName | lowercase) === 'pending',
+                                                'bg-primary': (po.statusName | lowercase) === 'shipped',
+                                                'bg-info': (po.statusName | lowercase) === 'approved',
+                                                'bg-success': (po.statusName | lowercase) === 'completed',
+                                                'bg-danger': (po.statusName | lowercase) === 'canceled',
+                                                'bg-secondary': !po.statusName
+                                              }">
+                                            {{po.statusName || 'Không xác định'}}
+                                        </span>
+                                    </td>
+                                    <td>
                                         <span ng-if="po.note">{{po.note | truncate:30}}</span>
                                         <span ng-if="!po.note" class="text-muted">Không có ghi chú</span>
                                     </td>
@@ -90,10 +104,20 @@
                                             <button class="btn btn-outline-info" ng-click="viewPurchaseOrder(po)" title="Xem chi tiết">
                                                 <i class="bi bi-eye"></i>
                                             </button>
-                                            <button class="btn btn-outline-warning" ng-click="openEditModal(po)" title="Chỉnh sửa">
+                                            <button class="btn btn-outline-warning" ng-click="openEditModal(po)" title="Chỉnh sửa" ng-if="(po.statusName | lowercase) === 'pending' || po.statusId === 1">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
-                                            <button class="btn btn-outline-danger" ng-click="confirmDelete(po)" title="Xóa">
+                                            <button class="btn btn-light btn-send-hover" ng-click="sendPurchaseOrder(po)" title="Gửi NXB" ng-if="(po.statusName | lowercase) === 'pending' || po.statusId === 1">
+                                                <i class="bi bi-send"></i>
+                                            </button>
+                                            <button class="btn btn-outline-success" ng-click="approvePurchaseOrder(po)" title="Xác nhận" ng-if="(po.statusName | lowercase) === 'shipped' || po.statusId === 2">
+                                                <i class="bi bi-check2-circle"></i>
+                                            </button>
+                                            <button class="btn btn-light btn-receive-hover" ng-click="goToGoodsReceipt(po)" title="Nhập hàng" ng-if="(po.statusName | lowercase) === 'approved' || po.statusId === 3">
+                                                <i class="bi bi-box-seam"></i>
+                                            </button>
+                                            <!-- Chỉ hiển thị nút xóa khi trạng thái Pending -->
+                                            <button class="btn btn-outline-danger" ng-click="confirmDelete(po)" title="Xóa" ng-if="(po.statusName | lowercase) === 'pending' || po.statusId === 1">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </div>
@@ -245,49 +269,101 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" ng-if="selectedPurchaseOrder">
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <h6>Thông tin đơn hàng</h6>
-                        <p><strong>Mã đơn:</strong> PO-{{selectedPurchaseOrder.poId}}</p>
-                        <p><strong>Nhà xuất bản:</strong> {{selectedPurchaseOrder.publisherName}}</p>
-                        <p><strong>Ngày đặt:</strong> {{selectedPurchaseOrder.orderedAt | datetime}}</p>
-                        <p><strong>Người tạo:</strong> {{selectedPurchaseOrder.createdByName}}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <h6>Tổng kết</h6>
-                        <p><strong>Tổng số lượng:</strong> {{selectedPurchaseOrder.totalQuantity}}</p>
-                        <p><strong>Tổng tiền:</strong> <span class="h5 text-success">{{selectedPurchaseOrder.totalAmount | currency}}</span></p>
-                        <p><strong>Ghi chú:</strong> {{selectedPurchaseOrder.note || 'Không có ghi chú'}}</p>
+                <div class="row g-3 mb-3">
+                    <div class="col-12">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-body py-3">
+                                <h6 class="text-uppercase text-muted small mb-3">Thông tin đơn hàng</h6>
+                                <div class="row small g-3">
+                                    <div class="col-md-4">
+                                        <div class="text-muted">Mã đơn</div>
+                                        <div><code>PO-{{selectedPurchaseOrder.poId}}</code></div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="text-muted">Nhà xuất bản</div>
+                                        <div class="fw-semibold text-truncate">{{selectedPurchaseOrder.publisherName}}</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="text-muted">Trạng thái</div>
+                                        <div>
+                                            <span class="badge"
+                                                  ng-class="{
+                                                    'bg-warning': (selectedPurchaseOrder.statusName | lowercase) === 'pending',
+                                                    'bg-primary': (selectedPurchaseOrder.statusName | lowercase) === 'shipped',
+                                                    'bg-info': (selectedPurchaseOrder.statusName | lowercase) === 'approved',
+                                                    'bg-success': (selectedPurchaseOrder.statusName | lowercase) === 'completed',
+                                                    'bg-danger': (selectedPurchaseOrder.statusName | lowercase) === 'canceled',
+                                                    'bg-secondary': !selectedPurchaseOrder.statusName
+                                                  }">
+                                                {{selectedPurchaseOrder.statusName || 'Không xác định'}}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row small g-3 mt-1">
+                                    <div class="col-md-4">
+                                        <div class="text-muted">Ngày đặt</div>
+                                        <div>{{selectedPurchaseOrder.orderedAt | datetime}}</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="text-muted">Người tạo</div>
+                                        <div>{{selectedPurchaseOrder.createdByName}}</div>
+                                    </div>
+                                    <div class="col-md-4" ng-if="selectedPurchaseOrder.note">
+                                        <div class="text-muted">Ghi chú</div>
+                                        <div class="text-truncate">{{selectedPurchaseOrder.note}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                
-                <h6>Chi tiết đơn hàng</h6>
-                <div class="table-responsive">
-                    <table class="table table-sm">
-                        <thead class="table-light">
-                            <tr>
-                                <th>ISBN</th>
-                                <th>Tên sách</th>
-                                <th>Số lượng</th>
-                                <th>Đơn giá</th>
-                                <th>Thành tiền</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr ng-repeat="line in selectedPurchaseOrder.lines">
-                                <td><code>{{line.isbn}}</code></td>
-                                <td>{{line.bookTitle}}</td>
-                                <td><span class="badge bg-primary">{{line.qtyOrdered}}</span></td>
-                                <td>{{line.unitPrice | currency}}</td>
-                                <td><strong>{{line.lineTotal | currency}}</strong></td>
-                            </tr>
-                        </tbody>
-                    </table>
+
+                <div class="border-top pt-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">Chi tiết đơn hàng</h6>
+                        <span class="text-muted small">{{selectedPurchaseOrder.lines.length}} dòng</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 15%">ISBN</th>
+                                    <th>Tên sách</th>
+                                    <th class="text-end" style="width: 12%">Số lượng</th>
+                                    <th class="text-end" style="width: 15%">Đơn giá</th>
+                                    <th class="text-end" style="width: 18%">Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="line in selectedPurchaseOrder.lines">
+                                    <td class="text-nowrap"><code>{{line.isbn}}</code></td>
+                                    <td class="text-truncate" style="max-width: 340px">{{line.bookTitle}}</td>
+                                    <td class="text-end"><span class="badge bg-primary">{{line.qtyOrdered}}</span></td>
+                                    <td class="text-end">{{line.unitPrice | currency}}</td>
+                                    <td class="text-end"><strong>{{line.lineTotal | currency}}</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex justify-content-end mt-2">
+                        <div class="text-end">
+                            <div class="small text-muted">Tổng số lượng</div>
+                            <div class="fw-bold">{{selectedPurchaseOrder.totalQuantity}}</div>
+                        </div>
+                        <div class="text-end ms-4">
+                            <div class="small text-muted">Tổng tiền</div>
+                            <div class="h5 text-success mb-0">{{selectedPurchaseOrder.totalAmount | currency}}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-warning" ng-click="openEditModal(selectedPurchaseOrder)">
+                <button type="button" class="btn btn-warning" ng-click="openEditModal(selectedPurchaseOrder)" ng-if="(selectedPurchaseOrder.statusName | lowercase) === 'pending' || selectedPurchaseOrder.statusId === 1">
                     <i class="bi bi-pencil"></i> Chỉnh sửa
+                </button>
+                <button type="button" class="btn btn-primary" ng-click="sendPurchaseOrder(selectedPurchaseOrder)" ng-if="(selectedPurchaseOrder.statusName | lowercase) === 'pending' || selectedPurchaseOrder.statusId === 1">
+                    <i class="bi bi-send"></i> Gửi NXB
                 </button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
             </div>
@@ -302,3 +378,28 @@
     message="Bạn có chắc chắn muốn xóa đơn đặt hàng PO-{{purchaseOrderToDelete.poId}}? Hành động này không thể hoàn tác."
     on-confirm="deletePurchaseOrder()">
 </confirm-dialog>
+
+<style>
+    /* Base: nền trắng chữ đen; Hover: nền xám, chữ trắng */
+    .btn-send-hover,
+    .btn-receive-hover {
+        background-color: #fff !important;
+        color: #000 !important;
+        border-color: #dee2e6 !important;
+    }
+    .btn-send-hover .bi,
+    .btn-receive-hover .bi {
+        color: inherit !important;
+    }
+    .btn-send-hover:hover,
+    .btn-receive-hover:hover {
+        background-color: #6c757d !important; /* Bootstrap secondary */
+        color: #fff !important;
+        border-color: #6c757d !important;
+        text-decoration: none;
+    }
+    .btn-send-hover:hover .bi,
+    .btn-receive-hover:hover .bi {
+        color: #fff !important;
+    }
+</style>

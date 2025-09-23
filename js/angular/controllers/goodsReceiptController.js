@@ -76,11 +76,24 @@ app.controller('AdminGoodsReceiptsController', ['$scope', 'BookstoreService', 'A
     $scope.loadAvailablePurchaseOrders = function() {
         BookstoreService.getAvailablePurchaseOrders()
             .then(function(response) {
-                if (response.data && Array.isArray(response.data)) {
-                    $scope.availablePurchaseOrders = response.data;
-                } else {
-                    $scope.availablePurchaseOrders = [];
+                var payload = response && response.data ? response.data : null;
+                var list = [];
+                if (payload) {
+                    // New backend format: { success, message, data: [...] }
+                    if (Array.isArray(payload.data)) {
+                        list = payload.data;
+                    } else if (Array.isArray(payload)) {
+                        list = payload;
+                    }
                 }
+                // Only include available POs:
+                // - Approved (statusId === 3 or statusName === 'approved')
+                // - Or backend already filtered and leaves status as null → accept as available
+                $scope.availablePurchaseOrders = list.filter(function(po) {
+                    if (!po) return false;
+                    var name = po.statusName ? String(po.statusName).toLowerCase() : null;
+                    return po.statusId === 3 || name === 'approved' || (po.statusId == null && name == null);
+                });
             })
             .catch(function(error) {
                 console.error('Error loading available purchase orders:', error);
@@ -105,6 +118,14 @@ app.controller('AdminGoodsReceiptsController', ['$scope', 'BookstoreService', 'A
         };
         $scope.showForm = true;
         $scope.loadAvailablePurchaseOrders();
+        // Prefill from navigation if present
+        var preselectedPoId = sessionStorage.getItem('selected_po_id');
+        if (preselectedPoId) {
+            $scope.formData.purchaseOrderId = preselectedPoId;
+            $scope.goodsReceiptData = $scope.goodsReceiptData || {};
+            $scope.goodsReceiptData.poId = preselectedPoId;
+            sessionStorage.removeItem('selected_po_id');
+        }
     };
 
     // Show edit form

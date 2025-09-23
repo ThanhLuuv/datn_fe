@@ -208,6 +208,19 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
+    // Thay đổi trạng thái đơn đặt mua
+    this.changePurchaseOrderStatus = function(poId, newStatusId, note) {
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/purchaseorder/' + poId + '/change-status',
+            data: {
+                newStatusId: newStatusId,
+                note: note || ''
+            },
+            headers: getAuthHeaders()
+        });
+    };
+
     // Xóa đơn đặt mua
     this.deletePurchaseOrder = function(id) {
         return $http({

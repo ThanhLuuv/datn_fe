@@ -16,6 +16,19 @@
     <!-- Custom CSS -->
     <link href="css/custom/main.css?v=1.5" rel="stylesheet">
     <link href="css/custom/auth.css?v=1.5" rel="stylesheet">
+    <style>
+        /* Tinh chỉnh kích thước chữ ở menu header */
+        .navbar .nav-link {
+            font-size: 0.95rem;
+        }
+        .navbar .dropdown-menu .dropdown-item {
+            font-size: 0.95rem;
+        }
+        /* Giảm nhẹ kích thước chữ brand để đồng đều tổng thể */
+        .navbar .brand-text {
+            font-size: 1rem;
+        }
+    </style>
     
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
@@ -32,7 +45,6 @@
         <div class="container">
             <a class="navbar-brand" href="#!/home">
                 <img src="app/assets/images/logo.png" alt="BookStore Logo" class="navbar-logo">
-                <span class="brand-text">BookStore</span>
             </a>
             
             <!-- Search Bar -->
@@ -66,42 +78,6 @@
                             <i class="bi bi-tags me-1"></i>Danh mục
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#!/about">
-                            <i class="bi bi-info-circle me-1"></i>Giới thiệu
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#!/contact">
-                            <i class="bi bi-telephone me-1"></i>Liên hệ
-                        </a>
-                    </li>
-                </ul>
-                
-                <!-- Admin Menu -->
-                <ul class="navbar-nav me-3" ng-if="isAuthenticated && (currentUser.roleId === 1 || currentUser.roleId === 2)">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle admin-menu" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-gear me-1"></i>Quản lý
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#!/admin" admin-or-teacher-only>
-                                <i class="bi bi-speedometer2 me-2"></i>Dashboard
-                            </a></li>
-                            <li><a class="dropdown-item" href="#!/admin/categories" can-manage-categories>
-                                <i class="bi bi-tags me-2"></i>Quản lý danh mục
-                            </a></li>
-                            <li><a class="dropdown-item" href="#!/admin/books" can-manage-products>
-                                <i class="bi bi-book me-2"></i>Quản lý sách
-                            </a></li>
-                            <li><a class="dropdown-item" href="#!/admin/purchase-orders" can-manage-purchase-orders>
-                                <i class="bi bi-cart-check me-2"></i>Đơn đặt hàng
-                            </a></li>
-                            <li><a class="dropdown-item" href="#!/admin/goods-receipts" can-manage-goods-receipts>
-                                <i class="bi bi-box-seam me-2"></i>Phiếu nhập
-                            </a></li>
-                        </ul>
-                    </li>
                 </ul>
                 
                 <!-- User Menu -->
@@ -118,9 +94,12 @@
                     </li>
                     <li class="nav-item dropdown" ng-if="isAuthenticated">
                         <a class="nav-link dropdown-toggle user-menu" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-person-circle me-1"></i>{{currentUser.email}}
+                            <i class="bi bi-person-circle me-1"></i>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#!/admin" ng-if="isAuthenticated && (currentUser.roleId === 1 || currentUser.roleId === 2)">
+                                <i class="bi bi-person me-2"></i>Trang quản lý
+                            </a></li>
                             <li><a class="dropdown-item" href="#!/profile">
                                 <i class="bi bi-person me-2"></i>Thông tin cá nhân
                             </a></li>
