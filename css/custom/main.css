@@ -94,6 +94,31 @@ body {
     margin-bottom: 8px;
 }
 
+.price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.price-new {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--danger-color);
+}
+
+.price-old {
+    color: var(--gray-500);
+    text-decoration: line-through;
+    font-size: 0.95rem;
+}
+
+.badge-promo {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    z-index: 2;
+}
+
 .book-stats {
     display: flex;
     align-items: center;

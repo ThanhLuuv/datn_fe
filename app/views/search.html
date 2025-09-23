@@ -27,7 +27,11 @@
                     </div>
                     <div class="book-info">
                         <h6 class="book-title">{{book.title}}</h6>
-                        <p class="book-price">{{book.unitPrice | currency:'':0}} VNĐ</p>
+                        <div class="price-row" ng-if="hasPromo(book)">
+                            <span class="price-new">{{getFinalPrice(book) | currency:'':0}} VNĐ</span>
+                            <span class="price-old">{{book.unitPrice | currency:'':0}} VNĐ</span>
+                        </div>
+                        <p class="book-price" ng-if="!hasPromo(book)">{{book.unitPrice | currency:'':0}} VNĐ</p>
                     </div>
                 </div>
             </div>

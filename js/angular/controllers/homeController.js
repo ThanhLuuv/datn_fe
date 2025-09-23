@@ -10,6 +10,21 @@ app.controller('HomeController', ['$scope', '$http', 'DataService', 'BookstoreSe
     $scope.newBooks = [];
     $scope.error = '';
 
+    // Compute promotional price per rules: prefer percent, show lowest
+    $scope.getFinalPrice = function(book) {
+        if (!book) return 0;
+        var base = book.unitPrice || 0;
+        var percent = book.promoPercent || book.discountPercent || null;
+        var amount = book.promoAmount || book.discountAmount || null;
+        var priceByPercent = (percent && percent > 0) ? Math.round(base * (1 - percent / 100)) : null;
+        var priceByAmount = (amount && amount > 0) ? Math.max(0, Math.round(base - amount)) : null;
+        var candidates = [base];
+        if (priceByPercent !== null) candidates.push(priceByPercent);
+        if (priceByAmount !== null) candidates.push(priceByAmount);
+        return Math.min.apply(null, candidates);
+    };
+    $scope.hasPromo = function(book) { return $scope.getFinalPrice(book) < (book.unitPrice || 0); };
+
     // Initialize controller
     $scope.init = function() {
         $scope.loadFeatures();

@@ -131,7 +131,11 @@
                         </div>
                         <div class="book-info">
                             <h6 class="book-title">{{book.title}}</h6>
-                            <p class="book-price">{{book.unitPrice | currency:'':0}} VNĐ</p>
+                            <div class="price-row" ng-if="hasPromo(book)">
+                                <span class="price-new">{{getFinalPrice(book) | currency:'':0}} VNĐ</span>
+                                <span class="price-old">{{book.unitPrice | currency:'':0}} VNĐ</span>
+                            </div>
+                            <p class="book-price" ng-if="!hasPromo(book)">{{book.unitPrice | currency:'':0}} VNĐ</p>
                             <div class="book-stats">
                                 <small class="text-muted">
                                     <i class="bi bi-graph-up me-1"></i>{{book.totalSold}} cuốn đã bán
@@ -175,7 +179,11 @@
                         </div>
                         <div class="book-info">
                             <h6 class="book-title">{{book.title}}</h6>
-                            <p class="book-price">{{book.unitPrice | currency:'':0}} VNĐ</p>
+                            <div class="price-row" ng-if="hasPromo(book)">
+                                <span class="price-new">{{getFinalPrice(book) | currency:'':0}} VNĐ</span>
+                                <span class="price-old">{{book.unitPrice | currency:'':0}} VNĐ</span>
+                            </div>
+                            <p class="book-price" ng-if="!hasPromo(book)">{{book.unitPrice | currency:'':0}} VNĐ</p>
                             <div class="book-stats">
                                 <small class="text-muted">
                                     <i class="bi bi-calendar me-1"></i>{{book.createdAt | date:'dd/MM/yyyy'}}
