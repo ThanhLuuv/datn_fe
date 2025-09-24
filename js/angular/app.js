@@ -84,6 +84,10 @@ app.config(['$routeProvider', function($routeProvider) {
             templateUrl: 'app/views/search.html',
             controller: 'SearchController'
         })
+        .when('/book/:isbn', {
+            templateUrl: 'app/views/book-detail.html',
+            controller: 'BookDetailController'
+        })
         .when('/api-test', {
             templateUrl: 'app/views/api-test.html',
             controller: 'ApiTestController'
