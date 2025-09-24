@@ -18,6 +18,18 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
     $scope.pageSize = 10;
     $scope.totalPages = 0;
 
+    // Toasts
+    $scope.toasts = [];
+    $scope.addToast = function(variant, message) {
+        var id = Date.now() + Math.random();
+        $scope.toasts.push({ id: id, variant: variant, message: message });
+        setTimeout(function(){
+            $scope.$apply(function(){
+                $scope.toasts = $scope.toasts.filter(function(t){ return t.id !== id; });
+            });
+        }, 4000);
+    };
+
     // Form data
     $scope.formData = {
         publisher: '',
@@ -115,6 +127,7 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
                 $scope.error = 'Không thể tải danh sách đơn đặt hàng. Vui lòng thử lại.';
                 $scope.loading = false;
                 console.error('Error loading purchase orders:', error);
+                $scope.addToast('danger', $scope.error);
             });
     };
 
@@ -220,6 +233,7 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
                 $scope.success = $scope.editingOrder ? 'Cập nhật đơn đặt hàng thành công!' : 'Tạo đơn đặt hàng thành công!';
                 $scope.hideForm();
                 $scope.loadPurchaseOrders();
+                $scope.addToast('success', $scope.success);
                 
                 // Hide success message after 3 seconds
                 setTimeout(function() {
@@ -232,6 +246,7 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
                 $scope.loading = false;
                 $scope.error = error.data?.message || 'Có lỗi xảy ra khi lưu đơn đặt hàng.';
                 console.error('Error saving purchase order:', error);
+                $scope.addToast('danger', $scope.error);
             });
     };
 
@@ -252,6 +267,7 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
                     $scope.loading = false;
                     $scope.success = 'Xóa đơn đặt hàng thành công!';
                     $scope.loadPurchaseOrders();
+                    $scope.addToast('success', $scope.success);
                     
                     // Hide success message after 3 seconds
                     setTimeout(function() {
@@ -264,6 +280,7 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
                     $scope.loading = false;
                     $scope.error = error.data?.message || 'Có lỗi xảy ra khi xóa đơn đặt hàng.';
                     console.error('Error deleting purchase order:', error);
+                    $scope.addToast('danger', $scope.error);
                 });
         }
     };
@@ -287,6 +304,10 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
                 $scope.loading = false;
                 $scope.success = 'Đã gửi đơn đặt hàng thành công!';
                 $scope.loadPurchaseOrders();
+                $scope.addToast('success', $scope.success);
+                // Close detail modal if open
+                var detailModal = bootstrap.Modal.getInstance(document.getElementById('purchaseOrderDetailModal'));
+                if (detailModal) { detailModal.hide(); }
                 setTimeout(function() {
                     $scope.$apply(function() { $scope.success = null; });
                 }, 3000);
@@ -317,6 +338,7 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
                 $scope.loading = false;
                 $scope.success = 'Đã xác nhận đơn đặt hàng!';
                 $scope.loadPurchaseOrders();
+                $scope.addToast('success', $scope.success);
                 setTimeout(function() {
                     $scope.$apply(function() { $scope.success = null; });
                 }, 3000);
@@ -434,6 +456,30 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
         }
     };
 
+    // Check if a book (ISBN) is already selected in another line
+    $scope.isBookSelected = function(isbn, currentIndex) {
+        if (!isbn || !$scope.purchaseOrderData || !$scope.purchaseOrderData.lines) {
+            return false;
+        }
+        return $scope.purchaseOrderData.lines.some(function(l, idx) {
+            return idx !== currentIndex && l && l.isbn === isbn;
+        });
+    };
+
+    // Get available books for a specific line (hide books already selected on other lines, but keep current selection visible)
+    $scope.getAvailableBooksForLine = function(lineIndex) {
+        if (!$scope.availableBooks || !$scope.purchaseOrderData || !$scope.purchaseOrderData.lines) {
+            return $scope.availableBooks || [];
+        }
+        var currentLine = $scope.purchaseOrderData.lines[lineIndex] || {};
+        var selectedOtherIsbns = $scope.purchaseOrderData.lines
+            .map(function(l, idx) { return idx !== lineIndex ? (l && l.isbn) : null; })
+            .filter(function(isbn) { return !!isbn; });
+        return $scope.availableBooks.filter(function(book) {
+            return selectedOtherIsbns.indexOf(book.isbn) === -1 || book.isbn === currentLine.isbn;
+        });
+    };
+
     // Load books when publisher changes
     $scope.onPublisherChange = function() {
         $scope.loadBooksByPublisher($scope.purchaseOrderData.publisherId);
@@ -518,6 +564,7 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
                 $scope.isSaving = false;
                 $scope.success = 'Tạo đơn đặt hàng thành công!';
                 $scope.loadPurchaseOrders();
+                $scope.addToast('success', $scope.success);
                 
                 // Hide modal
                 var modal = bootstrap.Modal.getInstance(document.getElementById('purchaseOrderModal'));
@@ -536,6 +583,7 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
                 $scope.isSaving = false;
                 $scope.error = error.data?.message || 'Có lỗi xảy ra khi tạo đơn đặt hàng.';
                 console.error('Error creating purchase order:', error);
+                $scope.addToast('danger', $scope.error);
             });
     };
 

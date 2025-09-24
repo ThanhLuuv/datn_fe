@@ -94,12 +94,6 @@
                                             <button class="btn btn-outline-info" ng-click="viewGoodsReceipt(gr)" title="Xem chi tiết">
                                                 <i class="bi bi-eye"></i>
                                             </button>
-                                            <button class="btn btn-outline-warning" ng-click="openEditModal(gr)" title="Chỉnh sửa">
-                                                <i class="bi bi-pencil"></i>
-                                            </button>
-                                            <button class="btn btn-outline-danger" ng-click="confirmDelete(gr)" title="Xóa">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -134,55 +128,49 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="bi bi-box-seam"></i> {{isEditMode ? 'Chỉnh sửa phiếu nhập' : 'Tạo phiếu nhập mới'}}
+                    <i class="bi bi-box-seam"></i> {{isEditMode ? 'Tạo phiếu nhập mới' : 'Tạo phiếu nhập mới'}}
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form name="goodsReceiptForm" ng-submit="saveGoodsReceipt()">
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-lg-8">
-                            <div class="mb-3">
-                                <label for="grPurchaseOrder" class="form-label">Đơn đặt hàng <span class="text-danger">*</span></label>
-                                <select class="form-select" id="grPurchaseOrder" ng-model="goodsReceiptData.poId" ng-change="loadPurchaseOrderDetails()" required>
-                                    <option value="">Chọn đơn đặt hàng</option>
-                                    <option ng-repeat="po in availablePurchaseOrders" value="{{po.poId}}">
-                                        PO-{{po.poId}} - {{po.publisherName}} ({{po.orderedAt | date}})
-                                    </option>
-                                </select>
+                        <div class="col-12">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="grReceivedBy" class="form-label">Người nhập <span class="text-danger">*</span></label>
+                                    <input type="text" id="grReceivedBy" class="form-control" ng-model="goodsReceiptData.receivedBy" disabled>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="grPurchaseOrder" class="form-label">Đơn đặt hàng <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="grPurchaseOrder" ng-model="goodsReceiptData.poId" ng-change="loadPurchaseOrderDetails()" required>
+                                        <option value="">Chọn đơn đặt hàng</option>
+                                        <option ng-repeat="po in availablePurchaseOrders" value="{{po.poId}}">
+                                            PO-{{po.poId}} - {{po.publisherName}} ({{po.orderedAt | date}})
+                                        </option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label for="grNote" class="form-label">Ghi chú</label>
                                 <textarea class="form-control" id="grNote" ng-model="goodsReceiptData.note" rows="3" auto-resize></textarea>
                             </div>
                         </div>
-                        <div class="col-lg-4">
-                            <div class="card summary-card h-100">
-                                <div class="card-header bg-primary text-white">
-                                    <h6 class="mb-0"><i class="bi bi-calculator me-2"></i>Tổng kết phiếu nhập</h6>
-                                </div>
-                                <div class="card-body d-flex flex-column justify-content-center">
-                                    <div class="summary-item">
-                                        <div class="d-flex justify-content-between align-items-center mb-3">
-                                            <span class="text-muted">Tổng số lượng:</span>
-                                            <strong class="text-primary fs-4">{{getTotalQuantity()}}</strong>
-                                        </div>
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span class="text-muted">Tổng tiền:</span>
-                                            <strong class="text-success fs-4">{{getTotalAmount() | currency}}</strong>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        
                     </div>
                     
                     <!-- Purchase Order Details -->
                     <div class="row" ng-if="selectedPurchaseOrder">
                         <div class="col-12">
                             <h6>Chi tiết đơn đặt hàng</h6>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0">Chi tiết đơn đặt hàng</h6>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" ng-click="openImportExcelModal()" ng-disabled="!goodsReceiptData.poId">
+                                    <i class="bi bi-file-earmark-excel"></i> Nhập từ Excel
+                                </button>
+                            </div>
                             <div class="table-responsive">
-                                <table class="table table-sm">
+                                <table class="table table-sm align-middle">
                                     <thead>
                                         <tr>
                                             <th>ISBN</th>
@@ -190,12 +178,11 @@
                                             <th>Số lượng đặt</th>
                                             <th>Đơn giá đặt</th>
                                             <th>Số lượng nhận</th>
-                                            <th>Đơn giá nhận</th>
                                             <th>Thành tiền</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr ng-repeat="line in selectedPurchaseOrder.lines track by $index">
+                                        <tr ng-repeat="line in selectedPurchaseOrder.lines track by $index" ng-class="{'table-danger': receiptValidation.lineErrors[$index].hasError}">
                                             <td><code>{{line.isbn}}</code></td>
                                             <td>{{line.bookTitle}}</td>
                                             <td><span class="badge bg-info">{{line.qtyOrdered}}</span></td>
@@ -204,21 +191,36 @@
                                                 <input type="number" class="form-control form-control-sm" ng-model="goodsReceiptData.lines[$index].qtyReceived" min="0" max="{{line.qtyOrdered}}" ng-change="updateLineTotal($index)" number-input>
                                             </td>
                                             <td>
-                                                <input type="number" class="form-control form-control-sm" ng-model="goodsReceiptData.lines[$index].unitCost" step="0.01" min="0" ng-change="updateLineTotal($index)" currency-input>
-                                            </td>
-                                            <td>
                                                 <strong>{{goodsReceiptData.lines[$index].lineTotal | currency}}</strong>
+                                                <div class="text-danger small mt-1" ng-if="receiptValidation.lineErrors[$index].hasError">
+                                                    {{receiptValidation.lineErrors[$index].errors.join(', ')}}
+                                                </div>
                                             </td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <div>
+                            <button type="button" class="btn btn-outline-danger btn-sm" ng-if="receiptValidation.hasError" ng-click="cancelPurchaseOrderDueToMismatch()">
+                                <i class="bi bi-x-circle"></i> Hủy đơn đặt hàng
+                            </button>
+                        </div>
+                        <div class="text-end">
+                            <div class="small text-muted">Tổng số lượng</div>
+                            <div class="fw-bold">{{getTotalQuantity()}}</div>
+                        </div>
+                        <div class="text-end ms-4">
+                            <div class="small text-muted">Tổng tiền</div>
+                            <div class="h5 text-success mb-0">{{getTotalAmount() | currency}}</div>
+                        </div>
+                    </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-primary" ng-disabled="goodsReceiptForm.$invalid || isSaving || !selectedPurchaseOrder">
+                    <button type="submit" class="btn btn-primary" ng-disabled="goodsReceiptForm.$invalid || isSaving || !selectedPurchaseOrder || receiptValidation.hasError">
                         <span ng-if="isSaving" class="spinner-border spinner-border-sm me-2"></span>
                         {{isEditMode ? 'Cập nhật' : 'Tạo mới'}}
                     </button>
@@ -239,51 +241,84 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" ng-if="selectedGoodsReceipt">
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <h6>Thông tin phiếu nhập</h6>
-                        <p><strong>Mã phiếu:</strong> GR-{{selectedGoodsReceipt.grId}}</p>
-                        <p><strong>Mã đơn đặt:</strong> PO-{{selectedGoodsReceipt.poId}}</p>
-                        <p><strong>Nhà xuất bản:</strong> {{selectedGoodsReceipt.publisherName}}</p>
-                        <p><strong>Ngày nhập:</strong> {{selectedGoodsReceipt.receivedAt | datetime}}</p>
-                        <p><strong>Người tạo:</strong> {{selectedGoodsReceipt.createdByName}}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <h6>Tổng kết</h6>
-                        <p><strong>Tổng số lượng:</strong> {{selectedGoodsReceipt.totalQuantity}}</p>
-                        <p><strong>Tổng tiền:</strong> <span class="h5 text-success">{{selectedGoodsReceipt.totalAmount | currency}}</span></p>
-                        <p><strong>Ghi chú:</strong> {{selectedGoodsReceipt.note || 'Không có ghi chú'}}</p>
+                <div class="row g-3 mb-3">
+                    <div class="col-12">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-body py-3">
+                                <h6 class="text-uppercase text-muted small mb-3">Thông tin phiếu nhập</h6>
+                                <div class="row small g-3">
+                                    <div class="col-md-4">
+                                        <div class="text-muted">Mã phiếu</div>
+                                        <div><code>GR-{{selectedGoodsReceipt.grId}}</code></div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="text-muted">Đơn đặt hàng</div>
+                                        <div><code>PO-{{selectedGoodsReceipt.poId}}</code></div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="text-muted">Nhà xuất bản</div>
+                                        <div class="fw-semibold text-truncate">{{selectedGoodsReceipt.publisherName || (selectedGoodsReceipt.purchaseOrderInfo && (selectedGoodsReceipt.purchaseOrderInfo.split(' - ').slice(1).join(' - ')))}}</div>
+                                    </div>
+                                </div>
+                                <div class="row small g-3 mt-1">
+                                    <div class="col-md-4">
+                                        <div class="text-muted">Ngày nhập</div>
+                                        <div>{{selectedGoodsReceipt.receivedAt | datetime}}</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="text-muted">Người tạo</div>
+                                        <div>{{selectedGoodsReceipt.createdByName}}</div>
+                                    </div>
+                                    <div class="col-md-4" ng-if="selectedGoodsReceipt.note">
+                                        <div class="text-muted">Ghi chú</div>
+                                        <div class="text-truncate">{{selectedGoodsReceipt.note}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                
-                <h6>Chi tiết phiếu nhập</h6>
-                <div class="table-responsive">
-                    <table class="table table-sm">
-                        <thead class="table-light">
-                            <tr>
-                                <th>ISBN</th>
-                                <th>Tên sách</th>
-                                <th>Số lượng nhận</th>
-                                <th>Đơn giá nhận</th>
-                                <th>Thành tiền</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr ng-repeat="line in selectedGoodsReceipt.lines">
-                                <td><code>{{line.isbn}}</code></td>
-                                <td>{{line.bookTitle}}</td>
-                                <td><span class="badge bg-success">{{line.qtyReceived}}</span></td>
-                                <td>{{line.unitCost | currency}}</td>
-                                <td><strong>{{line.lineTotal | currency}}</strong></td>
-                            </tr>
-                        </tbody>
-                    </table>
+
+                <div class="border-top pt-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">Chi tiết phiếu nhập</h6>
+                        <span class="text-muted small">{{selectedGoodsReceipt.lines.length}} dòng</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 15%">ISBN</th>
+                                    <th>Tên sách</th>
+                                    <th class="text-end" style="width: 14%">Số lượng nhận</th>
+                                    <th class="text-end" style="width: 15%">Đơn giá nhận</th>
+                                    <th class="text-end" style="width: 18%">Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="line in selectedGoodsReceipt.lines">
+                                    <td class="text-nowrap"><code>{{line.isbn}}</code></td>
+                                    <td class="text-truncate" style="max-width: 340px">{{line.bookTitle}}</td>
+                                    <td class="text-end"><span class="badge bg-success">{{line.qtyReceived}}</span></td>
+                                    <td class="text-end">{{line.unitCost | currency}}</td>
+                                    <td class="text-end"><strong>{{line.lineTotal | currency}}</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex justify-content-end mt-2">
+                        <div class="text-end">
+                            <div class="small text-muted">Tổng số lượng</div>
+                            <div class="fw-bold">{{selectedGoodsReceipt.totalQuantity}}</div>
+                        </div>
+                        <div class="text-end ms-4">
+                            <div class="small text-muted">Tổng tiền</div>
+                            <div class="h5 text-success mb-0">{{selectedGoodsReceipt.totalAmount | currency}}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-warning" ng-click="openEditModal(selectedGoodsReceipt)">
-                    <i class="bi bi-pencil"></i> Chỉnh sửa
-                </button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
             </div>
         </div>
@@ -297,3 +332,88 @@
     message="Bạn có chắc chắn muốn xóa phiếu nhập GR-{{goodsReceiptToDelete.grId}}? Hành động này không thể hoàn tác."
     on-confirm="deleteGoodsReceipt()">
 </confirm-dialog>
+
+<!-- Toasts -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000;">
+    <div class="toast align-items-center text-white bg-{{t.variant}} border-0 mb-2 show" role="alert" aria-live="assertive" aria-atomic="true" ng-repeat="t in toasts">
+        <div class="d-flex">
+            <div class="toast-body">{{t.message}}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" ng-click="toasts.splice($index,1)"></button>
+        </div>
+    </div>
+    </div>
+
+<!-- Import Excel Modal -->
+<div class="modal fade" id="importExcelModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-file-earmark-excel"></i> Nhập hàng từ Excel</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Chọn file Excel (.xlsx)</label>
+                    <input type="file" class="form-control" accept=".xlsx,.xls" onchange="angular.element(this).scope().onExcelFileSelected(this.files)" />
+                </div>
+                <div class="mb-3" ng-if="excelSheets && excelSheets.length">
+                    <label class="form-label">Chọn Sheet</label>
+                    <select class="form-select" ng-model="selectedExcelSheet" ng-options="s for s in excelSheets" ng-change="previewExcelSheet()"></select>
+                </div>
+                <div class="table-responsive" ng-if="excelPreview && excelPreview.length">
+                    <table class="table table-sm table-striped align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Tên sách</th>
+                                <th>Số lượng đặt</th>
+                                <th>Số lượng nhận</th>
+                                <th>Đơn giá (VND)</th>
+                                <th>Thành tiền (VND)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="row in excelPreview" ng-class="{'table-danger': excelPreviewValidation.lineErrors[$index].hasError}">
+                                <td>{{$index + 1}}</td>
+                                <td class="text-truncate" style="max-width:320px">{{row.bookTitle}}</td>
+                                <td>{{row.qtyOrdered}}</td>
+                                <td>{{row.qtyReceived}}</td>
+                                <td>{{row.unitPrice | currency}}</td>
+                                <td>
+                                    <strong>{{row.lineTotal | currency}}</strong>
+                                    <div class="text-danger small mt-1" ng-if="excelPreviewValidation.lineErrors[$index].hasError">
+                                        {{excelPreviewValidation.lineErrors[$index].errors.join(', ')}}
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="alert alert-info" ng-if="excelPreview && !excelPreview.length">
+                    Không tìm thấy bảng dữ liệu hợp lệ. Vui lòng kiểm tra lại file.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" ng-disabled="!excelPreview || !excelPreview.length" ng-click="applyExcelImport()">Áp dụng vào phiếu nhập</button>
+            </div>
+        </div>
+    </div>
+    </div>
+
+<style>
+    /* Normalize control heights in goods receipt modal */
+    #goodsReceiptModal .form-control,
+    #goodsReceiptModal .form-select {
+        height: 38px;
+        padding: 0.375rem 0.75rem;
+        line-height: 1.5;
+    }
+    /* Ensure consistent border radius */
+    #goodsReceiptModal .form-control,
+    #goodsReceiptModal .form-select {
+        border-radius: 0.375rem;
+    }
+    /* Align the two controls nicely in the same row */
+    #goodsReceiptModal .row.g-3 > [class*='col-'] .form-label { margin-bottom: 0.25rem; }
+</style>
