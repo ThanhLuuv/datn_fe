@@ -198,6 +198,17 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
+    // Get effective price for a book by ISBN
+    this.getEffectivePrice = function(isbn) {
+        if (!isbn) {
+            return $q.reject('ISBN is required');
+        }
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/storefront/effective-price/' + encodeURIComponent(isbn)
+        });
+    };
+
     // ==================== PURCHASE ORDER APIs ====================
     
     // Lấy danh sách đơn đặt mua
