@@ -1,16 +1,8 @@
 // Custom jQuery and JavaScript
 $(document).ready(function() {
-    // Initialize tooltips
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-
-    // Initialize popovers
-    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
-    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
-        return new bootstrap.Popover(popoverTriggerEl);
-    });
+    // Initialize tooltips and popovers
+    initializeTooltips();
+    initializePopovers();
 
     // Smooth scrolling for anchor links
     $('a[href*="#"]').on('click', function(e) {
@@ -61,6 +53,45 @@ $(document).ready(function() {
         }, 5000);
     });
 });
+
+// Initialize tooltips function
+function initializeTooltips() {
+    // Destroy existing tooltips first
+    var existingTooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    existingTooltips.forEach(function(element) {
+        var tooltip = bootstrap.Tooltip.getInstance(element);
+        if (tooltip) {
+            tooltip.dispose();
+        }
+    });
+    
+    // Initialize new tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl, {
+            html: true,
+            trigger: 'hover focus'
+        });
+    });
+}
+
+// Initialize popovers function
+function initializePopovers() {
+    // Destroy existing popovers first
+    var existingPopovers = document.querySelectorAll('[data-bs-toggle="popover"]');
+    existingPopovers.forEach(function(element) {
+        var popover = bootstrap.Popover.getInstance(element);
+        if (popover) {
+            popover.dispose();
+        }
+    });
+    
+    // Initialize new popovers
+    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+        return new bootstrap.Popover(popoverTriggerEl);
+    });
+}
 
 // Global functions
 window.showNotification = function(message, type = 'info') {
