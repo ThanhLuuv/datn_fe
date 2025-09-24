@@ -1,0 +1,29 @@
+<div class="container py-4" ng-init="">
+  <div class="row" ng-if="!loading && book">
+    <div class="col-md-4">
+      <img ng-src="{{book.imageUrl || 'https://via.placeholder.com/400x600?text=No+Image'}}" class="img-fluid rounded shadow-sm" alt="{{book.title}}" />
+    </div>
+    <div class="col-md-8">
+      <h2 class="mb-3">{{book.title}}</h2>
+      <p class="text-muted">ISBN: {{book.isbn}}</p>
+      <div class="mb-3">
+        <span ng-if="book.effectivePrice != null && book.effectivePrice < book.unitPrice" class="h4 text-danger fw-bold">{{ (book.effectivePrice | currency:'VND':0) || (getFinalPrice() | currency:'VND':0) }}</span>
+        <span ng-if="book.effectivePrice == null || book.effectivePrice >= book.unitPrice" class="h4 fw-bold">{{ (getFinalPrice() | currency:'VND':0) }}</span>
+        <span ng-if="book.effectivePrice != null && book.effectivePrice < book.unitPrice" class="text-decoration-line-through ms-2 text-secondary">{{ (book.unitPrice | currency:'VND':0) }}</span>
+      </div>
+      <div class="mb-4">
+        <button class="btn btn-primary" ng-click="addToCart()"><i class="bi bi-cart-plus"></i> Thêm vào giỏ</button>
+      </div>
+      <div>
+        <h5 class="mb-2">Mô tả</h5>
+        <p ng-bind="book.description || 'Chưa có mô tả.'"></p>
+      </div>
+    </div>
+  </div>
+  <div class="text-center py-5" ng-if="loading">
+    <div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>
+  </div>
+  <div class="alert alert-danger" ng-if="!loading && error">{{error}}</div>
+</div>
+
+
