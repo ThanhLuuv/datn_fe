@@ -101,6 +101,9 @@
                                     </td>
                                     <td>
                                         <div class="btn-group btn-group-sm">
+                                            <a class="btn btn-download-po" ng-if="po.orderFileUrl" ng-href="{{po.orderFileUrl}}" target="_blank" download title="Tải file đơn đặt hàng">
+                                                <i class="bi bi-download"></i>
+                                            </a>
                                             <button class="btn btn-outline-info" ng-click="viewPurchaseOrder(po)" title="Xem chi tiết">
                                                 <i class="bi bi-eye"></i>
                                             </button>
@@ -415,5 +418,17 @@
     .btn-send-hover:hover .bi,
     .btn-receive-hover:hover .bi {
         color: #fff !important;
+    }
+</style>
+
+<style>
+    .btn-download-po {
+        border: none !important;
+        background-color: transparent !important;
+        color: #6c757d;
+    }
+    .btn-download-po:hover {
+        background-color: rgba(25, 135, 84, 0.15) !important; /* Bootstrap success rgba */
+        color: #198754 !important;
     }
 </style>
