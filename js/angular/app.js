@@ -152,6 +152,32 @@ app.config(['$routeProvider', function($routeProvider) {
                 }]
             }
         })
+        .when('/admin/roles', {
+            templateUrl: 'app/views/admin-roles.html',
+            controller: 'AdminRolesController',
+            resolve: {
+                checkAuth: ['AuthService', '$location', function(AuthService, $location) {
+                    if (!AuthService.isAdmin()) {
+                        $location.path('/home');
+                        return false;
+                    }
+                    return true;
+                }]
+            }
+        })
+        .when('/admin/reports/revenue', {
+            templateUrl: 'app/views/admin-report-revenue.html',
+            controller: 'AdminRevenueReportController',
+            resolve: {
+                checkAuth: ['AuthService', '$location', function(AuthService, $location) {
+                    if (!AuthService.isAdminOrTeacher()) {
+                        $location.path('/home');
+                        return false;
+                    }
+                    return true;
+                }]
+            }
+        })
         .otherwise({
             redirectTo: '/'
         });

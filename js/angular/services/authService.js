@@ -87,24 +87,21 @@ app.service('AuthService', ['$http', '$q', 'APP_CONFIG', function($http, $q, APP
         return user && user.roleId === roleId;
     };
 
-    // Check if user is admin (RoleId: 1)
+    // Role mapping (DB): CUSTOMER=1, SALES=2, ADMIN=3, DELIVERY=4
     this.isAdmin = function() {
-        return this.hasRole(1);
+        return this.hasRole(3);
     };
 
-    // Check if user is sales employee (RoleId: 2)
     this.isSalesEmployee = function() {
         return this.hasRole(2);
     };
 
-    // Check if user is delivery employee (RoleId: 3)
     this.isDeliveryEmployee = function() {
-        return this.hasRole(3);
+        return this.hasRole(4);
     };
 
-    // Check if user is customer (RoleId: 4)
     this.isCustomer = function() {
-        return this.hasRole(4);
+        return this.hasRole(1);
     };
 
     // Check if user is staff (sales, delivery employee or admin)

@@ -93,6 +93,15 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
+    // Xóa danh mục
+    this.deleteCategory = function(id) {
+        return $http({
+            method: 'DELETE',
+            url: baseUrl + '/category/' + id,
+            headers: getAuthHeaders()
+        });
+    };
+
     // ==================== BOOK APIs ====================
     
     // Lấy danh sách sách
@@ -110,6 +119,115 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
             url: baseUrl + '/book',
             headers: getAuthHeaders(),
             params: queryParams
+        });
+    };
+
+    // Lấy sách mới nhất
+    this.getNewestBooks = function(limit) {
+        var queryParams = { limit: Math.min(Math.max(parseInt(limit) || 10, 1), 50) };
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/book/newest',
+            headers: getAuthHeaders(),
+            params: queryParams
+        });
+    };
+
+    // ==================== REPORT APIs ====================
+    // Báo cáo doanh thu theo khoảng thời gian
+    this.getRevenueReport = function(params) {
+        var queryParams = {
+            fromDate: params && params.fromDate ? params.fromDate : '',
+            toDate: params && params.toDate ? params.toDate : ''
+        };
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/report/revenue',
+            headers: getAuthHeaders(),
+            params: queryParams
+        });
+    };
+
+    // ==================== ROLE & PERMISSION APIs ====================
+    // Get roles
+    this.getRoles = function() {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/role',
+            headers: getAuthHeaders()
+        });
+    };
+
+    // ==================== ADMIN DASHBOARD APIs ====================
+    this.getAdminDashboardSummary = function() {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/admin/dashboard/summary',
+            headers: getAuthHeaders()
+        });
+    };
+
+    this.getAdminRecentActivities = function() {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/admin/dashboard/recent-activities',
+            headers: getAuthHeaders()
+        });
+    };
+
+    // New: total users
+    this.getAdminTotalUsers = function() {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/admin/dashboard/total-users',
+            headers: getAuthHeaders()
+        });
+    };
+
+    // New: total orders today (UTC)
+    this.getAdminOrdersToday = function() {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/admin/dashboard/orders-today',
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Get all permissions
+    this.getAllPermissions = function() {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/role/permissions',
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Get permissions by role
+    this.getRolePermissions = function(roleId) {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/role/' + roleId + '/permissions',
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Assign permission to role
+    this.assignPermissionToRole = function(roleId, permissionId) {
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/role/assign',
+            data: { roleId: roleId, permissionId: permissionId },
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Remove permission from role
+    this.removePermissionFromRole = function(roleId, permissionId) {
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/role/remove',
+            data: { roleId: roleId, permissionId: permissionId },
+            headers: getAuthHeaders()
         });
     };
 
@@ -166,6 +284,24 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         return $http({
             method: 'DELETE',
             url: baseUrl + '/book/' + isbn,
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Kích hoạt sách (status = 1)
+    this.activateBook = function(isbn) {
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/book/' + encodeURIComponent(isbn) + '/activate',
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Vô hiệu hóa sách (status = 0)
+    this.deactivateBook = function(isbn) {
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/book/' + encodeURIComponent(isbn) + '/deactivate',
             headers: getAuthHeaders()
         });
     };

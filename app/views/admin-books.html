@@ -81,7 +81,9 @@
                                     <th>Danh mục</th>
                                     <th>Nhà xuất bản</th>
                                     <th>Giá</th>
+                                    <th>Số lượng</th>
                                     <th>Năm XB</th>
+                                    <th>Trạng thái</th>
                                     <th>Thao tác</th>
                                 </tr>
                             </thead>
@@ -107,7 +109,16 @@
                                     <td>
                                         <strong class="text-primary">{{book.unitPrice | currency}}</strong>
                                     </td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{book.stock || 0}}</span>
+                                    </td>
                                     <td>{{book.publishYear}}</td>
+                                    <td>
+                                        <span class="badge"
+                                              ng-class="{ 'bg-success': book.status, 'bg-danger': !book.status }">
+                                            {{book.status ? 'Đang bán' : 'Ngừng bán'}}
+                                        </span>
+                                    </td>
                                     <td>
                                         <div class="btn-group btn-group-sm">
                                             <button class="btn btn-outline-info" ng-click="viewBook(book)" title="Xem chi tiết">
@@ -116,8 +127,8 @@
                                             <button class="btn btn-outline-warning" ng-click="openEditModal(book)" title="Chỉnh sửa">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
-                                            <button class="btn btn-outline-danger" ng-click="confirmDelete(book)" title="Xóa">
-                                                <i class="bi bi-trash"></i>
+                                            <button class="btn" ng-class="book.status ? 'btn-outline-secondary' : 'btn-outline-success'" ng-click="toggleBookStatus(book)" title="{{book.status ? 'Tắt sách' : 'Bật sách'}}">
+                                                <i class="bi" ng-class="book.status ? 'bi-toggle-off' : 'bi-toggle-on'"></i>
                                             </button>
                                         </div>
                                     </td>
@@ -163,43 +174,53 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="bookIsbn" class="form-label">ISBN <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="bookIsbn" ng-model="bookData.isbn" required>
+                                <input type="text" class="form-control" id="bookIsbn" name="isbn"
+                                       ng-model="bookData.isbn" required
+                                       unique-isbn original-isbn="isEditMode ? editingBook.isbn : null">
+                                <div class="invalid-feedback d-block" ng-if="bookForm.isbn.$touched && bookForm.isbn.$error.required">
+                                    Vui lòng nhập ISBN.
+                                </div>
+                                <div class="invalid-feedback d-block" ng-if="bookForm.isbn.$touched && bookForm.isbn.$error.uniqueIsbn">
+                                    ISBN đã tồn tại.
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label for="bookTitle" class="form-label">Tên sách <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="bookTitle" ng-model="bookData.title" required>
+                                <input type="text" class="form-control" id="bookTitle" name="title" ng-model="bookData.title" required>
+                                <div class="invalid-feedback d-block" ng-if="bookForm.title.$touched && bookForm.title.$error.required">Vui lòng nhập tên sách.</div>
                             </div>
                             <div class="mb-3">
                                 <label for="bookCategory" class="form-label">Danh mục <span class="text-danger">*</span></label>
-                                <select class="form-select" id="bookCategory" ng-model="bookData.categoryId" required>
-                                    <option value="">Chọn danh mục</option>
-                                    <option ng-repeat="category in categories" value="{{category.categoryId}}">
-                                        {{category.name}}
-                                    </option>
+                                <select class="form-select" id="bookCategory" name="category" ng-model="bookData.categoryId" ng-options="(c.categoryId + '') as c.name for c in categories" required>
                                 </select>
+                                <div class="invalid-feedback d-block" ng-if="bookForm.category.$touched && bookForm.category.$error.required">Vui lòng chọn danh mục.</div>
                             </div>
                             <div class="mb-3">
                                 <label for="bookPublisher" class="form-label">Nhà xuất bản <span class="text-danger">*</span></label>
-                                <select class="form-select" id="bookPublisher" ng-model="bookData.publisherId" required>
-                                    <option value="">Chọn nhà xuất bản</option>
-                                    <option ng-repeat="publisher in publishers" value="{{publisher.publisherId}}">
-                                        {{publisher.name}}
-                                    </option>
+                                <select class="form-select" id="bookPublisher" name="publisher" ng-model="bookData.publisherId" ng-options="(p.publisherId + '') as p.name for p in publishers" required>
                                 </select>
+                                <div class="invalid-feedback d-block" ng-if="bookForm.publisher.$touched && bookForm.publisher.$error.required">Vui lòng chọn nhà xuất bản.</div>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="bookPrice" class="form-label">Giá bán <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" id="bookPrice" ng-model="bookData.unitPrice" step="0.01" min="0" currency-input required>
+                                <input type="number" class="form-control" id="bookPrice" name="unitPrice" ng-model="bookData.unitPrice" step="0.01" min="0" currency-input required>
+                                <div class="invalid-feedback d-block" ng-if="bookForm.unitPrice.$touched && (bookForm.unitPrice.$error.required || bookForm.unitPrice.$error.min)">Vui lòng nhập giá hợp lệ.</div>
                             </div>
                             <div class="mb-3">
                                 <label for="bookYear" class="form-label">Năm xuất bản <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" id="bookYear" ng-model="bookData.publishYear" min="1900" max="2024" required>
+                                <input type="number" class="form-control" id="bookYear" name="publishYear" ng-model="bookData.publishYear" min="1900" max="{{currentYear}}" required>
+                                <div class="invalid-feedback d-block" ng-if="bookForm.publishYear.$touched && (bookForm.publishYear.$error.required || bookForm.publishYear.$error.min || bookForm.publishYear.$error.max)">Vui lòng nhập năm hợp lệ.</div>
                             </div>
                             <div class="mb-3">
                                 <label for="bookPages" class="form-label">Số trang <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" id="bookPages" ng-model="bookData.pageCount" min="1" number-input required>
+                                <input type="number" class="form-control" id="bookPages" name="pageCount" ng-model="bookData.pageCount" min="1" number-input required>
+                                <div class="invalid-feedback d-block" ng-if="bookForm.pageCount.$touched && (bookForm.pageCount.$error.required || bookForm.pageCount.$error.min)">Vui lòng nhập số trang hợp lệ.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="bookStock" class="form-label">Số lượng tồn kho</label>
+                                <input type="number" class="form-control" id="bookStock" ng-model="bookData.stock" min="0" number-input>
                             </div>
                             <div class="mb-3">
                                 <label for="bookImage" class="form-label">URL hình ảnh</label>
@@ -212,14 +233,11 @@
                             <div class="mb-3">
                                 <label for="bookAuthors" class="form-label">Tác giả</label>
                                 <div class="d-flex gap-2 mb-2">
-                                    <select class="form-select" ng-model="selectedAuthorId">
+                                    <select class="form-select" ng-model="selectedAuthorId" ng-options="a.authorId as a.fullName for a in authors track by a.authorId">
                                         <option value="">Chọn tác giả</option>
-                                        <option ng-repeat="author in authors" value="{{author.authorId}}">
-                                            {{author.fullName}}
-                                        </option>
                                     </select>
                                     <button type="button" class="btn btn-outline-primary" ng-click="addAuthor()">
-                                        <i class="bi bi-plus"></i> Thêm
+                                        <i class="bi bi-plus"></i>
                                     </button>
                                 </div>
                                 <div class="d-flex flex-wrap gap-1">
@@ -321,3 +339,28 @@
     message="Bạn có chắc chắn muốn xóa sách '{{bookToDelete.title}}'? Hành động này không thể hoàn tác."
     on-confirm="deleteBook()">
 </confirm-dialog>
+
+<!-- Toasts -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000;">
+    <div class="toast align-items-center text-white bg-{{t.variant}} border-0 mb-2 show" role="alert" aria-live="assertive" aria-atomic="true" ng-repeat="t in toasts">
+        <div class="d-flex">
+            <div class="toast-body">{{t.message}}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" ng-click="toasts.splice($index,1)"></button>
+        </div>
+    </div>
+    </div>
+
+<style>
+    /* Normalize control heights in book modal */
+    #bookModal .form-control,
+    #bookModal .form-select {
+        height: 38px;
+        padding: 0.375rem 0.75rem;
+        line-height: 1.5;
+        border-radius: 0.375rem;
+    }
+    #bookModal .form-label { margin-bottom: 0.25rem; }
+    #bookModal .row > [class*='col-'] { margin-bottom: 0.5rem; }
+    /* Ensure equal spacing between two columns */
+    #bookModal .row.g-3 { row-gap: 0.75rem; }
+</style>

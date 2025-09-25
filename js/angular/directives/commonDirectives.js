@@ -167,10 +167,38 @@ app.directive('confirmDialog', function() {
             message: '@',
             onConfirm: '&'
         },
-        link: function(scope) {
+        link: function(scope, element) {
+            var modalInstance = null;
+
+            function openModal() {
+                var modalEl = element[0].querySelector('.modal');
+                if (!modalEl) return;
+                modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+                modalInstance.show();
+                modalEl.addEventListener('hidden.bs.modal', function() {
+                    scope.$applyAsync(function(){ scope.show = false; });
+                }, { once: true });
+            }
+
+            function closeModal() {
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
+            }
+
+            scope.$watch('show', function(val) {
+                if (val) {
+                    // Wait next tick for DOM render
+                    setTimeout(openModal, 0);
+                } else {
+                    closeModal();
+                }
+            });
+
             scope.confirm = function() {
                 scope.onConfirm();
                 scope.show = false;
+                closeModal();
             };
         }
     };

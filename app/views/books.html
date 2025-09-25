@@ -67,7 +67,8 @@
                                 <small class="text-muted">
                                     <i class="bi bi-tag"></i> {{book.categoryName}}<br>
                                     <i class="bi bi-building"></i> {{book.publisherName}}<br>
-                                    <i class="bi bi-calendar"></i> {{book.publishYear}}
+                                    <i class="bi bi-calendar"></i> {{book.publishYear}}<br>
+                                    <i class="bi bi-box-seam"></i> Số lượng: <span class="badge bg-primary">{{book.stock || 0}}</span>
                                 </small>
                             </p>
                             <div class="d-flex justify-content-between align-items-center">
@@ -163,6 +164,23 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
             </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Toasts (Books) -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000;">
+    <div class="toast align-items-center text-white bg-danger border-0 mb-2 show" role="alert" aria-live="assertive" aria-atomic="true" ng-if="showError && errorMessage">
+        <div class="d-flex">
+            <div class="toast-body">{{errorMessage}}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" ng-click="showError=false"></button>
+        </div>
+    </div>
+    <div class="toast align-items-center text-white bg-success border-0 mb-2 show" role="alert" aria-live="assertive" aria-atomic="true" ng-if="showSuccess && successMessage">
+        <div class="d-flex">
+            <div class="toast-body">{{successMessage}}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" ng-click="showSuccess=false"></button>
         </div>
     </div>
 </div>

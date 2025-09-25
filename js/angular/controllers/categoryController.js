@@ -79,13 +79,23 @@ app.controller('AdminCategoriesController', ['$scope', 'BookstoreService', 'Auth
     $scope.pageSize = 10;
     $scope.totalPages = 0;
 
-    // Form data
-    $scope.formData = {
-        name: '',
-        description: ''
+    // Toasts
+    $scope.toasts = [];
+    $scope.addToast = function(variant, message) {
+        var id = Date.now() + Math.random();
+        $scope.toasts.push({ id: id, variant: variant, message: message });
+        setTimeout(function(){
+            $scope.$apply(function(){
+                $scope.toasts = $scope.toasts.filter(function(t){ return t.id !== id; });
+            });
+        }, 3500);
     };
-    $scope.editingCategory = null;
-    $scope.showForm = false;
+
+    // Modal form state
+    $scope.categoryData = { name: '', description: '' };
+    $scope.isEditMode = false;
+    $scope.categoryToDelete = null;
+    $scope.showDeleteConfirm = false;
 
     // Load categories
     $scope.loadCategories = function() {
@@ -136,49 +146,36 @@ app.controller('AdminCategoriesController', ['$scope', 'BookstoreService', 'Auth
     // Open create modal
     $scope.openCreateModal = function() {
         $scope.isEditMode = false;
-        $scope.formData = {
-            name: '',
-            description: ''
-        };
-        
-        // Show modal
+        $scope.categoryData = { name: '', description: '' };
         var modal = new bootstrap.Modal(document.getElementById('categoryModal'));
         modal.show();
     };
 
-    // Show add form
-    $scope.showAddForm = function() {
-        $scope.editingCategory = null;
-        $scope.formData = {
-            name: '',
-            description: ''
-        };
-        $scope.showForm = true;
-    };
-
-    // Show edit form
-    $scope.showEditForm = function(category) {
+    // Open edit modal
+    $scope.openEditModal = function(category) {
+        if (!category) return;
+        $scope.isEditMode = true;
         $scope.editingCategory = category;
-        $scope.formData = {
-            name: category.name,
-            description: category.description
-        };
-        $scope.showForm = true;
+        $scope.categoryData = { name: category.name, description: category.description };
+        var modal = new bootstrap.Modal(document.getElementById('categoryModal'));
+        modal.show();
     };
 
-    // Hide form
-    $scope.hideForm = function() {
-        $scope.showForm = false;
-        $scope.editingCategory = null;
-        $scope.formData = {
-            name: '',
-            description: ''
-        };
+    // View category detail
+    $scope.viewCategory = function(category) {
+        $scope.selectedCategory = category;
+        var modal = new bootstrap.Modal(document.getElementById('categoryDetailModal'));
+        modal.show();
     };
 
-    // Save category
+    function closeCategoryModal() {
+        var modal = bootstrap.Modal.getInstance(document.getElementById('categoryModal'));
+        if (modal) modal.hide();
+    }
+
+    // Save category (create/update)
     $scope.saveCategory = function() {
-        if (!$scope.formData.name.trim()) {
+        if (!$scope.categoryData.name || !$scope.categoryData.name.trim()) {
             $scope.error = 'Tên danh mục không được để trống.';
             return;
         }
@@ -189,18 +186,19 @@ app.controller('AdminCategoriesController', ['$scope', 'BookstoreService', 'Auth
         var promise;
         if ($scope.editingCategory) {
             // Update existing category
-            promise = BookstoreService.updateCategory($scope.editingCategory.id, $scope.formData);
+            promise = BookstoreService.updateCategory($scope.editingCategory.categoryId || $scope.editingCategory.id, $scope.categoryData);
         } else {
             // Create new category
-            promise = BookstoreService.createCategory($scope.formData);
+            promise = BookstoreService.createCategory($scope.categoryData);
         }
 
         promise
             .then(function(response) {
                 $scope.loading = false;
                 $scope.success = $scope.editingCategory ? 'Cập nhật danh mục thành công!' : 'Thêm danh mục thành công!';
-                $scope.hideForm();
+                closeCategoryModal();
                 $scope.loadCategories();
+                $scope.addToast('success', $scope.success);
                 
                 // Hide success message after 3 seconds
                 setTimeout(function() {
@@ -213,34 +211,47 @@ app.controller('AdminCategoriesController', ['$scope', 'BookstoreService', 'Auth
                 $scope.loading = false;
                 $scope.error = error.data?.message || 'Có lỗi xảy ra khi lưu danh mục.';
                 console.error('Error saving category:', error);
+                $scope.addToast('danger', $scope.error);
             });
     };
 
-    // Delete category
-    $scope.deleteCategory = function(category) {
-        if (confirm('Bạn có chắc chắn muốn xóa danh mục "' + category.name + '"?')) {
-            $scope.loading = true;
-            $scope.error = null;
+    // Confirm delete flow
+    $scope.confirmDelete = function(category) {
+        $scope.categoryToDelete = category;
+        $scope.showDeleteConfirm = true;
+        var d = document.querySelector('confirm-dialog');
+    };
 
-            BookstoreService.deleteCategory(category.id)
-                .then(function(response) {
-                    $scope.loading = false;
-                    $scope.success = 'Xóa danh mục thành công!';
-                    $scope.loadCategories();
-                    
-                    // Hide success message after 3 seconds
-                    setTimeout(function() {
-                        $scope.$apply(function() {
-                            $scope.success = null;
-                        });
-                    }, 3000);
-                })
-                .catch(function(error) {
-                    $scope.loading = false;
-                    $scope.error = error.data?.message || 'Có lỗi xảy ra khi xóa danh mục.';
-                    console.error('Error deleting category:', error);
-                });
+    // Delete category (only if no books)
+    $scope.deleteCategory = function() {
+        var category = $scope.categoryToDelete;
+        if (!category) return;
+        if ((category.bookCount || 0) > 0) {
+            $scope.error = 'Chỉ xóa được danh mục không có đầu sách.';
+            $scope.showDeleteConfirm = false;
+            $scope.addToast('warning', $scope.error);
+            return;
         }
+        $scope.loading = true;
+        $scope.error = null;
+        BookstoreService.deleteCategory(category.categoryId || category.id)
+            .then(function(response) {
+                $scope.loading = false;
+                $scope.success = 'Xóa danh mục thành công!';
+                $scope.loadCategories();
+                $scope.showDeleteConfirm = false;
+                $scope.addToast('success', $scope.success);
+                setTimeout(function() {
+                    $scope.$apply(function() { $scope.success = null; });
+                }, 3000);
+            })
+            .catch(function(error) {
+                $scope.loading = false;
+                $scope.error = error.data?.message || 'Có lỗi xảy ra khi xóa danh mục.';
+                console.error('Error deleting category:', error);
+                $scope.showDeleteConfirm = false;
+                $scope.addToast('danger', $scope.error);
+            });
     };
 
     // Initialize

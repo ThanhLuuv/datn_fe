@@ -1,0 +1,75 @@
+<!-- Admin Roles & Permissions Management -->
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex align-items-center">
+                    <a href="#!/admin" class="btn btn-outline-secondary me-3">
+                        <i class="bi bi-arrow-left"></i> Quay lại
+                    </a>
+                    <h2 class="mb-0"><i class="bi bi-shield-lock"></i> Quản lý phân quyền</h2>
+                </div>
+            </div>
+
+            <div ng-if="loading" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Đang tải...</span>
+                </div>
+                <p class="mt-3 text-muted">Đang tải role và quyền...</p>
+            </div>
+
+            <error-state show="!!error" message="error" dismissible="true"></error-state>
+
+            <div class="row" ng-if="!loading && !error">
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-header">Roles</div>
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item" ng-repeat="r in roles" ng-class="{active: selectedRole && selectedRole.roleId === r.roleId}" style="cursor:pointer" ng-click="selectRole(r)">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>{{r.name}}</strong>
+                                            <div class="text-muted small" ng-if="r.description">{{r.description}}</div>
+                                        </div>
+                                        <span class="badge bg-primary">ID {{r.roleId}}</span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="card h-100">
+                        <div class="card-header">Quyền của role: <strong>{{selectedRole && selectedRole.name || 'Chưa chọn'}}</strong></div>
+                        <div class="card-body">
+                            <div class="row g-2">
+                                <div class="col-md-6" ng-repeat="p in permissions">
+                                    <div class="form-check border rounded p-2">
+                                        <input class="form-check-input" type="checkbox" id="perm-{{p.permissionId}}" ng-checked="hasPermission(p.permissionId)" ng-click="togglePermission(p)">
+                                        <label class="form-check-label" for="perm-{{p.permissionId}}">
+                                            <strong>{{p.code}}</strong>
+                                            <div class="small text-muted">{{p.name}}</div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toasts -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000;">
+    <div class="toast align-items-center text-white bg-{{t.variant}} border-0 mb-2 show" role="alert" aria-live="assertive" aria-atomic="true" ng-repeat="t in toasts">
+        <div class="d-flex">
+            <div class="toast-body">{{t.message}}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" ng-click="toasts.splice($index,1)"></button>
+        </div>
+    </div>
+    </div>
+
+

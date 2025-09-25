@@ -143,12 +143,13 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label for="grPurchaseOrder" class="form-label">Đơn đặt hàng <span class="text-danger">*</span></label>
-                                    <select class="form-select" id="grPurchaseOrder" ng-model="goodsReceiptData.poId" ng-change="loadPurchaseOrderDetails()" required>
+                                    <select class="form-select" id="grPurchaseOrder" name="poId" ng-model="goodsReceiptData.poId" ng-change="loadPurchaseOrderDetails()" required>
                                         <option value="">Chọn đơn đặt hàng</option>
                                         <option ng-repeat="po in availablePurchaseOrders" value="{{po.poId}}">
                                             PO-{{po.poId}} - {{po.publisherName}} ({{po.orderedAt | date}})
                                         </option>
                                     </select>
+                                    <div class="invalid-feedback d-block" ng-if="goodsReceiptForm.poId.$touched && goodsReceiptForm.poId.$error.required">Vui lòng chọn đơn đặt hàng.</div>
                                 </div>
                             </div>
                             <div class="mb-3">
@@ -188,7 +189,9 @@
                                             <td><span class="badge bg-info">{{line.qtyOrdered}}</span></td>
                                             <td>{{line.unitPrice | currency}}</td>
                                             <td>
-                                                <input type="number" class="form-control form-control-sm" ng-model="goodsReceiptData.lines[$index].qtyReceived" min="0" max="{{line.qtyOrdered}}" ng-change="updateLineTotal($index)" number-input>
+                                                <input type="number" class="form-control form-control-sm" ng-model="goodsReceiptData.lines[$index].qtyReceived" min="0" max="{{line.qtyOrdered}}" required ng-change="updateLineTotal($index)" number-input>
+                                                <div class="text-danger small mt-1" ng-if="goodsReceiptData.lines[$index].qtyReceived == null || goodsReceiptData.lines[$index].qtyReceived < 0">Số lượng nhận phải ≥ 0.</div>
+                                                <div class="text-danger small mt-1" ng-if="goodsReceiptData.lines[$index].qtyReceived > line.qtyOrdered">Không vượt quá số lượng đặt.</div>
                                             </td>
                                             <td>
                                                 <strong>{{goodsReceiptData.lines[$index].lineTotal | currency}}</strong>

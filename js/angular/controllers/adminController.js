@@ -1,5 +1,5 @@
 // Admin Controller
-app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$location', function($scope, AuthService, APP_CONFIG, $location) {
+app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$location', 'BookstoreService', function($scope, AuthService, APP_CONFIG, $location, BookstoreService) {
     // Check if user has admin or teacher access
     if (!AuthService.isAdminOrTeacher()) {
         console.log('Access denied: User does not have admin or teacher role');
@@ -19,60 +19,143 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
     };
     
     $scope.recentActivities = [];
+    $scope.latestBooks = [];
+    $scope.toasts = [];
+    $scope.addToast = function(variant, message) {
+        var id = Date.now() + Math.random();
+        $scope.toasts.push({ id: id, variant: variant, message: message });
+        setTimeout(function(){
+            $scope.$applyAsync(function(){
+                $scope.toasts = $scope.toasts.filter(function(t){ return t.id !== id; });
+            });
+        }, 3000);
+    };
+
+    function formatYMD(date) {
+        var y = date.getFullYear();
+        var m = ('0' + (date.getMonth() + 1)).slice(-2);
+        var d = ('0' + date.getDate()).slice(-2);
+        return y + '-' + m + '-' + d;
+    }
+
+    function sumRevenueFromReportPayload(payload) {
+        var items = payload && Array.isArray(payload.items) ? payload.items : [];
+        var sum = 0;
+        for (var i = 0; i < items.length; i++) {
+            var val = Number(items[i].revenue || items[i].totalRevenue || 0);
+            if (!isNaN(val)) sum += val;
+        }
+        return sum;
+    }
 
     // Initialize controller
     $scope.init = function() {
         $scope.loadStats();
-        $scope.loadRecentActivities();
+        $scope.loadLatestBooks();
     };
 
     // Load statistics
     $scope.loadStats = function() {
-        // Mock data - in real app, this would come from API
-        $scope.stats = {
-            totalUsers: 1250,
-            totalBooks: 3500,
-            todayOrders: 45,
-            monthlyRevenue: 125000000,
-            growthRate: 12.5,
-            newUsers: 25,
-            soldBooks: 180
-        };
+        BookstoreService.getAdminDashboardSummary()
+            .then(function(res){
+                var data = res && res.data && res.data.data;
+                if (data) {
+                    var src = (data && data.summary) ? data.summary : data;
+                    var totalUsers = src.totalUsers != null ? src.totalUsers : (src.users != null ? src.users : 0);
+                    var totalBooks = src.totalBooks != null ? src.totalBooks : (src.totalBook != null ? src.totalBook : (src.booksCount != null ? src.booksCount : (src.books != null ? src.books : 0)));
+                    var todayOrders = src.todayOrders != null ? src.todayOrders : (src.ordersToday != null ? src.ordersToday : 0);
+                    var monthlyRevenue = src.monthlyRevenue != null ? src.monthlyRevenue : (src.revenueThisMonth != null ? src.revenueThisMonth : (src.totalRevenueThisMonth != null ? src.totalRevenueThisMonth : (src.monthRevenue != null ? src.monthRevenue : 0)));
+                    var growthRate = src.growthRate != null ? src.growthRate : (src.growth != null ? src.growth : 0);
+                    var newUsers = src.newUsers != null ? src.newUsers : (src.newUsersThisMonth != null ? src.newUsersThisMonth : 0);
+                    var soldBooks = src.soldBooks != null ? src.soldBooks : (src.soldBooksThisMonth != null ? src.soldBooksThisMonth : 0);
+                    $scope.stats = {
+                        totalUsers: Number(totalUsers) || 0,
+                        totalBooks: Number(totalBooks) || 0,
+                        todayOrders: Number(todayOrders) || 0,
+                        monthlyRevenue: Number(monthlyRevenue) || 0,
+                        growthRate: Number(growthRate) || 0,
+                        newUsers: Number(newUsers) || 0,
+                        soldBooks: Number(soldBooks) || 0
+                    };
+                    $scope.addToast('success', 'Đã tải thống kê tổng quan.');
+                }
+            })
+            .catch(function(err){
+                console.error('Summary error:', err);
+                $scope.addToast('danger', (err && err.data && err.data.message) || 'Không thể tải thống kê.');
+            })
+            .finally(function(){
+                // Always compute monthly revenue from report API to ensure accuracy
+                try {
+                    var now = new Date();
+                    var monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+                    var prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                    var prevMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+
+                    // Current month revenue
+                    BookstoreService.getRevenueReport({ fromDate: formatYMD(monthStart), toDate: formatYMD(now) })
+                        .then(function(r){
+                            var payload = r && r.data && r.data.data;
+                            var currentSum = sumRevenueFromReportPayload(payload);
+                            $scope.stats.monthlyRevenue = currentSum;
+                            return BookstoreService.getRevenueReport({ fromDate: formatYMD(prevMonthStart), toDate: formatYMD(prevMonthEnd) });
+                        })
+                        .then(function(prevRes){
+                            var prevPayload = prevRes && prevRes.data && prevRes.data.data;
+                            var prevSum = sumRevenueFromReportPayload(prevPayload);
+                            var cur = Number($scope.stats.monthlyRevenue) || 0;
+                            var growth = 0;
+                            if (prevSum > 0) {
+                                growth = ((cur - prevSum) / prevSum) * 100;
+                            } else if (cur > 0) {
+                                growth = 100; // from zero to positive => 100%+
+                            } else {
+                                growth = 0;
+                            }
+                            // Round to one decimal place
+                            $scope.stats.growthRate = Math.round(growth * 10) / 10;
+                            return BookstoreService.getAdminTotalUsers();
+                        })
+                        .then(function(usersRes){
+                            var udata = usersRes && usersRes.data && usersRes.data.data;
+                            if (udata && udata.totalUsers != null) {
+                                $scope.stats.totalUsers = Number(udata.totalUsers) || $scope.stats.totalUsers;
+                            }
+                            return BookstoreService.getAdminOrdersToday();
+                        })
+                        .then(function(ordersRes){
+                            var odata = ordersRes && ordersRes.data && ordersRes.data.data;
+                            if (odata && (odata.totalOrdersToday != null)) {
+                                $scope.stats.todayOrders = Number(odata.totalOrdersToday) || $scope.stats.todayOrders;
+                            }
+                        })
+                        .catch(function(e){
+                            console.warn('Monthly revenue via report failed', e);
+                        });
+                } catch(e) { console.warn(e); }
+            });
     };
 
-    // Load recent activities
-    $scope.loadRecentActivities = function() {
-        // Mock data - in real app, this would come from API
-        $scope.recentActivities = [
-            {
-                timestamp: new Date(),
-                user: 'admin@bookstore.com',
-                action: 'Đăng nhập',
-                type: 'success',
-                details: 'Đăng nhập vào hệ thống'
-            },
-            {
-                timestamp: new Date(Date.now() - 300000),
-                user: 'user@example.com',
-                action: 'Mua sách',
-                type: 'info',
-                details: 'Mua 2 cuốn sách'
-            },
-            {
-                timestamp: new Date(Date.now() - 600000),
-                user: 'staff@bookstore.com',
-                action: 'Cập nhật',
-                type: 'warning',
-                details: 'Cập nhật thông tin sách'
-            },
-            {
-                timestamp: new Date(Date.now() - 900000),
-                user: 'user2@example.com',
-                action: 'Đăng ký',
-                type: 'primary',
-                details: 'Tạo tài khoản mới'
-            }
-        ];
+    // (Removed recent activities per request)
+
+    // Load newest books via dedicated API
+    $scope.loadLatestBooks = function() {
+        BookstoreService.getNewestBooks(10)
+            .then(function(response){
+                var list = [];
+                if (response.data && response.data.success && response.data.data && Array.isArray(response.data.data.books)) {
+                    list = response.data.data.books;
+                } else if (response.data && response.data.data && Array.isArray(response.data.data)) {
+                    list = response.data.data;
+                } else if (response.data && Array.isArray(response.data)) {
+                    list = response.data;
+                }
+                $scope.latestBooks = list || [];
+            })
+            .catch(function(error){
+                console.error('Newest books error:', error);
+                $scope.addToast('danger', 'Không thể tải sách mới nhất.');
+            });
     };
 
     // Test API endpoints

@@ -73,9 +73,6 @@
                                     </td>
                                     <td>
                                         <div class="btn-group btn-group-sm">
-                                            <button class="btn btn-outline-info" ng-click="viewCategory(category)" title="Xem chi tiết">
-                                                <i class="bi bi-eye"></i>
-                                            </button>
                                             <button class="btn btn-outline-warning" ng-click="openEditModal(category)" title="Chỉnh sửa">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
@@ -198,3 +195,13 @@
     message="Bạn có chắc chắn muốn xóa danh mục '{{categoryToDelete.name}}'? Hành động này không thể hoàn tác."
     on-confirm="deleteCategory()">
 </confirm-dialog>
+
+<!-- Toasts -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000;">
+    <div class="toast align-items-center text-white bg-{{t.variant}} border-0 mb-2 show" role="alert" aria-live="assertive" aria-atomic="true" ng-repeat="t in toasts">
+        <div class="d-flex">
+            <div class="toast-body">{{t.message}}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" ng-click="toasts.splice($index,1)"></button>
+        </div>
+    </div>
+    </div>

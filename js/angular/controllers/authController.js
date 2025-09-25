@@ -44,9 +44,9 @@ app.controller('LoginController', ['$scope', '$location', '$window', '$rootScope
                             // Create user object with correct structure
                             var user = {
                                 email: response.data.data.email,
-                                roleId: response.data.data.role === 'ADMIN' ? 1 : 
+                                roleId: response.data.data.role === 'ADMIN' ? 3 : 
                                        response.data.data.role === 'SALES_EMPLOYEE' ? 2 :
-                                       response.data.data.role === 'DELIVERY_EMPLOYEE' ? 3 : 4,
+                                       response.data.data.role === 'DELIVERY_EMPLOYEE' ? 4 : 1,
                                 role: response.data.data.role
                             };
                             localStorage.setItem('user', JSON.stringify(user));
@@ -62,13 +62,13 @@ app.controller('LoginController', ['$scope', '$location', '$window', '$rootScope
                             // Redirect based on role with timeout
                             try {
                                 $timeout(function() {
-                                    if (user.roleId === 1) {
+                                    if (user.roleId === 3) {
                                         console.log('Redirecting to admin page');
                                         console.log('Current location before:', $location.path());
                                         $location.path('/admin');
                                         console.log('Current location after:', $location.path());
                                         console.log('Full URL:', $location.url());
-                                    } else if (user.roleId === 2 || user.roleId === 3) {
+                                    } else if (user.roleId === 2 || user.roleId === 4) {
                                         console.log('Redirecting to employee page');
                                         $location.path('/employee');
                                     } else {

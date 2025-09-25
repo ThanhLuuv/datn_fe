@@ -174,12 +174,13 @@
                         <div class="col-lg-8">
                             <div class="mb-3">
                                 <label for="poPublisher" class="form-label">Nhà xuất bản <span class="text-danger">*</span></label>
-                                <select class="form-select" id="poPublisher" ng-model="purchaseOrderData.publisherId" ng-change="onPublisherChange()" required>
+                                <select class="form-select" id="poPublisher" name="publisher" ng-model="purchaseOrderData.publisherId" ng-change="onPublisherChange()" required>
                                     <option value="">Chọn nhà xuất bản</option>
                                     <option ng-repeat="publisher in publishers" value="{{publisher.publisherId}}">
                                         {{publisher.name}}
                                     </option>
                                 </select>
+                                <div class="invalid-feedback d-block" ng-if="purchaseOrderForm.publisher.$touched && purchaseOrderForm.publisher.$error.required">Vui lòng chọn nhà xuất bản.</div>
                             </div>
                             <div class="mb-3">
                                 <label for="poNote" class="form-label">Ghi chú</label>
@@ -225,18 +226,21 @@
                                     <tbody>
                                         <tr ng-repeat="line in purchaseOrderData.lines track by $index">
                                             <td>
-                                                <select class="form-select form-select-sm" ng-model="line.isbn" ng-change="updateLineBook($index)">
+                                                <select class="form-select form-select-sm" ng-model="line.isbn" ng-change="updateLineBook($index)" required>
                                                     <option value="">Chọn sách</option>
                                                     <option ng-repeat="book in getAvailableBooksForLine($index)" value="{{book.isbn}}">
                                                         {{book.title}} - {{book.isbn}}
                                                     </option>
                                                 </select>
+                                                <div class="text-danger small mt-1" ng-if="!line.isbn">Vui lòng chọn sách.</div>
                                             </td>
                                             <td>
-                                                <input type="number" class="form-control form-control-sm" ng-model="line.qtyOrdered" min="1" ng-change="updateLineTotal($index)" number-input>
+                                                <input type="number" class="form-control form-control-sm" ng-model="line.qtyOrdered" min="1" required ng-change="updateLineTotal($index)" number-input>
+                                                <div class="text-danger small mt-1" ng-if="!line.qtyOrdered || line.qtyOrdered < 1">Số lượng phải ≥ 1.</div>
                                             </td>
                                             <td>
-                                                <input type="number" class="form-control form-control-sm" ng-model="line.unitPrice" step="0.01" min="0" ng-change="updateLineTotal($index)" currency-input>
+                                                <input type="number" class="form-control form-control-sm" ng-model="line.unitPrice" step="0.01" min="0" required ng-change="updateLineTotal($index)" currency-input>
+                                                <div class="text-danger small mt-1" ng-if="line.unitPrice == null || line.unitPrice < 0">Đơn giá phải ≥ 0.</div>
                                             </td>
                                             <td>
                                                 <strong>{{line.lineTotal | currency}}</strong>
