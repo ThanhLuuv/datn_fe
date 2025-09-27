@@ -17,16 +17,69 @@
     <link href="css/custom/main.css?v=1.5" rel="stylesheet">
     <link href="css/custom/auth.css?v=1.5" rel="stylesheet">
     <style>
-        /* Tinh chỉnh kích thước chữ ở menu header */
+        /* Enhanced Navbar Styles */
         .navbar .nav-link {
             font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
         }
+        
         .navbar .dropdown-menu .dropdown-item {
             font-size: 0.95rem;
         }
-        /* Giảm nhẹ kích thước chữ brand để đồng đều tổng thể */
+        
         .navbar .brand-text {
-            font-size: 1rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        
+        .cart-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .cart-link:hover {
+            transform: scale(1.05);
+        }
+        
+        .cart-badge {
+            font-size: 0.7rem;
+            min-width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .navbar-nav .nav-link:hover {
+            color: white !important;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        
+        .navbar-nav .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white !important;
+            border-radius: 8px;
+        }
+        
+        /* Mobile Search */
+        @media (max-width: 991px) {
+            .navbar-search {
+                display: block !important;
+                margin: 1rem 0;
+            }
+            
+            .search-input-group {
+                width: 100%;
+            }
         }
     </style>
     
@@ -47,24 +100,32 @@
     <!-- Navigation - Hidden for Admin Pages -->
     <nav class="navbar navbar-expand-lg navbar-dark bookstore-navbar" ng-hide="isAdminPage">
         <div class="container">
+            <!-- Brand -->
             <a class="navbar-brand" href="#!/home">
                 <img src="app/assets/images/logo.png" alt="BookStore Logo" class="navbar-logo">
+                <span class="brand-text">BookStore</span>
             </a>
             
             <!-- Search Bar -->
             <div class="navbar-search d-none d-lg-flex">
                 <div class="search-input-group">
-                    <input type="text" class="form-control search-input" placeholder="Tìm kiếm sách, tác giả..." ng-model="searchQuery" ng-keypress="$event.which === 13 && goSearch()">
+                    <input type="text" 
+                           class="form-control search-input" 
+                           placeholder="Tìm kiếm sách, tác giả..." 
+                           ng-model="searchQuery" 
+                           ng-keypress="$event.which === 13 && goSearch()">
                     <button class="btn btn-search" type="button" ng-click="goSearch()">
                         <i class="bi bi-search"></i>
                     </button>
                 </div>
             </div>
 
+            <!-- Mobile Toggle -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             
+            <!-- Navigation Menu -->
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
@@ -84,22 +145,29 @@
                     </li>
                 </ul>
                 
-                <!-- User Menu -->
+                <!-- User Actions -->
                 <ul class="navbar-nav">
+                    <!-- Cart -->
                     <li class="nav-item me-2">
-                        <a class="nav-link position-relative" href="#!/cart">
-                            <i class="bi bi-cart3 me-1"></i>Giỏ hàng
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" ng-show="cartCount > 0">{{cartCount}}</span>
+                        <a class="nav-link position-relative cart-link" href="#!/cart">
+                            <i class="bi bi-cart3 me-1"></i>
+                            <span class="d-none d-md-inline">Giỏ hàng</span>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-badge" 
+                                  ng-show="cartCount > 0">{{cartCount}}</span>
                         </a>
                     </li>
+                    
+                    <!-- Authentication -->
                     <li class="nav-item" ng-if="!isAuthenticated">
                         <a class="nav-link" href="#!/login">
-                            <i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập
+                            <i class="bi bi-box-arrow-in-right me-1"></i>
+                            <span class="d-none d-md-inline">Đăng nhập</span>
                         </a>
                     </li>
                     <li class="nav-item" ng-if="!isAuthenticated">
                         <a class="nav-link" href="#!/register">
-                            <i class="bi bi-person-plus me-1"></i>Đăng ký
+                            <i class="bi bi-person-plus me-1"></i>
+                            <span class="d-none d-md-inline">Đăng ký</span>
                         </a>
                     </li>
                     <li class="nav-item dropdown" ng-if="isAuthenticated">

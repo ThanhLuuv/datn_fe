@@ -1,84 +1,163 @@
+<!-- Cart Page -->
 <div class="cart-page py-4">
     <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4>Giỏ hàng</h4>
-            <a href="#!/home" class="btn btn-outline-secondary btn-sm">Tiếp tục mua sắm</a>
-        </div>
-
-        <div class="row" ng-if="cart.items.length === 0">
-            <div class="col-12 text-center text-muted py-5">
-                Giỏ hàng trống
+        <!-- Header -->
+        <div class="cart-header mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="cart-title mb-1">
+                        <i class="bi bi-cart3 me-2"></i>Giỏ hàng của bạn
+                    </h2>
+                    <p class="text-muted mb-0">{{ cart.items.length }} sản phẩm trong giỏ hàng</p>
+                </div>
+                <a href="#!/home" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-left me-2"></i>Tiếp tục mua sắm
+                </a>
             </div>
         </div>
 
+        <!-- Empty Cart -->
+        <div class="row" ng-if="cart.items.length === 0">
+            <div class="col-12">
+                <div class="empty-cart text-center py-5">
+                    <div class="empty-cart-icon mb-4">
+                        <i class="bi bi-cart-x text-muted" style="font-size: 4rem;"></i>
+                    </div>
+                    <h4 class="text-muted mb-3">Giỏ hàng trống</h4>
+                    <p class="text-muted mb-4">Bạn chưa có sản phẩm nào trong giỏ hàng</p>
+                    <a href="#!/home" class="btn btn-primary btn-lg">
+                        <i class="bi bi-shop me-2"></i>Bắt đầu mua sắm
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cart Content -->
         <div class="row g-4" ng-if="cart.items.length > 0">
+            <!-- Cart Items -->
             <div class="col-lg-8">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table align-middle">
-                                <thead>
-                                    <tr>
-                                        <th>Sách</th>
-                                        <th class="text-end">Đơn giá</th>
-                                        <th class="text-center">Số lượng</th>
-                                        <th class="text-end">Thành tiền</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr ng-repeat="it in cart.items">
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <img ng-src="{{it.imageUrl || 'app/assets/images/book-placeholder.jpg'}}" alt="{{it.title}}" style="width:50px;height:50px;object-fit:cover" class="me-2">
-                                                <div>
-                                                    <div class="fw-semibold">{{it.title}}</div>
-                                                    <small class="text-muted">ISBN: {{it.isbn}}</small>
+                <div class="cart-items">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white border-bottom">
+                            <h5 class="mb-0">
+                                <i class="bi bi-list-ul me-2"></i>Sản phẩm trong giỏ
+                            </h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="border-0 py-3 px-4">Sản phẩm</th>
+                                            <th class="border-0 py-3 text-center">Đơn giá</th>
+                                            <th class="border-0 py-3 text-center">Số lượng</th>
+                                            <th class="border-0 py-3 text-end">Thành tiền</th>
+                                            <th class="border-0 py-3 text-center" style="width: 60px;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="item in cart.items" class="cart-item-row">
+                                            <td class="py-4 px-4">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="cart-item-image me-3">
+                                                        <img ng-src="{{ item.imageUrl || 'https://via.placeholder.com/80x100' }}" 
+                                                             alt="{{ item.title }}" 
+                                                             class="rounded shadow-sm"
+                                                             style="width: 80px; height: 100px; object-fit: cover;">
+                                                    </div>
+                                                    <div class="cart-item-info">
+                                                        <h6 class="cart-item-title mb-1">{{ item.title }}</h6>
+                                                        <small class="text-muted">ISBN: {{ item.isbn }}</small>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td class="text-end">{{it.unitPrice | currency:'':0}} VNĐ</td>
-                                        <td class="text-center">
-                                            <div class="input-group input-group-sm" style="width:120px;margin:0 auto;">
-                                                <button class="btn btn-outline-secondary" type="button" ng-click="decrement(it)">-</button>
-                                                <input type="number" min="1" class="form-control text-center" ng-model="it.qty" ng-change="updateQty(it)">
-                                                <button class="btn btn-outline-secondary" type="button" ng-click="increment(it)">+</button>
-                                            </div>
-                                        </td>
-                                        <td class="text-end">{{(it.unitPrice * it.qty) | currency:'':0}} VNĐ</td>
-                                        <td class="text-end">
-                                            <button class="btn btn-sm btn-outline-danger" ng-click="remove(it)"><i class="bi bi-trash"></i></button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                                            </td>
+                                            <td class="py-4 text-center">
+                                                <span class="cart-item-price">{{ item.unitPrice | currency:'':0 }} VNĐ</span>
+                                            </td>
+                                            <td class="py-4 text-center">
+                                                <div class="quantity-controls">
+                                                    <div class="input-group" style="width: 120px; margin: 0 auto;">
+                                                        <button class="btn btn-outline-secondary btn-sm" 
+                                                                type="button" 
+                                                                ng-click="decrement(item)"
+                                                                ng-disabled="item.qty <= 1">
+                                                            <i class="bi bi-dash"></i>
+                                                        </button>
+                                                        <input type="number" 
+                                                               min="1" 
+                                                               class="form-control form-control-sm text-center" 
+                                                               ng-model="item.qty" 
+                                                               ng-change="updateQty(item)"
+                                                               style="border-left: 0; border-right: 0;">
+                                                        <button class="btn btn-outline-secondary btn-sm" 
+                                                                type="button" 
+                                                                ng-click="increment(item)">
+                                                            <i class="bi bi-plus"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="py-4 text-end">
+                                                <span class="cart-item-total fw-bold text-primary">
+                                                    {{ (item.unitPrice * item.qty) | currency:'':0 }} VNĐ
+                                                </span>
+                                            </td>
+                                            <td class="py-4 text-center">
+                                                <button class="btn btn-sm btn-outline-danger" 
+                                                        ng-click="remove(item)"
+                                                        title="Xóa sản phẩm">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Order Summary -->
             <div class="col-lg-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h6 class="mb-3">Tóm tắt đơn hàng</h6>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Tạm tính</span>
-                            <span>{{cart.subtotal | currency:'':0}} VNĐ</span>
+                <div class="order-summary">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-receipt me-2"></i>Tóm tắt đơn hàng
+                            </h5>
                         </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Thuế (8%)</span>
-                            <span>{{tax | currency:'':0}} VNĐ</span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Phí vận chuyển</span>
-                            <span>{{shippingFee | currency:'':0}} VNĐ</span>
-                        </div>
-                        <hr>
-                        <div class="d-flex justify-content-between fw-bold">
-                            <span>Tổng cộng</span>
-                            <span>{{grandTotal | currency:'':0}} VNĐ</span>
-                        </div>
-                        <div class="mt-3">
-                            <a href="#!/checkout" class="btn btn-primary w-100">Thanh toán</a>
+                        <div class="card-body">
+                            <div class="summary-item d-flex justify-content-between mb-3">
+                                <span class="text-muted">Tạm tính ({{ cart.items.length }} sản phẩm)</span>
+                                <span class="fw-semibold">{{ cart.subtotal | currency:'':0 }} VNĐ</span>
+                            </div>
+                            
+                            <div class="summary-item d-flex justify-content-between mb-3">
+                                <span class="text-muted">Thuế VAT (8%)</span>
+                                <span class="fw-semibold">{{ tax | currency:'':0 }} VNĐ</span>
+                            </div>
+                            
+                            <div class="summary-item d-flex justify-content-between mb-3">
+                                <span class="text-muted">Phí vận chuyển</span>
+                                <span class="fw-semibold">{{ shippingFee | currency:'':0 }} VNĐ</span>
+                            </div>
+                            
+                            <hr class="my-3">
+                            
+                            <div class="summary-total d-flex justify-content-between mb-4">
+                                <span class="fs-5 fw-bold">Tổng cộng</span>
+                                <span class="fs-5 fw-bold text-primary">{{ grandTotal | currency:'':0 }} VNĐ</span>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <a href="#!/checkout" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-credit-card me-2"></i>Tiến hành thanh toán
+                                </a>
+                                <a href="#!/home" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left me-2"></i>Tiếp tục mua sắm
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -87,3 +166,122 @@
     </div>
 </div>
 
+<style>
+.cart-page {
+    background-color: var(--gray-50);
+    min-height: calc(100vh - 60px);
+}
+
+.cart-header {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
+.cart-title {
+    color: var(--gray-800);
+    font-weight: 700;
+}
+
+.empty-cart {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.empty-cart-icon {
+    opacity: 0.5;
+}
+
+.cart-items .card {
+    border: none;
+    border-radius: 12px;
+}
+
+.cart-item-row:hover {
+    background-color: var(--gray-50);
+}
+
+.cart-item-image img {
+    transition: transform 0.3s ease;
+}
+
+.cart-item-row:hover .cart-item-image img {
+    transform: scale(1.05);
+}
+
+.cart-item-title {
+    color: var(--gray-800);
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.cart-item-price {
+    font-weight: 600;
+    color: var(--gray-700);
+}
+
+.cart-item-total {
+    font-size: 1.1rem;
+}
+
+.quantity-controls .input-group {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.quantity-controls .btn {
+    border-radius: 0;
+    border-color: var(--gray-300);
+}
+
+.quantity-controls .form-control {
+    border-radius: 0;
+    border-color: var(--gray-300);
+    font-weight: 600;
+}
+
+.quantity-controls .form-control:focus {
+    box-shadow: none;
+    border-color: var(--primary-color);
+}
+
+.order-summary .card {
+    border: none;
+    border-radius: 12px;
+}
+
+.summary-item {
+    padding: 0.5rem 0;
+}
+
+.summary-total {
+    padding: 1rem 0;
+    border-top: 2px solid var(--gray-200);
+    margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+    .cart-header {
+        padding: 1rem;
+    }
+    
+    .cart-title {
+        font-size: 1.5rem;
+    }
+    
+    .cart-item-image img {
+        width: 60px !important;
+        height: 75px !important;
+    }
+    
+    .cart-item-title {
+        font-size: 0.9rem;
+    }
+    
+    .quantity-controls .input-group {
+        width: 100px !important;
+    }
+}
+</style>

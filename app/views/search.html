@@ -1,60 +1,297 @@
+<!-- Search Page -->
 <div class="search-page py-4">
     <div class="container">
-        <div class="row mb-3">
-            <div class="col-12 d-flex align-items-center">
-                <h4 class="mb-0">Kết quả tìm kiếm</h4>
-                <span class="ms-2 text-muted" ng-if="query">cho "{{query}}"</span>
+        <!-- Search Header -->
+        <div class="search-header mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="search-title mb-1">
+                        <i class="bi bi-search me-2"></i>Tìm kiếm sách
+                    </h2>
+                    <p class="text-muted mb-0" ng-if="query">Kết quả tìm kiếm cho "{{ query }}"</p>
+                    <p class="text-muted mb-0" ng-if="!query">Nhập từ khóa để tìm kiếm sách</p>
+                </div>
+                <div class="search-stats" ng-if="loaded && query">
+                    <span class="badge bg-primary fs-6 px-3 py-2">
+                        {{ total }} kết quả
+                    </span>
+                </div>
             </div>
         </div>
 
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <input type="text" class="form-control" placeholder="Nhập từ khóa..." ng-model="query" ng-keypress="$event.which === 13 && doSearch()">
-            </div>
-            <div class="col-md-2">
-                <button class="btn btn-primary w-100" ng-click="doSearch()">
-                    <i class="bi bi-search me-1"></i>Tìm kiếm
-                </button>
-            </div>
-        </div>
-
-        <div class="row g-4" ng-if="results.length > 0">
-            <div class="col-lg-3 col-md-4 col-sm-6" ng-repeat="book in results">
-                <div class="book-card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
-                     title="<strong>{{book.title}}</strong><br>Giá: {{book.unitPrice | currency:'':0}} VNĐ">
-                    <div class="book-image">
-                        <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.jpg'}}" alt="{{book.title}}" class="img-fluid">
-                    </div>
-                    <div class="book-info">
-                        <h6 class="book-title">{{book.title}}</h6>
-                        <div class="price-row" ng-if="hasPromo(book)">
-                            <span class="price-new">{{getFinalPrice(book) | currency:'':0}} VNĐ</span>
-                            <span class="price-old">{{book.unitPrice | currency:'':0}} VNĐ</span>
+        <!-- Search Form -->
+        <div class="search-form mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <div class="search-input-group">
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       placeholder="Nhập tên sách, tác giả hoặc từ khóa..." 
+                                       ng-model="query" 
+                                       ng-keypress="$event.which === 13 && doSearch()"
+                                       autofocus>
+                                <button class="btn btn-primary btn-lg" ng-click="doSearch()">
+                                    <i class="bi bi-search me-2"></i>Tìm kiếm
+                                </button>
+                            </div>
                         </div>
-                        <p class="book-price" ng-if="!hasPromo(book)">{{book.unitPrice | currency:'':0}} VNĐ</p>
-                        <div class="mt-2">
-                            <button class="btn btn-sm btn-primary" ng-click="addToCart(book)">
-                                <i class="bi bi-cart-plus me-1"></i>Thêm vào giỏ
-                            </button>
+                        <div class="col-md-4">
+                            <div class="search-filters">
+                                <select class="form-select form-select-lg" ng-model="sortBy" ng-change="doSearch()">
+                                    <option value="title">Sắp xếp theo tên</option>
+                                    <option value="price_asc">Giá thấp đến cao</option>
+                                    <option value="price_desc">Giá cao đến thấp</option>
+                                    <option value="newest">Mới nhất</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="row" ng-if="results.length === 0 && loaded">
-            <div class="col-12 text-center text-muted">
-                Không có kết quả phù hợp
+        <!-- Loading State -->
+        <div class="text-center py-5" ng-if="loading">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Đang tìm kiếm...</span>
+            </div>
+            <p class="mt-3 text-muted">Đang tìm kiếm sách...</p>
+        </div>
+
+        <!-- Search Results -->
+        <div class="search-results" ng-if="!loading && results.length > 0">
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-4 col-sm-6" ng-repeat="book in results">
+                    <div class="book-card" 
+                         data-bs-toggle="tooltip" 
+                         data-bs-placement="top" 
+                         data-bs-html="true"
+                         title="<strong>{{book.title}}</strong><br>Giá: {{book.unitPrice | currency:'':0}} VNĐ<br>ISBN: {{book.isbn}}">
+                        <div class="book-image">
+                            <img ng-src="{{book.imageUrl || 'https://via.placeholder.com/200x250'}}" 
+                                 alt="{{book.title}}" 
+                                 class="img-fluid">
+                            <div class="book-badge">
+                                <span class="badge bg-info">Tìm thấy</span>
+                            </div>
+                        </div>
+                        <div class="book-info">
+                            <h6 class="book-title">{{book.title}}</h6>
+                            <div class="book-meta mb-2">
+                                <small class="text-muted">ISBN: {{book.isbn}}</small>
+                            </div>
+                            <div class="price-row" ng-if="hasPromo(book)">
+                                <span class="price-new">{{getFinalPrice(book) | currency:'':0}} VNĐ</span>
+                                <span class="price-old">{{book.unitPrice | currency:'':0}} VNĐ</span>
+                            </div>
+                            <p class="book-price" ng-if="!hasPromo(book)">{{book.unitPrice | currency:'':0}} VNĐ</p>
+                            <div class="book-actions mt-3">
+                                <button class="btn btn-sm btn-primary w-100" ng-click="addToCart(book)">
+                                    <i class="bi bi-cart-plus me-1"></i>Thêm vào giỏ
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="row mt-4" ng-if="total > pageSize">
-            <div class="col-12 d-flex justify-content-center gap-2">
-                <button class="btn btn-outline-secondary" ng-disabled="page === 1" ng-click="goPage(page - 1)">Trước</button>
-                <span class="align-self-center">Trang {{page}} / {{Math.ceil(total / pageSize)}}</span>
-                <button class="btn btn-outline-secondary" ng-disabled="page >= total / pageSize" ng-click="goPage(page + 1)">Sau</button>
+        <!-- No Results -->
+        <div class="no-results" ng-if="results.length === 0 && loaded && query">
+            <div class="text-center py-5">
+                <div class="no-results-icon mb-4">
+                    <i class="bi bi-search text-muted" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="text-muted mb-3">Không tìm thấy kết quả</h4>
+                <p class="text-muted mb-4">Không có sách nào phù hợp với từ khóa "{{ query }}"</p>
+                <div class="suggestions">
+                    <p class="text-muted mb-2">Gợi ý:</p>
+                    <ul class="list-unstyled text-muted">
+                        <li>• Kiểm tra lại chính tả</li>
+                        <li>• Thử từ khóa khác</li>
+                        <li>• Sử dụng từ khóa ngắn gọn hơn</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-section mt-5" ng-if="total > pageSize">
+            <nav aria-label="Search pagination">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" ng-class="{disabled: page === 1}">
+                        <button class="page-link" ng-click="goPage(page - 1)" ng-disabled="page === 1">
+                            <i class="bi bi-chevron-left"></i> Trước
+                        </button>
+                    </li>
+                    
+                    <li class="page-item" ng-repeat="p in getPageNumbers()" ng-class="{active: p === page}">
+                        <button class="page-link" ng-click="goPage(p)">{{ p }}</button>
+                    </li>
+                    
+                    <li class="page-item" ng-class="{disabled: page >= Math.ceil(total / pageSize)}">
+                        <button class="page-link" ng-click="goPage(page + 1)" ng-disabled="page >= Math.ceil(total / pageSize)">
+                            Sau <i class="bi bi-chevron-right"></i>
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="pagination-info text-center mt-3">
+                <small class="text-muted">
+                    Hiển thị {{ (page - 1) * pageSize + 1 }} - {{ Math.min(page * pageSize, total) }} 
+                    trong tổng số {{ total }} kết quả
+                </small>
             </div>
         </div>
     </div>
 </div>
 
+<style>
+.search-page {
+    background-color: var(--gray-50);
+    min-height: calc(100vh - 60px);
+}
+
+.search-header {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
+.search-title {
+    color: var(--gray-800);
+    font-weight: 700;
+}
+
+.search-form .card {
+    border: none;
+    border-radius: 12px;
+}
+
+.search-input-group {
+    display: flex;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.search-input-group .form-control {
+    border-radius: 12px 0 0 12px;
+    border-right: none;
+    padding: 0.75rem 1rem;
+}
+
+.search-input-group .form-control:focus {
+    box-shadow: none;
+    border-color: var(--primary-color);
+}
+
+.search-input-group .btn {
+    border-radius: 0 12px 12px 0;
+    border-left: none;
+    padding: 0.75rem 1.5rem;
+}
+
+.search-filters .form-select {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.search-results .book-card {
+    transition: all 0.3s ease;
+}
+
+.search-results .book-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.book-actions .btn {
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.no-results {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.no-results-icon {
+    opacity: 0.5;
+}
+
+.suggestions {
+    background: var(--gray-50);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.pagination-section {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
+.pagination .page-link {
+    border-radius: 8px;
+    margin: 0 2px;
+    border: 1px solid var(--gray-300);
+    color: var(--gray-700);
+    font-weight: 500;
+}
+
+.pagination .page-link:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.pagination .page-item.disabled .page-link {
+    color: var(--gray-400);
+    background-color: var(--gray-100);
+}
+
+.pagination-info {
+    color: var(--gray-600);
+}
+
+@media (max-width: 768px) {
+    .search-header {
+        padding: 1rem;
+    }
+    
+    .search-title {
+        font-size: 1.5rem;
+    }
+    
+    .search-input-group {
+        flex-direction: column;
+    }
+    
+    .search-input-group .form-control,
+    .search-input-group .btn {
+        border-radius: 12px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .search-input-group .btn {
+        margin-bottom: 0;
+    }
+    
+    .pagination-section {
+        padding: 1rem;
+    }
+}
+</style>
