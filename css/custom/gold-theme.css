@@ -1,0 +1,378 @@
+/* ==========================================
+   GOLD THEME - Màu vàng đặc trưng #FFD700
+   ========================================== */
+
+:root {
+    --gold-primary: #FFD700;
+    --gold-light: #FFF8DC;
+    --gold-dark: #B8860B;
+    --gold-accent: #DAA520;
+    --gold-shadow: rgba(255, 215, 0, 0.3);
+    --gold-gradient: linear-gradient(135deg, #FFD700, #DAA520);
+    --gold-gradient-light: linear-gradient(135deg, #FFF8DC, #FFD700);
+}
+
+/* ========== MAIN NAVIGATION ========== */
+.bookstore-navbar {
+    background: var(--gold-gradient) !important;
+    border-bottom: 3px solid var(--gold-dark);
+}
+
+.navbar-brand .brand-text {
+    color: #2c3e50 !important;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+.nav-link {
+    color: #2c3e50 !important;
+    font-weight: 500;
+}
+
+.nav-link:hover {
+    background-color: rgba(44, 62, 80, 0.1) !important;
+    border-radius: 8px;
+}
+
+/* ========== SEARCH BAR ========== */
+.search-input {
+    border: 2px solid var(--gold-primary) !important;
+    background: white;
+}
+
+.search-input:focus {
+    border-color: var(--gold-dark) !important;
+    box-shadow: 0 0 0 0.2rem rgba(255, 215, 0, 0.25) !important;
+}
+
+.btn-search {
+    background: var(--gold-dark) !important;}
+.btn-search:hover {
+    background: var(--gold-accent) !important;}
+}
+
+/* ========== SECTIONS & HEADINGS ========== */
+.section-title {
+    color: var(--gold-dark);
+    font-weight: 700;
+}
+
+.text-gradient {
+    background: var(--gold-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+}
+
+/* ========== BOOK CARDS ========== */
+.book-card {
+    border: 2px solid var(--gold-primary);
+    background: linear-gradient(145deg, #ffffff, var(--gold-light));
+    transition: all 0.3s ease;
+}
+
+.book-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px var(--gold-shadow);
+    border-color: var(--gold-dark);
+}
+
+.book-image {
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+}
+
+/* ========== RATING STARS ========== */
+.rating-stars i.bi-star-fill {
+    color: var(--gold-primary) !important;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+.rating-stars i.bi-star {
+    color: #e9ecef;
+}
+
+/* ========== BADGES ========== */
+.book-badge .badge {
+    background: var(--gold-gradient) !important;
+    color: #2c3e50 !important;
+    font-weight: 600;
+    border: 1px solid var(--gold-dark);
+}
+
+.discount-badge {
+    background: var(--gold-gradient);
+    color: #2c3e50 !important;
+    border: 1px solid var(--gold-dark);
+    font-weight: 700;
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
+}
+
+/* ========== PRICING ========== */
+.price-new {
+    color: var(--gold-dark) !important;
+    font-weight: 700;
+}
+
+.price-old {
+    color: #6c757d;
+    text-decoration: line-through;
+}
+
+.price-row {
+    margin: 8px 0;
+}
+
+/* ========== BUTTONS ========== */
+.btn-primary {
+    background: var(--gold-gradient) !important;
+    border: 2px solid var(--gold-dark) !important;
+    color: #2c3e50 !important;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: var(--gold-dark) !important;
+    border-color: var(--gold-accent) !important;
+    color: white !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px var(--gold-shadow);
+}
+
+.btn-outline-primary {
+    border: 2px solid var(--gold-primary) !important;
+    color: var(--gold-dark) !important;
+    font-weight: 600;
+}
+
+.btn-outline-primary:hover {
+    background: var(--gold-primary) !important;
+    border-color: var(--gold-dark) !important;
+    color: #2c3e50 !important;
+}
+
+/* ========== FEATURE CARDS ========== */
+.feature-card {
+    background: white;
+    border: 2px solid var(--gold-primary);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+    background: var(--gold-light);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--gold-shadow);
+}
+
+.feature-icon {
+    background: var(--gold-gradient);
+    color: #2c3e50;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+}
+
+.feature-icon i {
+    font-size: 24px;
+}
+
+/* ========== STATS CARDS ========== */
+.stat-card {
+    background: white;
+    border: 2px solid var(--gold-primary);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    background: var(--gold-light);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px var(--gold-shadow);
+}
+
+.stat-icon {
+    background: var(--gold-gradient);
+    color: #2c3e50;
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+}
+
+.stat-icon i {
+    font-size: 32px;
+}
+
+.stat-number {
+    color: var(--gold-dark);
+    font-weight: 700;
+}
+
+/* ========== BACKGROUND SECTIONS ========== */
+.best-sellers-section {
+    background: linear-gradient(145deg, var(--gold-light), white) !important;
+}
+
+.new-books-section {
+    background: linear-gradient(145deg, white, var(--gold-light)) !important;
+}
+
+/* ========== CATEGORY CARDS ========== */
+.category-card {
+    background: white;
+    border: 2px solid var(--gold-primary);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.category-card:hover {
+    background: var(--gold-light);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--gold-shadow);
+}
+
+.category-icon {
+    background: var(--gold-gradient);
+    color: #2c3e50;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+}
+
+.category-icon i {
+    font-size: 24px;
+}
+
+/* ========== CTA SECTION ========== */
+.cta-section {
+    background: var(--gold-gradient) !important;
+    color: #2c3e50;
+}
+
+.cta-title {
+    color: #2c3e50 !important;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-outline-light {
+    border: 2px solid #2c3e50 !important;
+    color: #2c3e50 !important;
+}
+
+.btn-outline-light:hover {
+    background: #2c3e50 !important;
+    color: white !important;
+}
+
+/* ========== HERO SECTION ========== */
+.hero-section {
+    background: linear-gradient(135deg, var(--gold-light), white);
+}
+
+.book-stack {
+    background: var(--gold-gradient);
+    border: 3px solid var(--gold-dark);
+}
+
+.book-stack .book {
+    background: var(--gold-gradient);
+    border: 2px solid var(--gold-dark);
+}
+
+/* ========== CART & NOTIFICATIONS ========== */
+.cart-badge {
+    background: var(--gold-dark) !important;
+    color: white !important;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+    .section-title {
+        font-size: 1.6rem;
+    }
+    
+    .hero-title {
+        font-size: 1.8rem !important;
+    }
+    
+    .feature-icon,
+    .category-icon {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .feature-icon i,
+    .category-icon i {
+        font-size: 20px;
+    }
+}
+
+/* ========== LOADING STATES ========== */
+.book-placeholder {
+    background: var(--gold-light);
+    border: 2px solid var(--gold-primary);
+}
+
+.loading-spinner {
+    border-top-color: var(--gold-primary);
+}
+
+/* ========== SCROLL ANIMATIONS ========== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.book-card,
+.feature-card,
+.stat-card,
+.category-card {
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+/* Delay for staggered animation */
+.book-card:nth-child(1) { animation-delay: 0.1s; }
+.book-card:nth-child(2) { animation-delay: 0.2s; }
+.book-card:nth-child(3) { animation-delay: 0.3s; }
+.book-card:nth-child(4) { animation-delay: 0.4s; }
+
+/* ========== SPECIAL EFFECTS ========== */
+.glow-effect {
+    box-shadow: 0 0 20px var(--gold-shadow);
+}
+
+.pulse-gold {
+    animation: pulseGold 2s infinite;
+}
+
+@keyframes pulseGold {
+    0% { box-shadow: 0 0 0 0 var(--gold-shadow); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 215, 0, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+}
+
+/* Apply to important elements */
+.best-sellers-section .section-title,
+.new-books-section .section-title {
+    animation: pulseGold 3s infinite;
+}

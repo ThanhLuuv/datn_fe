@@ -25,7 +25,31 @@ app.controller('HomeController', ['$scope', '$http', 'DataService', 'BookstoreSe
         if (priceByAmount !== null) candidates.push(priceByAmount);
         return Math.min.apply(null, candidates);
     };
+    
     $scope.hasPromo = function(book) { return $scope.getFinalPrice(book) < (book.unitPrice || 0); };
+    
+    // Calculate discount percentage
+    $scope.calculateDiscountPercent = function(book) {
+        if (book && book.unitPrice > 0) {
+            var finalPrice = $scope.getFinalPrice(book);
+            var discount = Math.round(((book.unitPrice - finalPrice) / book.unitPrice) * 100);
+            return discount;
+        }
+        return 0;
+    };
+    
+    // Rating functions
+    $scope.getStarArray = function(rating) {
+        if (!rating) return [];
+        var filledStars = Math.floor(parseFloat(rating));
+        return new Array(filledStars);
+    };
+    
+    $scope.getEmptyStarArray = function(rating) {
+        if (!rating) return new Array(5);
+        var filledStars = Math.floor(parseFloat(rating));
+        return new Array(5 - filledStars);
+    };
 
     $scope.addToCart = function(book) {
         if (!book) return;
@@ -100,6 +124,9 @@ app.controller('HomeController', ['$scope', '$http', 'DataService', 'BookstoreSe
         BookstoreService.getBestSellers(30, 10)
             .then(function(res) {
                 $scope.bestSellers = (res.data && res.data.data) ? res.data.data : [];
+                
+                // Chỉ sử dụng dữ liệu thật từ API: không inject mock rating/review/promotion
+                
                 // fetch effective prices in parallel (best effort)
                 $scope.bestSellers.forEach(function(b){
                     BookstoreService.getEffectivePrice(b.isbn).then(function(r){
@@ -125,6 +152,9 @@ app.controller('HomeController', ['$scope', '$http', 'DataService', 'BookstoreSe
         BookstoreService.getNewBooks(30, 10)
             .then(function(res) {
                 $scope.newBooks = (res.data && res.data.data) ? res.data.data : [];
+                
+                // Chỉ sử dụng dữ liệu thật từ API: không inject mock rating/review/promotion
+                
                 $scope.newBooks.forEach(function(b){
                     BookstoreService.getEffectivePrice(b.isbn).then(function(r){
                         var d = r.data && (r.data.data || r.data);

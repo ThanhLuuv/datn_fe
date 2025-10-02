@@ -35,8 +35,8 @@
                                     <i class="bi bi-star-fill" ng-repeat="star in getStarArray(book.rating)" style="color: #ffc107;"></i>
                                     <i class="bi bi-star" ng-repeat="star in getEmptyStarArray(book.rating)" style="color: #e9ecef;"></i>
                                 </span>
-                                <span class="rating-text ms-1">{{book.rating || 'Chưa có đánh giá'}}</span>
-                                <small class="text-muted ms-2" ng-if="book.totalReviews">({{book.totalReviews}})</small>
+                                <span class="rating-text ms-1">{{book.rating || 'Chưa đánh giá'}}</span>
+                                <small class="text-muted ms-2">({{book.totalReviews || 0}})</small>
                             </div>
                             
                             <!-- Price -->
@@ -50,7 +50,7 @@
                             <!-- Stats -->
                             <div class="book-stats">
                                 <small class="text-muted">
-                                    <i class="bi bi-graph-up me-1"></i>{{book.totalSold ? (book.totalSold + ' cuốn đã bán') : 'Chưa có đơn hàng nào'}}
+                                    <i class="bi bi-graph-up me-1"></i>{{book.totalSold}} cuốn đã bán
                                 </small>
                             </div>
                             
@@ -126,8 +126,8 @@
                                     <i class="bi bi-star-fill" ng-repeat="star in getStarArray(book.rating)" style="color: #ffc107;"></i>
                                     <i class="bi bi-star" ng-repeat="star in getEmptyStarArray(book.rating)" style="color: #e9ecef;"></i>
                                 </span>
-                                <span class="rating-text ms-1">{{book.rating || 'Chưa có đánh giá'}}</span>
-                                <small class="text-muted ms-2" ng-if="book.totalReviews">({{book.totalReviews}})</small>
+                                <span class="rating-text ms-1">{{book.rating || 'Chưa đánh giá'}}</span>
+                                <small class="text-muted ms-2">({{book.totalReviews || 0}})</small>
                             </div>
                             
                             <!-- Price -->
@@ -141,7 +141,7 @@
                             <!-- Stats -->
                             <div class="book-stats">
                                 <small class="text-muted">
-                                    <i class="bi bi-graph-up me-1"></i>{{book.totalSold ? (book.totalSold + ' cuốn đã bán') : 'Chưa có đơn hàng nào'}}
+                                    <i class="bi bi-graph-up me-1"></i>{{book.totalSold}} cuốn đã bán
                                 </small>
                             </div>
                             

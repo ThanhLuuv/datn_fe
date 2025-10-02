@@ -1,0 +1,316 @@
+/* ==========================================
+   GOLD THEME ENHANCEMENTS - Màu vàng mềm mại
+   ========================================== */
+
+/* Điều chỉnh màu vàng để phù hợp với trang web */
+:root {
+    --gold-primary: #FFD700;
+    --gold-secondary: #F4D03F;
+    --gold-tertiary: #F7DC6F;
+    --gold-light: #FFFACD;
+    --gold-dark: #DAA520;
+    --gold-accent: #B8860B;
+    --gold-shadow: rgba(255, 215, 0, 0.2);
+    --gold-gradient: linear-gradient(135deg, #FFF8DC, #FFD700, #F4D03F);
+    --gold-gradient-button: linear-gradient(135deg, #FFD700, #DAA520);
+    --gold-gradient-soft: linear-gradient(135deg, #FFFACD, #F7DC6F);
+}
+
+/* ========== NAVBAR IMPROVEMENTS ========== */
+.bookstore-navbar {
+    background: linear-gradient(135deg, #FFF6CC, #FFE066, #FFC300) !important;
+    border-bottom: 1px solid rgba(184, 134, 11, 0.35);
+    box-shadow: 0 2px 12px rgba(184, 134, 11, 0.15);
+}
+
+.navbar-brand .brand-text {
+    color: #2c3e50 !important;
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+    font-weight: 700;
+}
+
+/* Clear dropdown contrast */
+.navbar .dropdown-menu {
+    background: linear-gradient(180deg, #FFFDF0, #FFF4C2) !important;
+    border: 1px solid rgba(184, 134, 11, 0.35) !important;
+}
+
+.navbar .dropdown-item:hover,
+.navbar .dropdown-item:focus,
+.navbar .dropdown-item.active {
+    background: rgba(255, 208, 0, 0.18) !important;
+}
+
+/* ========== SECTION BACKGROUNDS ========== */
+.bestsellers-section {
+    background: linear-gradient(to bottom, var(--gold-light), white) !important;
+}
+
+.new-books-section {
+    background: linear-gradient(to bottom, white, var(--gold-light)) !important;
+}
+
+.categories-section {
+    background: linear-gradient(to bottom, var(--gold-light), white) !important;
+}
+
+.features-section {
+    background: linear-gradient(to bottom, white, var(--gold-light)) !important;
+}
+
+.stats-section {
+    background: var(--gold-light) !important;
+}
+
+/* ========== TEXT COLORS ========== */
+.section-title {
+    color: var(--gold-dark) !important;
+    font-weight: 700;
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+}
+
+.section-subtitle {
+    color: var(--gold-accent) !important;
+    font-weight: 500;
+}
+
+.text-gradient {
+    background: var(--gold-gradient-button);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+}
+
+/* ========== FEATURE ICONS ========== */
+.feature-icon {
+    background: var(--gold-gradient-button) !important;
+    color: white !important;
+    box-shadow: 0 4px 15px var(--gold-shadow);
+    border: 2px solid var(--gold-dark);
+}
+
+.category-icon {
+    background: var(--gold-gradient-button) !important;
+    color: white !important;
+    box-shadow: 0 4px 15px var(--gold-shadow);
+    border: 2px solid var(--gold-dark);
+}
+
+.stat-icon {
+    background: var(--gold-gradient-button) !important;
+    color: white !important;
+    box-shadow: 0 4px 15px var(--gold-shadow);
+    border: 2px solid var(--gold-dark);
+}
+
+/* ========== BOOK CARDS ENHANCED ========== */
+.book-card {
+    background: linear-gradient(145deg, #ffffff, var(--gold-light)) !important;
+    border: 2px solid var(--gold-primary) !important;
+    box-shadow: 0 4px 15px var(--gold-shadow);
+    transition: all 0.3s ease;
+}
+
+.book-card:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 8px 25px var(--gold-shadow) !important;
+    border-color: var(--gold-dark) !important;
+}
+
+/* ========== RATING IMPROVEMENTS ========== */
+.rating-stars i.bi-star-fill {
+    color: var(--gold-primary) !important;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    filter: drop-shadow(1px 1px 2px rgba(255, 215, 0, 0.3));
+}
+
+/* ========== PRICE DISPLAYS ========== */
+.price-new {
+    color: var(--gold-dark) !important;
+    font-weight: 700;
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+}
+
+/* ========== BUTTONS FINAL ========== */
+.btn-primary {
+    background: var(--gold-gradient-button) !important;
+    border: 2px solid var(--gold-accent) !important;
+    color: white !important;
+    font-weight: 600;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 15px var(--gold-shadow);
+}
+
+.btn-primary:hover {
+    background: var(--gold-accent) !important;
+    border-color: var(--gold-dark) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px var(--gold-shadow) !important;
+}
+
+/* ========== BADGES CONSISTENT ========== */
+.badge.bg-danger,
+.badge.bg-blue,
+.badge.bg-primary,
+.badge.bg-info,
+.cart-badge {
+    background: var(--gold-gradient-button) !important;
+    color: white !important;
+    border: 1px solid var(--gold-dark);
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+.badge.bg-success {
+    background: var(--gold-gradient-button) !important;
+    color: white !important;
+    border: 1px solid var(--gold-dark);
+}
+
+.discount-badge {
+    background: var(--gold-gradient-button) !important;
+    color: white !important;
+    border: 1px solid var(--gold-dark);
+    font-weight: 700;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+}
+
+/* ========== HERO SECTION ========== */
+.hero-section {
+    background: linear-gradient(135deg, var(--gold-light), #ffffff) !important;
+}
+
+.book-stack {
+    background: var(--gold-gradient-button) !important;
+    border: 3px solid var(--gold-dark) !important;
+    box-shadow: 0 8px 25px var(--gold-shadow);
+}
+
+.book-stack .book {
+    background: var(--gold-gradient-button) !important;
+    border: 2px solid var(--gold-dark) !important;
+}
+
+.book-stack .book:nth-child(even) {
+    background: var(--gold-gradient-soft) !important;
+}
+
+/* ========== CTA SECTION ========== */
+.cta-section {
+    background: var(--gold-gradient-soft) !important;
+    color: #2c3e50;
+    border-top: 3px solid var(--gold-dark);
+}
+
+/* ========== SPECIAL EFFECTS ========== */
+.glow-gold {
+    animation: glowGold 3s ease-in-out infinite alternate;
+}
+
+@keyframes glowGold {
+    from {
+        box-shadow: 0 0 10px var(--gold-shadow);
+    }
+    to {
+        box-shadow: 0 0 20px var(--gold-shadow), 0 0 30px rgba(255, 215, 0, 0.3);
+    }
+}
+
+.bounce-gold {
+    animation: bounceGold 2s infinite;
+}
+
+@keyframes bounceGold {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+/* Apply animations to key elements */
+.book-card:nth-child(2n) {
+    animation: glowGold 4s ease-in-out infinite alternate;
+}
+
+.feature-icon,
+.category-icon,
+.stat-icon {
+    animation: bounceGold 3s ease-in-out infinite;
+}
+
+/* ========== HOVER EFFECTS ========== */
+.book-card:hover .book-image {
+    transform: scale(1.05);
+    transition: transform 0.3s ease;
+}
+
+.btn-primary:active {
+    transform: translateY(0px) !important;
+    box-shadow: 0 2px 10px var(--gold-shadow) !important;
+}
+
+/* ========== MOBILE RESPONSIVE ========== */
+@media (max-width: 768px) {
+    .book-card {
+        margin-bottom: 20px;
+    }
+    
+    .feature-icon,
+    .category-icon {
+        width: 50px !important;
+        height: 50px !important;
+    }
+    
+    .stat-icon {
+        width: 60px !important;
+        height: 60px !important;
+    }
+}
+
+/* ========== FOCUS STATES ========== */
+.btn-primary:focus {
+    box-shadow: 0 0 0 0.3rem rgba(255, 215, 0, 0.25) !important;
+}
+
+.search-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(255, 215, 0, 0.25) !important;
+    border-color: var(--gold-dark) !important;
+}
+
+/* ========== OVERRIDE ALL BLUE COLORS ========== */
+.bg-primary,
+.btn-primary,
+.navbar.bg-primary {
+    background: var(--gold-gradient-button) !important;
+    border-color: var(--gold-accent) !important;
+}
+
+.text-primary {
+    color: var(--gold-dark) !important;
+}
+
+.border-primary {
+    border-color: var(--gold-primary) !important;
+}
+
+/* Override Bootstrap card borders */
+.card.border-primary {
+    border-color: var(--gold-primary) !important;
+}
+
+/* Override any remaining blue elements */
+*[style*="background-color:"] {
+    background-color: var(--gold-light) !important;
+}
+
+.bg-info,
+.bg-secondary,
+.bg-light {
+    background: var(--gold-light) !important;
+}
