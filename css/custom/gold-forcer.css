@@ -1,0 +1,228 @@
+/* ==========================================
+   GOLD FORCER - Override cưỡng bức tất cả màu xanh
+   ========================================== */
+
+/* ========== CRITICAL OVERRIDE - Độ ưu tiên tối đa ========== */
+.navbar {
+    background: linear-gradient(135deg, #FFF8DC, #FFD700, #F4D03F) !important;
+    background-color: #FFD700 !important;
+}
+
+.bookstore-navbar {
+    /* Softer gold gradient */
+    background: linear-gradient(135deg, #FFF6CC, #FFE066, #FFC300) !important;
+    background-color: #FFE066 !important;
+    border-bottom: 1px solid rgba(184, 134, 11, 0.35) !important;
+    box-shadow: 0 2px 12px rgba(184, 134, 11, 0.15) !important;
+}
+
+/* Navbar collapse (three-line menu) panel styling */
+.navbar .navbar-collapse {
+    background: linear-gradient(180deg, rgba(255, 240, 170, 0.96), rgba(255, 224, 102, 0.96)) !important;
+    backdrop-filter: blur(6px);
+    border-radius: 10px;
+    border: 1px solid rgba(184, 134, 11, 0.35);
+    box-shadow: 0 10px 25px rgba(184, 134, 11, 0.25);
+    padding: 8px;
+}
+
+.navbar .navbar-collapse .nav-link {
+    color: #2c3e50 !important;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin: 4px 2px;
+    display: block;
+    background: rgba(255, 224, 102, 0.35) !important; /* base non-white background */
+    box-shadow: inset 0 -1px 0 rgba(184, 134, 11, 0.25);
+    border: 1px solid rgba(184, 134, 11, 0.4) !important; /* viền rõ quanh item */
+}
+
+.navbar .navbar-collapse .nav-link:hover,
+.navbar .navbar-collapse .nav-link:focus,
+.navbar .navbar-collapse .nav-link.active {
+    background: linear-gradient(180deg, rgba(255, 208, 0, 0.28), rgba(255, 208, 0, 0.18)) !important;
+    color: #2c3e50 !important;
+    box-shadow: 0 4px 10px rgba(184, 134, 11, 0.18);
+}
+
+/* Dropdown menus */
+.dropdown-menu {
+    background: linear-gradient(180deg, #FFF7D6, #FFE999) !important; /* warm gold */
+    border: 1px solid rgba(184, 134, 11, 0.35) !important;
+    box-shadow: 0 12px 30px rgba(184, 134, 11, 0.25) !important;
+}
+
+.dropdown-item {
+    color: #2c3e50 !important;
+    border-radius: 8px;
+    margin: 4px 6px;
+    background: rgba(255, 224, 102, 0.35) !important; /* base background */
+    border: 1px solid rgba(184, 134, 11, 0.4) !important; /* viền rõ quanh item */
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus,
+.dropdown-item.active {
+    background: linear-gradient(180deg, rgba(255, 208, 0, 0.32), rgba(255, 208, 0, 0.22)) !important;
+    color: #2c3e50 !important;
+}
+
+/* ========== NAVBAR BUTTON OVERRIDE ========== */
+.btn-primary {
+    background: linear-gradient(135deg, #FFD700, #DAA520) !important;
+    background-color: #FFD700 !important;
+    border: 2px solid #B8860B !important;
+    color: #2c3e50 !important;
+}
+
+.btn-search {
+    background: linear-gradient(135deg, #DAA520, #B8860B) !important;
+    background-color: #DAA520 !important;
+    border-color: #B8860B !important;
+}
+
+/* ========== HERO SECTION OVERRIDE ========== */
+.hero-section,
+.jumbotron,
+.bg-primary {
+    background: linear-gradient(135deg, #FFFACD, #FFD700) !important;
+    background-color: #FFD700 !important;
+    color: #2c3e50 !important;
+}
+
+/* ========== CARD OVERRIDE ========== */
+.card,
+.book-card {
+    border: 2px solid #FFD700 !important;
+    background: linear-gradient(145deg, #ffffff, #FFF8DC) !important;
+}
+
+/* ========== BADGE OVERRIDE ========== */
+.badge.bg-danger,
+.badge.bg-primary,
+.badge.bg-info,
+.badge.bg-secondary,
+.cart-badge {
+    background: linear-gradient(135deg, #FFD700, #DAA520) !important;
+    background-color: #FFD700 !important;
+    color: #2c3e50 !important;
+    border: 1px solid #B8860B !important;
+}
+
+/* ========== TEXT OVERRIDE ========== */
+.text-primary {
+    color: #DAA520 !important;
+}
+
+/* ========== BUTTON HOVER ========== */
+.btn-primary:hover {
+    background: linear-gradient(135deg, #DAA520, #B8860B) !important;
+    background-color: #DAA520 !important;
+    border-color: #B8860B !important;
+}
+
+/* ========== NAVBAR SEARCH ========== */
+.search-input,
+.form-control {
+    border: 2px solid #FFD700 !important;
+}
+
+.search-input:focus,
+.form-control:focus {
+    border-color: #B8860B !important;
+    box-shadow: 0 0 0 0.2rem rgba(255, 215, 0, 0.25) !important;
+}
+
+/* ========== NAV LINK OVERRIDE ========== */
+.nav-link {
+    color: #2c3e50 !important;
+}
+
+.nav-link:hover {
+    background-color: rgba(44, 62, 80, 0.1) !important;
+    border-radius: 8px !important;
+}
+
+/* ========== UNIVERSAL SELECTOR OVERRIDE ========== */
+* {
+    -webkit-font-smoothing: antialiased;
+}
+
+body {
+    background-color: #ffffff !important;
+}
+
+/* ========== SPECIFIC ELEMENTS FOUND IN HTML ========== */
+.navbar.bg-primary {
+    background: linear-gradient(135deg, #FFF8DC, #FFD700, #F4D03F) !important;
+}
+
+.navbar .navbar-brand {
+    color: #2c3e50 !important;
+}
+
+.navbar .navbar-nav .nav-link {
+    color: #2c3e50 !important;
+}
+
+/* ========== HERO TITLE AND BUTTONS ========== */
+.hero-title {
+    color: #2c3e50 !important;
+    text-shadow: 2px 2px 4px rgba(255,255,255,0.8) !important;
+}
+
+.btn-outline-primary {
+    background: linear-gradient(135deg, #FFD700, #DAA520) !important;
+    border: 2px solid #B8860B !important;
+    color: #2c3e50 !important;
+}
+
+.btn-outline-primary:hover {
+    background: linear-gradient(135deg, #DAA520, #B8860B) !important;
+    border-color: #DAA520 !important;
+    color: white !important;
+}
+
+/* ========== BOOK STACK ========== */
+.book-stack {
+    background: linear-gradient(135deg, #FFD700, #DAA520) !important;
+    border: 3px solid #B8860B !important;
+}
+
+.book-stack .book {
+    background: linear-gradient(135deg, #FFF8DC, #F7DC6F) !important;
+    border: 2px solid #DAA520 !important;
+}
+
+/* ========== OVERRIDE EVERYTHING ========== */
+[style*="background-color: #"] {
+    background-color: #FFD700 !important;
+}
+
+[style*="background-color: rgb"] {
+    background-color: #FFD700 !important;
+}
+
+.has-background-primary,
+.bg-primary,
+.bg-primary > * {
+    background-color: #FFD700 !important;
+}
+
+/* ========== FOCUS FIX ========== */
+.btn-primary:focus,
+.btn-outline-primary:focus {
+    box-shadow: 0 0 0 0.25rem rgba(255, 215, 0, 0.25) !important;
+}
+
+/* ========== SECTION BACKGROUNDS ========== */
+.bestsellers-section,
+.new-books-section,
+.categories-section,
+.features-section {
+    background: linear-gradient(to bottom, #FFFACD, white) !important;
+}
+
+.stats-section {
+    background: #FFFACD !important;
+}
