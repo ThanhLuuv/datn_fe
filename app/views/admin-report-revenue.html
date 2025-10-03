@@ -23,6 +23,14 @@
                             <input type="date" class="form-control" ng-model="filters.toDate">
                         </div>
                         <div class="col-md-4">
+                            <label class="form-label">Chế độ</label>
+                            <div class="btn-group w-100" role="group">
+                                <button type="button" class="btn btn-outline-primary" ng-class="{ active: mode==='daily' }" ng-click="setMode('daily')">Ngày</button>
+                                <button type="button" class="btn btn-outline-primary" ng-class="{ active: mode==='monthly' }" ng-click="setMode('monthly')">Tháng</button>
+                                <button type="button" class="btn btn-outline-primary" ng-class="{ active: mode==='quarterly' }" ng-click="setMode('quarterly')">Quý</button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
                             <button class="btn btn-primary me-2" ng-click="loadRevenue()">
                                 <i class="bi bi-arrow-repeat"></i> Tải báo cáo
                             </button>
@@ -101,13 +109,17 @@
                     <table class="table table-sm align-middle">
                         <thead class="table-light">
                             <tr>
-                                <th>Ngày</th>
+                                <th>Thời gian</th>
                                 <th class="text-end">Doanh thu</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr ng-repeat="row in (report.items || [])">
-                                <td>{{(row.day || row.date || row.period) | date:'dd/MM/yyyy'}}</td>
+                                <td>
+                                    <span ng-if="mode==='daily'">{{(row.day || row.date || row.period) | date:'dd/MM/yyyy'}}</span>
+                                    <span ng-if="mode==='monthly'">{{(('0' + (row.month || row.Month)).slice(-2)) + '/' + (row.year || row.Year)}}</span>
+                                    <span ng-if="mode==='quarterly'">{{'Q' + (row.quarter || row.Quarter) + '/' + (row.year || row.Year)}}</span>
+                                </td>
                                 <td class="text-end">{{formatCurrency(row.revenue || 0)}}</td>
                             </tr>
                         </tbody>

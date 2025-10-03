@@ -168,7 +168,7 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form name="bookForm" ng-submit="saveBook()">
+            <form name="bookForm" ng-submit="saveBook()" enctype="multipart/form-data">
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6">
@@ -176,7 +176,8 @@
                                 <label for="bookIsbn" class="form-label">ISBN <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="bookIsbn" name="isbn"
                                        ng-model="bookData.isbn" required
-                                       unique-isbn original-isbn="isEditMode ? editingBook.isbn : null">
+                                       unique-isbn original-isbn="isEditMode ? editingBook.isbn : null"
+                                       ng-class="{'is-invalid': bookForm.isbn.$touched && bookForm.isbn.$invalid, 'is-valid': bookForm.isbn.$touched && bookForm.isbn.$valid}">
                                 <div class="invalid-feedback d-block" ng-if="bookForm.isbn.$touched && bookForm.isbn.$error.required">
                                     Vui lòng nhập ISBN.
                                 </div>
@@ -186,18 +187,21 @@
                             </div>
                             <div class="mb-3">
                                 <label for="bookTitle" class="form-label">Tên sách <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="bookTitle" name="title" ng-model="bookData.title" required>
+                                <input type="text" class="form-control" id="bookTitle" name="title" ng-model="bookData.title" required
+                                       ng-class="{'is-invalid': bookForm.title.$touched && bookForm.title.$invalid, 'is-valid': bookForm.title.$touched && bookForm.title.$valid}">
                                 <div class="invalid-feedback d-block" ng-if="bookForm.title.$touched && bookForm.title.$error.required">Vui lòng nhập tên sách.</div>
                             </div>
                             <div class="mb-3">
                                 <label for="bookCategory" class="form-label">Danh mục <span class="text-danger">*</span></label>
-                                <select class="form-select" id="bookCategory" name="category" ng-model="bookData.categoryId" ng-options="(c.categoryId + '') as c.name for c in categories" required>
+                                <select class="form-select" id="bookCategory" name="category" ng-model="bookData.categoryId" ng-options="(c.categoryId + '') as c.name for c in categories" required
+                                        ng-class="{'is-invalid': bookForm.category.$touched && bookForm.category.$invalid, 'is-valid': bookForm.category.$touched && bookForm.category.$valid}">
                                 </select>
                                 <div class="invalid-feedback d-block" ng-if="bookForm.category.$touched && bookForm.category.$error.required">Vui lòng chọn danh mục.</div>
                             </div>
                             <div class="mb-3">
                                 <label for="bookPublisher" class="form-label">Nhà xuất bản <span class="text-danger">*</span></label>
-                                <select class="form-select" id="bookPublisher" name="publisher" ng-model="bookData.publisherId" ng-options="(p.publisherId + '') as p.name for p in publishers" required>
+                                <select class="form-select" id="bookPublisher" name="publisher" ng-model="bookData.publisherId" ng-options="(p.publisherId + '') as p.name for p in publishers" required
+                                        ng-class="{'is-invalid': bookForm.publisher.$touched && bookForm.publisher.$invalid, 'is-valid': bookForm.publisher.$touched && bookForm.publisher.$valid}">
                                 </select>
                                 <div class="invalid-feedback d-block" ng-if="bookForm.publisher.$touched && bookForm.publisher.$error.required">Vui lòng chọn nhà xuất bản.</div>
                             </div>
@@ -205,26 +209,54 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="bookPrice" class="form-label">Giá bán <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" id="bookPrice" name="unitPrice" ng-model="bookData.unitPrice" step="0.01" min="0" currency-input required>
-                                <div class="invalid-feedback d-block" ng-if="bookForm.unitPrice.$touched && (bookForm.unitPrice.$error.required || bookForm.unitPrice.$error.min)">Vui lòng nhập giá hợp lệ.</div>
+                                <input type="number" class="form-control" id="bookPrice" name="unitPrice" ng-model="bookData.unitPrice" step="0.01" min="0" currency-input required
+                                       ng-class="{'is-invalid': bookForm.unitPrice.$touched && bookForm.unitPrice.$invalid, 'is-valid': bookForm.unitPrice.$touched && bookForm.unitPrice.$valid}">
+                                <div class="invalid-feedback d-block" ng-if="bookForm.unitPrice.$touched && bookForm.unitPrice.$error.required">Vui lòng nhập giá bán.</div>
+                                <div class="invalid-feedback d-block" ng-if="bookForm.unitPrice.$touched && bookForm.unitPrice.$error.min">Giá bán phải lớn hơn 0.</div>
                             </div>
                             <div class="mb-3">
                                 <label for="bookYear" class="form-label">Năm xuất bản <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" id="bookYear" name="publishYear" ng-model="bookData.publishYear" min="1900" max="{{currentYear}}" required>
-                                <div class="invalid-feedback d-block" ng-if="bookForm.publishYear.$touched && (bookForm.publishYear.$error.required || bookForm.publishYear.$error.min || bookForm.publishYear.$error.max)">Vui lòng nhập năm hợp lệ.</div>
+                                <input type="number" class="form-control" id="bookYear" name="publishYear" ng-model="bookData.publishYear" min="1900" max="{{currentYear}}" required
+                                       ng-class="{'is-invalid': bookForm.publishYear.$touched && bookForm.publishYear.$invalid, 'is-valid': bookForm.publishYear.$touched && bookForm.publishYear.$valid}">
+                                <div class="invalid-feedback d-block" ng-if="bookForm.publishYear.$touched && bookForm.publishYear.$error.required">Vui lòng nhập năm xuất bản.</div>
+                                <div class="invalid-feedback d-block" ng-if="bookForm.publishYear.$touched && bookForm.publishYear.$error.min">Năm xuất bản phải từ 1900 trở lên.</div>
+                                <div class="invalid-feedback d-block" ng-if="bookForm.publishYear.$touched && bookForm.publishYear.$error.max">Năm xuất bản không được vượt quá năm hiện tại.</div>
                             </div>
                             <div class="mb-3">
                                 <label for="bookPages" class="form-label">Số trang <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" id="bookPages" name="pageCount" ng-model="bookData.pageCount" min="1" number-input required>
-                                <div class="invalid-feedback d-block" ng-if="bookForm.pageCount.$touched && (bookForm.pageCount.$error.required || bookForm.pageCount.$error.min)">Vui lòng nhập số trang hợp lệ.</div>
+                                <input type="number" class="form-control" id="bookPages" name="pageCount" ng-model="bookData.pageCount" min="1" number-input required
+                                       ng-class="{'is-invalid': bookForm.pageCount.$touched && bookForm.pageCount.$invalid, 'is-valid': bookForm.pageCount.$touched && bookForm.pageCount.$valid}">
+                                <div class="invalid-feedback d-block" ng-if="bookForm.pageCount.$touched && bookForm.pageCount.$error.required">Vui lòng nhập số trang.</div>
+                                <div class="invalid-feedback d-block" ng-if="bookForm.pageCount.$touched && bookForm.pageCount.$error.min">Số trang phải lớn hơn 0.</div>
                             </div>
                             <div class="mb-3">
                                 <label for="bookStock" class="form-label">Số lượng tồn kho</label>
-                                <input type="number" class="form-control" id="bookStock" ng-model="bookData.stock" min="0" number-input>
+                                <input type="number" class="form-control" id="bookStock" name="stock" ng-model="bookData.stock" min="0" number-input
+                                       ng-class="{'is-invalid': bookForm.stock.$touched && bookForm.stock.$invalid, 'is-valid': bookForm.stock.$touched && bookForm.stock.$valid}">
+                                <div class="invalid-feedback d-block" ng-if="bookForm.stock.$touched && bookForm.stock.$error.min">Số lượng tồn kho không được âm.</div>
                             </div>
                             <div class="mb-3">
-                                <label for="bookImage" class="form-label">URL hình ảnh</label>
-                                <input type="url" class="form-control" id="bookImage" ng-model="bookData.imageUrl">
+                                <label for="bookImage" class="form-label">Hình ảnh sách</label>
+                                <input type="file" class="form-control" id="bookImage" name="imageFile" 
+                                       accept="image/*" ng-model="bookData.imageFile" 
+                                       onchange="angular.element(this).scope().previewImage(this)"
+                                       file-validation
+                                       ng-class="{'is-invalid': bookForm.imageFile.$touched && bookForm.imageFile.$invalid, 'is-valid': bookForm.imageFile.$touched && bookForm.imageFile.$valid}">
+                                <div class="invalid-feedback d-block" ng-if="bookForm.imageFile.$touched && bookForm.imageFile.$error.fileSize">
+                                    File ảnh không được vượt quá 5MB.
+                                </div>
+                                <div class="invalid-feedback d-block" ng-if="bookForm.imageFile.$touched && bookForm.imageFile.$error.fileType">
+                                    Chỉ chấp nhận file ảnh (JPG, PNG, GIF).
+                                </div>
+                                <div class="mt-2" ng-if="bookData.imagePreview">
+                                    <img ng-src="{{bookData.imagePreview}}" alt="Preview" class="img-thumbnail" style="max-width: 150px; max-height: 150px;">
+                                    <div class="mt-1">
+                                        <button type="button" class="btn btn-sm btn-outline-danger" ng-click="removeImage()">
+                                            <i class="bi bi-trash"></i> Xóa ảnh
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="form-text">Chọn file ảnh (JPG, PNG, GIF) - Tối đa 5MB</div>
                             </div>
                         </div>
                     </div>
@@ -233,10 +265,10 @@
                             <div class="mb-3">
                                 <label for="bookAuthors" class="form-label">Tác giả</label>
                                 <div class="d-flex gap-2 mb-2">
-                                    <select class="form-select" ng-model="selectedAuthorId" ng-options="a.authorId as a.fullName for a in authors track by a.authorId">
+                                    <select class="form-select" ng-model="selectedAuthorId" ng-change="addAuthor()" ng-options="a.authorId as a.fullName for a in authors track by a.authorId">
                                         <option value="">Chọn tác giả</option>
                                     </select>
-                                    <button type="button" class="btn btn-outline-primary" ng-click="addAuthor()">
+                                    <button type="button" class="btn btn-outline-primary" ng-click="addAuthor()" title="Thêm tác giả">
                                         <i class="bi bi-plus"></i>
                                     </button>
                                 </div>
@@ -257,6 +289,23 @@
                         {{isEditMode ? 'Cập nhật' : 'Tạo mới'}}
                     </button>
                 </div>
+                
+                <!-- Form validation summary -->
+                <div class="alert alert-warning mt-3" ng-if="bookForm.$submitted && bookForm.$invalid">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <strong>Vui lòng kiểm tra lại thông tin:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li ng-if="bookForm.isbn.$invalid">ISBN không hợp lệ</li>
+                        <li ng-if="bookForm.title.$invalid">Tên sách không hợp lệ</li>
+                        <li ng-if="bookForm.category.$invalid">Danh mục không hợp lệ</li>
+                        <li ng-if="bookForm.publisher.$invalid">Nhà xuất bản không hợp lệ</li>
+                        <li ng-if="bookForm.unitPrice.$invalid">Giá bán không hợp lệ</li>
+                        <li ng-if="bookForm.publishYear.$invalid">Năm xuất bản không hợp lệ</li>
+                        <li ng-if="bookForm.pageCount.$invalid">Số trang không hợp lệ</li>
+                        <li ng-if="bookForm.stock.$invalid">Số lượng tồn kho không hợp lệ</li>
+                        <li ng-if="bookForm.imageFile.$invalid">File ảnh không hợp lệ</li>
+                    </ul>
+                </div>
             </form>
         </div>
     </div>
@@ -276,8 +325,10 @@
                 <div class="row">
                     <div class="col-md-4">
                         <div class="text-center">
-                            <img ng-if="selectedBook.imageUrl" ng-src="{{selectedBook.imageUrl}}" alt="{{selectedBook.title}}" class="img-fluid rounded">
-                            <i ng-if="!selectedBook.imageUrl" class="bi bi-book display-1 text-muted"></i>
+                            <img ng-if="selectedBook.imageUrl || selectedBook.imagePreview" 
+                                 ng-src="{{selectedBook.imagePreview || selectedBook.imageUrl}}" 
+                                 alt="{{selectedBook.title}}" class="img-fluid rounded">
+                            <i ng-if="!selectedBook.imageUrl && !selectedBook.imagePreview" class="bi bi-book display-1 text-muted"></i>
                         </div>
                     </div>
                     <div class="col-md-8">
@@ -363,4 +414,51 @@
     #bookModal .row > [class*='col-'] { margin-bottom: 0.5rem; }
     /* Ensure equal spacing between two columns */
     #bookModal .row.g-3 { row-gap: 0.75rem; }
+    
+    /* File input styling */
+    #bookModal input[type="file"] {
+        height: auto;
+        padding: 0.375rem 0.75rem;
+    }
+    
+    /* Image preview styling */
+    .img-thumbnail {
+        border: 2px solid #dee2e6;
+        border-radius: 0.375rem;
+        object-fit: cover;
+    }
+    
+    /* File validation styling */
+    .form-control.is-invalid {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+    
+    .form-control.is-valid {
+        border-color: #198754;
+        box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+    }
+    
+    .form-select.is-invalid {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+    
+    .form-select.is-valid {
+        border-color: #198754;
+        box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+    }
+    
+    /* Validation summary styling */
+    .alert-warning {
+        border-left: 4px solid #ffc107;
+    }
+    
+    .alert-warning ul {
+        padding-left: 1.5rem;
+    }
+    
+    .alert-warning li {
+        margin-bottom: 0.25rem;
+    }
 </style>

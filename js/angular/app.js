@@ -126,6 +126,32 @@ app.config(['$routeProvider', function($routeProvider) {
                 }]
             }
         })
+        .when('/admin/promotions', {
+            templateUrl: 'app/views/admin-promotions.html',
+            controller: 'AdminPromotionsController',
+            resolve: {
+                checkAuth: ['AuthService', '$location', function(AuthService, $location) {
+                    if (!AuthService.isAdminOrTeacher()) {
+                        $location.path('/home');
+                        return false;
+                    }
+                    return true;
+                }]
+            }
+        })
+        .when('/admin/orders', {
+            templateUrl: 'app/views/admin-orders.html',
+            controller: 'AdminOrdersController',
+            resolve: {
+                checkAuth: ['AuthService', '$location', function(AuthService, $location) {
+                    if (!AuthService.isAdminOrTeacher()) {
+                        $location.path('/home');
+                        return false;
+                    }
+                    return true;
+                }]
+            }
+        })
         .when('/admin/purchase-orders', {
             templateUrl: 'app/views/admin-purchase-orders.html',
             controller: 'AdminPurchaseOrdersController',

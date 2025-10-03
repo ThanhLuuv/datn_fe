@@ -5,6 +5,7 @@ app.controller('AdminRevenueReportController', ['$scope', 'BookstoreService', 'A
 	}
 
 	$scope.title = 'Báo cáo doanh thu';
+	$scope.mode = 'daily'; // 'daily' | 'monthly' | 'quarterly'
 	function formatYMD(date) {
 		var y = date.getFullYear();
 		var m = ('0' + (date.getMonth() + 1)).slice(-2);
@@ -43,6 +44,35 @@ app.controller('AdminRevenueReportController', ['$scope', 'BookstoreService', 'A
 			return day + '/' + month;
 		} catch(e) { return dd; }
 	}
+
+	function formatVNDate(dd) {
+		return formatVN(dd);
+	}
+
+	$scope.setMode = function(mode) {
+		if (mode === 'daily' || mode === 'monthly' || mode === 'quarterly') {
+			$scope.mode = mode;
+			$scope.loadRevenue();
+		}
+	};
+
+	$scope.displayPeriod = function(item) {
+		if (!item) return '';
+		if ($scope.mode === 'monthly') {
+			var y = item.year || item.Year;
+			var m = item.month || item.Month;
+			if (!y || !m) return '';
+			var mm = ('0' + m).slice(-2);
+			return mm + '/' + y;
+		}
+		if ($scope.mode === 'quarterly') {
+			var yq = item.year || item.Year;
+			var q = item.quarter || item.Quarter;
+			if (!yq || !q) return '';
+			return 'Q' + q + '/' + yq;
+		}
+		return formatVNDate(item.day || item.date || item.period);
+	};
 
 	function generateDaysInCurrentMonth() {
 		var now = new Date();
@@ -83,18 +113,54 @@ app.controller('AdminRevenueReportController', ['$scope', 'BookstoreService', 'A
 		} catch(e) { console.warn('Chart init error', e); }
 	}
 
+	function isValidYMD(str) {
+		if (!str || typeof str !== 'string') return false;
+		var re = /^\d{4}-\d{2}-\d{2}$/;
+		if (!re.test(str)) return false;
+		var d = new Date(str);
+		if (isNaN(d.getTime())) return false;
+		// Ensure components match (avoid parsing quirks)
+		var parts = str.split('-');
+		var y = d.getFullYear();
+		var m = ('0' + (d.getMonth() + 1)).slice(-2);
+		var day = ('0' + d.getDate()).slice(-2);
+		return String(y) === parts[0] && m === parts[1] && day === parts[2];
+	}
+
+	function validateDateRange(fromDate, toDate) {
+		if (!fromDate || !toDate) {
+			return 'Vui lòng chọn khoảng thời gian.';
+		}
+		if (!isValidYMD(fromDate) || !isValidYMD(toDate)) {
+			return 'Định dạng ngày không hợp lệ. Vui lòng dùng yyyy-MM-dd.';
+		}
+		var f = new Date(fromDate);
+		var t = new Date(toDate);
+		if (f.getTime() > t.getTime()) {
+			return 'Khoảng thời gian không hợp lệ: Từ ngày phải nhỏ hơn hoặc bằng Đến ngày.';
+		}
+		return null;
+	}
+
 	$scope.loadRevenue = function() {
-		if (!$scope.filters.fromDate || !$scope.filters.toDate) {
-			$scope.error = 'Vui lòng chọn khoảng thời gian.';
+		var validationError = validateDateRange($scope.filters.fromDate, $scope.filters.toDate);
+		if (validationError) {
+			$scope.error = validationError;
+			$scope.addToast('danger', validationError);
 			return;
 		}
 		$scope.loading = true;
 		$scope.error = null;
 		$scope.report = null;
-		BookstoreService.getRevenueReport({
-			fromDate: $scope.filters.fromDate,
-			toDate: $scope.filters.toDate
-		}).then(function(res){
+		var apiCall;
+		if ($scope.mode === 'monthly') {
+			apiCall = BookstoreService.getRevenueReportMonthly({ fromDate: $scope.filters.fromDate, toDate: $scope.filters.toDate });
+		} else if ($scope.mode === 'quarterly') {
+			apiCall = BookstoreService.getRevenueReportQuarterly({ fromDate: $scope.filters.fromDate, toDate: $scope.filters.toDate });
+		} else {
+			apiCall = BookstoreService.getRevenueReport({ fromDate: $scope.filters.fromDate, toDate: $scope.filters.toDate });
+		}
+		apiCall.then(function(res){
 			var data = res && res.data ? res.data : null;
 			if (data && data.success && data.data) {
 				$scope.report = data.data;
@@ -104,7 +170,7 @@ app.controller('AdminRevenueReportController', ['$scope', 'BookstoreService', 'A
 			$scope.addToast('success', 'Đã tải báo cáo doanh thu.');
 			// update chart if series available
 			if ($scope.chart && $scope.report && Array.isArray($scope.report.items)) {
-				$scope.chart.data.labels = $scope.report.items.map(function(i){ return formatVN(i.day || i.date || i.period); });
+				$scope.chart.data.labels = $scope.report.items.map(function(i){ return $scope.displayPeriod(i); });
 				$scope.chart.data.datasets[0].data = $scope.report.items.map(function(i){ return Number(i.revenue || i.totalRevenue || 0); });
 				$scope.chart.update();
 			}

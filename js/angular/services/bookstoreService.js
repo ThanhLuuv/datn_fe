@@ -12,6 +12,14 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         };
     };
 
+    // Helper function to get auth headers for file upload
+    var getFileUploadHeaders = function() {
+        var token = AuthService.getToken();
+        return {
+            'Authorization': 'Bearer ' + token
+        };
+    };
+
     // ==================== CATEGORY APIs ====================
     
     // Lấy danh sách danh mục
@@ -148,6 +156,34 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
+	// Báo cáo doanh thu theo tháng
+	this.getRevenueReportMonthly = function(params) {
+		var queryParams = {
+			fromDate: params && params.fromDate ? params.fromDate : '',
+			toDate: params && params.toDate ? params.toDate : ''
+		};
+		return $http({
+			method: 'GET',
+			url: baseUrl + '/report/revenue-monthly',
+			headers: getAuthHeaders(),
+			params: queryParams
+		});
+	};
+
+	// Báo cáo doanh thu theo quý
+	this.getRevenueReportQuarterly = function(params) {
+		var queryParams = {
+			fromDate: params && params.fromDate ? params.fromDate : '',
+			toDate: params && params.toDate ? params.toDate : ''
+		};
+		return $http({
+			method: 'GET',
+			url: baseUrl + '/report/revenue-quarterly',
+			headers: getAuthHeaders(),
+			params: queryParams
+		});
+	};
+
     // ==================== ROLE & PERMISSION APIs ====================
     // Get roles
     this.getRoles = function() {
@@ -261,21 +297,259 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
 
     // Tạo sách mới
     this.createBook = function(bookData) {
-        return $http({
+        // Always use FormData for multipart form data
+        var formData = new FormData();
+        
+        // Ensure all required fields are properly formatted
+        formData.append('isbn', String(bookData.isbn || ''));
+        formData.append('title', String(bookData.title || ''));
+        formData.append('categoryId', String(bookData.categoryId || ''));
+        formData.append('publisherId', String(bookData.publisherId || ''));
+        formData.append('unitPrice', String(Number(bookData.unitPrice) || 0));
+        formData.append('publishYear', String(Number(bookData.publishYear) || new Date().getFullYear()));
+        formData.append('pageCount', String(Number(bookData.pageCount) || 1));
+        formData.append('stock', String(Number(bookData.stock) || 0));
+        
+        // Add authors as comma-separated string (authorIds)
+        if (bookData.authors && bookData.authors.length > 0) {
+            var authorIds = bookData.authors.map(function(author) {
+                return author.authorId;
+            }).join(',');
+            formData.append('authorIds', authorIds);
+        }
+        
+        // Add image file if exists
+        console.log('=== DEBUG IMAGE FILE ===');
+        console.log('bookData.imageFile:', bookData.imageFile);
+        console.log('bookData.imageFile type:', typeof bookData.imageFile);
+        console.log('bookData.imageFile instanceof File:', bookData.imageFile instanceof File);
+        
+        if (bookData.imageFile) {
+            formData.append('imageFile', bookData.imageFile);
+            console.log('✅ Image file added to FormData');
+        } else {
+            console.log('❌ No image file to add');
+        }
+        
+        // Debug: Log form data
+        console.log('=== SENDING FORMDATA TO /api/book ===');
+        console.log('FormData contents:');
+        for (var pair of formData.entries()) {
+            console.log(pair[0] + ': ' + (pair[1] instanceof File ? '[FILE: ' + pair[1].name + ']' : pair[1]));
+        }
+        
+        // Log detailed FormData information
+        console.log('=== FORMDATA DETAILS ===');
+        console.log('FormData constructor:', formData.constructor.name);
+        console.log('FormData entries count:', Array.from(formData.entries()).length);
+        
+        // Log each field separately
+        console.log('=== FIELD BY FIELD ===');
+        console.log('isbn:', formData.get('isbn'));
+        console.log('title:', formData.get('title'));
+        console.log('categoryId:', formData.get('categoryId'));
+        console.log('publisherId:', formData.get('publisherId'));
+        console.log('unitPrice:', formData.get('unitPrice'));
+        console.log('publishYear:', formData.get('publishYear'));
+        console.log('pageCount:', formData.get('pageCount'));
+        console.log('stock:', formData.get('stock'));
+        console.log('authorIds:', formData.get('authorIds'));
+        
+        var imageFile = formData.get('imageFile');
+        if (imageFile) {
+            console.log('imageFile:', {
+                name: imageFile.name,
+                size: imageFile.size,
+                type: imageFile.type,
+                lastModified: imageFile.lastModified,
+                constructor: imageFile.constructor.name
+            });
+        } else {
+            console.log('imageFile: null');
+        }
+        
+        // Use fetch API for FormData to ensure proper multipart/form-data
+        var token = AuthService.getToken();
+        
+        console.log('=== SENDING FETCH REQUEST ===');
+        console.log('URL:', baseUrl + '/book');
+        console.log('Method: POST');
+        console.log('Headers:', { 'Authorization': 'Bearer ' + token });
+        console.log('Body type:', formData.constructor.name);
+        
+        // Log raw FormData as string (for debugging)
+        console.log('=== RAW FORMDATA DEBUG ===');
+        try {
+            // Try to log FormData as string representation
+            var formDataString = '';
+            for (var pair of formData.entries()) {
+                if (pair[1] instanceof File) {
+                    formDataString += pair[0] + ': [FILE] ' + pair[1].name + ' (' + pair[1].size + ' bytes)\n';
+                } else {
+                    formDataString += pair[0] + ': ' + pair[1] + '\n';
+                }
+            }
+            console.log('FormData as string:\n' + formDataString);
+        } catch (e) {
+            console.log('Cannot convert FormData to string:', e.message);
+        }
+        
+        return fetch(baseUrl + '/book', {
             method: 'POST',
-            url: baseUrl + '/book',
-            data: bookData,
-            headers: getAuthHeaders()
+            headers: {
+                'Authorization': 'Bearer ' + token
+                // Don't set Content-Type - browser will set it automatically
+            },
+            body: formData
+        })
+        .then(function(response) {
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+            
+            if (!response.ok) {
+                return response.json().then(function(errorData) {
+                    console.error('Error response:', errorData);
+                    throw new Error(errorData.message || 'Request failed');
+                });
+            }
+            return response.json();
+        })
+        .then(function(data) {
+            console.log('Success response:', data);
+            return { data: data };
+        })
+        .catch(function(error) {
+            console.error('Fetch error:', error);
+            throw { data: { message: error.message } };
         });
     };
 
     // Cập nhật sách
     this.updateBook = function(isbn, bookData) {
-        return $http({
+        // Always use FormData for multipart form data
+        var formData = new FormData();
+        
+        // Ensure all required fields are properly formatted
+        formData.append('isbn', String(bookData.isbn || ''));
+        formData.append('title', String(bookData.title || ''));
+        formData.append('categoryId', String(bookData.categoryId || ''));
+        formData.append('publisherId', String(bookData.publisherId || ''));
+        formData.append('unitPrice', String(Number(bookData.unitPrice) || 0));
+        formData.append('publishYear', String(Number(bookData.publishYear) || new Date().getFullYear()));
+        formData.append('pageCount', String(Number(bookData.pageCount) || 1));
+        formData.append('stock', String(Number(bookData.stock) || 0));
+        
+        // Add authors as comma-separated string (authorIds)
+        if (bookData.authors && bookData.authors.length > 0) {
+            var authorIds = bookData.authors.map(function(author) {
+                return author.authorId;
+            }).join(',');
+            formData.append('authorIds', authorIds);
+        }
+        
+        // Add image file if exists
+        console.log('=== DEBUG IMAGE FILE (UPDATE) ===');
+        console.log('bookData.imageFile:', bookData.imageFile);
+        console.log('bookData.imageFile type:', typeof bookData.imageFile);
+        console.log('bookData.imageFile instanceof File:', bookData.imageFile instanceof File);
+        
+        if (bookData.imageFile) {
+            formData.append('imageFile', bookData.imageFile);
+            console.log('✅ Image file added to FormData');
+        } else {
+            console.log('❌ No image file to add');
+        }
+        
+        // Debug: Log form data
+        console.log('=== SENDING FORMDATA TO /api/book/' + isbn + ' ===');
+        console.log('FormData contents:');
+        for (var pair of formData.entries()) {
+            console.log(pair[0] + ': ' + (pair[1] instanceof File ? '[FILE: ' + pair[1].name + ']' : pair[1]));
+        }
+        
+        // Log detailed FormData information
+        console.log('=== FORMDATA DETAILS (UPDATE) ===');
+        console.log('FormData constructor:', formData.constructor.name);
+        console.log('FormData entries count:', Array.from(formData.entries()).length);
+        
+        // Log each field separately
+        console.log('=== FIELD BY FIELD (UPDATE) ===');
+        console.log('isbn:', formData.get('isbn'));
+        console.log('title:', formData.get('title'));
+        console.log('categoryId:', formData.get('categoryId'));
+        console.log('publisherId:', formData.get('publisherId'));
+        console.log('unitPrice:', formData.get('unitPrice'));
+        console.log('publishYear:', formData.get('publishYear'));
+        console.log('pageCount:', formData.get('pageCount'));
+        console.log('stock:', formData.get('stock'));
+        console.log('authorIds:', formData.get('authorIds'));
+        
+        var imageFile = formData.get('imageFile');
+        if (imageFile) {
+            console.log('imageFile:', {
+                name: imageFile.name,
+                size: imageFile.size,
+                type: imageFile.type,
+                lastModified: imageFile.lastModified,
+                constructor: imageFile.constructor.name
+            });
+        } else {
+            console.log('imageFile: null');
+        }
+        
+        // Use fetch API for FormData to ensure proper multipart/form-data
+        var token = AuthService.getToken();
+        
+        console.log('=== SENDING FETCH REQUEST (UPDATE) ===');
+        console.log('URL:', baseUrl + '/book/' + isbn);
+        console.log('Method: PUT');
+        console.log('Headers:', { 'Authorization': 'Bearer ' + token });
+        console.log('Body type:', formData.constructor.name);
+        
+        // Log raw FormData as string (for debugging)
+        console.log('=== RAW FORMDATA DEBUG (UPDATE) ===');
+        try {
+            // Try to log FormData as string representation
+            var formDataString = '';
+            for (var pair of formData.entries()) {
+                if (pair[1] instanceof File) {
+                    formDataString += pair[0] + ': [FILE] ' + pair[1].name + ' (' + pair[1].size + ' bytes)\n';
+                } else {
+                    formDataString += pair[0] + ': ' + pair[1] + '\n';
+                }
+            }
+            console.log('FormData as string:\n' + formDataString);
+        } catch (e) {
+            console.log('Cannot convert FormData to string:', e.message);
+        }
+        
+        return fetch(baseUrl + '/book/' + isbn, {
             method: 'PUT',
-            url: baseUrl + '/book/' + isbn,
-            data: bookData,
-            headers: getAuthHeaders()
+            headers: {
+                'Authorization': 'Bearer ' + token
+                // Don't set Content-Type - browser will set it automatically
+            },
+            body: formData
+        })
+        .then(function(response) {
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+            
+            if (!response.ok) {
+                return response.json().then(function(errorData) {
+                    console.error('Error response:', errorData);
+                    throw new Error(errorData.message || 'Request failed');
+                });
+            }
+            return response.json();
+        })
+        .then(function(data) {
+            console.log('Success response:', data);
+            return { data: data };
+        })
+        .catch(function(error) {
+            console.error('Fetch error:', error);
+            throw { data: { message: error.message } };
         });
     };
 
@@ -419,6 +693,179 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
             url: baseUrl + '/goodsreceipt',
             headers: getAuthHeaders(),
             params: queryParams
+        });
+    };
+
+    // ==================== PROMOTION APIs ====================
+    
+    // Lấy danh sách khuyến mãi
+    this.getPromotions = function(params) {
+        params = params || {};
+        // Backend requires SortBy and SortOrder; provide sensible defaults when missing
+        var sortBy = params.SortBy || params.sortBy || 'StartDate';
+        var sortOrder = params.SortOrder || params.sortOrder || 'DESC';
+        var queryParams = {
+            Name: params.Name || params.name || '',
+            MinDiscountPct: params.MinDiscountPct || params.minDiscountPct || '',
+            MaxDiscountPct: params.MaxDiscountPct || params.maxDiscountPct || '',
+            StartDate: params.StartDate || params.startDate || '',
+            EndDate: params.EndDate || params.endDate || '',
+            Status: params.Status || params.status || 'all',
+            IssuedBy: params.IssuedBy || params.issuedBy || '',
+            BookIsbn: params.BookIsbn || params.bookIsbn || '',
+            Page: params.Page || params.pageNumber || 1,
+            PageSize: params.PageSize || params.pageSize || 10,
+            SortBy: sortBy,
+            SortOrder: sortOrder
+        };
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/promotion',
+            headers: getAuthHeaders(),
+            params: queryParams
+        });
+    };
+
+    // Lấy chi tiết khuyến mãi
+    this.getPromotionById = function(promotionId) {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/promotion/' + promotionId,
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Tạo khuyến mãi
+    this.createPromotion = function(promotionData) {
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/promotion',
+            data: promotionData,
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Cập nhật khuyến mãi
+    this.updatePromotion = function(promotionId, promotionData) {
+        return $http({
+            method: 'PUT',
+            url: baseUrl + '/promotion/' + promotionId,
+            data: promotionData,
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Xóa khuyến mãi
+    this.deletePromotion = function(promotionId) {
+        return $http({
+            method: 'DELETE',
+            url: baseUrl + '/promotion/' + promotionId,
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Thống kê khuyến mãi
+    this.getPromotionStats = function() {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/promotion/stats',
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Danh sách sách đang có khuyến mãi (Public)
+    this.getActivePromotionBooks = function() {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/promotion/active-books'
+        });
+    };
+
+    // Danh sách khuyến mãi theo ISBN (Public)
+    this.getPromotionsByBook = function(isbn) {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/promotion/book/' + encodeURIComponent(isbn)
+        });
+    };
+
+    // ==================== CUSTOMER ORDER APIs ====================
+
+    // Lấy danh sách đơn hàng
+    this.getOrders = function(params) {
+        params = params || {};
+        var queryParams = {
+            keyword: params.keyword || '',
+            customerId: params.customerId || '',
+            status: params.status || '',
+            fromDate: params.fromDate || '',
+            toDate: params.toDate || '',
+            pageNumber: params.pageNumber || 1,
+            pageSize: params.pageSize || 10
+        };
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/order',
+            headers: getAuthHeaders(),
+            params: queryParams
+        });
+    };
+
+    // Lấy chi tiết đơn hàng
+    this.getOrderById = function(orderId) {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/order/' + orderId,
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Gợi ý nhân viên giao hàng cho đơn
+    this.getOrderDeliveryCandidates = function(orderId) {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/order/' + orderId + '/delivery-candidates',
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Duyệt/Không duyệt đơn
+    this.approveOrder = function(orderId, payload) {
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/order/' + orderId + '/approve',
+            data: payload,
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Phân công giao hàng
+    this.assignOrderDelivery = function(orderId, payload) {
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/order/' + orderId + '/assign-delivery',
+            data: payload,
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Xác nhận giao hàng thành công
+    this.confirmOrderDelivered = function(orderId, payload) {
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/order/' + orderId + '/confirm-delivered',
+            data: payload,
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Trả hàng (Return order)
+    this.returnOrder = function(orderId, payload) {
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/order/' + orderId + '/return',
+            data: payload || {},
+            headers: getAuthHeaders()
         });
     };
 

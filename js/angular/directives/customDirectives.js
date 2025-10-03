@@ -66,3 +66,24 @@ app.directive('uniqueIsbn', ['BookstoreService', '$q', function(BookstoreService
         }
     };
 }]);
+
+// File validation directive
+app.directive('fileValidation', function() {
+    return {
+        require: 'ngModel',
+        link: function(scope, element, attrs, ngModel) {
+            ngModel.$validators.fileSize = function(modelValue, viewValue) {
+                var file = modelValue || viewValue;
+                if (!file) return true;
+                return file.size <= 5 * 1024 * 1024; // 5MB
+            };
+            
+            ngModel.$validators.fileType = function(modelValue, viewValue) {
+                var file = modelValue || viewValue;
+                if (!file) return true;
+                var allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                return allowedTypes.indexOf(file.type) !== -1;
+            };
+        }
+    };
+});

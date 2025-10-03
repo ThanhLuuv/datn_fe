@@ -69,19 +69,19 @@ app.directive('pagination', function() {
         template: '<nav aria-label="Phân trang" ng-if="totalPages > 1">' +
                   '<ul class="pagination justify-content-center">' +
                   '<li class="page-item" ng-class="{\'disabled\': currentPage === 1}">' +
-                  '<a class="page-link" href="#" ng-click="goToPage(1)">Đầu</a>' +
+                  '<a class="page-link" href="javascript:void(0)" ng-click="goToPage(1); $event.preventDefault()">Đầu</a>' +
                   '</li>' +
                   '<li class="page-item" ng-class="{\'disabled\': currentPage === 1}">' +
-                  '<a class="page-link" href="#" ng-click="goToPage(currentPage - 1)">Trước</a>' +
+                  '<a class="page-link" href="javascript:void(0)" ng-click="goToPage(currentPage - 1); $event.preventDefault()">Trước</a>' +
                   '</li>' +
                   '<li class="page-item" ng-repeat="page in pages" ng-class="{\'active\': page === currentPage}">' +
-                  '<a class="page-link" href="#" ng-click="goToPage(page)">{{page}}</a>' +
+                  '<a class="page-link" href="javascript:void(0)" ng-click="goToPage(page); $event.preventDefault()">{{page}}</a>' +
                   '</li>' +
                   '<li class="page-item" ng-class="{\'disabled\': currentPage === totalPages}">' +
-                  '<a class="page-link" href="#" ng-click="goToPage(currentPage + 1)">Sau</a>' +
+                  '<a class="page-link" href="javascript:void(0)" ng-click="goToPage(currentPage + 1); $event.preventDefault()">Sau</a>' +
                   '</li>' +
                   '<li class="page-item" ng-class="{\'disabled\': currentPage === totalPages}">' +
-                  '<a class="page-link" href="#" ng-click="goToPage(totalPages)">Cuối</a>' +
+                  '<a class="page-link" href="javascript:void(0)" ng-click="goToPage(totalPages); $event.preventDefault()">Cuối</a>' +
                   '</li>' +
                   '</ul>' +
                   '</nav>',
@@ -105,6 +105,7 @@ app.directive('pagination', function() {
             
             scope.goToPage = function(page) {
                 if (page >= 1 && page <= scope.totalPages && page !== scope.currentPage) {
+                    scope.currentPage = page;
                     scope.onPageChange({page: page});
                 }
             };
