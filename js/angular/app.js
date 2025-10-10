@@ -2,26 +2,64 @@
 var app = angular.module('myApp', ['ngRoute', 'ngAnimate']);
 
 // Global controller for navbar visibility
-app.controller('AppController', ['$scope', '$location', 'CartService', function($scope, $location, CartService) {
+app.controller('AppController', ['$scope', '$location', 'CartService', 'AuthService', function($scope, $location, CartService, AuthService) {
     $scope.isAdminPage = false;
+    $scope.isAuthPage = false; // login/register
     $scope.searchQuery = '';
-    $scope.cartCount = CartService && CartService.getTotalQuantity ? CartService.getTotalQuantity() : 0;
+    $scope.cartCount = 0;
+    $scope.isAuthenticated = AuthService.isAuthenticated();
 
     $scope.goSearch = function() {
-        if ($scope.searchQuery && $scope.searchQuery.trim().length > 0) {
-            $location.path('/search').search({ q: $scope.searchQuery.trim(), page: 1, pageSize: 12 });
+        var q = ($scope.searchQuery || '').trim();
+        $location.path('/search').search({ q: q, page: 1, pageSize: 12 });
+    };
+
+    // Load cart count from API
+    $scope.loadCartCount = function() {
+        if (!$scope.isAuthenticated) {
+            $scope.cartCount = 0;
+            return;
         }
+
+        CartService.getCartSummary()
+            .then(function(response) {
+                if (response && response.data && response.data.success) {
+                    $scope.cartCount = response.data.data.totalItems || 0;
+                } else {
+                    $scope.cartCount = 0;
+                }
+            })
+            .catch(function(error) {
+                console.error('Error loading cart count:', error);
+                // Fallback to local storage
+                $scope.cartCount = CartService.getTotalQuantity();
+            });
     };
 
     $scope.$on('$routeChangeSuccess', function() {
         var path = $location.path();
         $scope.isAdminPage = path.indexOf('/admin') === 0;
+        $scope.isAuthPage = (path === '/login' || path === '/register');
+        
+        // Update authentication status
+        $scope.isAuthenticated = AuthService.isAuthenticated();
+        
+        // Load cart count if authenticated
+        if ($scope.isAuthenticated) {
+            $scope.loadCartCount();
+        } else {
+            $scope.cartCount = 0;
+        }
     });
 
     $scope.$on('cart:changed', function() {
-        $scope.cartCount = CartService.getTotalQuantity();
-        $scope.$applyAsync();
+        $scope.loadCartCount();
     });
+
+    // Initial load
+    if ($scope.isAuthenticated) {
+        $scope.loadCartCount();
+    }
 }]);
 
 // Route Configuration
@@ -79,6 +117,18 @@ app.config(['$routeProvider', function($routeProvider) {
         .when('/checkout', {
             templateUrl: 'app/views/checkout.html',
             controller: 'CheckoutController'
+        })
+        .when('/success', {
+            templateUrl: 'app/views/success.html',
+            controller: 'SuccessController'
+        })
+        .when('/cancel', {
+            templateUrl: 'app/views/cancel.html',
+            controller: 'CancelController'
+        })
+        .when('/orders', {
+            templateUrl: 'app/views/customer-orders.html',
+            controller: 'CustomerOrdersController'
         })
         .when('/search', {
             templateUrl: 'app/views/search.html',
@@ -168,6 +218,19 @@ app.config(['$routeProvider', function($routeProvider) {
         .when('/admin/goods-receipts', {
             templateUrl: 'app/views/admin-goods-receipts.html',
             controller: 'AdminGoodsReceiptsController',
+            resolve: {
+                checkAuth: ['AuthService', '$location', function(AuthService, $location) {
+                    if (!AuthService.isAdminOrTeacher()) {
+                        $location.path('/home');
+                        return false;
+                    }
+                    return true;
+                }]
+            }
+        })
+        .when('/admin/returns', {
+            templateUrl: 'app/views/admin-returns.html',
+            controller: 'AdminReturnsController',
             resolve: {
                 checkAuth: ['AuthService', '$location', function(AuthService, $location) {
                     if (!AuthService.isAdminOrTeacher()) {

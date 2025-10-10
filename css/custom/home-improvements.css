@@ -88,11 +88,16 @@
     margin-left: 8px !important;
     background: #007bff !important;
     border: none !important;
+    top: 50% !important;
+    right: 0 !important;
+    position: absolute !important;
+    transform: translateY(-50%) !important;
 }
 
 .btn-search:hover {
     background: #0056b3 !important;
-    transform: scale(1.05);
+    /* Keep the same translate to avoid shifting */
+    transform: translateY(-50%);
 }
 
 /* Simple, clean design */

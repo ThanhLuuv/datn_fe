@@ -298,12 +298,43 @@ app.controller('AdminGoodsReceiptsController', ['$scope', 'BookstoreService', 'A
                 bookTitle: line.bookTitle,
                 qtyOrdered: line.qtyOrdered,
                 unitCost: line.unitPrice, // keep internally for total calc
-                qtyReceived: line.qtyOrdered,
+                qtyReceived: line.qtyOrdered, // Tự động fill số lượng nhận bằng số lượng đặt
                 lineTotal: (parseInt(line.qtyOrdered) || 0) * (parseFloat(line.unitPrice) || 0)
             };
         }) : [];
 
         $scope.validateReceiptLines();
+    };
+
+    // Fill all quantities with ordered quantities
+    $scope.fillAllQuantities = function() {
+        if (!$scope.selectedPurchaseOrder || !$scope.goodsReceiptData || !$scope.goodsReceiptData.lines) {
+            return;
+        }
+
+        // Fill all quantities with ordered quantities
+        $scope.goodsReceiptData.lines.forEach(function(line, index) {
+            if (line && line.qtyOrdered) {
+                line.qtyReceived = line.qtyOrdered;
+                $scope.updateLineTotal(index);
+            }
+        });
+
+        // Show success message
+        $scope.addToast('success', 'Đã tự động điền số lượng nhận cho tất cả sách!');
+    };
+
+    // Fill single quantity with ordered quantity
+    $scope.fillSingleQuantity = function(index) {
+        if (!$scope.goodsReceiptData || !$scope.goodsReceiptData.lines || !$scope.goodsReceiptData.lines[index]) {
+            return;
+        }
+
+        var line = $scope.goodsReceiptData.lines[index];
+        if (line && line.qtyOrdered) {
+            line.qtyReceived = line.qtyOrdered;
+            $scope.updateLineTotal(index);
+        }
     };
 
     // Recalculate a line total and overall totals
@@ -349,11 +380,13 @@ app.controller('AdminGoodsReceiptsController', ['$scope', 'BookstoreService', 'A
                 if (!gl) {
                     errs.push('Thiếu dòng từ Excel');
                 } else {
-                    var qOrdered = parseInt(poLine.qtyOrdered) || 0;
-                    var qReceived = parseInt(gl.qtyReceived) || 0;
-                    if (qReceived !== qOrdered) {
-                        errs.push('SL nhận khác SL đặt');
-                    }
+                    // Bỏ validation số lượng nhận khác số lượng đặt
+                    // var qOrdered = parseInt(poLine.qtyOrdered) || 0;
+                    // var qReceived = parseInt(gl.qtyReceived) || 0;
+                    // if (qReceived !== qOrdered) {
+                    //     errs.push('SL nhận khác SL đặt');
+                    // }
+                    
                     var pricePo = parseFloat(poLine.unitPrice) || 0;
                     var priceRecv = (gl.unitCost != null) ? (parseFloat(gl.unitCost) || 0) : pricePo;
                     if (priceRecv !== pricePo) {
@@ -439,6 +472,15 @@ app.controller('AdminGoodsReceiptsController', ['$scope', 'BookstoreService', 'A
             return;
         }
 
+        // Show warning if there are validation errors but still allow save (chỉ cảnh báo về đơn giá)
+        var hasValidationWarnings = $scope.receiptValidation && $scope.receiptValidation.hasError;
+        if (hasValidationWarnings) {
+            var confirmSave = confirm('Có một số cảnh báo về đơn giá không khớp với đơn đặt hàng. Bạn có muốn tiếp tục tạo phiếu nhập không?');
+            if (!confirmSave) {
+                return;
+            }
+        }
+
         $scope.isSaving = true;
         $scope.error = null;
 
@@ -454,9 +496,12 @@ app.controller('AdminGoodsReceiptsController', ['$scope', 'BookstoreService', 'A
         BookstoreService.createGoodsReceipt(receiptData)
             .then(function(response) {
                 $scope.isSaving = false;
-                $scope.success = 'Tạo phiếu nhập hàng thành công!';
+                var successMessage = hasValidationWarnings ? 
+                    'Tạo phiếu nhập hàng thành công! (Có một số cảnh báo đã được ghi nhận)' : 
+                    'Tạo phiếu nhập hàng thành công!';
+                $scope.success = successMessage;
                 $scope.loadGoodsReceipts();
-                $scope.addToast('success', $scope.success);
+                $scope.addToast('success', successMessage);
                 
                 // Hide modal
                 var modal = bootstrap.Modal.getInstance(document.getElementById('goodsReceiptModal'));

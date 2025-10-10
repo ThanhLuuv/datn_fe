@@ -124,7 +124,7 @@ app.controller('RegisterController', ['$scope', '$location', 'AuthService', 'APP
         email: '',
         password: '',
         confirmPassword: '',
-        roleId: '',
+        roleId: 1, // CUSTOMER mặc định
         agreeTerms: false
     };
     $scope.isLoading = false;
@@ -168,7 +168,7 @@ app.controller('RegisterController', ['$scope', '$location', 'AuthService', 'APP
                 email: $scope.registerData.email,
                 password: $scope.registerData.password,
                 confirmPassword: $scope.registerData.confirmPassword,
-                roleId: parseInt($scope.registerData.roleId)
+                roleId: 1
             };
 
             AuthService.register(registerPayload)
@@ -182,7 +182,7 @@ app.controller('RegisterController', ['$scope', '$location', 'AuthService', 'APP
                         email: '',
                         password: '',
                         confirmPassword: '',
-                        roleId: '',
+                        roleId: 1,
                         agreeTerms: false
                     };
                     $scope.registerForm.$setPristine();
@@ -218,7 +218,7 @@ app.controller('RegisterController', ['$scope', '$location', 'AuthService', 'APP
             email: '',
             password: '',
             confirmPassword: '',
-            roleId: '',
+            roleId: 1,
             agreeTerms: false
         };
         $scope.registerForm.$setPristine();

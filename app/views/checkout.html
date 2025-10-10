@@ -109,58 +109,21 @@
                         </div>
                         <div class="card-body">
                             <div class="payment-methods">
-                                <div class="payment-option mb-3">
+                                <div class="payment-option">
                                     <input class="form-check-input" 
                                            type="radio" 
                                            ng-model="form.payment" 
-                                           value="cod" 
-                                           id="payCOD">
-                                    <label class="form-check-label payment-label" for="payCOD">
-                                        <div class="payment-info">
-                                            <div class="payment-icon">
-                                                <i class="bi bi-cash-coin text-success"></i>
-                                            </div>
-                                            <div class="payment-details">
-                                                <h6 class="mb-1">Thanh toán khi nhận hàng (COD)</h6>
-                                                <small class="text-muted">Thanh toán bằng tiền mặt khi nhận được hàng</small>
-                                            </div>
-                                        </div>
-                                    </label>
-                                </div>
-                                
-                                <div class="payment-option mb-3">
-                                    <input class="form-check-input" 
-                                           type="radio" 
-                                           ng-model="form.payment" 
-                                           value="vnpay" 
-                                           id="payVNPAY">
-                                    <label class="form-check-label payment-label" for="payVNPAY">
+                                           value="payos" 
+                                           id="payPayOS"
+                                           checked>
+                                    <label class="form-check-label payment-label" for="payPayOS">
                                         <div class="payment-info">
                                             <div class="payment-icon">
                                                 <i class="bi bi-credit-card text-primary"></i>
                                             </div>
                                             <div class="payment-details">
-                                                <h6 class="mb-1">VNPay</h6>
-                                                <small class="text-muted">Thanh toán qua cổng VNPay (Sandbox)</small>
-                                            </div>
-                                        </div>
-                                    </label>
-                                </div>
-                                
-                                <div class="payment-option">
-                                    <input class="form-check-input" 
-                                           type="radio" 
-                                           ng-model="form.payment" 
-                                           value="momo" 
-                                           id="payMOMO">
-                                    <label class="form-check-label payment-label" for="payMOMO">
-                                        <div class="payment-info">
-                                            <div class="payment-icon">
-                                                <i class="bi bi-phone text-warning"></i>
-                                            </div>
-                                            <div class="payment-details">
-                                                <h6 class="mb-1">MoMo</h6>
-                                                <small class="text-muted">Thanh toán qua ví MoMo (Sandbox)</small>
+                                                <h6 class="mb-1">Thanh toán trực tuyến</h6>
+                                                <small class="text-muted">Thanh toán qua PayOS - Hỗ trợ thẻ ATM, Visa, Mastercard</small>
                                             </div>
                                         </div>
                                     </label>
@@ -230,10 +193,15 @@
                             <div class="d-grid gap-2">
                                 <button class="btn btn-primary btn-lg" 
                                         ng-click="placeOrder()"
-                                        ng-disabled="!form.fullName || !form.phone || !form.address || !form.payment">
-                                    <i class="bi bi-check-circle me-2"></i>Đặt hàng ngay
+                                        ng-disabled="!form.fullName || !form.phone || !form.address || loading">
+                                    <span ng-if="!loading">
+                                        <i class="bi bi-check-circle me-2"></i>Đặt hàng ngay
+                                    </span>
+                                    <span ng-if="loading">
+                                        <i class="bi bi-hourglass-split me-2"></i>Đang xử lý...
+                                    </span>
                                 </button>
-                                <a href="#!/cart" class="btn btn-outline-secondary">
+                                <a href="#!/cart" class="btn btn-outline-secondary" ng-disabled="loading">
                                     <i class="bi bi-arrow-left me-2"></i>Quay lại giỏ hàng
                                 </a>
                             </div>

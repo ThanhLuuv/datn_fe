@@ -81,19 +81,16 @@
 									<button class="btn btn-outline-secondary" ng-click="viewOrder(o)" title="Chi tiết" data-bs-toggle="modal" data-bs-target="#orderDetailModal">
 												<i class="bi bi-eye"></i>
 											</button>
-											<button class="btn btn-outline-success" ng-click="approveOrder(o, true)" ng-if="o.status==='Pending'" title="Duyệt">
-												<i class="bi bi-check2-circle"></i>
-											</button>
-											<button class="btn btn-outline-danger" ng-click="approveOrder(o, false)" ng-if="o.status==='Pending'" title="Từ chối">
-												<i class="bi bi-x-circle"></i>
-											</button>
-											<button class="btn btn-outline-primary" ng-click="assignDelivery(o)" ng-if="o.status==='Pending' || o.status==='Approved' || o.status==='Assigned'" title="Phân công giao">
+										<button class="btn btn-outline-danger" ng-click="approveOrder(o, false)" ng-if="getOrderStatus(o)==='Pending'" title="Hủy đơn">
+											<i class="bi bi-x-circle"></i>
+										</button>
+										<button class="btn btn-outline-primary" ng-click="assignDelivery(o)" ng-if="getOrderStatus(o)==='Pending'" title="Phân công giao">
 												<i class="bi bi-truck"></i>
 											</button>
-											<button class="btn btn-outline-dark" ng-click="confirmDelivered(o)" ng-if="o.status==='Assigned'" title="Xác nhận giao">
+										<button class="btn btn-outline-dark" ng-click="confirmDelivered(o)" ng-if="getOrderStatus(o)==='Assigned'" title="Xác nhận giao">
 												<i class="bi bi-bag-check"></i>
 											</button>
-											<button class="btn btn-outline-warning" ng-click="returnOrder(o)" ng-if="o.status==='Delivered'" title="Trả hàng">
+										<button class="btn btn-outline-warning" ng-click="returnOrder(o)" ng-if="getOrderStatus(o)==='Delivered'" title="Trả hàng">
 												<i class="bi bi-arrow-counterclockwise"></i>
 											</button>
 										</div>
@@ -224,49 +221,81 @@
 					</div>
 				</div>
 				<div class="px-3 pb-3">
-					<div class="d-flex justify-content-between align-items-center mb-2">
-						<h6 class="mb-0"><i class="bi bi-people"></i> Gợi ý nhân viên giao hàng</h6>
-						<div class="d-flex align-items-center gap-2">
-							<input type="datetime-local" class="form-control form-control-sm" style="width: 220px" ng-model="deliveryDateInput" placeholder="Ngày giao" />
-							<button class="btn btn-sm btn-outline-secondary" ng-click="loadDeliveryCandidates($root.selectedOrder.orderId || $root.selectedOrder.id)"><i class="bi bi-arrow-clockwise"></i> Làm mới</button>
-						</div>
-					</div>
-					<div class="table-responsive">
+                    <div class="d-flex justify-content-between align-items-center mb-2" ng-if="getOrderStatus($root.selectedOrder)==='Pending'">
+                        <h6 class="mb-0"><i class="bi bi-people"></i> Gợi ý nhân viên giao hàng</h6>
+                        <div class="d-flex align-items-center gap-2">
+                            <div>
+                                <input type="datetime-local" class="form-control form-control-sm" ng-class="{'is-invalid': dateInvalid}" style="width: 220px" ng-model="deliveryDateInput" ng-change="updateDeliveryDateValidity()" min="{{deliveryDateMin}}" required placeholder="Ngày giao" />
+                                <div class="invalid-feedback d-block" ng-show="dateInvalid">Vui lòng chọn thời điểm giao hợp lệ (không ở quá khứ).</div>
+                            </div>
+                            <button class="btn btn-sm btn-outline-info" ng-click="resetDeliveryDate()" title="Reset ngày giao">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </button>
+                        <button class="btn btn-sm btn-outline-secondary" ng-click="refreshDeliveryCandidates($root.selectedOrder.orderId || $root.selectedOrder.id)" ng-disabled="candidatesLoading">
+                            <span ng-if="!candidatesLoading"><i class="bi bi-arrow-clockwise"></i> Làm mới</span>
+                            <span ng-if="candidatesLoading"><span class="spinner-border spinner-border-sm me-1"></span>Đang tải</span>
+                        </button>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2" ng-if="getOrderStatus($root.selectedOrder)!=='Pending'">
+                        <h6 class="mb-0"><i class="bi bi-person-badge"></i> Nhân viên giao hàng</h6>
+                    </div>
+                    <div class="table-responsive" ng-if="getOrderStatus($root.selectedOrder)==='Pending'">
 						<table class="table table-sm table-hover align-middle">
-							<thead class="table-light">
-								<tr>
-									<th>Nhân viên</th>
-									<th>Khu vực</th>
-									<th class="text-end">Assigned</th>
-									<th class="text-end">Delivered</th>
-									<th class="text-end">Distance</th>
-									<th class="text-end">Workload</th>
-									<th class="text-end">Điểm</th>
-									<th class="text-end">Thao tác</th>
-								</tr>
-							</thead>
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Nhân viên</th>
+                                    <th>Khu vực</th>
+                                    <th class="text-center">Khớp khu vực</th>
+                                    <th class="text-end">Đang giao</th>
+                                    <th class="text-end">Đã giao</th>
+                                    <th class="text-end">Thao tác</th>
+                                </tr>
+                            </thead>
 							<tbody>
-								<tr ng-repeat="c in deliveryCandidates">
-									<td>
-										<div class="fw-semibold">{{c.fullName}} <small class="text-muted">(#{{c.employeeId || c.id}})</small></div>
-										<div class="small text-muted">{{c.phone}} · {{c.email}}</div>
-									</td>
-									<td>{{c.areaName || '—'}}</td>
-									<td class="text-end">{{c.activeAssignedOrders || c.activeAssigned}}</td>
-									<td class="text-end">{{c.totalDeliveredOrders || c.delivered}}</td>
-									<td class="text-end">{{c.distanceScore | number:2}}</td>
-									<td class="text-end">{{c.workloadScore | number:2}}</td>
-									<td class="text-end"><span class="badge bg-primary">{{c.finalScore | number:2}}</span></td>
-									<td class="text-end">
-										<button class="btn btn-sm btn-outline-primary" ng-click="assignDeliveryCandidate($root.selectedOrder, c)"><i class="bi bi-truck"></i> Phân công</button>
+								<tr ng-if="candidatesLoading">
+									<td colspan="8" class="text-center py-3">
+										<div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+										<span class="ms-2 text-muted small">Đang tải gợi ý...</span>
 									</td>
 								</tr>
-								<tr ng-if="deliveryCandidates.length === 0">
-									<td colspan="8" class="text-center text-muted py-2">Chưa có gợi ý. Nhấn "Làm mới" để tải.</td>
+                                <tr ng-repeat="c in deliveryCandidates">
+                                    <td>
+                                        <div class="fw-semibold">{{c.fullName}} <small class="text-muted">(#{{c.employeeId || c.id}})</small></div>
+                                        <div class="small text-muted">{{c.phone || '—'}} · {{c.email || '—'}}</div>
+                                    </td>
+									<td>{{c.areaName || '—'}}</td>
+                                    <td class="text-center">
+                                        <span class="badge" ng-class="{ 'bg-success': c.isAreaMatched, 'bg-secondary': !c.isAreaMatched }">{{c.isAreaMatched ? 'Khớp' : 'Không'}}</span>
+                                    </td>
+                                    <td class="text-end">{{(c.activeAssignedOrders != null) ? c.activeAssignedOrders : ((c.activeAssigned != null) ? c.activeAssigned : 0)}}</td>
+                                    <td class="text-end">{{(c.totalDeliveredOrders != null) ? c.totalDeliveredOrders : ((c.delivered != null) ? c.delivered : 0)}}</td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-primary" ng-click="assignDeliveryCandidate($root.selectedOrder, c)" ng-disabled="dateInvalid || !deliveryDateInput"><i class="bi bi-truck"></i> Phân công</button>
+									</td>
+								</tr>
+								<tr ng-if="!candidatesLoading && deliveryCandidates.length === 0">
+									<td colspan="8" class="text-center text-muted py-2">Chưa có gợi ý.</td>
 								</tr>
 							</tbody>
 						</table>
 					</div>
+                    <div class="table-responsive" ng-if="getOrderStatus($root.selectedOrder)!=='Pending'">
+                        <table class="table table-sm align-middle">
+                            <tbody>
+                                <tr>
+                                    <td style="width:60%">
+                                        <div class="fw-semibold">{{$root.selectedOrder.deliveredByName || $root.selectedOrder.deliveryEmployeeName || 'Chưa rõ'}}</div>
+                                        <div class="small text-muted">ID: {{$root.selectedOrder.deliveredBy || $root.selectedOrder.deliveryEmployeeId || '—'}}</div>
+                                    </td>
+                                    <td class="text-end" style="width:40%">
+                                        <div class="small text-muted">Ngày giao dự kiến</div>
+                                        <div>{{($root.selectedOrder.deliveryDate || $root.selectedOrder.deliveryAt) | date:'yyyy-MM-dd HH:mm'}}</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
 				</div>
@@ -274,6 +303,59 @@
 		</div>
 	</div>
 
+	<!-- Return Modal -->
+	<div class="modal fade" id="returnModal" tabindex="-1">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title"><i class="bi bi-arrow-counterclockwise"></i> Lập phiếu trả</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<div class="mb-2">
+                        <label class="form-label small">Lý do</label>
+                        <input type="text" class="form-control" ng-model="$root.returnModel.reason" placeholder="Lý do trả hàng" />
+					</div>
+					<div class="table-responsive" style="max-height: 320px; overflow:auto;">
+						<table class="table table-sm align-middle">
+							<thead class="table-light">
+								<tr>
+									<th>Sách</th>
+									<th class="text-end">Đã mua</th>
+									<th style="width: 120px" class="text-end">Trả</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr ng-if="returnLoading">
+									<td colspan="3" class="text-center py-3">
+										<div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+										<span class="ms-2 text-muted small">Đang tải dòng đơn...</span>
+									</td>
+								</tr>
+                                <tr ng-repeat="l in $root.returnModel.lines track by $index">
+									<td>
+										<div class="fw-semibold">{{l.bookTitle || ('#' + l.orderLineId)}}</div>
+										<div class="small text-muted">Đơn giá: {{l.unitPrice | currency}}</div>
+									</td>
+                                    <td class="text-end"><span class="badge bg-secondary">{{l.maxQty}}</span></td>
+									<td class="text-end">
+										<input type="number" class="form-control form-control-sm text-end" min="0" max="{{l.maxQty}}" ng-model="l.qtyReturned" />
+									</td>
+								</tr>
+                                <tr ng-if="!returnLoading && (!$root.returnModel || !$root.returnModel.lines || $root.returnModel.lines.length===0)">
+									<td colspan="3" class="text-center text-muted py-2">Không có dòng nào.</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+					<button type="button" class="btn btn-warning" ng-click="submitReturn()"><i class="bi bi-arrow-counterclockwise"></i> Tạo phiếu trả</button>
+				</div>
+			</div>
+		</div>
+	</div>
 	<!-- Toasts -->
 	<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000;">
 		<div class="toast align-items-center text-white bg-{{t.variant}} border-0 mb-2 show" role="alert" aria-live="assertive" aria-atomic="true" ng-repeat="t in toasts">

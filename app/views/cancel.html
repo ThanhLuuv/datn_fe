@@ -1,0 +1,91 @@
+<!-- Payment Cancel Page -->
+<div class="cancel-page py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="cancel-card text-center">
+                    <div class="cancel-icon mb-4">
+                        <i class="bi bi-x-circle-fill text-warning" style="font-size: 5rem;"></i>
+                    </div>
+                    
+                    <h2 class="cancel-title mb-3">Thanh toán bị hủy</h2>
+                    <p class="cancel-message mb-4">
+                        Bạn đã hủy quá trình thanh toán. Đơn hàng chưa được tạo và bạn có thể thử lại bất cứ lúc nào.
+                    </p>
+                    
+                    <div class="cancel-info mb-4">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Lưu ý:</strong> Giỏ hàng của bạn vẫn được giữ nguyên. Bạn có thể tiếp tục thanh toán hoặc chỉnh sửa đơn hàng.
+                        </div>
+                    </div>
+                    
+                    <div class="cancel-actions">
+                        <a href="#!/checkout" class="btn btn-primary btn-lg me-3">
+                            <i class="bi bi-credit-card me-2"></i>Thử lại thanh toán
+                        </a>
+                        <a href="#!/cart" class="btn btn-outline-secondary btn-lg me-3">
+                            <i class="bi bi-cart me-2"></i>Xem giỏ hàng
+                        </a>
+                        <a href="#!/home" class="btn btn-outline-primary btn-lg">
+                            <i class="bi bi-house me-2"></i>Về trang chủ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.cancel-page {
+    background-color: var(--gray-50);
+    min-height: calc(100vh - 60px);
+}
+
+.cancel-card {
+    background: white;
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.cancel-title {
+    color: var(--gray-800);
+    font-weight: 700;
+}
+
+.cancel-message {
+    color: var(--gray-600);
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.cancel-info {
+    margin: 2rem 0;
+}
+
+.cancel-actions {
+    margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+    .cancel-card {
+        padding: 2rem 1rem;
+    }
+    
+    .cancel-icon i {
+        font-size: 4rem !important;
+    }
+    
+    .cancel-actions .btn {
+        display: block;
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+    
+    .cancel-actions .btn:last-child {
+        margin-bottom: 0;
+    }
+}
+</style>

@@ -16,64 +16,7 @@
     <!-- Custom CSS -->
     <link href="css/custom/main.css?v=1.5" rel="stylesheet">
     <link href="css/custom/auth.css?v=1.5" rel="stylesheet">
-    <link href="css/custom/home-improvements.css?v=1.0" rel="stylesheet">
-    <link href="css/custom/gold-theme.css?v=1.0" rel="stylesheet">
-    <link href="css/custom/gold-enhancements.css?v=2.1" rel="stylesheet">
-    <link href="css/custom/gold-forcer.css?v=1.3" rel="stylesheet">
     <style>
-        /* ULTIMATE GOLD OVERRIDE - Cực đại priority */
-        .navbar, .bookstore-navbar {
-            background: linear-gradient(135deg, #FFF8DC, #FFD700, #F4D03F) !important;
-            background-color: #FFD700 !important;
-            color: #2c3e50 !important;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #FFD700, #DAA520) !important;
-            background-color: #FFD700 !important;
-            border: 2px solid #B8860B !important;
-            color: #2c3e50 !important;
-        }
-        .btn-search {
-            background: linear-gradient(135deg, #DAA520, #B8860B) !important;
-            background-color: #DAA520 !important;
-            border: 2px solid #B8860B !important;
-            color: #2c3e50 !important;
-        }
-        .badge, .cart-badge {
-            background: linear-gradient(135deg, #FFD700, #DAA520) !important;
-            background-color: #FFD700 !important;
-            color: #2c3e50 !important;
-            border: 1px solid #B8860B !important;
-        }
-        .text-primary {
-            color: #DAA520 !important;
-        }
-    </style>
-    
-    <style>
-        /* GOLD FORCE OVERRIDE - Tối đa priority */
-        .navbar {
-            background: linear-gradient(135deg, #FFF8DC, #FFD700, #F4D03F) !important;
-            background-color: #FFD700 !important;
-        }
-        .btn-primary, .btn-search {
-            background: linear-gradient(135deg, #FFD700, #DAA520) !important;
-            background-color: #FFD700 !important;
-            border: 2px solid #B8860B !important;
-            color: #2c3e50 !important;
-        }
-        .hero-section, .bg-primary {
-            background: linear-gradient(135deg, #FFFACD, #FFD700) !important;
-            background-color: #FFD700 !important;
-            color: #2c3e50 !important;
-        }
-        .badge.bg-danger, .cart-badge {
-            background: linear-gradient(135deg, #FFD700, #DAA520) !important;
-            background-color: #FFD700 !important;
-            color: #2c3e50 !important;
-        }
-        .navbar .brand-text { color: #2c3e50 !important; }
-        
         /* Enhanced Navbar Styles */
         .navbar .nav-link {
             font-size: 0.95rem;
@@ -142,8 +85,6 @@
     
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <!-- Gold Force Script -->
-    <script src="js/gold-force.js?v=1.0"></script>
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- AngularJS -->
@@ -156,8 +97,8 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body ng-controller="AppController">
-    <!-- Navigation - Hidden for Admin Pages -->
-    <nav class="navbar navbar-expand-lg navbar-dark bookstore-navbar" ng-hide="isAdminPage">
+    <!-- Navigation - Hidden for Admin and Auth Pages -->
+    <nav class="navbar navbar-expand-lg navbar-dark bookstore-navbar" ng-hide="isAdminPage || isAuthPage">
         <div class="container">
             <!-- Brand -->
             <a class="navbar-brand" href="#!/home">
@@ -186,31 +127,14 @@
             
             <!-- Navigation Menu -->
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#!/home">
-                            <i class="bi bi-house-door me-1"></i>Trang chủ
-                        </a>
-                    </li>
-                    <li class="nav-item" can-view-books>
-                        <a class="nav-link" href="#!/books">
-                            <i class="bi bi-book me-1"></i>Sách
-                        </a>
-                    </li>
-                    <li class="nav-item" can-view-books>
-                        <a class="nav-link" href="#!/categories">
-                            <i class="bi bi-tags me-1"></i>Danh mục
-                        </a>
-                    </li>
-                </ul>
+                <ul class="navbar-nav me-auto"></ul>
                 
                 <!-- User Actions -->
                 <ul class="navbar-nav">
                     <!-- Cart -->
                     <li class="nav-item me-2">
-                        <a class="nav-link position-relative cart-link" href="#!/cart">
-                            <i class="bi bi-cart3 me-1"></i>
-                            <span class="d-none d-md-inline">Giỏ hàng</span>
+                        <a class="nav-link position-relative cart-link" href="#!/cart" aria-label="Giỏ hàng">
+                            <i class="bi bi-cart3"></i>
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-badge" 
                                   ng-show="cartCount > 0">{{cartCount}}</span>
                         </a>
@@ -258,12 +182,12 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="container-fluid" ng-class="{'admin-fullscreen': isAdminPage}">
+    <main class="container-fluid" ng-class="{'admin-fullscreen': isAdminPage, 'p-0': isAuthPage}">
         <div ng-view></div>
     </main>
 
     <!-- Footer -->
-    <footer class="bg-dark text-light text-center py-3 mt-5">
+    <footer class="bg-dark text-light text-center py-3 mt-5" ng-hide="isAuthPage">
         <div class="container">
             <p>&copy; 2024 Dự án Frontend. Tất cả quyền được bảo lưu.</p>
         </div>
@@ -291,12 +215,15 @@
     <script src="js/angular/controllers/searchController.js"></script>
     <script src="js/angular/controllers/cartController.js"></script>
     <script src="js/angular/controllers/checkoutController.js"></script>
+    <script src="js/angular/controllers/successController.js"></script>
+    <script src="js/angular/controllers/customerOrdersController.js"></script>
     <script src="js/angular/controllers/purchaseOrderController.js"></script>
     <script src="js/angular/controllers/goodsReceiptController.js"></script>
-    <script src="js/angular/controllers/orderController.js"></script>
-    <script src="js/angular/controllers/promotionController.js"></script>
     <script src="js/angular/controllers/reportController.js"></script>
     <script src="js/angular/controllers/rolesController.js"></script>
+	<script src="js/angular/controllers/orderController.js"></script>
+    <script src="js/angular/controllers/returnController.js"></script>
+    <script src="js/angular/controllers/promotionController.js"></script>
     <!-- Directives -->
     <script src="js/angular/directives/customDirectives.js?v=1.4"></script>
     <script src="js/angular/directives/authDirectives.js?v=1.4"></script>

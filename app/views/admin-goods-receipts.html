@@ -166,9 +166,14 @@
                             <h6>Chi tiết đơn đặt hàng</h6>
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <h6 class="mb-0">Chi tiết đơn đặt hàng</h6>
-                                <button type="button" class="btn btn-outline-secondary btn-sm" ng-click="openImportExcelModal()" ng-disabled="!goodsReceiptData.poId">
-                                    <i class="bi bi-file-earmark-excel"></i> Nhập từ Excel
-                                </button>
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-primary" ng-click="fillAllQuantities()" ng-disabled="!goodsReceiptData.poId || !selectedPurchaseOrder">
+                                        <i class="bi bi-arrow-down-up"></i> Fill tất cả
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" ng-click="openImportExcelModal()" ng-disabled="!goodsReceiptData.poId">
+                                        <i class="bi bi-file-earmark-excel"></i> Nhập từ Excel
+                                    </button>
+                                </div>
                             </div>
                             <div class="table-responsive">
                                 <table class="table table-sm align-middle">
@@ -189,9 +194,13 @@
                                             <td><span class="badge bg-info">{{line.qtyOrdered}}</span></td>
                                             <td>{{line.unitPrice | currency}}</td>
                                             <td>
-                                                <input type="number" class="form-control form-control-sm" ng-model="goodsReceiptData.lines[$index].qtyReceived" min="0" max="{{line.qtyOrdered}}" required ng-change="updateLineTotal($index)" number-input>
+                                                <div class="input-group input-group-sm">
+                                                    <input type="number" class="form-control" ng-model="goodsReceiptData.lines[$index].qtyReceived" min="0" required ng-change="updateLineTotal($index)" number-input>
+                                                    <button type="button" class="btn btn-outline-secondary" ng-click="fillSingleQuantity($index)" title="Điền số lượng đặt">
+                                                        <i class="bi bi-arrow-down-up"></i>
+                                                    </button>
+                                                </div>
                                                 <div class="text-danger small mt-1" ng-if="goodsReceiptData.lines[$index].qtyReceived == null || goodsReceiptData.lines[$index].qtyReceived < 0">Số lượng nhận phải ≥ 0.</div>
-                                                <div class="text-danger small mt-1" ng-if="goodsReceiptData.lines[$index].qtyReceived > line.qtyOrdered">Không vượt quá số lượng đặt.</div>
                                             </td>
                                             <td>
                                                 <strong>{{goodsReceiptData.lines[$index].lineTotal | currency}}</strong>
@@ -203,12 +212,7 @@
                                     </tbody>
                                 </table>
                             </div>
-                    <div class="d-flex justify-content-between align-items-center mt-2">
-                        <div>
-                            <button type="button" class="btn btn-outline-danger btn-sm" ng-if="receiptValidation.hasError" ng-click="cancelPurchaseOrderDueToMismatch()">
-                                <i class="bi bi-x-circle"></i> Hủy đơn đặt hàng
-                            </button>
-                        </div>
+                    <div class="d-flex justify-content-end align-items-center mt-2">
                         <div class="text-end">
                             <div class="small text-muted">Tổng số lượng</div>
                             <div class="fw-bold">{{getTotalQuantity()}}</div>
@@ -223,7 +227,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-primary" ng-disabled="goodsReceiptForm.$invalid || isSaving || !selectedPurchaseOrder || receiptValidation.hasError">
+                    <button type="submit" class="btn btn-primary" ng-disabled="goodsReceiptForm.$invalid || isSaving || !selectedPurchaseOrder">
                         <span ng-if="isSaving" class="spinner-border spinner-border-sm me-2"></span>
                         {{isEditMode ? 'Cập nhật' : 'Tạo mới'}}
                     </button>

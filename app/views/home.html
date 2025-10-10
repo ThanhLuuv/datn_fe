@@ -1,20 +1,74 @@
-<!-- BookStore Homepage - Cleaned -->
+<!-- BookStore Homepage - Simplified -->
 <div class="bookstore-homepage">
-    <!-- Sách bán chạy -->
-    <section class="bestsellers-section py-5">
+    <!-- Banner (non-gradient) - Always visible -->
+    <section class="home-banner">
+        <div class="banner-inner container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="banner-title">Khám phá kho sách phong phú</h1>
+                    <p class="banner-subtitle">Từ văn học, khoa học đến kinh tế, lịch sử và nhiều hơn nữa. Tìm cuốn sách bạn yêu thích ngay hôm nay.</p>
+                    <a class="btn btn-primary btn-lg" href="#!/books">
+                        <i class="bi bi-search me-1"></i>Khám phá ngay
+                    </a>
+                </div>
+                <div class="col-lg-6 text-center">
+                    <img class="banner-image" src="app/assets/images/banner-books.jpg" alt="Sách" onerror="this.src='app/assets/images/book-placeholder.jpg'">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Loading State for Content -->
+    <div class="content-loading" ng-if="loadingGlobal">
+        <div class="loading-container">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Đang tải...</span>
+            </div>
+            <p class="text-muted mt-3">Đang tải nội dung...</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div ng-if="!loadingGlobal">
+        <!-- Categories Section -->
+        <section class="categories-section py-5">
+            <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h2 class="section-title"><i class="bi bi-journals me-2"></i>Danh mục sách</h2>
+                    <p class="section-subtitle">Khám phá các thể loại sách đa dạng</p>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-lg-2 col-md-4 col-sm-6" ng-repeat="category in categories">
+                    <div class="category-card text-center h-100">
+                        <div class="category-icon mb-3">
+                            <i class="bi bi-journal-text"></i>
+                        </div>
+                        <h6 class="category-name">{{category.name || category.categoryName}}</h6>
+                        <small class="text-muted" ng-if="category.bookCount != null">{{category.bookCount}} đầu sách</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- New Books -->
+    <section class="new-books-section py-5">
         <div class="container">
             <div class="row">
                 <div class="col-12 text-center mb-5">
-                    <h2 class="section-title">📚 Sách bán chạy</h2>
-                    <p class="section-subtitle">Những cuốn sách được độc giả yêu thích nhất</p>
+                    <h2 class="section-title"><i class="bi bi-stars me-2"></i>Sách mới</h2>
+                    <p class="section-subtitle">Những đầu sách mới nhất vừa được cập nhật</p>
                 </div>
             </div>
             
             <div class="row g-4" ng-if="!loading">
-                <div class="col-lg-3 col-md-4 col-sm-6" ng-repeat="book in bestSellers | limitTo:8">
+                <div class="col-lg-3 col-md-4 col-sm-6" ng-repeat="book in newBooks | limitTo:8">
                     <div class="book-card h-100" 
                          data-bs-toggle="tooltip" 
-                         ng-attr-title="{{book.title}}&#10;Giá: {{book.unitPrice | currency:'':0}} VNĐ&#10;Đánh giá: {{book.rating || 'N/A'}}⭐&#10;Bán được: {{book.totalSold}} cuốn&#10;{{(book.discountPercent) ? 'Khuyến mãi: ' + book.discountPercent + '% OFF' : ''}}">
+                         ng-attr-title="{{book.title}}&#10;Giá: {{book.currentPrice | currency:'':0}} VNĐ&#10;Tác giả: {{book.authors[0].fullName}}&#10;Năm xuất bản: {{book.publishYear}}&#10;Nhà xuất bản: {{book.publisherName}}">
                         
                         <div class="book-image">
                             <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.jpg'}}" 
@@ -24,39 +78,39 @@
                             <div class="book-badge" ng-if="hasPromo(book)">
                                 <span class="badge bg-danger">{{calculateDiscountPercent(book)}}% OFF</span>
                             </div>
+                            <div class="book-badge new-badge">
+                                <span class="badge bg-success">Mới</span>
+                            </div>
                         </div>
                         
                         <div class="book-info">
                             <h6 class="book-title">{{book.title}}</h6>
                             
-                            <!-- Rating -->
-                            <div class="book-rating mb-2">
-                                <span class="rating-stars">
-                                    <i class="bi bi-star-fill" ng-repeat="star in getStarArray(book.rating)" style="color: #ffc107;"></i>
-                                    <i class="bi bi-star" ng-repeat="star in getEmptyStarArray(book.rating)" style="color: #e9ecef;"></i>
-                                </span>
-                                <span class="rating-text ms-1">{{book.rating || 'Chưa có đánh giá'}}</span>
-                                <small class="text-muted ms-2" ng-if="book.totalReviews">({{book.totalReviews}})</small>
-                            </div>
-                            
-                            <!-- Price -->
-                            <div class="price-row" ng-if="hasPromo(book)">
-                                <span class="price-new">{{getFinalPrice(book) | currency:'':0}} VNĐ</span>
-                                <span class="price-old">{{book.unitPrice | currency:'':0}} VNĐ</span>
-                                <span class="discount-badge">{{calculateDiscountPercent(book)}}% OFF</span>
-                            </div>
-                            <p class="book-price" ng-if="!hasPromo(book)">{{book.unitPrice | currency:'':0}} VNĐ</p>
-                            
-                            <!-- Stats -->
-                            <div class="book-stats">
+                            <!-- Author -->
+                            <div class="book-author mb-2">
                                 <small class="text-muted">
-                                    <i class="bi bi-graph-up me-1"></i>{{book.totalSold ? (book.totalSold + ' cuốn đã bán') : 'Chưa có đơn hàng nào'}}
+                                    <i class="bi bi-person me-1"></i>{{book.authors[0].fullName}}
                                 </small>
                             </div>
                             
+                            <!-- Publisher & Year -->
+                            <div class="book-meta mb-2">
+                                <small class="text-muted">
+                                    <i class="bi bi-building me-1"></i>{{book.publisherName}} • {{book.publishYear}}
+                                </small>
+                            </div>
+                            
+                            <!-- Price (current above, original below; no percent text) -->
+                            <div class="price-block">
+                                <div class="price-current">{{getFinalPrice(book) | currency:'':0}} VNĐ</div>
+                                <div class="price-old">{{book.currentPrice | currency:'':0}} VNĐ</div>
+                            </div>
+                            
                             <!-- Actions -->
-                            <div class="mt-2">
-                                <button class="btn btn-sm btn-primary" ng-click="addToCart(book)">
+                            <div class="book-actions">
+                                <button class="btn btn-sm btn-primary" 
+                                        ng-click="addToCart(book)"
+                                        ng-disabled="!isAuthenticated">
                                     <i class="bi bi-cart-plus me-1"></i>Thêm vào giỏ
                                 </button>
                             </div>
@@ -65,7 +119,6 @@
                 </div>
             </div>
             
-            <!-- Loading State -->
             <div class="row g-4" ng-if="loading">
                 <div class="col-lg-3 col-md-4 col-sm-6" ng-repeat="n in [1,2,3,4,5,6,7,8]">
                     <div class="book-placeholder h-100">
@@ -78,7 +131,173 @@
                 </div>
             </div>
             
-            <!-- Empty State -->
+            <div class="row" ng-if="!loading && newBooks.length === 0">
+                <div class="col-12 text-center">
+                    <div class="empty-state">
+                        <i class="bi bi-book empty-icon"></i>
+                        <h4>Chưa có sách mới</h4>
+                        <p>Chúng tôi sẽ sớm cập nhật những đầu sách mới!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Promotions -->
+    <section id="promotions" class="promotions-section py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h2 class="section-title"><i class="bi bi-percent me-2"></i>Sách khuyến mãi</h2>
+                    <p class="section-subtitle">Những ưu đãi hấp dẫn không thể bỏ qua</p>
+                </div>
+            </div>
+            
+            <div class="row g-4" ng-if="!loading">
+                <div class="col-lg-3 col-md-4 col-sm-6" ng-repeat="book in promotionBooks | limitTo:8">
+                    <div class="book-card h-100" 
+                         data-bs-toggle="tooltip" 
+                         ng-attr-title="{{book.title}}&#10;Giá gốc: {{book.currentPrice | currency:'':0}} VNĐ&#10;Giá khuyến mãi: {{book.discountedPrice | currency:'':0}} VNĐ&#10;Tác giả: {{book.authors[0].fullName}}&#10;Nhà xuất bản: {{book.publisherName}}">
+                        
+                        <div class="book-image">
+                            <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.jpg'}}" 
+                                 alt="{{book.title}}"
+                                 onerror="this.src='app/assets/images/book-placeholder.jpg'">
+                            
+                            <div class="book-badge">
+                                <span class="badge bg-danger">{{calculateDiscountPercent(book)}}% OFF</span>
+                            </div>
+                        </div>
+                        
+                        <div class="book-info">
+                            <h6 class="book-title">{{book.title}}</h6>
+                            
+                            <div class="book-author mb-2">
+                                <small class="text-muted">
+                                    <i class="bi bi-person me-1"></i>{{book.authors[0].fullName}}
+                                </small>
+                            </div>
+                            
+                            <div class="price-block">
+                                <div class="price-current">{{getFinalPrice(book) | currency:'':0}} VNĐ</div>
+                                <div class="price-old">{{book.currentPrice | currency:'':0}} VNĐ</div>
+                            </div>
+                            
+                            <div class="promotion-info mb-2" ng-if="book.activePromotions && book.activePromotions.length > 0">
+                                <small class="text-success">
+                                    <i class="bi bi-gift me-1"></i>{{book.activePromotions[0].name}}
+                                </small>
+                            </div>
+                            
+                            <div class="book-actions">
+                                <button class="btn btn-sm btn-primary" 
+                                        ng-click="addToCart(book)"
+                                        ng-disabled="!isAuthenticated">
+                                    <i class="bi bi-cart-plus me-1"></i>Thêm vào giỏ
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row g-4" ng-if="loading">
+                <div class="col-lg-3 col-md-4 col-sm-6" ng-repeat="n in [1,2,3,4,5,6,7,8]">
+                    <div class="book-placeholder h-100">
+                        <div class="placeholder-image"></div>
+                        <div class="placeholder-content">
+                            <div class="placeholder-title"></div>
+                            <div class="placeholder-price"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row" ng-if="!loading && promotionBooks.length === 0">
+                <div class="col-12 text-center">
+                    <div class="empty-state">
+                        <i class="bi bi-percent empty-icon"></i>
+                        <h4>Chưa có sách khuyến mãi</h4>
+                        <p>Hãy quay lại sau để xem những ưu đãi hấp dẫn!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bestsellers -->
+    <section id="bestsellers" class="bestsellers-section py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h2 class="section-title"><i class="bi bi-fire me-2"></i>Sách bán chạy</h2>
+                    <p class="section-subtitle">Những cuốn sách được độc giả yêu thích nhất</p>
+                </div>
+            </div>
+            
+            <div class="row g-4" ng-if="!loading">
+                <div class="col-lg-3 col-md-4 col-sm-6" ng-repeat="book in bestSellers | limitTo:8">
+                    <div class="book-card h-100" 
+                         data-bs-toggle="tooltip" 
+                         ng-attr-title="{{book.title}}&#10;Giá: {{book.currentPrice | currency:'':0}} VNĐ&#10;Tác giả: {{book.authors[0].fullName}}&#10;Bán được: {{book.totalSold}} cuốn&#10;Nhà xuất bản: {{book.publisherName}}">
+                        
+                        <div class="book-image">
+                            <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.jpg'}}" 
+                                 alt="{{book.title}}"
+                                 onerror="this.src='app/assets/images/book-placeholder.jpg'">
+                            
+                            <div class="book-badge" ng-if="hasPromo(book)">
+                                <span class="badge bg-danger">{{calculateDiscountPercent(book)}}% OFF</span>
+                            </div>
+                            <div class="book-badge bestseller-badge" ng-if="book.totalSold > 0">
+                                <span class="badge bg-warning">Bán chạy</span>
+                            </div>
+                        </div>
+                        
+                        <div class="book-info">
+                            <h6 class="book-title">{{book.title}}</h6>
+                            
+                            <div class="book-author mb-2">
+                                <small class="text-muted">
+                                    <i class="bi bi-person me-1"></i>{{book.authors[0].fullName}}
+                                </small>
+                            </div>
+                            
+                            <div class="price-block">
+                                <div class="price-current">{{getFinalPrice(book) | currency:'':0}} VNĐ</div>
+                                <div class="price-old">{{book.currentPrice | currency:'':0}} VNĐ</div>
+                            </div>
+                            
+                            <div class="book-stats">
+                                <small class="text-muted">
+                                    <i class="bi bi-graph-up me-1"></i>{{book.totalSold ? (book.totalSold + ' cuốn đã bán') : 'Chưa có đơn hàng nào'}}
+                                </small>
+                            </div>
+                            
+                            <div class="book-actions">
+                                <button class="btn btn-sm btn-primary" 
+                                        ng-click="addToCart(book)"
+                                        ng-disabled="!isAuthenticated">
+                                    <i class="bi bi-cart-plus me-1"></i>Thêm vào giỏ
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row g-4" ng-if="loading">
+                <div class="col-lg-3 col-md-4 col-sm-6" ng-repeat="n in [1,2,3,4,5,6,7,8]">
+                    <div class="book-placeholder h-100">
+                        <div class="placeholder-image"></div>
+                        <div class="placeholder-content">
+                            <div class="placeholder-title"></div>
+                            <div class="placeholder-price"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="row" ng-if="!loading && bestSellers.length === 0">
                 <div class="col-12 text-center">
                     <div class="empty-state">
@@ -90,95 +309,5 @@
             </div>
         </div>
     </section>
-
-    <!-- Sách mới -->
-    <section class="new-books-section py-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-12 text-center mb-5">
-                    <h2 class="section-title">🆕 Sách mới</h2>
-                    <p class="section-subtitle">Những đầu sách mới nhất vừa được cập nhật</p>
-                </div>
-            </div>
-            
-            <div class="row g-4" ng-if="!loading">
-                <div class="col-lg-3 col-md-4 col-sm-6" ng-repeat="book in newBooks | limitTo:8">
-                    <div class="book-card h-100" 
-                         data-bs-toggle="tooltip" 
-                         ng-attr-title="{{book.title}}&#10;Giá: {{book.unitPrice | currency:'':0}} VNĐ&#10;Đánh giá: {{book.rating || 'N/A'}}⭐&#10;Bán được: {{book.totalSold}} cuốn&#10;{{(book.discountPercent) ? 'Khuyến mãi: ' + book.discountPercent + '% OFF' : ''}}">
-                        
-                        <div class="book-image">
-                            <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.jpg'}}" 
-                                 alt="{{book.title}}"
-                                 onerror="this.src='app/assets/images/book-placeholder.jpg'">
-                            
-                            <div class="book-badge" ng-if="hasPromo(book)">
-                                <span class="badge bg-danger">{{calculateDiscountPercent(book)}}% OFF</span>
-                            </div>
-                        </div>
-                        
-                        <div class="book-info">
-                            <h6 class="book-title">{{book.title}}</h6>
-                            
-                            <!-- Rating -->
-                            <div class="book-rating mb-2">
-                                <span class="rating-stars">
-                                    <i class="bi bi-star-fill" ng-repeat="star in getStarArray(book.rating)" style="color: #ffc107;"></i>
-                                    <i class="bi bi-star" ng-repeat="star in getEmptyStarArray(book.rating)" style="color: #e9ecef;"></i>
-                                </span>
-                                <span class="rating-text ms-1">{{book.rating || 'Chưa có đánh giá'}}</span>
-                                <small class="text-muted ms-2" ng-if="book.totalReviews">({{book.totalReviews}})</small>
-                            </div>
-                            
-                            <!-- Price -->
-                            <div class="price-row" ng-if="hasPromo(book)">
-                                <span class="price-new">{{getFinalPrice(book) | currency:'':0}} VNĐ</span>
-                                <span class="price-old">{{book.unitPrice | currency:'':0}} VNĐ</span>
-                                <span class="discount-badge">{{calculateDiscountPercent(book)}}% OFF</span>
-                            </div>
-                            <p class="book-price" ng-if="!hasPromo(book)">{{book.unitPrice | currency:'':0}} VNĐ</p>
-                            
-                            <!-- Stats -->
-                            <div class="book-stats">
-                                <small class="text-muted">
-                                    <i class="bi bi-graph-up me-1"></i>{{book.totalSold ? (book.totalSold + ' cuốn đã bán') : 'Chưa có đơn hàng nào'}}
-                                </small>
-                            </div>
-                            
-                            <!-- Actions -->
-                            <div class="mt-2">
-                                <button class="btn btn-sm btn-primary" ng-click="addToCart(book)">
-                                    <i class="bi bi-cart-plus me-1"></i>Thêm vào giỏ
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Loading State -->
-            <div class="row g-4" ng-if="loading">
-                <div class="col-lg-3 col-md-4 col-sm-6" ng-repeat="n in [1,2,3,4,5,6,7,8]">
-                    <div class="book-placeholder h-100">
-                        <div class="placeholder-image"></div>
-                        <div class="placeholder-content">
-                            <div class="placeholder-title"></div>
-                            <div class="placeholder-price"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Empty State -->
-            <div class="row" ng-if="!loading && newBooks.length === 0">
-                <div class="col-12 text-center">
-                    <div class="empty-state">
-                        <i class="bi bi-book empty-icon"></i>
-                        <h4>Chưa có sách mới</h>
-                        <p>Chúng tôi sẽ sớm cập nhật những đầu sách mới!</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    </div>
 </div>

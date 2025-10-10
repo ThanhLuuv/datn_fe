@@ -1,5 +1,14 @@
-app.factory('CartService', ['$rootScope', function($rootScope) {
+app.factory('CartService', ['$rootScope', '$http', 'APP_CONFIG', function($rootScope, $http, APP_CONFIG) {
+    var baseUrl = APP_CONFIG.API_BASE_URL;
     var STORAGE_KEY = 'bookstore_cart_v1';
+
+    function getAuthHeaders() {
+        var token = localStorage.getItem('token');
+        return {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json'
+        };
+    }
 
     function readCart() {
         try {
@@ -33,6 +42,66 @@ app.factory('CartService', ['$rootScope', function($rootScope) {
     }
 
     return {
+        // API-based methods
+        addToCart: function(isbn, quantity) {
+            return $http({
+                method: 'POST',
+                url: baseUrl + '/cart/add',
+                data: { isbn: isbn, quantity: quantity },
+                headers: getAuthHeaders()
+            });
+        },
+
+        getCartFromAPI: function() {
+            return $http({
+                method: 'GET',
+                url: baseUrl + '/cart',
+                headers: getAuthHeaders()
+            });
+        },
+
+        updateCartItem: function(cartItemId, quantity) {
+            return $http({
+                method: 'PUT',
+                url: baseUrl + '/cart/' + cartItemId,
+                data: { quantity: quantity },
+                headers: getAuthHeaders()
+            });
+        },
+
+        removeCartItem: function(cartItemId) {
+            return $http({
+                method: 'DELETE',
+                url: baseUrl + '/cart/' + cartItemId,
+                headers: getAuthHeaders()
+            });
+        },
+
+        clearCartAPI: function() {
+            return $http({
+                method: 'DELETE',
+                url: baseUrl + '/cart/clear',
+                headers: getAuthHeaders()
+            });
+        },
+
+        removeBookFromCart: function(isbn) {
+            return $http({
+                method: 'DELETE',
+                url: baseUrl + '/cart/book/' + isbn,
+                headers: getAuthHeaders()
+            });
+        },
+
+        getCartSummary: function() {
+            return $http({
+                method: 'GET',
+                url: baseUrl + '/cart/summary',
+                headers: getAuthHeaders()
+            });
+        },
+
+        // Local storage methods (fallback)
         getCart: function() {
             return computeTotals(readCart());
         },

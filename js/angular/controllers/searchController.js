@@ -5,6 +5,7 @@ app.controller('SearchController', ['$scope', '$location', 'BookstoreService', '
     $scope.results = [];
     $scope.total = 0;
     $scope.loaded = false;
+    $scope.loading = false;
     $scope.Math = window.Math;
 
     $scope.getFinalPrice = function(book) {
@@ -37,10 +38,31 @@ app.controller('SearchController', ['$scope', '$location', 'BookstoreService', '
     };
 
     $scope.doSearch = function() {
+        $scope.loading = true;
         if (!$scope.query) {
-            $scope.results = [];
-            $scope.total = 0;
-            $scope.loaded = true;
+            // Empty query => fetch all books (pageable)
+            BookstoreService.getBooks({ pageNumber: $scope.page, pageSize: $scope.pageSize, searchTerm: '' })
+                .then(function(res){
+                    var resp = res.data || {};
+                    if (resp.success && resp.data && Array.isArray(resp.data.books)) {
+                        $scope.results = resp.data.books;
+                        $scope.total = resp.data.totalCount || 0;
+                    } else if (Array.isArray(resp.data)) {
+                        $scope.results = resp.data;
+                        $scope.total = resp.totalCount || 0;
+                    } else {
+                        $scope.results = [];
+                        $scope.total = 0;
+                    }
+                    $scope.loaded = true;
+                    $scope.loading = false;
+                })
+                .catch(function(){
+                    $scope.results = [];
+                    $scope.total = 0;
+                    $scope.loaded = true;
+                    $scope.loading = false;
+                });
             return;
         }
         BookstoreService.searchBooksByTitle($scope.query, $scope.page, $scope.pageSize)
@@ -56,12 +78,14 @@ app.controller('SearchController', ['$scope', '$location', 'BookstoreService', '
                     }).catch(function(){});
                 });
                 $scope.loaded = true;
+                $scope.loading = false;
                 setTimeout(function() { if (typeof initializeTooltips === 'function') initializeTooltips(); }, 100);
             })
             .catch(function() {
                 $scope.results = [];
                 $scope.total = 0;
                 $scope.loaded = true;
+                $scope.loading = false;
             });
     };
 

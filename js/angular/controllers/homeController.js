@@ -2,20 +2,39 @@
 app.controller('HomeController', ['$scope', '$http', 'DataService', 'BookstoreService', 'CartService', function($scope, $http, DataService, BookstoreService, CartService) {
     $scope.title = 'BookStore - Khám phá thế giới qua những trang sách';
     $scope.message = 'Hệ thống quản lý hiệu sách hiện đại';
-    $scope.features = [];
     $scope.categories = [];
-    $scope.stats = {};
     $scope.loading = true;
+    $scope.loadingGlobal = false;
+    var pendingLoads = 0;
+
+    function beginLoading() {
+        pendingLoads++;
+        $scope.loadingGlobal = true;
+    }
+
+    function endLoading() {
+        pendingLoads = Math.max(0, pendingLoads - 1);
+        if (pendingLoads === 0) $scope.loadingGlobal = false;
+    }
     $scope.bestSellers = [];
     $scope.newBooks = [];
+    $scope.promotionBooks = [];
     $scope.error = '';
 
     // Compute promotional price per rules: prefer percent, show lowest
     $scope.getFinalPrice = function(book) {
         if (!book) return 0;
-        // prefer server-calculated effective price if present
+        
+        // Use discountedPrice if available (from new API)
+        if (book.discountedPrice != null) return Math.round(book.discountedPrice);
+        
+        // Use currentPrice as fallback
+        if (book.currentPrice != null) return Math.round(book.currentPrice);
+        
+        // Legacy support for old API structure
         if (book.effectivePrice != null) return Math.round(book.effectivePrice);
-        var base = book.unitPrice || 0;
+        
+        var base = book.unitPrice || book.averagePrice || 0;
         var percent = book.promoPercent || book.discountPercent || null;
         var amount = book.promoAmount || book.discountAmount || null;
         var priceByPercent = (percent && percent > 0) ? Math.round(base * (1 - percent / 100)) : null;
@@ -26,14 +45,22 @@ app.controller('HomeController', ['$scope', '$http', 'DataService', 'BookstoreSe
         return Math.min.apply(null, candidates);
     };
     
-    $scope.hasPromo = function(book) { return $scope.getFinalPrice(book) < (book.unitPrice || 0); };
+    $scope.hasPromo = function(book) { 
+        if (!book) return false;
+        var finalPrice = $scope.getFinalPrice(book);
+        var originalPrice = book.currentPrice || book.unitPrice || book.averagePrice || 0;
+        return finalPrice < originalPrice || book.hasPromotion === true;
+    };
     
     // Calculate discount percentage
     $scope.calculateDiscountPercent = function(book) {
-        if (book && book.unitPrice > 0) {
+        if (book) {
             var finalPrice = $scope.getFinalPrice(book);
-            var discount = Math.round(((book.unitPrice - finalPrice) / book.unitPrice) * 100);
-            return discount;
+            var originalPrice = book.currentPrice || book.unitPrice || book.averagePrice || 0;
+            if (originalPrice > 0) {
+                var discount = Math.round(((originalPrice - finalPrice) / originalPrice) * 100);
+                return discount;
+            }
         }
         return 0;
     };
@@ -42,13 +69,27 @@ app.controller('HomeController', ['$scope', '$http', 'DataService', 'BookstoreSe
     $scope.getStarArray = function(rating) {
         if (!rating) return [];
         var filledStars = Math.floor(parseFloat(rating));
-        return new Array(filledStars);
+        var stars = [];
+        for (var i = 0; i < filledStars; i++) {
+            stars.push(i);
+        }
+        return stars;
     };
     
     $scope.getEmptyStarArray = function(rating) {
-        if (!rating) return new Array(5);
+        if (!rating) {
+            var emptyStars = [];
+            for (var i = 0; i < 5; i++) {
+                emptyStars.push(i);
+            }
+            return emptyStars;
+        }
         var filledStars = Math.floor(parseFloat(rating));
-        return new Array(5 - filledStars);
+        var emptyStars = [];
+        for (var i = 0; i < (5 - filledStars); i++) {
+            emptyStars.push(i);
+        }
+        return emptyStars;
     };
 
     $scope.addToCart = function(book) {
@@ -68,72 +109,21 @@ app.controller('HomeController', ['$scope', '$http', 'DataService', 'BookstoreSe
 
     // Initialize controller
     $scope.init = function() {
-        $scope.loadFeatures();
         $scope.loadCategories();
-        $scope.loadStats();
+        $scope.loadPromotionBooks();
         $scope.loadBestSellers();
         $scope.loadNewBooks();
     };
 
-    // Load features data
-    $scope.loadFeatures = function() {
-        // Default features for bookstore
-        $scope.features = [
-            {
-                id: 1,
-                title: 'Kho sách đa dạng',
-                description: 'Hàng nghìn đầu sách từ văn học kinh điển đến sách khoa học công nghệ mới nhất',
-                icon: 'bi-book'
-            },
-            {
-                id: 2,
-                title: 'Tìm kiếm thông minh',
-                description: 'Hệ thống tìm kiếm nâng cao giúp bạn dễ dàng tìm được cuốn sách yêu thích',
-                icon: 'bi-search'
-            },
-            {
-                id: 3,
-                title: 'Giao hàng nhanh chóng',
-                description: 'Dịch vụ giao hàng tận nơi nhanh chóng và an toàn trên toàn quốc',
-                icon: 'bi-truck'
-            },
-            {
-                id: 4,
-                title: 'Giá cả hợp lý',
-                description: 'Giá sách cạnh tranh với nhiều chương trình khuyến mãi hấp dẫn',
-                icon: 'bi-tag'
-            },
-            {
-                id: 5,
-                title: 'Đánh giá uy tín',
-                description: 'Hệ thống đánh giá và review sách từ cộng đồng người đọc',
-                icon: 'bi-star'
-            },
-            {
-                id: 6,
-                title: 'Hỗ trợ 24/7',
-                description: 'Đội ngũ chăm sóc khách hàng chuyên nghiệp, hỗ trợ 24/7',
-                icon: 'bi-headset'
-            }
-        ];
-        $scope.loading = false;
-    };
+    // Removed features section per simplified home requirements
 
-    // Load bestsellers (last 30 days, top 10)
+    // Load bestsellers using new API
     $scope.loadBestSellers = function() {
-        BookstoreService.getBestSellers(30, 10)
+        beginLoading();
+        BookstoreService.getBestsellerBooks(8)
             .then(function(res) {
                 $scope.bestSellers = (res.data && res.data.data) ? res.data.data : [];
                 
-                // Chỉ sử dụng dữ liệu thật từ API: không inject mock rating/review/promotion
-                
-                // fetch effective prices in parallel (best effort)
-                $scope.bestSellers.forEach(function(b){
-                    BookstoreService.getEffectivePrice(b.isbn).then(function(r){
-                        var d = r.data && (r.data.data || r.data);
-                        if (d && typeof d.effectivePrice !== 'undefined') b.effectivePrice = d.effectivePrice;
-                    }).catch(function(){});
-                });
                 // Initialize tooltips after data is loaded
                 setTimeout(function() {
                     if (typeof initializeTooltips === 'function') {
@@ -144,23 +134,17 @@ app.controller('HomeController', ['$scope', '$http', 'DataService', 'BookstoreSe
             .catch(function() {
                 $scope.bestSellers = [];
                 $scope.error = 'Không tải được danh sách bán chạy';
-            });
+            })
+            .finally(function() { $scope.loading = false; endLoading(); });
     };
 
-    // Load new books (last 30 days, top 10)
+    // Load new books using new API
     $scope.loadNewBooks = function() {
-        BookstoreService.getNewBooks(30, 10)
+        beginLoading();
+        BookstoreService.getLatestBooks(8)
             .then(function(res) {
                 $scope.newBooks = (res.data && res.data.data) ? res.data.data : [];
                 
-                // Chỉ sử dụng dữ liệu thật từ API: không inject mock rating/review/promotion
-                
-                $scope.newBooks.forEach(function(b){
-                    BookstoreService.getEffectivePrice(b.isbn).then(function(r){
-                        var d = r.data && (r.data.data || r.data);
-                        if (d && typeof d.effectivePrice !== 'undefined') b.effectivePrice = d.effectivePrice;
-                    }).catch(function(){});
-                });
                 // Initialize tooltips after data is loaded
                 setTimeout(function() {
                     if (typeof initializeTooltips === 'function') {
@@ -172,59 +156,88 @@ app.controller('HomeController', ['$scope', '$http', 'DataService', 'BookstoreSe
                 $scope.newBooks = [];
                 $scope.error = 'Không tải được sách mới';
             })
-            .finally(function() { $scope.loading = false; });
+            .finally(function() { $scope.loading = false; endLoading(); });
     };
 
-    // Load categories data
+    // Load promotion books using new API
+    $scope.loadPromotionBooks = function() {
+        beginLoading();
+        BookstoreService.getPromotionBooks(8)
+            .then(function(res) {
+                $scope.promotionBooks = (res.data && res.data.data) ? res.data.data : [];
+                
+                // Initialize tooltips after data is loaded
+                setTimeout(function() {
+                    if (typeof initializeTooltips === 'function') {
+                        initializeTooltips();
+                    }
+                }, 100);
+            })
+            .catch(function() {
+                $scope.promotionBooks = [];
+                $scope.error = 'Không tải được sách khuyến mãi';
+            })
+            .finally(function() { $scope.loading = false; endLoading(); });
+    };
+
+    // Load categories data from API
     $scope.loadCategories = function() {
-        $scope.categories = [
-            {
-                id: 1,
-                name: 'Văn học',
-                icon: 'bi-book-half',
-                bookCount: 450
-            },
-            {
-                id: 2,
-                name: 'Khoa học',
-                icon: 'bi-cpu',
-                bookCount: 320
-            },
-            {
-                id: 3,
-                name: 'Kinh tế',
-                icon: 'bi-graph-up',
-                bookCount: 280
-            },
-            {
-                id: 4,
-                name: 'Lịch sử',
-                icon: 'bi-clock-history',
-                bookCount: 200
-            },
-            {
-                id: 5,
-                name: 'Nghệ thuật',
-                icon: 'bi-palette',
-                bookCount: 150
-            },
-            {
-                id: 6,
-                name: 'Thiếu nhi',
-                icon: 'bi-heart',
-                bookCount: 300
-            }
-        ];
+        BookstoreService.getCategories({ pageNumber: 1, pageSize: 12, searchTerm: '' })
+            .then(function(response) {
+                if (response && response.data) {
+                    if (response.data.success && response.data.data && Array.isArray(response.data.data.categories)) {
+                        $scope.categories = response.data.data.categories;
+                    } else if (Array.isArray(response.data.data)) {
+                        $scope.categories = response.data.data;
+                    } else if (Array.isArray(response.data)) {
+                        $scope.categories = response.data;
+                    } else {
+                        $scope.categories = [];
+                    }
+                } else {
+                    $scope.categories = [];
+                }
+            })
+            .catch(function() {
+                $scope.categories = [];
+            });
     };
 
-    // Load stats data
-    $scope.loadStats = function() {
-        $scope.stats = {
-            totalBooks: '3,500+',
-            totalUsers: '1,250+',
-            totalOrders: '500+',
-            growthRate: 15.5
-        };
+    // Add to cart function
+    $scope.addToCart = function(book) {
+        if (!book || !book.isbn) {
+            if (window.showNotification) {
+                window.showNotification('Thông tin sách không hợp lệ', 'danger');
+            }
+            return;
+        }
+
+        CartService.addToCart(book.isbn, 1)
+            .then(function(response) {
+                if (response && response.data && response.data.success) {
+                    if (window.showNotification) {
+                        window.showNotification('Đã thêm "' + book.title + '" vào giỏ hàng', 'success');
+                    }
+                    // Update cart count
+                    $scope.$emit('cart:changed');
+                } else {
+                    if (window.showNotification) {
+                        window.showNotification('Không thể thêm vào giỏ hàng', 'warning');
+                    }
+                }
+            })
+            .catch(function(error) {
+                console.error('Add to cart error:', error);
+                if (error.data && error.data.message) {
+                    if (window.showNotification) {
+                        window.showNotification(error.data.message, 'danger');
+                    }
+                } else {
+                    if (window.showNotification) {
+                        window.showNotification('Không thể thêm vào giỏ hàng', 'danger');
+                    }
+                }
+            });
     };
 
     // Initialize when controller loads

@@ -599,6 +599,89 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
+    // ==================== BOOK APIs (NEW) ====================
+    
+    // Tìm kiếm sách với các filter
+    this.searchBooks = function(params) {
+        var queryParams = {
+            searchTerm: params.searchTerm || '',
+            categoryId: params.categoryId || '',
+            minPrice: params.minPrice || '',
+            maxPrice: params.maxPrice || '',
+            sortBy: params.sortBy || 'title',
+            sortDirection: params.sortDirection || 'asc',
+            pageNumber: params.pageNumber || 1,
+            pageSize: params.pageSize || 10
+        };
+        
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/book/search',
+            params: queryParams
+        });
+    };
+
+    // Sách có khuyến mãi
+    this.getPromotionBooks = function(limit) {
+        var queryParams = { limit: Math.min(Math.max(parseInt(limit) || 10, 1), 50) };
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/book/promotions',
+            params: queryParams
+        });
+    };
+
+    // Sách bán chạy nhất
+    this.getBestsellerBooks = function(limit) {
+        var queryParams = { limit: Math.min(Math.max(parseInt(limit) || 10, 1), 50) };
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/book/bestsellers',
+            params: queryParams
+        });
+    };
+
+    // Sách mới nhất
+    this.getLatestBooks = function(limit) {
+        var queryParams = { limit: Math.min(Math.max(parseInt(limit) || 10, 1), 50) };
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/book/latest',
+            params: queryParams
+        });
+    };
+
+    // Chi tiết sách theo ISBN
+    this.getBookDetail = function(isbn) {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/book/' + encodeURIComponent(isbn)
+        });
+    };
+
+    // Danh sách tác giả
+    this.getBookAuthors = function() {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/book/authors'
+        });
+    };
+
+    // Sách theo nhà xuất bản
+    this.getBooksByPublisherId = function(publisherId, params) {
+        var queryParams = {
+            pageNumber: params.pageNumber || 1,
+            pageSize: params.pageSize || 10,
+            searchTerm: params.searchTerm || ''
+        };
+        
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/book/by-publisher/' + publisherId,
+            params: queryParams
+        });
+    };
+
     // Search by title
     this.searchBooksByTitle = function(title, page, pageSize) {
         return $http({
@@ -791,21 +874,49 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
 
     // ==================== CUSTOMER ORDER APIs ====================
 
-    // Lấy danh sách đơn hàng
+    // Tạo đơn hàng (Customer)
+    this.createOrder = function(orderPayload) {
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/order',
+            data: orderPayload,
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Lấy danh sách đơn hàng (Admin/Employee)
     this.getOrders = function(params) {
         params = params || {};
         var queryParams = {
+            pageNumber: params.pageNumber || 1,
+            pageSize: params.pageSize || 10,
             keyword: params.keyword || '',
             customerId: params.customerId || '',
             status: params.status || '',
             fromDate: params.fromDate || '',
-            toDate: params.toDate || '',
-            pageNumber: params.pageNumber || 1,
-            pageSize: params.pageSize || 10
+            toDate: params.toDate || ''
         };
         return $http({
             method: 'GET',
             url: baseUrl + '/order',
+            headers: getAuthHeaders(),
+            params: queryParams
+        });
+    };
+
+    // Lấy đơn hàng của khách hàng
+    this.getMyOrders = function(params) {
+        params = params || {};
+        var queryParams = {
+            pageNumber: params.pageNumber || 1,
+            pageSize: params.pageSize || 10,
+            status: params.status || '',
+            fromDate: params.fromDate || '',
+            toDate: params.toDate || ''
+        };
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/order/my-orders',
             headers: getAuthHeaders(),
             params: queryParams
         });
@@ -859,6 +970,16 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
+    // ==================== PAYMENT APIs ====================
+    this.createPaymentLink = function(payload) {
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/payment/create-link',
+            data: payload,
+            headers: getAuthHeaders()
+        });
+    };
+
     // Trả hàng (Return order)
     this.returnOrder = function(orderId, payload) {
         return $http({
@@ -866,6 +987,55 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
             url: baseUrl + '/order/' + orderId + '/return',
             data: payload || {},
             headers: getAuthHeaders()
+        });
+    };
+
+    // Lập phiếu trả (API mới)
+    this.createReturn = function(returnRequest) {
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/return',
+            data: returnRequest,
+            headers: getAuthHeaders()
+        });
+    };
+
+    // ==================== RETURN MANAGEMENT APIs ====================
+
+    // Danh sách phiếu trả (có filter và phân trang)
+    this.getReturns = function(params) {
+        params = params || {};
+        var queryParams = {
+            invoiceId: params.invoiceId || '',
+            fromDate: params.fromDate || '',
+            toDate: params.toDate || '',
+            pageNumber: params.pageNumber || 1,
+            pageSize: params.pageSize || 10
+        };
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/return',
+            headers: getAuthHeaders(),
+            params: queryParams
+        });
+    };
+
+    // Chi tiết phiếu trả
+    this.getReturnById = function(returnId) {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/return/' + returnId,
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Cập nhật trạng thái phiếu trả
+    this.updateReturnStatus = function(returnId, data) {
+        return $http({
+            method: 'PUT',
+            url: baseUrl + '/return/' + returnId + '/status',
+            headers: getAuthHeaders(),
+            data: data
         });
     };
 

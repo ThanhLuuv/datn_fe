@@ -1,10 +1,10 @@
-app.controller('CheckoutController', ['$scope', '$location', 'CartService', function($scope, $location, CartService) {
+app.controller('CheckoutController', ['$scope', '$location', 'CartService', 'BookstoreService', 'AuthService', function($scope, $location, CartService, BookstoreService, AuthService) {
     $scope.form = {
         fullName: '',
         phone: '',
         city: 'hcm_inner',
         address: '',
-        payment: 'cod'
+        payment: 'payos'
     };
 
     function getShippingFee(city) {
@@ -22,14 +22,43 @@ app.controller('CheckoutController', ['$scope', '$location', 'CartService', func
 
     $scope.recompute = compute;
 
+    $scope.loading = false;
+
     $scope.placeOrder = function() {
         if ($scope.cart.items.length === 0) return;
-        // For now, simulate order placement
-        if (window.showNotification) {
-            window.showNotification('Đặt hàng thành công! Tổng tiền: ' + $scope.grandTotal.toLocaleString('vi-VN') + ' VNĐ', 'success');
-        }
-        CartService.clear();
-        $location.path('/home');
+        $scope.loading = true;
+        var payload = {
+            receiverName: $scope.form.fullName,
+            receiverPhone: $scope.form.phone,
+            shippingAddress: $scope.form.address,
+            lines: $scope.cart.items.map(function(it){ return { isbn: it.isbn, qty: it.qty }; })
+        };
+        BookstoreService.createOrder(payload)
+            .then(function(res){
+                var data = res && res.data ? res.data : {};
+                var order = data.data || data;
+                if ($scope.form.payment === 'payos') {
+                    // Use paymentUrl from order creation response
+                    var paymentUrl = order.paymentUrl || (data && data.paymentUrl);
+                    if (paymentUrl) {
+                        window.location.href = paymentUrl;
+                    } else {
+                        if (window.showNotification) window.showNotification('Không tạo được link thanh toán, đơn đã lưu', 'warning');
+                        CartService.clear();
+                        $location.path('/home');
+                    }
+                } else {
+                    // Store order info for success page
+                    localStorage.setItem('lastOrderId', order.orderId || order.id);
+                    localStorage.setItem('lastOrderTotal', $scope.grandTotal);
+                    CartService.clear();
+                    $location.path('/success');
+                }
+            })
+            .catch(function(err){
+                if (window.showNotification) window.showNotification('Đặt hàng thất bại', 'danger');
+            })
+            .finally(function(){ $scope.loading = false; });
     };
 
     // init

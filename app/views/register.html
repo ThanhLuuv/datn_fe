@@ -26,7 +26,7 @@
                     <!-- Register Form -->
                     <form name="registerForm" ng-submit="register()" novalidate>
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-12 mb-3">
                                 <label for="email" class="form-label">
                                     <i class="bi bi-envelope"></i> Email *
                                 </label>
@@ -42,29 +42,10 @@
                                     <span ng-show="registerForm.email.$error.email">Email không hợp lệ</span>
                                 </div>
                             </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="roleId" class="form-label">
-                                    <i class="bi bi-person-badge"></i> Loại tài khoản *
-                                </label>
-                                <select class="form-select" 
-                                        id="roleId" 
-                                        ng-model="registerData.roleId"
-                                        ng-class="{'is-invalid': registerForm.roleId.$invalid && registerForm.roleId.$touched}"
-                                        required>
-                                    <option value="">Chọn loại tài khoản</option>
-                                    <option value="1">Khách hàng (CUSTOMER)</option>
-                                    <option value="2">Nhân viên (EMPLOYEE)</option>
-                                    <option value="3">Quản trị viên (ADMIN)</option>
-                                </select>
-                                <div class="invalid-feedback" ng-show="registerForm.roleId.$invalid && registerForm.roleId.$touched">
-                                    Vui lòng chọn loại tài khoản
-                                </div>
-                            </div>
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-12 mb-3">
                                 <label for="password" class="form-label">
                                     <i class="bi bi-lock"></i> Mật khẩu *
                                 </label>
@@ -93,8 +74,7 @@
                                     </small>
                                 </div>
                             </div>
-
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-12 mb-3">
                                 <label for="confirmPassword" class="form-label">
                                     <i class="bi bi-lock-fill"></i> Xác nhận mật khẩu *
                                 </label>

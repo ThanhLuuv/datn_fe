@@ -19,38 +19,7 @@
             </div>
         </div>
 
-        <!-- Search Form -->
-        <div class="search-form mb-4">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-8">
-                            <div class="search-input-group">
-                                <input type="text" 
-                                       class="form-control form-control-lg" 
-                                       placeholder="Nhập tên sách, tác giả hoặc từ khóa..." 
-                                       ng-model="query" 
-                                       ng-keypress="$event.which === 13 && doSearch()"
-                                       autofocus>
-                                <button class="btn btn-primary btn-lg" ng-click="doSearch()">
-                                    <i class="bi bi-search me-2"></i>Tìm kiếm
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="search-filters">
-                                <select class="form-select form-select-lg" ng-model="sortBy" ng-change="doSearch()">
-                                    <option value="title">Sắp xếp theo tên</option>
-                                    <option value="price_asc">Giá thấp đến cao</option>
-                                    <option value="price_desc">Giá cao đến thấp</option>
-                                    <option value="newest">Mới nhất</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- Search Form (removed - using header search) -->
 
         <!-- Loading State -->
         <div class="text-center py-5" ng-if="loading">
@@ -64,30 +33,22 @@
         <div class="search-results" ng-if="!loading && results.length > 0">
             <div class="row g-4">
                 <div class="col-lg-3 col-md-4 col-sm-6" ng-repeat="book in results">
-                    <div class="book-card" 
-                         data-bs-toggle="tooltip" 
-                         data-bs-placement="top" 
-                         data-bs-html="true"
-                         title="<strong>{{book.title}}</strong><br>Giá: {{book.unitPrice | currency:'':0}} VNĐ<br>ISBN: {{book.isbn}}">
+                    <div class="book-card h-100"
+                         data-bs-toggle="tooltip"
+                         ng-attr-title="{{book.title}}&#10;Giá: {{(book.currentPrice || book.unitPrice) | currency:'':0}} VNĐ&#10;ISBN: {{book.isbn}}">
                         <div class="book-image">
-                            <img ng-src="{{book.imageUrl || 'https://via.placeholder.com/200x250'}}" 
-                                 alt="{{book.title}}" 
-                                 class="img-fluid">
-                            <div class="book-badge">
-                                <span class="badge bg-info">Tìm thấy</span>
-                            </div>
+                            <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.jpg'}}" alt="{{book.title}}">
                         </div>
                         <div class="book-info">
                             <h6 class="book-title">{{book.title}}</h6>
                             <div class="book-meta mb-2">
                                 <small class="text-muted">ISBN: {{book.isbn}}</small>
                             </div>
-                            <div class="price-row" ng-if="hasPromo(book)">
-                                <span class="price-new">{{getFinalPrice(book) | currency:'':0}} VNĐ</span>
-                                <span class="price-old">{{book.unitPrice | currency:'':0}} VNĐ</span>
+                            <div class="price-block">
+                                <div class="price-current">{{(getFinalPrice && getFinalPrice(book)) || (book.currentPrice || book.unitPrice) | currency:'':0}} VNĐ</div>
+                                <div class="price-old">{{(book.currentPrice || book.unitPrice) | currency:'':0}} VNĐ</div>
                             </div>
-                            <p class="book-price" ng-if="!hasPromo(book)">{{book.unitPrice | currency:'':0}} VNĐ</p>
-                            <div class="book-actions mt-3">
+                            <div class="book-actions">
                                 <button class="btn btn-sm btn-primary w-100" ng-click="addToCart(book)">
                                     <i class="bi bi-cart-plus me-1"></i>Thêm vào giỏ
                                 </button>
