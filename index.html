@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" ng-app="myApp">
+<html lang="vi" ng-app="myApp" ng-strict-di>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -75,7 +75,7 @@
     </style>
     
     <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <!-- <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script> -->
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- AngularJS -->
@@ -86,6 +86,18 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <!-- SheetJS for Excel parsing -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    
+    <!-- Debug Scripts -->
+    <script>
+        // English: log any script load error (404, CORS, MIME)
+        // Tiếng Việt: log lỗi tải file .js (404, CORS, MIME)
+        window.addEventListener('error', function (e) {
+            const t = e.target || e.srcElement;
+            if (t && t.tagName === 'SCRIPT') {
+                console.error('❌ Script load failed:', t.src || t.getAttribute('src'));
+            }
+        }, true);
+    </script>
 </head>
 <body ng-controller="AppController">
     <!-- Navigation - Hidden for Admin and Auth Pages -->
@@ -230,6 +242,18 @@
 
     <!-- AngularJS App Module -->
     <script src="js/angular/app.js?v=1.5"></script>
+    
+    <!-- Debug: Check if myApp module exists -->
+    <script>
+        // English: ensure the app module exists before loading the rest
+        // Tiếng Việt: đảm bảo module app tồn tại trước khi load phần còn lại
+        try {
+            angular.module('myApp');
+            console.log('✅ myApp FOUND');
+        } catch (e) {
+            console.error('⛔ myApp NOT FOUND. app.js chưa chạy hoặc lỗi cú pháp?', e);
+        }
+    </script>
     
     <!-- Configuration -->
     <script src="js/angular/app.config.js?v=1.3"></script>

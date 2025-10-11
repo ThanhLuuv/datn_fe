@@ -1,0 +1,19 @@
+<!doctype html>
+<html ng-app="myApp" ng-strict-di>
+<head>
+    <meta charset="utf-8">
+    <title>Debug Page</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script>
+        angular.module('myApp', [])
+        .controller('AppController', ['$scope', function($scope){ 
+            $scope.ok = 'OK'; 
+            console.log('Debug AppController loaded successfully');
+        }]);
+    </script>
+</head>
+<body ng-controller="AppController">
+    <h1>{{ok}}</h1>
+    <p>If you see "OK" above, AngularJS is working correctly.</p>
+</body>
+</html>
