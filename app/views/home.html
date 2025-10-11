@@ -12,7 +12,7 @@
                     </a>
                 </div>
                 <div class="col-lg-6 text-center">
-                    <img class="banner-image" src="app/assets/images/banner-books.jpg" alt="Sách" onerror="this.src='app/assets/images/book-placeholder.jpg'">
+                    <img class="banner-image" src="app/assets/images/banner-books.jpg" alt="Sách" onerror="this.src='app/assets/images/book-placeholder.png'">
                 </div>
             </div>
         </div>
@@ -71,9 +71,9 @@
                          ng-attr-title="{{book.title}}&#10;Giá: {{book.currentPrice | currency:'':0}} VNĐ&#10;Tác giả: {{book.authors[0].fullName}}&#10;Năm xuất bản: {{book.publishYear}}&#10;Nhà xuất bản: {{book.publisherName}}">
                         
                         <div class="book-image">
-                            <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.jpg'}}" 
+                            <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.png'}}" 
                                  alt="{{book.title}}"
-                                 onerror="this.src='app/assets/images/book-placeholder.jpg'">
+                                 onerror="this.src='app/assets/images/book-placeholder.png'">
                             
                             <div class="book-badge" ng-if="hasPromo(book)">
                                 <span class="badge bg-danger">{{calculateDiscountPercent(book)}}% OFF</span>
@@ -160,9 +160,9 @@
                          ng-attr-title="{{book.title}}&#10;Giá gốc: {{book.currentPrice | currency:'':0}} VNĐ&#10;Giá khuyến mãi: {{book.discountedPrice | currency:'':0}} VNĐ&#10;Tác giả: {{book.authors[0].fullName}}&#10;Nhà xuất bản: {{book.publisherName}}">
                         
                         <div class="book-image">
-                            <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.jpg'}}" 
+                            <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.png'}}" 
                                  alt="{{book.title}}"
-                                 onerror="this.src='app/assets/images/book-placeholder.jpg'">
+                                 onerror="this.src='app/assets/images/book-placeholder.png'">
                             
                             <div class="book-badge">
                                 <span class="badge bg-danger">{{calculateDiscountPercent(book)}}% OFF</span>
@@ -242,9 +242,9 @@
                          ng-attr-title="{{book.title}}&#10;Giá: {{book.currentPrice | currency:'':0}} VNĐ&#10;Tác giả: {{book.authors[0].fullName}}&#10;Bán được: {{book.totalSold}} cuốn&#10;Nhà xuất bản: {{book.publisherName}}">
                         
                         <div class="book-image">
-                            <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.jpg'}}" 
+                            <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.png'}}" 
                                  alt="{{book.title}}"
-                                 onerror="this.src='app/assets/images/book-placeholder.jpg'">
+                                 onerror="this.src='app/assets/images/book-placeholder.png'">
                             
                             <div class="book-badge" ng-if="hasPromo(book)">
                                 <span class="badge bg-danger">{{calculateDiscountPercent(book)}}% OFF</span>

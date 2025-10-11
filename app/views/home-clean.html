@@ -17,9 +17,9 @@
                          ng-attr-title="{{book.title}}&#10;Giá: {{book.unitPrice | currency:'':0}} VNĐ&#10;Đánh giá: {{book.rating || 'N/A'}}⭐&#10;Bán được: {{book.totalSold}} cuốn&#10;{{(book.discountPercent) ? 'Khuyến mãi: ' + book.discountPercent + '% OFF' : ''}}">
                         
                         <div class="book-image">
-                            <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.jpg'}}" 
+                            <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.png'}}" 
                                  alt="{{book.title}}"
-                                 onerror="this.src='app/assets/images/book-placeholder.jpg'">
+                                 onerror="this.src='app/assets/images/book-placeholder.png'">
                             
                             <div class="book-badge" ng-if="hasPromo(book)">
                                 <span class="badge bg-danger">{{calculateDiscountPercent(book)}}% OFF</span>
@@ -108,9 +108,9 @@
                          ng-attr-title="{{book.title}}&#10;Giá: {{book.unitPrice | currency:'':0}} VNĐ&#10;Đánh giá: {{book.rating || 'N/A'}}⭐&#10;Bán được: {{book.totalSold}} cuốn&#10;{{(book.discountPercent) ? 'Khuyến mãi: ' + book.discountPercent + '% OFF' : ''}}">
                         
                         <div class="book-image">
-                            <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.jpg'}}" 
+                            <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.png'}}" 
                                  alt="{{book.title}}"
-                                 onerror="this.src='app/assets/images/book-placeholder.jpg'">
+                                 onerror="this.src='app/assets/images/book-placeholder.png'">
                             
                             <div class="book-badge" ng-if="hasPromo(book)">
                                 <span class="badge bg-danger">{{calculateDiscountPercent(book)}}% OFF</span>
