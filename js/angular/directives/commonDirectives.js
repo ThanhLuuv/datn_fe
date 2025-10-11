@@ -335,23 +335,6 @@ app.directive('confirmDialog', function() {
     };
 });
 
-// Directive cho currency input
-app.directive('currencyInput', function() {
-    return {
-        restrict: 'A',
-        require: 'ngModel',
-        link: function(scope, element, attrs, ngModel) {
-            element.on('blur', function() {
-                var value = ngModel.$viewValue;
-                if (value && !isNaN(value)) {
-                    ngModel.$setViewValue(parseFloat(value).toFixed(2));
-                    ngModel.$render();
-                }
-            });
-        }
-    };
-});
-
 // Directive cho number input
 app.directive('numberInput', function() {
     return {

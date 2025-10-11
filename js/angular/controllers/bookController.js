@@ -53,6 +53,7 @@ app.controller('BooksController', ['$scope', 'BookstoreService', 'AuthService', 
 					$scope.books = [];
 					$scope.totalPages = 0;
 				}
+				
 				$scope.loading = false;
 			})
 			.catch(function(error) {
@@ -127,6 +128,15 @@ app.controller('AdminBooksController', ['$scope', 'BookstoreService', 'AuthServi
 		$location.path('/home');
 		return;
 	}
+	
+	// Add truncate filter directly to scope
+	$scope.truncate = function(text, length) {
+		if (!text) return '';
+		length = length || 50;
+		if (text.length <= length) return text;
+		return text.substring(0, length) + '...';
+	};
+	
 	$scope.title = 'Quản lý sách';
 	$scope.books = [];
 	$scope.categories = [];
@@ -135,8 +145,6 @@ app.controller('AdminBooksController', ['$scope', 'BookstoreService', 'AuthServi
 	$scope.loading = false;
 	$scope.showError = false;
 	$scope.errorMessage = '';
-	$scope.showSuccess = false;
-	$scope.successMessage = '';
 	$scope.isSaving = false;
 	$scope.searchTerm = '';
 	$scope.selectedCategoryId = '';
@@ -156,6 +164,19 @@ app.controller('AdminBooksController', ['$scope', 'BookstoreService', 'AuthServi
 				$scope.toasts = $scope.toasts.filter(function(t){ return t.id !== id; });
 			});
 		}, 3500);
+	};
+	
+	// Clear error message
+	$scope.clearError = function() {
+		$scope.showError = false;
+		$scope.errorMessage = '';
+	};
+	
+	// Clear error when user starts typing ISBN
+	$scope.onIsbnChange = function() {
+		if ($scope.showError && $scope.errorMessage.includes('ISBN đã tồn tại')) {
+			$scope.clearError();
+		}
 	};
 
 	// Modal form data (admin)
@@ -303,11 +324,23 @@ app.controller('AdminBooksController', ['$scope', 'BookstoreService', 'AuthServi
 			$scope.addToast('warning', 'Tác giả đã được thêm: ' + author.fullName);
 		}
 		
-		// Reset dropdown selection
-		$scope.selectedAuthorId = null;
-	};
+	// Reset dropdown selection
+	$scope.selectedAuthorId = null;
+};
 
-	$scope.removeAuthor = function(index) {
+// Clear image
+$scope.clearImage = function() {
+	$scope.bookData.imageFile = null;
+	$scope.bookData.imagePreview = null;
+	$scope.bookData.imageUrl = '';
+};
+
+// Remove image (alias for clearImage)
+$scope.removeImage = function() {
+	$scope.clearImage();
+};
+
+$scope.removeAuthor = function(index) {
 		if (!$scope.bookData || !Array.isArray($scope.bookData.authors)) return;
 		
 		var author = $scope.bookData.authors[index];
@@ -386,6 +419,7 @@ app.controller('AdminBooksController', ['$scope', 'BookstoreService', 'AuthServi
 	// Open create modal
 	$scope.openCreateModal = function() {
 		$scope.isEditMode = false;
+		$scope.clearError(); // Clear any previous errors
 		$scope.bookData = {
 			isbn: '',
 			title: '',
@@ -415,11 +449,13 @@ app.controller('AdminBooksController', ['$scope', 'BookstoreService', 'AuthServi
 	$scope.showAddForm = function() {};
 
 	// Open edit modal
-    $scope.openEditModal = function(book) {
+	$scope.openEditModal = function(book) {
 		if (!book) return;
 		$scope.isEditMode = true;
 		$scope.editingBook = book;
+		$scope.clearError(); // Clear any previous errors
 		console.log('[AdminBooks] Open edit for ISBN:', book.isbn, 'incoming categoryId/publisherId:', book.categoryId, book.publisherId);
+		console.log('[AdminBooks] Book currentPrice:', book.currentPrice, 'type:', typeof book.currentPrice);
 		
 		// Use book data from list (already includes details)
 		$scope.bookData = {
@@ -437,6 +473,7 @@ app.controller('AdminBooksController', ['$scope', 'BookstoreService', 'AuthServi
 			authors: (book.authors && Array.isArray(book.authors)) ? book.authors.map(function(a){ return { authorId: a.authorId, fullName: a.fullName }; }) : []
 		};
 		console.log('[AdminBooks] Initial bookData IDs:', $scope.bookData.categoryId, $scope.bookData.publisherId);
+		console.log('[AdminBooks] Set bookData.currentPrice:', $scope.bookData.currentPrice, 'type:', typeof $scope.bookData.currentPrice);
 
 		$q.all([
 			$scope.loadCategories(),
@@ -461,6 +498,12 @@ app.controller('AdminBooksController', ['$scope', 'BookstoreService', 'AuthServi
 				$scope.bookData.categoryId = ($scope.bookData && $scope.bookData.categoryId != null) ? String($scope.bookData.categoryId) : null;
 				$scope.bookData.publisherId = ($scope.bookData && $scope.bookData.publisherId != null) ? String($scope.bookData.publisherId) : null;
 				console.log('[AdminBooks] Pre-modal IDs:', $scope.bookData.categoryId, $scope.bookData.publisherId, 'typeofs:', typeof $scope.bookData.categoryId, typeof $scope.bookData.publisherId);
+				
+				// Ensure currentPrice is properly set as number
+				if ($scope.bookData.currentPrice != null) {
+					$scope.bookData.currentPrice = parseFloat($scope.bookData.currentPrice);
+					console.log('[AdminBooks] Final currentPrice:', $scope.bookData.currentPrice, 'type:', typeof $scope.bookData.currentPrice);
+				}
 			});
 			$timeout(function(){
 				var modal = new bootstrap.Modal(document.getElementById('bookModal'));
@@ -471,6 +514,13 @@ app.controller('AdminBooksController', ['$scope', 'BookstoreService', 'AuthServi
 					$scope.bookData.categoryId = ($scope.bookData && $scope.bookData.categoryId != null) ? String($scope.bookData.categoryId) : null;
 					$scope.bookData.publisherId = ($scope.bookData && $scope.bookData.publisherId != null) ? String($scope.bookData.publisherId) : null;
 					console.log('[AdminBooks] Post-show IDs:', $scope.bookData.categoryId, $scope.bookData.publisherId, 'typeofs:', typeof $scope.bookData.categoryId, typeof $scope.bookData.publisherId);
+					
+					// Ensure currentPrice is properly displayed
+					if ($scope.bookData.currentPrice != null) {
+						$scope.bookData.currentPrice = parseFloat($scope.bookData.currentPrice);
+						console.log('[AdminBooks] Post-modal currentPrice:', $scope.bookData.currentPrice);
+						$scope.$apply();
+					}
 				});
 			}, 0);
  		});
@@ -536,16 +586,30 @@ app.controller('AdminBooksController', ['$scope', 'BookstoreService', 'AuthServi
 		console.log('bookDataToSend.imageFile type:', typeof bookDataToSend.imageFile);
 		console.log('bookDataToSend.imageFile instanceof File:', bookDataToSend.imageFile instanceof File);
 		
-		// If no new file is selected but we have an existing imageUrl, keep it
-		if (!bookDataToSend.imageFile && bookDataToSend.imageUrl) {
-			// Keep existing imageUrl
-			console.log('Keeping existing imageUrl:', bookDataToSend.imageUrl);
-		} else if (!bookDataToSend.imageFile && !bookDataToSend.imageUrl) {
-			// No image at all
-			bookDataToSend.imageUrl = '';
-			console.log('No image file or URL');
+		// Handle image logic
+		if (!bookDataToSend.imageFile) {
+			// No new file selected
+			if ($scope.isEditMode && $scope.editingBook && $scope.editingBook.imageUrl) {
+				// In edit mode, keep the original book's imageUrl
+				bookDataToSend.imageUrl = $scope.editingBook.imageUrl;
+				console.log('Edit mode: Keeping original imageUrl:', bookDataToSend.imageUrl);
+			} else if (bookDataToSend.imageUrl) {
+				// Keep existing imageUrl
+				console.log('Keeping existing imageUrl:', bookDataToSend.imageUrl);
+			} else {
+				// No image at all
+				bookDataToSend.imageUrl = '';
+				console.log('No image file or URL');
+			}
+			// Remove imageFile from data to avoid sending null/undefined
+			delete bookDataToSend.imageFile;
+			delete bookDataToSend.imagePreview;
 		} else {
-			console.log('Has image file:', bookDataToSend.imageFile);
+			// New file selected
+			console.log('Has new image file:', bookDataToSend.imageFile);
+			// Remove imageUrl when uploading new file
+			delete bookDataToSend.imageUrl;
+			delete bookDataToSend.imagePreview;
 		}
 
 		var promise;
@@ -560,26 +624,44 @@ app.controller('AdminBooksController', ['$scope', 'BookstoreService', 'AuthServi
 		promise
 			.then(function(response) {
 				$scope.isSaving = false;
-				$scope.showSuccess = true;
-				$scope.successMessage = $scope.editingBook ? 'Cập nhật sách thành công!' : 'Thêm sách thành công!';
 				$scope.hideForm();
 				$scope.loadBooks();
-				$scope.addToast('success', $scope.successMessage);
-				
-				// Hide success message after 3 seconds
-				setTimeout(function() {
-					$scope.$apply(function() {
-						$scope.showSuccess = false;
-						$scope.successMessage = '';
-					});
-				}, 3000);
+				$scope.addToast('success', $scope.editingBook ? 'Cập nhật sách thành công!' : 'Thêm sách thành công!');
 			})
 			.catch(function(error) {
 				$scope.isSaving = false;
-				$scope.showError = true;
-				$scope.errorMessage = error.data?.message || 'Có lỗi xảy ra khi lưu sách.';
 				console.error('Error saving book:', error);
-				$scope.addToast('danger', $scope.errorMessage);
+				
+				// Handle specific error cases
+				if (error.data && error.data.errors && error.data.errors.length > 0) {
+					var errorMessage = error.data.errors[0];
+					
+					// Handle ISBN already exists error
+					if (errorMessage.includes('ISBN already exists') || errorMessage.includes('Book with this ISBN already exists')) {
+						$scope.showError = true;
+						$scope.errorMessage = 'ISBN đã tồn tại trong hệ thống. Vui lòng sử dụng ISBN khác.';
+						$scope.addToast('danger', 'ISBN đã tồn tại! Vui lòng kiểm tra lại.');
+						
+						// Focus on ISBN field
+						$timeout(function() {
+							var isbnField = document.getElementById('bookIsbn');
+							if (isbnField) {
+								isbnField.focus();
+								isbnField.select();
+							}
+						}, 100);
+					} else {
+						// Other validation errors
+						$scope.showError = true;
+						$scope.errorMessage = errorMessage;
+						$scope.addToast('danger', errorMessage);
+					}
+				} else {
+					// Generic error
+					$scope.showError = true;
+					$scope.errorMessage = error.data?.message || 'Có lỗi xảy ra khi lưu sách.';
+					$scope.addToast('danger', $scope.errorMessage);
+				}
 			});
 	};
 
@@ -595,9 +677,7 @@ app.controller('AdminBooksController', ['$scope', 'BookstoreService', 'AuthServi
 		promise
 			.then(function(){
 				$scope.loading = false;
-				$scope.showSuccess = true;
-				$scope.successMessage = book.status ? 'Đã tắt sách.' : 'Đã bật sách.';
-				$scope.addToast('success', $scope.successMessage);
+				$scope.addToast('success', book.status ? 'Đã tắt sách.' : 'Đã bật sách.');
 				$scope.loadBooks();
 			})
 			.catch(function(err){
