@@ -1,22 +1,31 @@
-// Application Configuration
-console.log('Loading APP_CONFIG...');
-
-// Check if ENV_CONFIG is available, otherwise use fallback
-var config = window.ENV_CONFIG || {
-    // Fallback configuration if ENV_CONFIG is not loaded
+// Development Environment Configuration
+window.ENV_CONFIG = {
+    // API Configuration
     API_BASE_URL: 'http://localhost:5256/api',
     API_TIMEOUT: 10000,
-    APP_NAME: 'BookStore Frontend',
+    
+    // Application Settings
+    APP_NAME: 'BookStore Frontend - Development',
     APP_VERSION: '1.0.0',
-    APP_DESCRIPTION: 'Dự án Frontend sử dụng AngularJS + Bootstrap',
+    APP_DESCRIPTION: 'Dự án Frontend sử dụng AngularJS + Bootstrap - Development Mode',
+    
+    // Environment
     ENVIRONMENT: 'development',
     DEBUG_MODE: true,
+    
+    // Pagination
     ITEMS_PER_PAGE: 10,
     MAX_PAGES_DISPLAY: 5,
+    
+    // Date Format
     DATE_FORMAT: 'dd/MM/yyyy',
     DATETIME_FORMAT: 'dd/MM/yyyy HH:mm:ss',
+    
+    // Validation
     EMAIL_REGEX: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
     PHONE_REGEX: /^[0-9]{10,11}$/,
+    
+    // Messages
     MESSAGES: {
         SUCCESS: 'Thao tác thành công!',
         ERROR: 'Có lỗi xảy ra, vui lòng thử lại!',
@@ -27,30 +36,19 @@ var config = window.ENV_CONFIG || {
         INVALID_EMAIL: 'Email không hợp lệ',
         INVALID_PHONE: 'Số điện thoại không hợp lệ'
     },
+    
+    // Storage Keys
     STORAGE_KEYS: {
         USER_TOKEN: 'user_token',
         USER_INFO: 'user_info',
         THEME: 'theme',
         LANGUAGE: 'language'
     },
+    
+    // Feature Flags
     FEATURES: {
         ENABLE_DEBUG_LOGS: true,
         ENABLE_API_LOGGING: true,
         ENABLE_PERFORMANCE_MONITORING: false
     }
 };
-
-app.constant('APP_CONFIG', config);
-
-// Debug log
-console.log('APP_CONFIG loaded - Environment:', config.ENVIRONMENT);
-console.log('APP_CONFIG loaded - API_BASE_URL:', config.API_BASE_URL);
-console.log('APP_CONFIG loaded - Debug Mode:', config.DEBUG_MODE);
-
-// Environment Configuration
-app.constant('ENV', {
-    DEVELOPMENT: 'development',
-    STAGING: 'staging',
-    PRODUCTION: 'production',
-    CURRENT: config.ENVIRONMENT || 'development'
-});

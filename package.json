@@ -1,24 +1,24 @@
 {
-  "name": "datn-frontend",
+  "name": "bookstore-frontend",
   "version": "1.0.0",
-  "description": "Dự án Frontend sử dụng HTML, CSS, Bootstrap, jQuery, AngularJS",
+  "description": "BookStore Frontend - AngularJS SPA",
   "main": "index.html",
   "scripts": {
     "start": "http-server -p 8080 -o --proxy http://localhost:8080/",
     "dev": "http-server -p 3000 -o --proxy http://localhost:3000/",
-    "build": "echo 'Build process for production'",
-    "test": "echo 'No tests specified'"
+    "build": "echo 'Static build - no build process needed'",
+    "test": "echo 'No tests specified'",
+    "vercel-build": "echo 'Vercel build - static files ready'"
   },
   "keywords": [
-    "html",
-    "css",
-    "bootstrap",
-    "jquery",
-    "angularjs",
+    "bookstore",
     "frontend",
-    "spa"
+    "angularjs",
+    "spa",
+    "vercel",
+    "static"
   ],
-  "author": "Your Name",
+  "author": "BookStore Team",
   "license": "MIT",
   "devDependencies": {
     "http-server": "^14.1.1"
@@ -26,10 +26,10 @@
   "dependencies": {},
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/datn-frontend.git"
+    "url": "https://github.com/yourusername/bookstore-frontend.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/datn-frontend/issues"
+    "url": "https://github.com/yourusername/bookstore-frontend/issues"
   },
-  "homepage": "https://github.com/yourusername/datn-frontend#readme"
+  "homepage": "https://bookstore-frontend.vercel.app"
 }
