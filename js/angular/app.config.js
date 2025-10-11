@@ -1,15 +1,20 @@
 // Application Configuration
 console.log('Loading APP_CONFIG...');
 
+// Detect environment
+var currentHost = window.location.hostname;
+var isLocal = currentHost === 'localhost' || currentHost === '127.0.0.1' || currentHost === '';
+var isVercel = currentHost.includes('vercel.app') || currentHost.includes('now.sh');
+
 // Fallback configuration
 var fallbackConfig = {
-    API_BASE_URL: 'https://bookstore-api-386583671447.asia-southeast1.run.app/api',
+    API_BASE_URL: isLocal ? 'http://localhost:5256/api' : 'https://bookstore-api-386583671447.asia-southeast1.run.app/api',
     API_TIMEOUT: 15000,
     APP_NAME: 'BookStore Frontend',
     APP_VERSION: '1.0.0',
     APP_DESCRIPTION: 'Dự án Frontend sử dụng AngularJS + Bootstrap',
-    ENVIRONMENT: 'production',
-    DEBUG_MODE: false,
+    ENVIRONMENT: isLocal ? 'development' : (isVercel ? 'production' : 'staging'),
+    DEBUG_MODE: isLocal,
     ITEMS_PER_PAGE: 10,
     MAX_PAGES_DISPLAY: 5,
     DATE_FORMAT: 'dd/MM/yyyy',
