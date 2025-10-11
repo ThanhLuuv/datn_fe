@@ -140,7 +140,7 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
 
     // Load newest books via dedicated API
     $scope.loadLatestBooks = function() {
-        BookstoreService.getNewestBooks(10)
+        BookstoreService.getLatestBooks(10)
             .then(function(response){
                 var list = [];
                 if (response.data && response.data.success && response.data.data && Array.isArray(response.data.data.books)) {

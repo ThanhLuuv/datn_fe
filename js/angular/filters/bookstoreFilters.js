@@ -1,6 +1,9 @@
 // Bookstore Filters - Các filter chung cho hệ thống
 console.log('Loading Bookstore Filters...');
 
+// Ensure app module exists
+var app = angular.module('myApp');
+
 // Filter format currency
 app.filter('currency', function() {
     return function(amount) {
@@ -10,6 +13,26 @@ app.filter('currency', function() {
             currency: 'VND'
         }).format(amount);
     };
+});
+
+// Filter để format số tiền với dấu phân cách phần nghìn
+app.filter('currencyFormatted', function() {
+  return function(amount) {
+    if (amount == null || amount === '') return '';
+    var num = parseFloat(amount);
+    if (isNaN(num)) return '';
+    return num.toLocaleString('vi-VN') + ' ₫';
+  };
+});
+
+// Filter để format số tiền không có ký hiệu tiền tệ
+app.filter('numberFormatted', function() {
+  return function(amount) {
+    if (amount == null || amount === '') return '';
+    var num = parseFloat(amount);
+    if (isNaN(num)) return '';
+    return num.toLocaleString('vi-VN');
+  };
 });
 
 // Filter format date

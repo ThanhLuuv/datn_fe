@@ -1,6 +1,16 @@
 // AngularJS Application Module
 var app = angular.module('myApp', ['ngRoute', 'ngAnimate']);
 
+// Add numberFormatted filter directly to app.js to ensure it's available
+app.filter('numberFormatted', function() {
+    return function(amount) {
+        if (amount == null || amount === '') return '';
+        var num = parseFloat(amount);
+        if (isNaN(num)) return '';
+        return num.toLocaleString('vi-VN');
+    };
+});
+
 // Global controller for navbar visibility
 app.controller('AppController', ['$scope', '$location', 'CartService', 'AuthService', function($scope, $location, CartService, AuthService) {
     $scope.isAdminPage = false;

@@ -164,7 +164,7 @@ app.controller('AdminBooksController', ['$scope', 'BookstoreService', 'AuthServi
 		title: '',
 		categoryId: null,
 		publisherId: null,
-		unitPrice: 0,
+		currentPrice: 0,
 		publishYear: new Date().getFullYear(),
 		pageCount: 1,
 		imageUrl: '',
@@ -391,7 +391,7 @@ app.controller('AdminBooksController', ['$scope', 'BookstoreService', 'AuthServi
 			title: '',
 			categoryId: null,
 			publisherId: null,
-			unitPrice: 0,
+			currentPrice: 0,
 			publishYear: new Date().getFullYear(),
 			pageCount: 1,
 			imageUrl: '',
@@ -427,7 +427,7 @@ app.controller('AdminBooksController', ['$scope', 'BookstoreService', 'AuthServi
 			title: book.title,
             categoryId: (book.categoryId != null) ? String(book.categoryId) : null,
             publisherId: (book.publisherId != null) ? String(book.publisherId) : null,
-			unitPrice: book.unitPrice,
+			currentPrice: book.currentPrice,
 			publishYear: book.publishYear,
 			pageCount: book.pageCount,
 			imageUrl: book.imageUrl,
@@ -484,7 +484,7 @@ app.controller('AdminBooksController', ['$scope', 'BookstoreService', 'AuthServi
 			title: '',
 			categoryId: null,
 			publisherId: null,
-			unitPrice: 0,
+			currentPrice: 0,
 			publishYear: new Date().getFullYear(),
 			pageCount: 1,
 			imageUrl: '',
@@ -520,7 +520,7 @@ app.controller('AdminBooksController', ['$scope', 'BookstoreService', 'AuthServi
 			title: $scope.bookData.title,
 			categoryId: $scope.bookData.categoryId,
 			publisherId: $scope.bookData.publisherId,
-			unitPrice: $scope.bookData.unitPrice,
+			currentPrice: $scope.bookData.currentPrice,
 			publishYear: $scope.bookData.publishYear,
 			pageCount: $scope.bookData.pageCount,
 			stock: $scope.bookData.stock,
@@ -671,6 +671,104 @@ app.controller('AdminBooksController', ['$scope', 'BookstoreService', 'AuthServi
 		if ($scope.bookForm && $scope.bookForm.imageFile) {
 			$scope.bookForm.imageFile.$setTouched();
 		}
+	};
+
+	// ==================== PRICE CHANGE FUNCTIONS ====================
+	
+	// Price change modal data
+	$scope.selectedBookForPriceChange = null;
+	$scope.priceChangeData = {
+		newPrice: null,
+		effectiveDate: '',
+		reason: ''
+	};
+	
+	// Price history data
+	$scope.selectedBookForHistory = null;
+	$scope.priceHistory = [];
+	$scope.priceHistoryLoading = false;
+	$scope.priceHistoryError = null;
+	
+	// Open price change modal
+	$scope.openPriceChangeModal = function(book) {
+		if (!book) return;
+		
+		$scope.selectedBookForPriceChange = book;
+		$scope.priceChangeData = {
+			newPrice: book.currentPrice,
+			effectiveDate: new Date().toISOString().slice(0, 16), // Current datetime-local format
+			reason: ''
+		};
+		
+		var modal = new bootstrap.Modal(document.getElementById('priceChangeModal'));
+		modal.show();
+	};
+	
+	// Save price change
+	$scope.savePriceChange = function() {
+		if (!$scope.priceChangeData.newPrice || !$scope.priceChangeData.effectiveDate || !$scope.priceChangeData.reason) {
+			$scope.addToast('warning', 'Vui lòng điền đầy đủ thông tin.');
+			return;
+		}
+		
+		$scope.loading = true;
+		
+		var priceChangeData = {
+			isbn: $scope.selectedBookForPriceChange.isbn,
+			newPrice: parseFloat($scope.priceChangeData.newPrice),
+			effectiveDate: new Date($scope.priceChangeData.effectiveDate).toISOString(),
+			reason: $scope.priceChangeData.reason.trim()
+		};
+		
+		BookstoreService.createPriceChange(priceChangeData)
+			.then(function(response) {
+				$scope.loading = false;
+				$scope.addToast('success', 'Thay đổi giá thành công!');
+				
+				// Close modal
+				var modal = bootstrap.Modal.getInstance(document.getElementById('priceChangeModal'));
+				if (modal) modal.hide();
+				
+				// Refresh books list to show updated price
+				$scope.loadBooks();
+			})
+			.catch(function(error) {
+				$scope.loading = false;
+				var errorMsg = error.data?.message || 'Có lỗi xảy ra khi thay đổi giá.';
+				$scope.addToast('danger', errorMsg);
+				console.error('Error creating price change:', error);
+			});
+	};
+	
+	// View price history
+	$scope.viewPriceHistory = function(book) {
+		if (!book) return;
+		
+		$scope.selectedBookForHistory = book;
+		$scope.priceHistoryLoading = true;
+		$scope.priceHistoryError = null;
+		$scope.priceHistory = [];
+		
+		BookstoreService.getPriceHistory(book.isbn)
+			.then(function(response) {
+				$scope.priceHistoryLoading = false;
+				
+				if (response.data && response.data.success && Array.isArray(response.data.data)) {
+					$scope.priceHistory = response.data.data;
+				} else if (Array.isArray(response.data)) {
+					$scope.priceHistory = response.data;
+				} else {
+					$scope.priceHistory = [];
+				}
+			})
+			.catch(function(error) {
+				$scope.priceHistoryLoading = false;
+				$scope.priceHistoryError = error.data?.message || 'Không thể tải lịch sử giá.';
+				console.error('Error loading price history:', error);
+			});
+		
+		var modal = new bootstrap.Modal(document.getElementById('priceHistoryModal'));
+		modal.show();
 	};
 
 	// Initialize

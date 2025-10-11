@@ -10,6 +10,12 @@ app.controller('CustomerOrdersController', ['$scope', '$rootScope', 'BookstoreSe
     $scope.loading = false;
     $scope.orders = [];
     $scope.selectedOrder = null;
+    $scope.returnModel = {
+        reason: '',
+        lines: []
+    };
+    $scope.returnLoading = false;
+    $scope.toasts = [];
 
     // Load customer orders
     $scope.loadOrders = function() {
@@ -28,10 +34,46 @@ app.controller('CustomerOrdersController', ['$scope', '$rootScope', 'BookstoreSe
         }).catch(function(error) {
             $scope.loading = false;
             console.error('Error loading orders:', error);
-            if (window.showNotification) {
-                window.showNotification('Không thể tải danh sách đơn hàng', 'danger');
-            }
+            $scope.addToast('danger', 'Không thể tải danh sách đơn hàng');
         });
+    };
+
+    // Add toast notification
+    $scope.addToast = function(variant, message) {
+        $scope.toasts.push({
+            variant: variant,
+            message: message
+        });
+        // Auto remove after 5 seconds
+        setTimeout(function() {
+            $scope.toasts.shift();
+            $scope.$apply();
+        }, 5000);
+    };
+
+    // Get payment status class for badge
+    $scope.getPaymentStatusClass = function(invoice) {
+        if (!invoice) {
+            return 'bg-secondary'; // Chưa có hóa đơn
+        }
+        
+        // Nếu có invoice nhưng không có paymentStatus, coi như chưa thanh toán
+        if (!invoice.paymentStatus) {
+            return 'bg-danger'; // Chưa thanh toán (có hóa đơn nhưng chưa có trạng thái thanh toán)
+        }
+        
+        switch(invoice.paymentStatus) {
+            case 'PENDING':
+                return 'bg-danger'; // Chưa thanh toán
+            case 'PAID':
+                return 'bg-success'; // Đã thanh toán
+            case 'FAILED':
+                return 'bg-warning'; // Thất bại
+            case 'REFUNDED':
+                return 'bg-info'; // Hoàn tiền
+            default:
+                return 'bg-secondary';
+        }
     };
 
     // Get status class for badge
@@ -40,18 +82,15 @@ app.controller('CustomerOrdersController', ['$scope', '$rootScope', 'BookstoreSe
         var statusValue = typeof status === 'number' ? status : status;
         switch(statusValue) {
             case 0:
-            case 'Paid':
-                return 'bg-success';
+            case 'PendingConfirmation':
+                return 'bg-warning';
             case 1:
-            case 'Assigned':
-                return 'bg-info';
+            case 'Confirmed':
+                return 'bg-primary';
             case 2:
             case 'Delivered':
                 return 'bg-success';
             case 3:
-            case 'PendingPayment':
-                return 'bg-warning';
-            case 4:
             case 'Cancelled':
                 return 'bg-danger';
             default:
@@ -65,22 +104,19 @@ app.controller('CustomerOrdersController', ['$scope', '$rootScope', 'BookstoreSe
         var statusValue = typeof status === 'number' ? status : status;
         switch(statusValue) {
             case 0:
-            case 'Paid':
-                return 'Đã thanh toán';
+            case 'PendingConfirmation':
+                return 'Chờ xác nhận';
             case 1:
-            case 'Assigned':
-                return 'Đã phân công';
+            case 'Confirmed':
+                return 'Đã xác nhận';
             case 2:
             case 'Delivered':
                 return 'Đã giao';
             case 3:
-            case 'PendingPayment':
-                return 'Chờ thanh toán';
-            case 4:
             case 'Cancelled':
                 return 'Đã hủy';
             default:
-                return status;
+                return status || 'Không xác định';
         }
     };
 
@@ -104,6 +140,142 @@ app.controller('CustomerOrdersController', ['$scope', '$rootScope', 'BookstoreSe
                 if (el.showModal) el.showModal();
             }
         }, 0);
+    };
+
+    // Return order function
+    $scope.returnOrder = function(order) {
+        if (!order || !order.orderId) {
+            $scope.addToast('danger', 'Không tìm thấy thông tin đơn hàng');
+            return;
+        }
+
+        // Check if order is delivered
+        if ($scope.getStatusText(order.status) !== 'Đã giao') {
+            $scope.addToast('warning', 'Chỉ có thể trả hàng với đơn hàng đã giao');
+            return;
+        }
+
+        // Set selected order for return
+        $scope.selectedOrder = angular.copy(order);
+
+        // Reset return model
+        $scope.returnModel = {
+            reason: '',
+            lines: []
+        };
+
+        // Load order details for return
+        $scope.returnLoading = true;
+        BookstoreService.getOrderDetail(order.orderId).then(function(response) {
+            var orderDetail = response.data;
+            if (orderDetail && orderDetail.lines) {
+                $scope.returnModel.lines = orderDetail.lines.map(function(line) {
+                    return {
+                        orderLineId: line.orderLineId,
+                        bookTitle: line.bookTitle,
+                        isbn: line.isbn,
+                        bookImageUrl: line.bookImageUrl,
+                        unitPrice: line.unitPrice,
+                        maxQty: line.qty || line.quantity,
+                        qtyReturned: 0
+                    };
+                });
+            }
+            $scope.returnLoading = false;
+            
+            // Show modal
+            setTimeout(function() {
+                var el = document.getElementById('returnModal');
+                if (!el) return;
+                try {
+                    var modal = bootstrap && bootstrap.Modal ? bootstrap.Modal.getOrCreateInstance(el) : null;
+                    if (modal) modal.show();
+                } catch (e) {
+                    if (el.showModal) el.showModal();
+                }
+            }, 0);
+        }).catch(function(error) {
+            $scope.returnLoading = false;
+            console.error('Error loading order detail:', error);
+            $scope.addToast('danger', 'Không thể tải thông tin đơn hàng');
+        });
+    };
+
+    // Check if has return items
+    $scope.hasReturnItems = function() {
+        if (!$scope.returnModel.lines || $scope.returnModel.lines.length === 0) {
+            return false;
+        }
+        return $scope.returnModel.lines.some(function(line) {
+            return line.qtyReturned > 0;
+        });
+    };
+
+    // Submit return request
+    $scope.submitReturn = function() {
+        if (!$scope.returnModel.reason || !$scope.hasReturnItems()) {
+            $scope.addToast('warning', 'Vui lòng nhập lý do và chọn sản phẩm cần trả');
+            return;
+        }
+
+        // Validate return quantities
+        var returnLines = $scope.returnModel.lines.filter(function(line) {
+            return line.qtyReturned > 0;
+        });
+
+        for (var i = 0; i < returnLines.length; i++) {
+            var line = returnLines[i];
+            if (line.qtyReturned > line.maxQty) {
+                $scope.addToast('warning', 'Số lượng trả không được vượt quá số lượng đã mua');
+                return;
+            }
+        }
+
+        // Prepare payload for new API
+        var payload = {
+            orderId: $scope.selectedOrder ? $scope.selectedOrder.orderId : null,
+            reason: $scope.returnModel.reason,
+            returnLines: returnLines.map(function(line) {
+                return {
+                    isbn: line.isbn,
+                    quantity: parseInt(line.qtyReturned),
+                    reason: $scope.returnModel.reason // Use main reason for all items
+                };
+            })
+        };
+
+        // Submit return request using new customer API
+        BookstoreService.createCustomerReturn(payload).then(function(response) {
+            $scope.addToast('success', 'Yêu cầu trả hàng đã được gửi thành công');
+            
+            // Close modal
+            setTimeout(function() {
+                var el = document.getElementById('returnModal');
+                if (!el) return;
+                try {
+                    var modal = bootstrap && bootstrap.Modal ? bootstrap.Modal.getInstance(el) : null;
+                    if (modal) modal.hide();
+                } catch (e) {
+                    if (el.close) el.close();
+                }
+            }, 0);
+            
+            // Reset form
+            $scope.returnModel = {
+                reason: '',
+                lines: []
+            };
+            
+            // Reload orders
+            $scope.loadOrders();
+        }).catch(function(error) {
+            console.error('Error creating return:', error);
+            var errorMsg = 'Không thể tạo yêu cầu trả hàng';
+            if (error.data && error.data.message) {
+                errorMsg = error.data.message;
+            }
+            $scope.addToast('danger', errorMsg);
+        });
     };
 
     // Initialize

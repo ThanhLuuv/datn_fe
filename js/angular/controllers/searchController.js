@@ -3,6 +3,7 @@ app.controller('SearchController', ['$scope', '$location', 'BookstoreService', '
     $scope.page = parseInt($location.search().page || '1');
     $scope.pageSize = parseInt($location.search().pageSize || '12');
     $scope.results = [];
+    $scope.filteredResults = [];
     $scope.total = 0;
     $scope.loaded = false;
     $scope.loading = false;
@@ -21,6 +22,13 @@ app.controller('SearchController', ['$scope', '$location', 'BookstoreService', '
         return Math.min.apply(null, candidates);
     };
     $scope.hasPromo = function(book) { return $scope.getFinalPrice(book) < (book.unitPrice || 0); };
+
+    // Filter results to only show books with status: true
+    $scope.filterActiveBooks = function() {
+        $scope.filteredResults = ($scope.results || []).filter(function(book) {
+            return book.status === true;
+        });
+    };
 
     $scope.addToCart = function(book) {
         if (!book) return;
@@ -56,12 +64,14 @@ app.controller('SearchController', ['$scope', '$location', 'BookstoreService', '
                     }
                     $scope.loaded = true;
                     $scope.loading = false;
+                    $scope.filterActiveBooks();
                 })
                 .catch(function(){
                     $scope.results = [];
                     $scope.total = 0;
                     $scope.loaded = true;
                     $scope.loading = false;
+                    $scope.filterActiveBooks();
                 });
             return;
         }
@@ -79,6 +89,7 @@ app.controller('SearchController', ['$scope', '$location', 'BookstoreService', '
                 });
                 $scope.loaded = true;
                 $scope.loading = false;
+                $scope.filterActiveBooks();
                 setTimeout(function() { if (typeof initializeTooltips === 'function') initializeTooltips(); }, 100);
             })
             .catch(function() {
@@ -86,6 +97,7 @@ app.controller('SearchController', ['$scope', '$location', 'BookstoreService', '
                 $scope.total = 0;
                 $scope.loaded = true;
                 $scope.loading = false;
+                $scope.filterActiveBooks();
             });
     };
 

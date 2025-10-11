@@ -2,37 +2,137 @@ app.controller('CheckoutController', ['$scope', '$location', 'CartService', 'Boo
     $scope.form = {
         fullName: '',
         phone: '',
-        city: 'hcm_inner',
+        areaType: '',
+        areaId: '',
         address: '',
         payment: 'payos'
     };
 
-    function getShippingFee(city) {
-        if (city === 'hcm_inner') return 30000;
-        if (city === 'hcm_outer') return 50000;
-        return 50000;
-    }
+    $scope.cart = { items: [] };
+    $scope.loading = false;
+    $scope.pageLoading = true;
+    $scope.areas = [];
+    $scope.areasLoading = false;
 
     function compute() {
-        $scope.cart = CartService.getCart();
-        $scope.tax = Math.round($scope.cart.subtotal * 0.08);
-        $scope.shippingFee = getShippingFee($scope.form.city);
-        $scope.grandTotal = $scope.cart.subtotal + $scope.tax + $scope.shippingFee;
+        // Không cần tính toán gì thêm, chỉ giữ cart.subtotal
     }
 
-    $scope.recompute = compute;
+    // Load cart from API to ensure data consistency
+    $scope.loadCartFromAPI = function() {
+        $scope.loading = true;
+        CartService.getCartFromAPI()
+            .then(function(response) {
+                if (response && response.data && response.data.success) {
+                    var cartData = response.data.data;
+                    var items = cartData.items || [];
+                    
+                    // Map API response to expected format
+                    items = items.map(function(item) {
+                        return {
+                            cartItemId: item.cartItemId,
+                            isbn: item.isbn,
+                            title: item.bookTitle,
+                            bookTitle: item.bookTitle,
+                            unitPrice: item.unitPrice,
+                            currentPrice: item.currentPrice,
+                            discountedPrice: item.discountedPrice,
+                            qty: item.quantity,
+                            quantity: item.quantity,
+                            totalPrice: item.totalPrice,
+                            imageUrl: item.imageUrl,
+                            stock: item.stock,
+                            hasPromotion: item.hasPromotion,
+                            activePromotions: item.activePromotions,
+                            addedAt: item.addedAt
+                        };
+                    });
+                    
+                    $scope.cart = {
+                        items: items,
+                        subtotal: cartData.totalAmount || 0
+                    };
+                    
+                    // Debug logging
+                    console.log('CheckoutController - Cart loaded from API:');
+                    console.log('Items count:', items.length);
+                    console.log('Items:', items);
+                    console.log('Subtotal:', cartData.totalAmount);
+                } else {
+                    $scope.cart = { items: [], subtotal: 0 };
+                    console.log('CheckoutController - Empty cart from API');
+                }
+                compute();
+                $scope.loading = false;
+                $scope.pageLoading = false;
+            })
+            .catch(function(error) {
+                console.error('Error loading cart:', error);
+                // Fallback to local storage
+                $scope.cart = CartService.getCart();
+                compute();
+                $scope.loading = false;
+                $scope.pageLoading = false;
+            });
+    };
 
-    $scope.loading = false;
+    // Load areas from API
+    $scope.loadAreas = function() {
+        $scope.areasLoading = true;
+        BookstoreService.getAreas()
+            .then(function(response) {
+                if (response && response.data && response.data.success) {
+                    $scope.areas = response.data.data.areas || [];
+                    console.log('Areas loaded:', $scope.areas);
+                } else {
+                    $scope.areas = [];
+                    console.log('No areas found');
+                }
+            })
+            .catch(function(error) {
+                console.error('Error loading areas:', error);
+                $scope.areas = [];
+            })
+            .finally(function() {
+                $scope.areasLoading = false;
+            });
+    };
+
+    // Handle area type change
+    $scope.onAreaTypeChange = function() {
+        $scope.form.areaId = ''; // Reset area selection
+        if ($scope.form.areaType === 'inner') {
+            $scope.loadAreas();
+        }
+    };
 
     $scope.placeOrder = function() {
         if ($scope.cart.items.length === 0) return;
         $scope.loading = true;
+        
+        // Build shipping address with area information
+        var shippingAddress = $scope.form.address;
+        if ($scope.form.areaType === 'inner' && $scope.form.areaId) {
+            var selectedArea = $scope.areas.find(function(area) {
+                return area.areaId == $scope.form.areaId;
+            });
+            if (selectedArea) {
+                shippingAddress = selectedArea.name + ', ' + shippingAddress;
+            }
+        }
+        shippingAddress = ($scope.form.areaType === 'inner' ? 'Nội thành' : 'Ngoại thành') + ', ' + shippingAddress;
+        
         var payload = {
             receiverName: $scope.form.fullName,
             receiverPhone: $scope.form.phone,
-            shippingAddress: $scope.form.address,
+            shippingAddress: shippingAddress,
             lines: $scope.cart.items.map(function(it){ return { isbn: it.isbn, qty: it.qty }; })
         };
+        
+        // Debug logging
+        console.log('CheckoutController - Order payload:');
+        console.log('Payload:', payload);
+        
         BookstoreService.createOrder(payload)
             .then(function(res){
                 var data = res && res.data ? res.data : {};
@@ -50,7 +150,7 @@ app.controller('CheckoutController', ['$scope', '$location', 'CartService', 'Boo
                 } else {
                     // Store order info for success page
                     localStorage.setItem('lastOrderId', order.orderId || order.id);
-                    localStorage.setItem('lastOrderTotal', $scope.grandTotal);
+                    localStorage.setItem('lastOrderTotal', $scope.cart.subtotal);
                     CartService.clear();
                     $location.path('/success');
                 }
@@ -61,7 +161,7 @@ app.controller('CheckoutController', ['$scope', '$location', 'CartService', 'Boo
             .finally(function(){ $scope.loading = false; });
     };
 
-    // init
-    compute();
+    // Initialize cart from API
+    $scope.loadCartFromAPI();
 }]);
 

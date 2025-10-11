@@ -64,8 +64,8 @@
                                     <td>
                                         <strong>{{category.name}}</strong>
                                     </td>
-                                    <td>
-                                        <span ng-if="category.description">{{category.description | truncate:50}}</span>
+                                    <td style="max-width: 200px;">
+                                        <span ng-if="category.description" title="{{category.description}}" style="display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{category.description}}</span>
                                         <span ng-if="!category.description" class="text-muted">Không có mô tả</span>
                                     </td>
                                     <td>

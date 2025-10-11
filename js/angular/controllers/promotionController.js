@@ -41,13 +41,57 @@ app.controller('AdminPromotionsController', [
       $scope.formData = {
         name: '',
         description: '',
-        discountPct: 0,
-        startDate: null,   // Date
-        endDate: null,     // Date
+        discountPct: 0.01,  // Default to minimum valid value
+        startDate: null,   // Date object for input type="date"
+        endDate: null,     // Date object for input type="date"
         bookIsbns: []
       };
   
       $scope.editingPromotion = null;         // also used to preview selected books in Add mode
+      
+      // Expose toDateObject to template for ng-change
+      $scope.toDateObject = toDateObject;
+      
+      // Real-time validation for discount percentage
+      $scope.validateDiscountPct = function() {
+        if (!$scope.formErrors) $scope.formErrors = {};
+        var pct = Number($scope.formData.discountPct);
+        if (!isFinite(pct)) {
+          $scope.formErrors.discountPct = 'Mức giảm phải là số';
+        } else if (pct < 0.01) {
+          $scope.formErrors.discountPct = 'Mức giảm tối thiểu là 0.01%';
+        } else if (pct > 99.99) {
+          $scope.formErrors.discountPct = 'Mức giảm tối đa là 99.99%';
+        } else if (pct % 0.01 !== 0) {
+          $scope.formErrors.discountPct = 'Mức giảm chỉ được nhập đến 2 chữ số thập phân';
+        } else {
+          $scope.formErrors.discountPct = null;
+        }
+      };
+      
+      // "Canh gác" model: ép mọi thứ về UTC Date nếu ai đó lỡ gán string
+      $scope.$watchGroup(['formData.startDate', 'formData.endDate'], function(vals){
+        ['startDate','endDate'].forEach(function(k){
+          var v = $scope.formData[k];
+          if (v && Object.prototype.toString.call(v) !== '[object Date]') {
+            var d = toUtcDate(v);
+            // Nếu parse thất bại -> null để tránh datefmt
+            $scope.formData[k] = d instanceof Date && !isNaN(d.getTime()) ? d : null;
+            console.log('Guard: Converted', k, 'from', typeof v, 'to UTC Date:', $scope.formData[k]);
+          }
+        });
+      });
+      
+      // Watch for discount percentage changes to update preview prices
+      $scope.$watch('formData.discountPct', function(newVal, oldVal) {
+        if (newVal !== oldVal && $scope.editingPromotion && $scope.editingPromotion.books) {
+          $scope.editingPromotion.books.forEach(function(book) {
+            if (book.unitPrice) {
+              book.discountedPrice = Math.round(book.unitPrice * (1 - (newVal || 0) / 100));
+            }
+          });
+        }
+      });
       $scope.isSubmitting = false;
       $rootScope.selectedPromotion = null;
       $scope.formErrors = {};
@@ -66,14 +110,83 @@ app.controller('AdminPromotionsController', [
       function toDateObject(input) {
         if (!input) return null;
         if (Object.prototype.toString.call(input) === '[object Date]') return input;
-        // normalize "YYYY-MM-DD" or ISO "YYYY-MM-DDTHH:mm:ss"
-        var s = (typeof input === 'string' && input.indexOf('T') !== -1) ? input.split('T')[0] : ('' + input).slice(0, 10);
-        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
-          var p = s.split('-').map(Number);
-          return new Date(p[0], p[1]-1, p[2]);
+
+        var s = String(input).trim();
+
+        // 1) ISO dạng 2025-10-04 hoặc 2025-10-04T...
+        var iso = s.indexOf('T') !== -1 ? s.split('T')[0] : s.slice(0, 10);
+        if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+          var p1 = iso.split('-').map(Number);
+          return new Date(p1[0], p1[1]-1, p1[2]);
         }
+
+        // 2) dd/MM/yyyy hoặc d/M/yyyy (VN)
+        var m1 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+        if (m1) {
+          var d = parseInt(m1[1], 10), m = parseInt(m1[2], 10), y = parseInt(m1[3], 10);
+          if (m>=1 && m<=12 && d>=1 && d<=31) return new Date(y, m-1, d);
+        }
+
+        // 3) MM-dd-yyyy hoặc M-d-yyyy
+        var m2 = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+        if (m2) {
+          var mm = parseInt(m2[1], 10), dd = parseInt(m2[2], 10), yy = parseInt(m2[3], 10);
+          if (mm>=1 && mm<=12 && dd>=1 && dd<=31) return new Date(yy, mm-1, dd);
+        }
+
+        // 4) Fallback: new Date(...) (cẩn thận theo locale trình duyệt)
+        var guess = new Date(s);
+        return isNaN(guess.getTime()) ? null : guess;
+      }
+      
+      function toUtcDate(input) {
+        // parse về Date local trước
+        var d = toDateObject(input);
+        if (!d || isNaN(d.getTime())) return null;
+        // trả Date ở 00:00 UTC (English: normalize to UTC midnight)
+        return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+      }
+      
+      function toDateOnlyStringUTC(input) {
+        if (!input) return '';
+        var d = (Object.prototype.toString.call(input) === '[object Date]') ? input : toUtcDate(input);
+        if (!d || isNaN(d.getTime())) return '';
+        var y = d.getUTCFullYear();
+        var m = String(d.getUTCMonth() + 1).padStart(2, '0');
+        var dd = String(d.getUTCDate()).padStart(2, '0');
+        return y + '-' + m + '-' + dd; // yyyy-MM-dd
+      }
+      
+      function strToUtcDate(s){
+        // s dạng yyyy-MM-dd
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(s||'')) return null;
+        var parts = s.split('-').map(Number);
+        var y = parts[0], m = parts[1], d = parts[2];
+        return new Date(Date.UTC(y, m-1, d));
+      }
+      
+      function formatDateForInput(input) {
+        if (!input) return '';
+        if (Object.prototype.toString.call(input) === '[object Date]') {
+          return input.getFullYear() + '-' + 
+                 String(input.getMonth() + 1).padStart(2, '0') + '-' + 
+                 String(input.getDate()).padStart(2, '0');
+        }
+        // If it's already a string in YYYY-MM-DD format, return as is
+        if (typeof input === 'string') {
+          var s = input.indexOf('T') !== -1 ? input.split('T')[0] : input.slice(0, 10);
+          if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+            return s;
+          }
+        }
+        // Try to parse and format
         var d = new Date(input);
-        return isNaN(d.getTime()) ? null : d;
+        if (!isNaN(d.getTime())) {
+          return d.getFullYear() + '-' + 
+                 String(d.getMonth() + 1).padStart(2, '0') + '-' + 
+                 String(d.getDate()).padStart(2, '0');
+        }
+        return '';
       }
       function compareDateOnly(a, b) {
         if (!a || !b) return 0;
@@ -86,9 +199,10 @@ app.controller('AdminPromotionsController', [
         if (!$scope.formData.name || !$scope.formData.name.trim()) errs.name = 'Vui lòng nhập tên khuyến mãi';
         var pct = Number($scope.formData.discountPct);
         if (!isFinite(pct)) errs.discountPct = 'Mức giảm phải là số';
-        else if (pct < 0 || pct > 100) errs.discountPct = 'Mức giảm phải trong khoảng 0 - 100%';
-        var s = toDateOnlyString($scope.formData.startDate);
-        var e = toDateOnlyString($scope.formData.endDate);
+        else if (pct < 0.01 || pct > 99.99) errs.discountPct = 'Mức giảm phải trong khoảng 0.01% - 99.99%';
+        else if (pct % 0.01 !== 0) errs.discountPct = 'Mức giảm chỉ được nhập đến 2 chữ số thập phân';
+        var s = toDateOnlyStringUTC($scope.formData.startDate);
+        var e = toDateOnlyStringUTC($scope.formData.endDate);
         if (!s) errs.startDate = 'Vui lòng chọn ngày bắt đầu';
         if (!e) errs.endDate = 'Vui lòng chọn ngày kết thúc';
         if (s && e && compareDateOnly(e, s) < 0) errs.dateRange = 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu';
@@ -178,8 +292,8 @@ app.controller('AdminPromotionsController', [
       // ---- Form actions ----
       $scope.showAddForm = function(){
         $scope.formErrors = {};
-        $scope.formData = { name:'', description:'', discountPct:0, startDate:null, endDate:null, bookIsbns:[] };
-        $scope.editingPromotion = { books: [] }; // allow preview table in Add mode
+        $scope.formData = { name:'', description:'', discountPct:0.01, startDate:null, endDate:null, bookIsbns:[] };
+        $scope.editingPromotion = { books: [] }; // allow preview table in Add mode và để ng-if="editingPromotion" hoạt động
         $timeout(function(){ var m=getPromotionModal(); if (m) m.show(); }, 0);
         $scope.bookPicker.searchTerm = '';
         $scope.bookPicker.currentPage = 1;
@@ -199,15 +313,36 @@ app.controller('AdminPromotionsController', [
           name: hydrated.name || '',
           description: hydrated.description || '',
           discountPct: hydrated.discountPct || 0,
-          startDate: toDateObject(hydrated.startDate), // Date object (fix ngModel:datefmt)
-          endDate: toDateObject(hydrated.endDate),     // Date object (fix ngModel:datefmt)
+          startDate: toUtcDate(hydrated.startDate), // UTC Date object for input type="date"
+          endDate: toUtcDate(hydrated.endDate),     // UTC Date object for input type="date"
+          startDateStr: toDateOnlyStringUTC(hydrated.startDate), // String fallback
+          endDateStr: toDateOnlyStringUTC(hydrated.endDate),     // String fallback
           bookIsbns: bookIsbns
         };
+
+        // Debug log
+        console.log('showEditForm - Original dates:', hydrated.startDate, hydrated.endDate);
+        console.log('showEditForm - Parsed UTC dates:', $scope.formData.startDate, $scope.formData.endDate);
+        console.log('showEditForm - Date types:', typeof $scope.formData.startDate, typeof $scope.formData.endDate);
+        console.log('showEditForm - UTC strings:', toDateOnlyStringUTC($scope.formData.startDate), toDateOnlyStringUTC($scope.formData.endDate));
   
         $scope.editingPromotion = JSON.parse(JSON.stringify(hydrated));
         $scope._originalPromotion = JSON.parse(JSON.stringify(hydrated));
   
-        $timeout(function(){ var m=getPromotionModal(); if (m) m.show(); }, 0);
+        $timeout(function(){ 
+          $scope.$applyAsync(); // đảm bảo 1 vòng digest trước khi show
+          var m = getPromotionModal(); 
+          if (m) m.show(); 
+        }, 0);
+
+        // Debug script để kiểm tra DOM values
+        $timeout(function(){
+          var s = document.querySelector('#promotionModal input[ng-model="formData.startDate"]');
+          var e = document.querySelector('#promotionModal input[ng-model="formData.endDate"]');
+          console.log('DOM values after open:', s && s.value, e && e.value);
+          console.log('Model types after digest:', typeof $scope.formData.startDate, typeof $scope.formData.endDate,
+                      $scope.formData.startDate, $scope.formData.endDate);
+        }, 50);
   
         $scope.bookPicker.searchTerm = '';
         $scope.bookPicker.currentPage = 1;
@@ -217,6 +352,11 @@ app.controller('AdminPromotionsController', [
       $scope.closeForm = function(){
         var m = getPromotionModal();
         if (m) m.hide();
+        // Reset form data
+        $scope.formData = { name:'', description:'', discountPct:0, startDate:null, endDate:null, bookIsbns:[] };
+        $scope.editingPromotion = null;
+        $scope._originalPromotion = null;
+        $scope.formErrors = {};
       };
   
       // ---- Book picker ----
@@ -287,28 +427,54 @@ app.controller('AdminPromotionsController', [
         var isbns = ($scope.formData.bookIsbns || []).slice();
         if (!$scope.editingPromotion) $scope.editingPromotion = { books: [] };
   
-        // If API exists, use it
-        if (BookstoreService.getBooksByIsbns && typeof BookstoreService.getBooksByIsbns === 'function') {
-          BookstoreService.getBooksByIsbns({ isbns: isbns }).then(function(res){
-            var items = (res && res.data && res.data.data) ? res.data.data : (res && res.data ? res.data : []);
-            var promoLike = {
-              discountPct: $scope.formData.discountPct,
-              books: (Array.isArray(items) ? items : []).map(function(b){
-                return {
-                  isbn: b.isbn,
-                  title: b.title,
-                  unitPrice: b.unitPrice,
-                  discountedPrice: b.discountedPrice,
-                  categoryName: b.categoryName,
-                  publisherName: b.publisherName
-                };
-              })
-            };
-            $scope.editingPromotion = hydratePromotionBooks(promoLike);
-          }).catch(function(){
-            // fallback minimal rows
-            $scope.editingPromotion.books = isbns.map(function(i){ return { isbn: i, title: '(đang tải...)' }; });
-          });
+        // Use existing getBooks API and filter by ISBNs
+        if (isbns.length > 0) {
+          BookstoreService.getBooks({ pageNumber: 1, pageSize: 1000, searchTerm: '' })
+            .then(function(res){
+              var resp = res.data || {};
+              var allBooks = [];
+              
+              if (resp.success && resp.data && Array.isArray(resp.data.books)) {
+                allBooks = resp.data.books;
+              } else if (Array.isArray(resp.data)) {
+                allBooks = resp.data;
+              }
+              
+              // Filter books by selected ISBNs
+              var selectedBooks = allBooks.filter(function(book) {
+                return isbns.indexOf(book.isbn) !== -1;
+              });
+              
+              var promoLike = {
+                discountPct: $scope.formData.discountPct,
+                books: selectedBooks.map(function(b){
+                  return {
+                    isbn: b.isbn,
+                    title: b.title,
+                    unitPrice: b.currentPrice || b.unitPrice || 0,
+                    publisherName: b.publisherName || '',
+                    categoryName: b.categoryName || '',
+                    discountedPrice: Math.round((b.currentPrice || b.unitPrice || 0) * (1 - ($scope.formData.discountPct || 0) / 100))
+                  };
+                })
+              };
+              
+              $scope.editingPromotion = hydratePromotionBooks(promoLike);
+            })
+            .catch(function(error){
+              console.error('Error loading books for preview:', error);
+              // fallback minimal rows
+              $scope.editingPromotion.books = isbns.map(function(i){ 
+                return { 
+                  isbn: i, 
+                  title: '(đang tải...)',
+                  unitPrice: 0,
+                  publisherName: '',
+                  categoryName: '',
+                  discountedPrice: 0
+                }; 
+              });
+            });
           return;
         }
   
@@ -317,7 +483,21 @@ app.controller('AdminPromotionsController', [
         ($scope.bookPicker.books || []).forEach(function(b){ if (b && b.isbn) map[b.isbn] = b; });
         $scope.editingPromotion.books = isbns.map(function(i){
           var b = map[i];
-          return b ? { isbn:b.isbn, title:b.title, unitPrice:b.unitPrice } : { isbn:i, title:'(đã chọn)' };
+          return b ? { 
+            isbn: b.isbn, 
+            title: b.title, 
+            unitPrice: b.currentPrice || b.unitPrice || 0,
+            publisherName: b.publisherName || '',
+            categoryName: b.categoryName || '',
+            discountedPrice: Math.round((b.currentPrice || b.unitPrice || 0) * (1 - ($scope.formData.discountPct || 0) / 100))
+          } : { 
+            isbn: i, 
+            title: '(đã chọn)',
+            unitPrice: 0,
+            publisherName: '',
+            categoryName: '',
+            discountedPrice: 0
+          };
         });
         $scope.editingPromotion = hydratePromotionBooks({ discountPct:$scope.formData.discountPct, books: $scope.editingPromotion.books });
       }
@@ -381,8 +561,8 @@ app.controller('AdminPromotionsController', [
           name: $scope.formData.name,
           description: $scope.formData.description,
           discountPct: Number($scope.formData.discountPct) || 0,
-          startDate: toDateOnlyString($scope.formData.startDate), // backend expects string
-          endDate: toDateOnlyString($scope.formData.endDate),
+          startDate: toDateOnlyStringUTC($scope.formData.startDate), // backend expects string
+          endDate: toDateOnlyStringUTC($scope.formData.endDate),
           bookIsbns: ($scope.formData.bookIsbns || []).slice()
         };
   

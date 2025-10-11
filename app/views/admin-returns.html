@@ -56,7 +56,7 @@
                                         <span ng-class="getStatusClass(r.status)">{{getStatusText(r.status)}}</span>
                                     </td>
                                     <td>{{r.createdAt | date:'yyyy-MM-dd HH:mm'}}</td>
-                                    <td class="text-end">{{r.totalAmount | currency}}</td>
+                                    <td class="text-end">{{r.totalAmount | numberFormatted}} ₫</td>
                                     <td class="text-end">
                                         <div class="btn-group btn-group-sm">
                                             <button class="btn btn-outline-info" ng-click="viewReturn(r)" title="Xem chi tiết">
@@ -120,7 +120,7 @@
                                 </tr>
                                 <tr>
                                     <td>Tổng tiền</td>
-                                    <td class="text-end"><strong>{{selectedReturn.totalAmount | currency}}</strong></td>
+                                    <td class="text-end"><strong>{{selectedReturn.totalAmount | numberFormatted}} ₫</strong></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -168,8 +168,8 @@
                                         <td class="text-nowrap"><code>{{l.isbn}}</code></td>
                                         <td class="text-truncate" style="max-width: 280px">{{l.bookTitle}}</td>
                                         <td class="text-end">{{l.qtyReturned}}</td>
-                                        <td class="text-end">{{l.unitPrice | currency}}</td>
-                                        <td class="text-end">{{l.amount | currency}}</td>
+                                        <td class="text-end">{{l.unitPrice | numberFormatted}} ₫</td>
+                                        <td class="text-end">{{l.amount | numberFormatted}} ₫</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -199,7 +199,7 @@
                     <div class="mb-3">
                         <strong>Mã phiếu:</strong> RT-{{selectedReturn.returnId}}<br>
                         <strong>Invoice:</strong> {{selectedReturn.invoiceId}}<br>
-                        <strong>Tổng tiền:</strong> {{selectedReturn.totalAmount | currency}}
+                        <strong>Tổng tiền:</strong> {{selectedReturn.totalAmount | numberFormatted}} ₫
                     </div>
                     
                     <div class="mb-3">

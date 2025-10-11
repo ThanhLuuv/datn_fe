@@ -83,7 +83,7 @@
                                         <span class="badge bg-primary">{{gr.totalQuantity}}</span>
                                     </td>
                                     <td>
-                                        <strong class="text-success">{{gr.totalAmount | currency}}</strong>
+                                        <strong class="text-success">{{gr.totalAmount | numberFormatted}} ₫</strong>
                                     </td>
                                     <td>
                                         <span ng-if="gr.note">{{gr.note | truncate:30}}</span>
@@ -192,18 +192,19 @@
                                             <td><code>{{line.isbn}}</code></td>
                                             <td>{{line.bookTitle}}</td>
                                             <td><span class="badge bg-info">{{line.qtyOrdered}}</span></td>
-                                            <td>{{line.unitPrice | currency}}</td>
+                                            <td>{{line.unitPrice | numberFormatted}} ₫</td>
                                             <td>
                                                 <div class="input-group input-group-sm">
-                                                    <input type="number" class="form-control" ng-model="goodsReceiptData.lines[$index].qtyReceived" min="0" required ng-change="updateLineTotal($index)" number-input>
+                                                    <input type="number" class="form-control" ng-model="goodsReceiptData.lines[$index].qtyReceived" min="0" max="{{line.qtyOrdered}}" required ng-change="updateLineTotal($index)" number-input>
                                                     <button type="button" class="btn btn-outline-secondary" ng-click="fillSingleQuantity($index)" title="Điền số lượng đặt">
                                                         <i class="bi bi-arrow-down-up"></i>
                                                     </button>
                                                 </div>
                                                 <div class="text-danger small mt-1" ng-if="goodsReceiptData.lines[$index].qtyReceived == null || goodsReceiptData.lines[$index].qtyReceived < 0">Số lượng nhận phải ≥ 0.</div>
+                                                <div class="text-danger small mt-1" ng-if="goodsReceiptData.lines[$index].qtyReceived > line.qtyOrdered">Số lượng nhận không được vượt quá số lượng đặt ({{line.qtyOrdered}}).</div>
                                             </td>
                                             <td>
-                                                <strong>{{goodsReceiptData.lines[$index].lineTotal | currency}}</strong>
+                                                <strong>{{goodsReceiptData.lines[$index].lineTotal | numberFormatted}} ₫</strong>
                                                 <div class="text-danger small mt-1" ng-if="receiptValidation.lineErrors[$index].hasError">
                                                     {{receiptValidation.lineErrors[$index].errors.join(', ')}}
                                                 </div>
@@ -219,7 +220,7 @@
                         </div>
                         <div class="text-end ms-4">
                             <div class="small text-muted">Tổng tiền</div>
-                            <div class="h5 text-success mb-0">{{getTotalAmount() | currency}}</div>
+                            <div class="h5 text-success mb-0">{{getTotalAmount() | numberFormatted}} ₫</div>
                         </div>
                     </div>
                         </div>
@@ -307,8 +308,8 @@
                                     <td class="text-nowrap"><code>{{line.isbn}}</code></td>
                                     <td class="text-truncate" style="max-width: 340px">{{line.bookTitle}}</td>
                                     <td class="text-end"><span class="badge bg-success">{{line.qtyReceived}}</span></td>
-                                    <td class="text-end">{{line.unitCost | currency}}</td>
-                                    <td class="text-end"><strong>{{line.lineTotal | currency}}</strong></td>
+                                    <td class="text-end">{{line.unitCost | numberFormatted}} ₫</td>
+                                    <td class="text-end"><strong>{{line.lineTotal | numberFormatted}} ₫</strong></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -320,7 +321,7 @@
                         </div>
                         <div class="text-end ms-4">
                             <div class="small text-muted">Tổng tiền</div>
-                            <div class="h5 text-success mb-0">{{selectedGoodsReceipt.totalAmount | currency}}</div>
+                            <div class="h5 text-success mb-0">{{selectedGoodsReceipt.totalAmount | numberFormatted}} ₫</div>
                         </div>
                     </div>
                 </div>
@@ -385,9 +386,9 @@
                                 <td class="text-truncate" style="max-width:320px">{{row.bookTitle}}</td>
                                 <td>{{row.qtyOrdered}}</td>
                                 <td>{{row.qtyReceived}}</td>
-                                <td>{{row.unitPrice | currency}}</td>
+                                <td>{{row.unitPrice | numberFormatted}} ₫</td>
                                 <td>
-                                    <strong>{{row.lineTotal | currency}}</strong>
+                                    <strong>{{row.lineTotal | numberFormatted}} ₫</strong>
                                     <div class="text-danger small mt-1" ng-if="excelPreviewValidation.lineErrors[$index].hasError">
                                         {{excelPreviewValidation.lineErrors[$index].errors.join(', ')}}
                                     </div>

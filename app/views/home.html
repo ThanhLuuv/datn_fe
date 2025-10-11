@@ -65,7 +65,7 @@
             </div>
             
             <div class="row g-4" ng-if="!loading">
-                <div class="col-lg-3 col-md-4 col-sm-6" ng-repeat="book in newBooks | limitTo:8">
+                <div class="col-lg-3 col-md-4 col-sm-6" ng-repeat="book in newBooks | limitTo:8" ng-if="book.status">
                     <div class="book-card h-100" 
                          data-bs-toggle="tooltip" 
                          ng-attr-title="{{book.title}}&#10;Giá: {{book.currentPrice | currency:'':0}} VNĐ&#10;Tác giả: {{book.authors[0].fullName}}&#10;Năm xuất bản: {{book.publishYear}}&#10;Nhà xuất bản: {{book.publisherName}}">
@@ -154,7 +154,7 @@
             </div>
             
             <div class="row g-4" ng-if="!loading">
-                <div class="col-lg-3 col-md-4 col-sm-6" ng-repeat="book in promotionBooks | limitTo:8">
+                <div class="col-lg-3 col-md-4 col-sm-6" ng-repeat="book in promotionBooks | limitTo:8" ng-if="book.status">
                     <div class="book-card h-100" 
                          data-bs-toggle="tooltip" 
                          ng-attr-title="{{book.title}}&#10;Giá gốc: {{book.currentPrice | currency:'':0}} VNĐ&#10;Giá khuyến mãi: {{book.discountedPrice | currency:'':0}} VNĐ&#10;Tác giả: {{book.authors[0].fullName}}&#10;Nhà xuất bản: {{book.publisherName}}">
@@ -236,7 +236,7 @@
             </div>
             
             <div class="row g-4" ng-if="!loading">
-                <div class="col-lg-3 col-md-4 col-sm-6" ng-repeat="book in bestSellers | limitTo:8">
+                <div class="col-lg-3 col-md-4 col-sm-6" ng-repeat="book in bestSellers | limitTo:8" ng-if="book.status">
                     <div class="book-card h-100" 
                          data-bs-toggle="tooltip" 
                          ng-attr-title="{{book.title}}&#10;Giá: {{book.currentPrice | currency:'':0}} VNĐ&#10;Tác giả: {{book.authors[0].fullName}}&#10;Bán được: {{book.totalSold}} cuốn&#10;Nhà xuất bản: {{book.publisherName}}">

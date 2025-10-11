@@ -30,9 +30,9 @@
         </div>
 
         <!-- Search Results -->
-        <div class="search-results" ng-if="!loading && results.length > 0">
+        <div class="search-results" ng-if="!loading && filteredResults.length > 0">
             <div class="row g-4">
-                <div class="col-lg-3 col-md-4 col-sm-6" ng-repeat="book in results">
+                <div class="col-lg-3 col-md-4 col-sm-6" ng-repeat="book in filteredResults">
                     <div class="book-card h-100"
                          data-bs-toggle="tooltip"
                          ng-attr-title="{{book.title}}&#10;Giá: {{(book.currentPrice || book.unitPrice) | currency:'':0}} VNĐ&#10;ISBN: {{book.isbn}}">
@@ -60,7 +60,7 @@
         </div>
 
         <!-- No Results -->
-        <div class="no-results" ng-if="results.length === 0 && loaded && query">
+        <div class="no-results" ng-if="filteredResults.length === 0 && loaded && query">
             <div class="text-center py-5">
                 <div class="no-results-icon mb-4">
                     <i class="bi bi-search text-muted" style="font-size: 4rem;"></i>

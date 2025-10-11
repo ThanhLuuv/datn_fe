@@ -96,8 +96,9 @@ app.controller('AdminOrdersController', ['$scope', '$rootScope', 'BookstoreServi
         el.addEventListener('shown.bs.modal', function(){
             try {
                 var cur = $rootScope.selectedOrder || $scope.selectedOrder;
-                if (cur && (cur.orderId || cur.id) && $scope.getOrderStatus(cur) === 'Pending') {
+                if (cur && (cur.orderId || cur.id) && $scope.getOrderStatus(cur) === 'PendingConfirmation') {
                     // Only fetch suggestions for unassigned orders
+                    console.log('Modal shown, loading candidates for:', cur.orderId || cur.id);
                     $scope.refreshDeliveryCandidates(cur.orderId || cur.id);
                 }
                 // Reset delivery date to ensure it's valid
@@ -173,7 +174,7 @@ $scope.viewOrder = function(order){
     $rootScope.selectedOrder = $scope.selectedOrder;
     // Load candidates immediately on open
     var curId = ($scope.selectedOrder.orderId || $scope.selectedOrder.id);
-    if (curId && $scope.getOrderStatus($scope.selectedOrder) === 'Pending') {
+    if (curId && $scope.getOrderStatus($scope.selectedOrder) === 'PendingConfirmation') {
         $scope.deliveryDateMin = formatNowForDatetimeLocal();
         if (!$scope.deliveryDateInput) {
             $scope.deliveryDateInput = $scope.deliveryDateMin;
@@ -225,7 +226,7 @@ $scope.viewOrder = function(order){
             .catch(function(){ /* ignore; list data already shown */ });
     }
     // also try to load candidates from list data
-    if (order && (order.orderId || order.id) && $scope.getOrderStatus(order) === 'Pending') {
+    if (order && (order.orderId || order.id) && $scope.getOrderStatus(order) === 'PendingConfirmation') {
         $scope.refreshDeliveryCandidates(order.orderId || order.id);
     }
 };
@@ -238,12 +239,12 @@ $scope.getOrderStatus = function(order){
     if (typeof s === 'string' && s.length > 0) return s;
     var id = order.statusId != null ? order.statusId : s;
     if (typeof id === 'number') {
-        // Common mapping: 0/1/2/3 or 1/2/3
+        // New mapping: 0/1/2/3
         switch(id){
-            case 0: return 'Pending';
-            case 1: return 'Assigned';
+            case 0: return 'PendingConfirmation';
+            case 1: return 'Confirmed';
             case 2: return 'Delivered';
-            case 3: return 'Delivered';
+            case 3: return 'Cancelled';
             default: return '';
         }
     }
@@ -252,7 +253,16 @@ $scope.getOrderStatus = function(order){
 
 $scope.canAssign = function(order){
     var s = $scope.getOrderStatus(order);
-    return s === 'Pending' || s === 'Approved';
+    return s === 'PendingConfirmation' || s === 'Confirmed';
+};
+
+// Helper function to get order status text
+$scope.getOrderStatusText = function(status) {
+    if (status === 'PendingConfirmation' || status === 0) return 'Chờ xác nhận';
+    if (status === 'Confirmed' || status === 1) return 'Đã xác nhận';
+    if (status === 'Delivered' || status === 2) return 'Đã giao';
+    if (status === 'Cancelled' || status === 3) return 'Đã hủy';
+    return status || 'Không xác định';
 };
 
 $scope.closeOrderDetail = function(){
@@ -267,33 +277,50 @@ $scope.closeOrderDetail = function(){
     $rootScope.selectedOrder = null;
 };
 
-	$scope.approveOrder = function(order, approved){
+	$scope.cancelOrder = function(order){
 		var id = order.orderId || order.id;
-		BookstoreService.approveOrder(id, { approved: approved, note: approved ? 'Đồng ý' : 'Không đồng ý' })
+		BookstoreService.approveOrder(id, { approved: false, note: 'Hủy đơn hàng' })
 			.then(function(){
-				$scope.addToast('success', approved ? 'Đã duyệt đơn' : 'Đã từ chối đơn');
+				$scope.addToast('success', 'Đã hủy đơn hàng');
 				$scope.loadOrders();
 			})
 			.catch(function(){
-				$scope.addToast('danger', 'Không thể cập nhật trạng thái duyệt');
+				$scope.addToast('danger', 'Không thể hủy đơn hàng');
 			});
 	};
 
 $scope.assignDelivery = function(order){
-    // Open detail modal and load candidates immediately
+    console.log('Assign delivery clicked for order:', order);
+    console.log('Order status:', $scope.getOrderStatus(order));
+    
+    // Open detail modal first
     $scope.viewOrder(order);
-    var id = order && (order.orderId || order.id);
-    if (id) $scope.loadDeliveryCandidates(id);
+    
+    // Load candidates after modal is shown
+    setTimeout(function() {
+        var id = order && (order.orderId || order.id);
+        if (id) {
+            console.log('Assigning delivery for order:', id);
+            // Sử dụng refreshDeliveryCandidates để có loading state
+            $scope.refreshDeliveryCandidates(id);
+        }
+    }, 100); // Delay 100ms để đảm bảo modal đã mở
 };
 
 // Load delivery candidates
 $scope.loadDeliveryCandidates = function(orderId){
-    if (!BookstoreService.getOrderDeliveryCandidates) return;
+    console.log('Loading delivery candidates for order:', orderId);
+    if (!BookstoreService.getOrderDeliveryCandidates) {
+        console.error('getOrderDeliveryCandidates API not available');
+        return;
+    }
     $scope.deliveryCandidates = [];
     return BookstoreService.getOrderDeliveryCandidates(orderId)
         .then(function(res){
+            console.log('Delivery candidates response:', res);
             var payload = (res && res.data) ? res.data : null;
             var list = (payload && Array.isArray(payload.data)) ? payload.data : [];
+            console.log('Delivery candidates list:', list);
             // simple ranking: area matched first, then fewer active assigned, then more delivered
             list.sort(function(a, b){
                 var amA = !!a.isAreaMatched ? 1 : 0;
@@ -307,9 +334,11 @@ $scope.loadDeliveryCandidates = function(orderId){
                 return dvB - dvA; // more delivered first
             });
             $scope.deliveryCandidates = list;
+            console.log('Sorted delivery candidates:', $scope.deliveryCandidates);
             try { $scope.$applyAsync(); } catch (e) {}
         })
-        .catch(function(){
+        .catch(function(error){
+            console.error('Error loading delivery candidates:', error);
             $scope.deliveryCandidates = [];
         });
 };
@@ -332,9 +361,16 @@ $scope.assignDeliveryCandidate = function(order, candidate){
     }
     var localValue = $scope.deliveryDateInput;
     var dateInput = new Date(localValue).toISOString();
-    BookstoreService.assignOrderDelivery(order.orderId || order.id, { deliveryEmployeeId: Number(candidate.employeeId || candidate.id), deliveryDate: dateInput })
+    
+    // Phân công giao hàng và tự động chuyển sang trạng thái "Đã xác nhận" (1)
+    BookstoreService.assignOrderDelivery(order.orderId || order.id, { 
+        deliveryEmployeeId: Number(candidate.employeeId || candidate.id), 
+        deliveryDate: dateInput,
+        approved: true, // Tự động xác nhận đơn hàng
+        note: 'Đã phân công giao hàng và xác nhận đơn'
+    })
         .then(function(){
-            $scope.addToast('success', 'Đã phân công giao hàng');
+            $scope.addToast('success', 'Đã phân công giao hàng và xác nhận đơn');
             try { $route.reload(); } catch(e) { $scope.loadOrders(); }
             $scope.closeOrderDetail();
         })

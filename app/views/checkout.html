@@ -22,8 +22,21 @@
             </div>
         </div>
 
+        <!-- Loading State -->
+        <div class="row" ng-if="pageLoading">
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">Đang tải...</span>
+                    </div>
+                    <h4 class="text-muted mb-3">Đang tải trang thanh toán...</h4>
+                    <p class="text-muted">Vui lòng chờ trong giây lát</p>
+                </div>
+            </div>
+        </div>
+
         <!-- Empty Cart -->
-        <div class="row" ng-if="cart.items.length === 0">
+        <div class="row" ng-if="!pageLoading && cart.items.length === 0">
             <div class="col-12">
                 <div class="empty-cart text-center py-5">
                     <div class="empty-cart-icon mb-4">
@@ -39,7 +52,7 @@
         </div>
 
         <!-- Checkout Content -->
-        <div class="row g-4" ng-if="cart.items.length > 0">
+        <div class="row g-4" ng-if="!pageLoading && cart.items.length > 0">
             <!-- Checkout Form -->
             <div class="col-lg-8">
                 <!-- Shipping Information -->
@@ -74,17 +87,33 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">
-                                        <i class="bi bi-geo-alt me-1"></i>Tỉnh/Thành <span class="text-danger">*</span>
+                                        <i class="bi bi-geo-alt me-1"></i>Khu vực <span class="text-danger">*</span>
                                     </label>
                                     <select class="form-select form-select-lg" 
-                                            ng-model="form.city" 
-                                            ng-change="recompute()">
-                                        <option value="hcm_inner">TP.HCM (nội thành) - 30,000 VNĐ</option>
-                                        <option value="hcm_outer">TP.HCM (ngoại thành) - 50,000 VNĐ</option>
-                                        <option value="other">Tỉnh/Thành khác - 80,000 VNĐ</option>
+                                            ng-model="form.areaType" 
+                                            ng-change="onAreaTypeChange()"
+                                            required>
+                                        <option value="">Chọn khu vực</option>
+                                        <option value="inner">Nội thành</option>
+                                        <option value="outer">Ngoại thành</option>
                                     </select>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-6" ng-if="form.areaType === 'inner'">
+                                    <label class="form-label fw-semibold">
+                                        <i class="bi bi-geo me-1"></i>Phường/Xã <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select form-select-lg" 
+                                            ng-model="form.areaId" 
+                                            ng-disabled="areasLoading"
+                                            required>
+                                        <option value="">Chọn phường/xã</option>
+                                        <option ng-repeat="area in areas" value="{{area.areaId}}">{{area.name}}</option>
+                                    </select>
+                                    <div ng-if="areasLoading" class="form-text">
+                                        <i class="bi bi-hourglass-split me-1"></i>Đang tải danh sách phường/xã...
+                                    </div>
+                                </div>
+                                <div class="col-12">
                                     <label class="form-label fw-semibold">
                                         <i class="bi bi-house me-1"></i>Địa chỉ chi tiết <span class="text-danger">*</span>
                                     </label>
@@ -166,26 +195,9 @@
                             
                             <!-- Price Breakdown -->
                             <div class="price-breakdown">
-                                <div class="summary-item d-flex justify-content-between mb-2">
-                                    <span class="text-muted">Tạm tính</span>
-                                    <span class="fw-semibold">{{ cart.subtotal | currency:'':0 }} VNĐ</span>
-                                </div>
-                                
-                                <div class="summary-item d-flex justify-content-between mb-2">
-                                    <span class="text-muted">Thuế VAT (8%)</span>
-                                    <span class="fw-semibold">{{ tax | currency:'':0 }} VNĐ</span>
-                                </div>
-                                
-                                <div class="summary-item d-flex justify-content-between mb-3">
-                                    <span class="text-muted">Phí vận chuyển</span>
-                                    <span class="fw-semibold">{{ shippingFee | currency:'':0 }} VNĐ</span>
-                                </div>
-                                
-                                <hr class="my-3">
-                                
                                 <div class="summary-total d-flex justify-content-between mb-4">
                                     <span class="fs-5 fw-bold">Tổng cộng</span>
-                                    <span class="fs-5 fw-bold text-primary">{{ grandTotal | currency:'':0 }} VNĐ</span>
+                                    <span class="fs-5 fw-bold text-primary">{{ cart.subtotal | currency:'':0 }} VNĐ</span>
                                 </div>
                             </div>
                             
@@ -193,7 +205,7 @@
                             <div class="d-grid gap-2">
                                 <button class="btn btn-primary btn-lg" 
                                         ng-click="placeOrder()"
-                                        ng-disabled="!form.fullName || !form.phone || !form.address || loading">
+                                        ng-disabled="!form.fullName || !form.phone || !form.address || !form.areaType || (form.areaType === 'inner' && !form.areaId) || loading">
                                     <span ng-if="!loading">
                                         <i class="bi bi-check-circle me-2"></i>Đặt hàng ngay
                                     </span>

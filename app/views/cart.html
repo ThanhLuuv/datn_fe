@@ -83,9 +83,9 @@
                                                 </div>
                                             </td>
                                             <td class="py-4 text-center">
-                                                <span class="cart-item-price">{{ (item.discountedPrice || item.currentPrice || item.unitPrice) | currency:'':0 }} VNĐ</span>
+                                                <span class="cart-item-price">{{ (item.discountedPrice || item.currentPrice || item.unitPrice) | numberFormatted }} ₫</span>
                                                 <div ng-if="item.hasPromotion && item.unitPrice !== item.discountedPrice" class="mt-1">
-                                                    <small class="text-muted text-decoration-line-through">{{ item.unitPrice | currency:'':0 }} VNĐ</small>
+                                                    <small class="text-muted text-decoration-line-through">{{ item.unitPrice | numberFormatted }} ₫</small>
                                                 </div>
                                             </td>
                                             <td class="py-4 text-center">
@@ -118,7 +118,7 @@
                                             </td>
                                             <td class="py-4 text-end">
                                                 <span class="cart-item-total fw-bold text-primary">
-                                                    {{ (item.totalPrice || (item.discountedPrice || item.currentPrice || item.unitPrice) * item.qty) | currency:'':0 }} VNĐ
+                                                    {{ (item.totalPrice || (item.discountedPrice || item.currentPrice || item.unitPrice) * item.qty) | numberFormatted }} ₫
                                                 </span>
                                             </td>
                                             <td class="py-4 text-center">
@@ -148,26 +148,9 @@
                             </h5>
                         </div>
                         <div class="card-body">
-                            <div class="summary-item d-flex justify-content-between mb-3">
-                                <span class="text-muted">Tạm tính ({{ cart.items.length }} sản phẩm)</span>
-                                <span class="fw-semibold">{{ cart.subtotal | currency:'':0 }} VNĐ</span>
-                            </div>
-                            
-                            <div class="summary-item d-flex justify-content-between mb-3">
-                                <span class="text-muted">Thuế VAT (8%)</span>
-                                <span class="fw-semibold">{{ tax | currency:'':0 }} VNĐ</span>
-                            </div>
-                            
-                            <div class="summary-item d-flex justify-content-between mb-3">
-                                <span class="text-muted">Phí vận chuyển</span>
-                                <span class="fw-semibold">{{ shippingFee | currency:'':0 }} VNĐ</span>
-                            </div>
-                            
-                            <hr class="my-3">
-                            
                             <div class="summary-total d-flex justify-content-between mb-4">
                                 <span class="fs-5 fw-bold">Tổng cộng</span>
-                                <span class="fs-5 fw-bold text-primary">{{ grandTotal | currency:'':0 }} VNĐ</span>
+                                <span class="fs-5 fw-bold text-primary">{{ cart.subtotal | numberFormatted }} ₫</span>
                             </div>
                             
                             <div class="d-grid gap-2">

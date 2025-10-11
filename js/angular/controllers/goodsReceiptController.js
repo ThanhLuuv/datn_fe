@@ -380,12 +380,12 @@ app.controller('AdminGoodsReceiptsController', ['$scope', 'BookstoreService', 'A
                 if (!gl) {
                     errs.push('Thiếu dòng từ Excel');
                 } else {
-                    // Bỏ validation số lượng nhận khác số lượng đặt
-                    // var qOrdered = parseInt(poLine.qtyOrdered) || 0;
-                    // var qReceived = parseInt(gl.qtyReceived) || 0;
-                    // if (qReceived !== qOrdered) {
-                    //     errs.push('SL nhận khác SL đặt');
-                    // }
+                    // Validation số lượng nhận không vượt quá số lượng đặt
+                    var qOrdered = parseInt(poLine.qtyOrdered) || 0;
+                    var qReceived = parseInt(gl.qtyReceived) || 0;
+                    if (qReceived > qOrdered) {
+                        errs.push('SL nhận (' + qReceived + ') vượt quá SL đặt (' + qOrdered + ')');
+                    }
                     
                     var pricePo = parseFloat(poLine.unitPrice) || 0;
                     var priceRecv = (gl.unitCost != null) ? (parseFloat(gl.unitCost) || 0) : pricePo;
@@ -691,6 +691,13 @@ app.controller('AdminGoodsReceiptsController', ['$scope', 'BookstoreService', 'A
                     var tPo = (poLine.bookTitle || '').toString().trim().toLowerCase();
                     if (tExcel !== tPo) {
                         errs.push('Tên sách không khớp');
+                    }
+                    
+                    // Validation số lượng nhận không vượt quá số lượng đặt
+                    var qOrdered = parseInt(poLine.qtyOrdered) || 0;
+                    var qReceived = parseInt(row.qtyReceived) || 0;
+                    if (qReceived > qOrdered) {
+                        errs.push('SL nhận (' + qReceived + ') vượt quá SL đặt (' + qOrdered + ')');
                     }
                 }
                 $scope.excelPreviewValidation.lineErrors.push({ hasError: errs.length>0, errors: errs });

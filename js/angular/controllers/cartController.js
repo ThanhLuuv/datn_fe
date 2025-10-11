@@ -1,14 +1,9 @@
 app.controller('CartController', ['$scope', 'CartService', '$location', function($scope, CartService, $location) {
     $scope.loading = false;
     $scope.cart = { items: [] };
-    $scope.tax = 0;
-    $scope.shippingFee = 30000;
-    $scope.grandTotal = 0;
 
     function compute() {
-        $scope.tax = Math.round($scope.cart.subtotal * 0.08);
-        $scope.shippingFee = 30000;
-        $scope.grandTotal = $scope.cart.subtotal + $scope.tax + $scope.shippingFee;
+        // Không cần tính toán gì thêm, chỉ giữ cart.subtotal
     }
 
     // Load cart from API
@@ -45,8 +40,15 @@ app.controller('CartController', ['$scope', 'CartService', '$location', function
                         items: items,
                         subtotal: cartData.totalAmount || 0
                     };
+                    
+                    // Debug logging
+                    console.log('CartController - Cart loaded from API:');
+                    console.log('Items count:', items.length);
+                    console.log('Items:', items);
+                    console.log('Subtotal:', cartData.totalAmount);
                 } else {
                     $scope.cart = { items: [], subtotal: 0 };
+                    console.log('CartController - Empty cart from API');
                 }
                 compute();
                 $scope.loading = false;

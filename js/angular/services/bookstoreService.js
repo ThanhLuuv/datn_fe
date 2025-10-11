@@ -38,6 +38,30 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
+    // ==================== AREA APIs ====================
+    
+    // Lấy danh sách khu vực
+    this.getAreas = function() {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/area',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+    };
+
+    // Lấy thông tin khu vực theo ID
+    this.getAreaById = function(areaId) {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/area/' + areaId,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+    };
+
     // ==================== PUBLISHER APIs ====================
     
     // Lấy danh sách nhà xuất bản
@@ -130,16 +154,6 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
-    // Lấy sách mới nhất
-    this.getNewestBooks = function(limit) {
-        var queryParams = { limit: Math.min(Math.max(parseInt(limit) || 10, 1), 50) };
-        return $http({
-            method: 'GET',
-            url: baseUrl + '/book/newest',
-            headers: getAuthHeaders(),
-            params: queryParams
-        });
-    };
 
     // ==================== REPORT APIs ====================
     // Báo cáo doanh thu theo khoảng thời gian
@@ -1000,6 +1014,59 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
+    // ==================== CUSTOMER RETURN APIs ====================
+
+    // Tạo yêu cầu trả hàng cho customer
+    this.createCustomerReturn = function(returnRequest) {
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/customer/return',
+            data: returnRequest,
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Lấy danh sách yêu cầu trả hàng của customer
+    this.getCustomerReturns = function(params) {
+        params = params || {};
+        var queryParams = {
+            pageNumber: params.pageNumber || 1,
+            pageSize: params.pageSize || 10,
+            status: params.status || '',
+            fromDate: params.fromDate || '',
+            toDate: params.toDate || ''
+        };
+        
+        var queryString = Object.keys(queryParams)
+            .filter(key => queryParams[key] !== '')
+            .map(key => key + '=' + encodeURIComponent(queryParams[key]))
+            .join('&');
+        
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/customer/return?' + queryString,
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Lấy chi tiết yêu cầu trả hàng của customer
+    this.getCustomerReturnDetail = function(returnId) {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/customer/return/' + returnId,
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Hủy yêu cầu trả hàng của customer
+    this.cancelCustomerReturn = function(returnId) {
+        return $http({
+            method: 'PUT',
+            url: baseUrl + '/customer/return/' + returnId + '/cancel',
+            headers: getAuthHeaders()
+        });
+    };
+
     // ==================== RETURN MANAGEMENT APIs ====================
 
     // Danh sách phiếu trả (có filter và phân trang)
@@ -1187,4 +1254,114 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         };
         return roles[roleId] || 'Không xác định';
     };
+    // ==================== PRICE CHANGE APIs ====================
+    
+    // Lấy danh sách thay đổi giá
+    this.getPriceChanges = function(params) {
+        var queryParams = {
+            isbn: params.isbn || '',
+            employeeId: params.employeeId || '',
+            fromDate: params.fromDate || '',
+            toDate: params.toDate || '',
+            isActive: params.isActive || '',
+            pageNumber: params.pageNumber || 1,
+            pageSize: params.pageSize || 10
+        };
+        
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/pricechange',
+            headers: getAuthHeaders(),
+            params: queryParams
+        });
+    };
+
+    // Lấy chi tiết thay đổi giá
+    this.getPriceChangeDetail = function(priceChangeId) {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/pricechange/' + priceChangeId,
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Tạo thay đổi giá mới
+    this.createPriceChange = function(priceChangeData) {
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/pricechange',
+            data: priceChangeData,
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Lấy giá hiện tại của sách (PUBLIC)
+    this.getCurrentPrice = function(isbn, asOfDate) {
+        var queryParams = {};
+        if (asOfDate) {
+            queryParams.asOfDate = asOfDate;
+        }
+        
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/pricechange/current-price/' + isbn,
+            params: queryParams
+        });
+    };
+
+    // Lấy lịch sử giá của sách (PUBLIC)
+    this.getPriceHistory = function(isbn) {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/pricechange/history/' + isbn
+        });
+    };
+
+    // ==================== ADMIN PRICE CHANGE APIs ====================
+    
+    // Danh sách thay đổi giá (Admin)
+    this.getAdminPriceChanges = function(params) {
+        var queryParams = {
+            isbn: params.isbn || '',
+            page: params.page || 1,
+            pageSize: params.pageSize || 20
+        };
+        
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/admin/price-changes',
+            headers: getAuthHeaders(),
+            params: queryParams
+        });
+    };
+
+    // Tạo thay đổi giá (Admin)
+    this.createAdminPriceChange = function(priceChangeData) {
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/admin/price-changes',
+            data: priceChangeData,
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Cập nhật thay đổi giá (Admin)
+    this.updateAdminPriceChange = function(isbn, changedAt, priceChangeData) {
+        return $http({
+            method: 'PUT',
+            url: baseUrl + '/admin/price-changes/' + isbn + '/' + changedAt,
+            data: priceChangeData,
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Xóa thay đổi giá (Admin)
+    this.deleteAdminPriceChange = function(isbn, changedAt) {
+        return $http({
+            method: 'DELETE',
+            url: baseUrl + '/admin/price-changes/' + isbn + '/' + changedAt,
+            headers: getAuthHeaders()
+        });
+    };
+
 }]);

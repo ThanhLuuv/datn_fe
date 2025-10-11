@@ -108,19 +108,24 @@ app.controller('AdminCategoriesController', ['$scope', 'BookstoreService', 'Auth
             searchTerm: $scope.searchTerm
         })
             .then(function(response) {
+                console.log('Admin Categories API response:', response);
                 // Parse API response according to actual structure
                 if (response.data && response.data.success && response.data.data && Array.isArray(response.data.data.categories)) {
                     $scope.categories = response.data.data.categories;
                     $scope.totalPages = response.data.data.totalPages || 0;
+                    console.log('Admin Categories loaded (method 1):', $scope.categories);
                 } else if (response.data && Array.isArray(response.data.data)) {
                     $scope.categories = response.data.data;
                     $scope.totalPages = response.data.totalPages || 0;
+                    console.log('Admin Categories loaded (method 2):', $scope.categories);
                 } else if (response.data && Array.isArray(response.data)) {
                     $scope.categories = response.data;
                     $scope.totalPages = 0;
+                    console.log('Admin Categories loaded (method 3):', $scope.categories);
                 } else {
                     $scope.categories = [];
                     $scope.totalPages = 0;
+                    console.log('No admin categories found');
                 }
                 $scope.loading = false;
             })

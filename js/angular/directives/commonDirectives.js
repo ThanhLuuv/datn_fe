@@ -1,6 +1,136 @@
 // Common Directives - Các directive chung cho UI
 console.log('Loading Common Directives...');
 
+// Directive để ép input type="date" về định dạng ISO yyyy-MM-dd
+app.directive('isoDate', [function(){
+  function toISO(d){
+    if (!d) return '';
+    if (Object.prototype.toString.call(d) !== '[object Date]') d = new Date(d);
+    if (isNaN(d.getTime())) return '';
+    var y = d.getFullYear();
+    var m = String(d.getMonth()+1).padStart(2,'0');
+    var dd = String(d.getDate()).padStart(2,'0');
+    return y+'-'+m+'-'+dd;
+  }
+  function toDateObj(v){
+    if (!v) return null;
+    if (Object.prototype.toString.call(v) === '[object Date]') return v;
+    var s = String(v).trim();
+    var iso = s.indexOf('T') !== -1 ? s.split('T')[0] : s.slice(0,10);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+      var p = iso.split('-').map(Number);
+      return new Date(p[0], p[1]-1, p[2]);
+    }
+    var m1 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/); // d/M/yyyy
+    if (m1) return new Date(+m1[3], +m1[2]-1, +m1[1]);
+    var m2 = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);   // M-d-yyyy
+    if (m2) return new Date(+m2[3], +m2[1]-1, +m2[2]);
+    var guess = new Date(s);
+    return isNaN(guess.getTime()) ? null : guess;
+  }
+
+  return {
+    require: 'ngModel',
+    restrict: 'A',
+    link: function(scope, el, attrs, ngModel){
+      // Bỏ qua nếu có timezone: 'UTC' trong ng-model-options
+      if (attrs.ngModelOptions && attrs.ngModelOptions.includes('timezone')) {
+        console.log('isoDate: Skipping input with timezone option');
+        return;
+      }
+      // Model (Date) -> View (yyyy-MM-dd)
+      ngModel.$formatters.push(function(model){
+        return model ? toISO(model) : null;
+      });
+      // View (yyyy-MM-dd) -> Model (Date)
+      ngModel.$parsers.push(function(viewVal){
+        return viewVal ? toDateObj(viewVal) : null;
+      });
+
+      // Chống plugin ngoài "đổi" value: nếu viewValue khác el.value → ép lại ISO
+      scope.$watch(function(){ return ngModel.$viewValue; }, function(v){
+        var target = v || '';
+        if (el[0].value !== target) el[0].value = target;
+      });
+
+      // Nếu plugin set sai value (vd 4/10/2025), bắt sự kiện change để sửa về Date
+      el.on('change blur', function(){
+        var v = el[0].value;
+        // Nếu là chuỗi locale (vd 4/10/2025), convert và ép lại ISO
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) {
+          var d = toDateObj(v);
+          var iso = toISO(d);
+          scope.$applyAsync(function(){
+            ngModel.$setViewValue(iso);
+            ngModel.$render();
+          });
+        }
+      });
+
+      // Chặn script bên ngoài set value sai format
+      var originalVal = el.val;
+      el.val = function(value) {
+        if (arguments.length > 0 && value && !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+          // Convert về ISO format trước khi set
+          var d = toDateObj(value);
+          var iso = toISO(d);
+          console.log('isoDate directive: Converting', value, 'to', iso);
+          return originalVal.call(this, iso);
+        }
+        return originalVal.apply(this, arguments);
+      };
+    }
+  };
+}]);
+
+// Directive currency-input để format giá với dấu phân cách phần nghìn
+app.directive('currencyInput', [function(){
+  return {
+    require: 'ngModel',
+    restrict: 'A',
+    link: function(scope, el, attrs, ngModel){
+      // Model (number) -> View (formatted string)
+      ngModel.$formatters.push(function(model){
+        if (model == null || model === '') return '';
+        var num = parseFloat(model);
+        if (isNaN(num)) return '';
+        return num.toLocaleString('vi-VN');
+      });
+      
+      // View (formatted string) -> Model (number)
+      ngModel.$parsers.push(function(viewVal){
+        if (!viewVal) return null;
+        // Remove all non-digit characters except decimal point
+        var cleanVal = viewVal.replace(/[^\d.,]/g, '');
+        // Replace comma with dot for decimal
+        cleanVal = cleanVal.replace(',', '.');
+        var num = parseFloat(cleanVal);
+        return isNaN(num) ? null : num;
+      });
+      
+      // Format on blur
+      el.on('blur', function(){
+        var val = ngModel.$viewValue;
+        if (val && !isNaN(parseFloat(val))) {
+          var formatted = parseFloat(val).toLocaleString('vi-VN');
+          ngModel.$setViewValue(formatted);
+          ngModel.$render();
+        }
+      });
+      
+      // Remove formatting on focus for easier editing
+      el.on('focus', function(){
+        var val = ngModel.$viewValue;
+        if (val) {
+          var cleanVal = val.replace(/[^\d.,]/g, '').replace(',', '.');
+          ngModel.$setViewValue(cleanVal);
+          ngModel.$render();
+        }
+      });
+    }
+  };
+}]);
+
 // Directive cho loading spinner
 app.directive('loadingSpinner', ['$timeout', function($timeout) {
     return {

@@ -60,7 +60,31 @@
                                 <div class="col-md-2">
                                     <div class="order-status">
                                         <span class="badge" ng-class="getStatusClass(order.status)">
-                                            {{ order.statusText || getStatusText(order.status) }}
+                                            {{ getStatusText(order.status) }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="payment-status">
+                                        <span class="badge" ng-class="getPaymentStatusClass(order.invoice)">
+                                            <span ng-if="order.invoice && order.invoice.paymentStatus === 'PENDING'">
+                                                <i class="bi bi-clock"></i> Chưa thanh toán
+                                            </span>
+                                            <span ng-if="order.invoice && order.invoice.paymentStatus === 'PAID'">
+                                                <i class="bi bi-check-circle"></i> Đã thanh toán
+                                            </span>
+                                            <span ng-if="order.invoice && order.invoice.paymentStatus === 'FAILED'">
+                                                <i class="bi bi-x-circle"></i> Thất bại
+                                            </span>
+                                            <span ng-if="order.invoice && order.invoice.paymentStatus === 'REFUNDED'">
+                                                <i class="bi bi-arrow-counterclockwise"></i> Hoàn tiền
+                                            </span>
+                                            <span ng-if="order.invoice && !order.invoice.paymentStatus">
+                                                <i class="bi bi-clock"></i> Chưa thanh toán
+                                            </span>
+                                            <span ng-if="!order.invoice">
+                                                <i class="bi bi-question-circle"></i> Chưa có hóa đơn
+                                            </span>
                                         </span>
                                     </div>
                                 </div>
@@ -69,16 +93,22 @@
                                         <small class="text-muted">{{ order.totalQuantity }} sản phẩm</small>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class="order-total">
-                                        <h6 class="mb-0 text-primary">{{ order.totalAmount | currency:'':0 }} VNĐ</h6>
+                                        <h6 class="mb-0 text-primary">{{ order.totalAmount | numberFormatted }} ₫</h6>
                                     </div>
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-1">
                                     <div class="order-actions">
                                         <button class="btn btn-outline-primary btn-sm" 
                                                 ng-click="viewOrderDetail(order)">
                                             <i class="bi bi-eye me-1"></i>Xem chi tiết
+                                        </button>
+                                        <button class="btn btn-outline-warning btn-sm mt-1" 
+                                                ng-click="returnOrder(order)"
+                                                ng-if="getStatusText(order.status) === 'Đã giao'"
+                                                title="Trả hàng">
+                                            <i class="bi bi-arrow-counterclockwise me-1"></i>Trả hàng
                                         </button>
                                     </div>
                                 </div>
@@ -110,7 +140,29 @@
                         <p class="mb-1"><strong>Ngày đặt:</strong> {{ selectedOrder.placedAt | date:'dd/MM/yyyy HH:mm' }}</p>
                         <p class="mb-1"><strong>Trạng thái:</strong> 
                             <span class="badge" ng-class="getStatusClass(selectedOrder.status)">
-                                {{ selectedOrder.statusText || getStatusText(selectedOrder.status) }}
+                                {{ getStatusText(selectedOrder.status) }}
+                            </span>
+                        </p>
+                        <p class="mb-1"><strong>Thanh toán:</strong> 
+                            <span class="badge" ng-class="getPaymentStatusClass(selectedOrder.invoice)">
+                                <span ng-if="selectedOrder.invoice && selectedOrder.invoice.paymentStatus === 'PENDING'">
+                                    <i class="bi bi-clock"></i> Chưa thanh toán
+                                </span>
+                                <span ng-if="selectedOrder.invoice && selectedOrder.invoice.paymentStatus === 'PAID'">
+                                    <i class="bi bi-check-circle"></i> Đã thanh toán
+                                </span>
+                                <span ng-if="selectedOrder.invoice && selectedOrder.invoice.paymentStatus === 'FAILED'">
+                                    <i class="bi bi-x-circle"></i> Thất bại
+                                </span>
+                                <span ng-if="selectedOrder.invoice && selectedOrder.invoice.paymentStatus === 'REFUNDED'">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Hoàn tiền
+                                </span>
+                                <span ng-if="selectedOrder.invoice && !selectedOrder.invoice.paymentStatus">
+                                    <i class="bi bi-clock"></i> Chưa thanh toán
+                                </span>
+                                <span ng-if="!selectedOrder.invoice">
+                                    <i class="bi bi-question-circle"></i> Chưa có hóa đơn
+                                </span>
                             </span>
                         </p>
                     </div>
@@ -152,8 +204,8 @@
                                         </div>
                                     </td>
                                     <td class="text-center">{{ line.qty }}</td>
-                                    <td class="text-end">{{ line.unitPrice | currency:'':0 }} VNĐ</td>
-                                    <td class="text-end fw-bold">{{ (line.totalPrice || line.lineTotal) | currency:'':0 }} VNĐ</td>
+                                    <td class="text-end">{{ line.unitPrice | numberFormatted }} ₫</td>
+                                    <td class="text-end fw-bold">{{ (line.totalPrice || line.lineTotal) | numberFormatted }} ₫</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -167,16 +219,16 @@
                         <div class="order-summary">
                             <div class="d-flex justify-content-between mb-2">
                                 <span>Tạm tính:</span>
-                                <span>{{ (selectedOrder.totalAmount / 1.08) | currency:'':0 }} VNĐ</span>
+                                <span>{{ (selectedOrder.totalAmount / 1.08) | numberFormatted }} ₫</span>
                             </div>
                             <div class="d-flex justify-content-between mb-2">
                                 <span>Thuế VAT (8%):</span>
-                                <span>{{ (selectedOrder.totalAmount * 0.08 / 1.08) | currency:'':0 }} VNĐ</span>
+                                <span>{{ (selectedOrder.totalAmount * 0.08 / 1.08) | numberFormatted }} ₫</span>
                             </div>
                             <hr>
                             <div class="d-flex justify-content-between">
                                 <strong>Tổng cộng:</strong>
-                                <strong class="text-primary">{{ selectedOrder.totalAmount | currency:'':0 }} VNĐ</strong>
+                                <strong class="text-primary">{{ selectedOrder.totalAmount | numberFormatted }} ₫</strong>
                             </div>
                         </div>
                     </div>
@@ -185,6 +237,103 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Return Modal -->
+<div class="modal fade" id="returnModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-arrow-counterclockwise"></i> Trả hàng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Lý do trả hàng <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" ng-model="returnModel.reason" placeholder="Ví dụ: Sách bị hỏng, không đúng mô tả..." required />
+                </div>
+                
+                <div class="mb-3">
+                    <h6>Chọn sản phẩm cần trả</h6>
+                    <div class="table-responsive" style="max-height: 400px; overflow:auto;">
+                        <table class="table table-sm align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Sản phẩm</th>
+                                    <th class="text-center">Đã mua</th>
+                                    <th class="text-center">Số lượng trả</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-if="returnLoading">
+                                    <td colspan="3" class="text-center py-3">
+                                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                        <span class="ms-2 text-muted small">Đang tải thông tin đơn hàng...</span>
+                                    </td>
+                                </tr>
+                                <tr ng-repeat="line in returnModel.lines track by $index">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3">
+                                                <img ng-src="{{ line.bookImageUrl || 'app/assets/images/book-placeholder.png' }}" 
+                                                     alt="{{ line.bookTitle }}" 
+                                                     class="rounded"
+                                                     style="width: 50px; height: 60px; object-fit: cover;">
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold">{{ line.bookTitle }}</div>
+                                                <div class="small text-muted">ISBN: {{ line.isbn }}</div>
+                                                <div class="small text-muted">Đơn giá: {{ line.unitPrice | numberFormatted }} ₫</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-primary">{{ line.maxQty }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="number" 
+                                               class="form-control form-control-sm text-center" 
+                                               min="0" 
+                                               max="{{ line.maxQty }}" 
+                                               ng-model="line.qtyReturned"
+                                               placeholder="0" />
+                                    </td>
+                                </tr>
+                                <tr ng-if="!returnLoading && (!returnModel.lines || returnModel.lines.length === 0)">
+                                    <td colspan="3" class="text-center text-muted py-3">Không có sản phẩm nào để trả.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info" ng-if="returnModel.lines && returnModel.lines.length > 0">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Lưu ý:</strong> Bạn chỉ có thể trả hàng trong vòng 7 ngày kể từ ngày nhận hàng. 
+                    Sản phẩm phải còn nguyên vẹn và có hóa đơn.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" 
+                        class="btn btn-warning" 
+                        ng-click="submitReturn()"
+                        ng-disabled="!returnModel.reason || !hasReturnItems()">
+                    <i class="bi bi-arrow-counterclockwise me-2"></i>Tạo yêu cầu trả hàng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notifications -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000;">
+    <div class="toast align-items-center text-white bg-{{t.variant}} border-0 mb-2 show" role="alert" aria-live="assertive" aria-atomic="true" ng-repeat="t in toasts">
+        <div class="d-flex">
+            <div class="toast-body">{{t.message}}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" ng-click="toasts.splice($index,1)"></button>
         </div>
     </div>
 </div>
@@ -254,6 +403,10 @@
 .badge.bg-info {
     background-color: #0dcaf0 !important;
     color: #000;
+}
+
+.badge.bg-secondary {
+    background-color: #6c757d !important;
 }
 
 @media (max-width: 768px) {

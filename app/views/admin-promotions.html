@@ -106,7 +106,7 @@
 			<h5 class="modal-title">{{editingPromotion ? 'Sửa khuyến mãi' : 'Thêm khuyến mãi'}}</h5>
 			<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 		  </div>
-		  <form ng-submit="submitForm()">
+		  <form ng-if="editingPromotion" ng-submit="submitForm()">
 			<div class="modal-body">
 			  <div class="mb-2">
 				<label class="form-label">Tên khuyến mãi</label>
@@ -119,18 +119,18 @@
 			  </div>
 			  <div class="mb-2">
 				<label class="form-label">Mức giảm (%)</label>
-				<input type="number" min="0" max="100" class="form-control" placeholder="0 - 100" ng-model="formData.discountPct" required />
+				<input type="number" min="0.01" max="99.99" step="0.01" class="form-control" placeholder="0.01 - 99.99" ng-model="formData.discountPct" ng-change="validateDiscountPct()" required />
 				<div class="text-danger small mt-1" ng-if="formErrors.discountPct">{{formErrors.discountPct}}</div>
 			  </div>
 			  <div class="row g-2">
 				<div class="col">
 				  <label class="form-label">Bắt đầu</label>
-				  <input type="date" class="form-control" ng-model="formData.startDate" required />
+				  <input type="date" class="form-control" ng-model="formData.startDate" ng-model-options="{ timezone: 'UTC', debounce: 100 }" required />
 				  <div class="text-danger small mt-1" ng-if="formErrors.startDate">{{formErrors.startDate}}</div>
 				</div>
 				<div class="col">
 				  <label class="form-label">Kết thúc</label>
-				  <input type="date" class="form-control" ng-model="formData.endDate" required />
+				  <input type="date" class="form-control" ng-model="formData.endDate" ng-model-options="{ timezone: 'UTC', debounce: 100 }" required />
 				  <div class="text-danger small mt-1" ng-if="formErrors.endDate">{{formErrors.endDate}}</div>
 				</div>
 			  </div>
@@ -150,10 +150,10 @@
 				<div class="text-danger small mt-1" ng-if="formErrors.bookIsbns">{{formErrors.bookIsbns}}</div>
   
 				<!-- Preview list shows both in Add & Edit -->
-				<div class="table-responsive mt-2" ng-if="editingPromotion && editingPromotion.books && editingPromotion.books.length > 0">
+				<div class="table-responsive mt-2" ng-if="(formData.bookIsbns && formData.bookIsbns.length > 0) || (editingPromotion && editingPromotion.books && editingPromotion.books.length > 0)">
 				  <div class="d-flex justify-content-between align-items-center mb-2">
 					<h6 class="mb-0"><i class="bi bi-book"></i> Danh sách sách trong khuyến mãi</h6>
-					<small class="text-muted">{{editingPromotion.books.length}} sách</small>
+					<small class="text-muted">{{(editingPromotion && editingPromotion.books) ? editingPromotion.books.length : (formData.bookIsbns ? formData.bookIsbns.length : 0)}} sách</small>
 				  </div>
 				  <table class="table table-sm table-striped mb-0">
 					<thead class="table-light">
@@ -168,13 +168,13 @@
 					  </tr>
 					</thead>
 					<tbody>
-					  <tr ng-repeat="b in editingPromotion.books track by b.isbn">
+					  <tr ng-repeat="b in (editingPromotion && editingPromotion.books) || [] track by b.isbn">
 						<td class="text-nowrap"><code>{{b.isbn}}</code></td>
 						<td class="text-truncate" style="max-width: 250px;" title="{{b.title}}">{{b.title}}</td>
 						<td class="text-truncate" style="max-width: 150px;" title="{{b.publisherName}}">{{b.publisherName}}</td>
 						<td>{{b.categoryName}}</td>
-						<td class="text-end">{{b.unitPrice | currency}}</td>
-						<td class="text-end text-success"><strong>{{b.discountedPrice | currency}}</strong></td>
+						<td class="text-end">{{b.unitPrice | currency:'':0}} ₫</td>
+						<td class="text-end text-success"><strong>{{b.discountedPrice | currency:'':0}} ₫</strong></td>
 						<td class="text-end">
 						  <button type="button" class="btn btn-sm btn-outline-danger" ng-click="removeBookFromPromotion(b.isbn)" title="Xóa sách này"><i class="bi bi-trash"></i></button>
 						</td>
