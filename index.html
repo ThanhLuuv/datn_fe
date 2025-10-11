@@ -87,10 +87,6 @@
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- AngularJS -->
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-route.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-animate.min.js"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <!-- SheetJS for Excel parsing -->
@@ -235,131 +231,47 @@
         console.log('✅ Environment config loaded for Vercel production');
         console.log('API Base URL:', window.ENV_CONFIG.API_BASE_URL);
     </script>
-    <!-- AngularJS App Module (Embedded) -->
+    <!-- Simple Static Page for Vercel -->
     <script>
-        console.log('Creating AngularJS app...');
+        console.log('✅ Environment config loaded for Vercel production');
+        console.log('API Base URL:', window.ENV_CONFIG.API_BASE_URL);
         
-        // Create AngularJS app
-        var app = angular.module('myApp', ['ngRoute', 'ngAnimate']);
-        console.log('AngularJS app module created');
-        
-        // Global controller
-        app.controller('AppController', ['$scope', '$location', function($scope, $location) {
-            console.log('AppController loaded');
-            $scope.isAdminPage = false;
-            $scope.isAuthPage = false;
-            $scope.searchQuery = '';
-            $scope.cartCount = 0;
-            $scope.isAuthenticated = false;
-
-            $scope.goSearch = function() {
-                var q = ($scope.searchQuery || '').trim();
-                $location.path('/search').search({ q: q, page: 1, pageSize: 12 });
-            };
-
-            $scope.$on('$routeChangeSuccess', function() {
-                var path = $location.path();
-                $scope.isAdminPage = path.indexOf('/admin') === 0;
-                $scope.isAuthPage = (path === '/login' || path === '/register');
-            });
-        }]);
-        
-        // Route Configuration
-        app.config(['$routeProvider', function($routeProvider) {
-            $routeProvider
-                .when('/', {
-                    templateUrl: 'app/views/home.html',
-                    controller: 'HomeController'
-                })
-                .when('/home', {
-                    templateUrl: 'app/views/home.html',
-                    controller: 'HomeController'
-                })
-                .when('/login', {
-                    templateUrl: 'app/views/login.html',
-                    controller: 'LoginController'
-                })
-                .when('/register', {
-                    templateUrl: 'app/views/register.html',
-                    controller: 'RegisterController'
-                })
-                .when('/about', {
-                    templateUrl: 'app/views/about.html',
-                    controller: 'AboutController'
-                })
-                .when('/contact', {
-                    templateUrl: 'app/views/contact.html',
-                    controller: 'ContactController'
-                })
-                .when('/search', {
-                    templateUrl: 'app/views/search.html',
-                    controller: 'SearchController'
-                })
-                .when('/api-test', {
-                    templateUrl: 'app/views/api-test.html',
-                    controller: 'ApiTestController'
-                })
-                .otherwise({
-                    redirectTo: '/'
+        // Simple static page functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded successfully');
+            
+            // Update cart count display
+            var cartBadge = document.querySelector('.cart-badge');
+            if (cartBadge) {
+                cartBadge.textContent = '0';
+            }
+            
+            // Simple search functionality
+            var searchInput = document.querySelector('.search-input');
+            var searchButton = document.querySelector('.search-button');
+            
+            if (searchButton && searchInput) {
+                searchButton.addEventListener('click', function() {
+                    var query = searchInput.value.trim();
+                    if (query) {
+                        alert('Search for: ' + query + '\nAPI Endpoint: ' + window.ENV_CONFIG.API_BASE_URL);
+                    }
                 });
-        }]);
-        
-        // Global Configuration
-        app.config(['$locationProvider', function($locationProvider) {
-            $locationProvider.hashPrefix('!');
-            $locationProvider.html5Mode(false);
-        }]);
-        
-        // Run Block
-        app.run(['$rootScope', function($rootScope) {
-            console.log('AngularJS app running');
-            $rootScope.appName = 'BookStore';
-            $rootScope.version = '1.0.0';
-            $rootScope.loading = false;
-            $rootScope.isAuthenticated = false;
-            $rootScope.currentUser = null;
-        }]);
-        
-        console.log('AngularJS app setup complete');
+            }
+            
+            // Add click handlers for navigation
+            var navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(function(link) {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var href = this.getAttribute('href');
+                    if (href && href !== '#') {
+                        alert('Navigate to: ' + href + '\nAPI Endpoint: ' + window.ENV_CONFIG.API_BASE_URL);
+                    }
+                });
+            });
+        });
     </script>
-    <!-- Configuration -->
-    <script src="js/angular/app.config.js?v=1.3"></script>
-    <!-- Services -->
-    <script src="js/angular/services/dataService.js?v=1.3"></script>
-    <script src="js/angular/services/authService.js?v=1.3"></script>
-    <script src="js/angular/services/bookstoreService.js?v=1.3"></script>
-    <script src="js/angular/services/cartService.js"></script>
-    <!-- Controllers -->
-    <script src="js/angular/controllers/homeController.js"></script>
-    <script src="js/angular/controllers/aboutController.js"></script>
-    <script src="js/angular/controllers/contactController.js"></script>
-    <script src="js/angular/controllers/authController.js"></script>
-    <script src="js/angular/controllers/adminController.js"></script>
-    <script src="js/angular/controllers/employeeController.js"></script>
-    <script src="js/angular/controllers/apiTestController.js"></script>
-    <script src="js/angular/controllers/categoryController.js"></script>
-    <script src="js/angular/controllers/bookController.js"></script>
-    <script src="js/angular/controllers/searchController.js"></script>
-    <script src="js/angular/controllers/cartController.js"></script>
-    <script src="js/angular/controllers/checkoutController.js"></script>
-    <script src="js/angular/controllers/successController.js"></script>
-    <script src="js/angular/controllers/customerOrdersController.js"></script>
-    <script src="js/angular/controllers/purchaseOrderController.js"></script>
-    <script src="js/angular/controllers/goodsReceiptController.js"></script>
-    <script src="js/angular/controllers/reportController.js"></script>
-    <script src="js/angular/controllers/rolesController.js"></script>
-	<script src="js/angular/controllers/orderController.js"></script>
-    <script src="js/angular/controllers/returnController.js"></script>
-    <script src="js/angular/controllers/promotionController.js"></script>
-    <!-- Directives -->
-    <script src="js/angular/directives/customDirectives.js?v=1.4"></script>
-    <script src="js/angular/directives/authDirectives.js?v=1.4"></script>
-    <script src="js/angular/directives/permissionDirectives.js?v=1.4"></script>
-    <script src="js/angular/directives/commonDirectives.js?v=1.4"></script>
-    <!-- Filters -->
-    <script src="js/angular/filters/customFilters.js"></script>
-    <script src="js/angular/filters/bookstoreFilters.js"></script>
-    <!-- Custom jQuery -->
-    <script src="js/custom/main.js"></script>
+    <!-- Simple Static Page - No AngularJS needed -->
 </body>
 </html>
