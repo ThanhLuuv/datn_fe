@@ -1,16 +1,15 @@
 // Application Configuration
 console.log('Loading APP_CONFIG...');
 
-// Check if ENV_CONFIG is available, otherwise use fallback
-var config = window.ENV_CONFIG || {
-    // Fallback configuration if ENV_CONFIG is not loaded
-    API_BASE_URL: 'http://localhost:5256/api',
-    API_TIMEOUT: 10000,
+// Fallback configuration
+var fallbackConfig = {
+    API_BASE_URL: 'https://bookstore-api-386583671447.asia-southeast1.run.app/api',
+    API_TIMEOUT: 15000,
     APP_NAME: 'BookStore Frontend',
     APP_VERSION: '1.0.0',
     APP_DESCRIPTION: 'Dự án Frontend sử dụng AngularJS + Bootstrap',
-    ENVIRONMENT: 'development',
-    DEBUG_MODE: true,
+    ENVIRONMENT: 'production',
+    DEBUG_MODE: false,
     ITEMS_PER_PAGE: 10,
     MAX_PAGES_DISPLAY: 5,
     DATE_FORMAT: 'dd/MM/yyyy',
@@ -34,11 +33,14 @@ var config = window.ENV_CONFIG || {
         LANGUAGE: 'language'
     },
     FEATURES: {
-        ENABLE_DEBUG_LOGS: true,
-        ENABLE_API_LOGGING: true,
-        ENABLE_PERFORMANCE_MONITORING: false
+        ENABLE_DEBUG_LOGS: false,
+        ENABLE_API_LOGGING: false,
+        ENABLE_PERFORMANCE_MONITORING: true
     }
 };
+
+// Use ENV_CONFIG if available, otherwise use fallback
+var config = window.ENV_CONFIG || fallbackConfig;
 
 app.constant('APP_CONFIG', config);
 
@@ -52,5 +54,5 @@ app.constant('ENV', {
     DEVELOPMENT: 'development',
     STAGING: 'staging',
     PRODUCTION: 'production',
-    CURRENT: config.ENVIRONMENT || 'development'
+    CURRENT: config.ENVIRONMENT || 'production'
 });

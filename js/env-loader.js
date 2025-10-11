@@ -9,7 +9,6 @@
     // Function to detect environment
     function detectEnvironment() {
         var hostname = window.location.hostname;
-        var protocol = window.location.protocol;
         
         // Vercel production detection
         if (hostname.includes('vercel.app') || hostname.includes('now.sh')) {
@@ -43,13 +42,52 @@
         
         script.onload = function() {
             console.log('✅ Environment script loaded:', env);
-            console.log('Environment:', window.ENV_CONFIG ? window.ENV_CONFIG.ENVIRONMENT : 'unknown');
-            console.log('API Base URL:', window.ENV_CONFIG ? window.ENV_CONFIG.API_BASE_URL : 'unknown');
+            if (window.ENV_CONFIG) {
+                console.log('Environment:', window.ENV_CONFIG.ENVIRONMENT);
+                console.log('API Base URL:', window.ENV_CONFIG.API_BASE_URL);
+            }
         };
         
         script.onerror = function() {
             console.error('❌ Failed to load environment script:', env);
-            console.log('Falling back to default configuration');
+            console.log('Using fallback configuration');
+            // Set fallback configuration
+            window.ENV_CONFIG = {
+                API_BASE_URL: 'https://bookstore-api-386583671447.asia-southeast1.run.app/api',
+                API_TIMEOUT: 15000,
+                ENVIRONMENT: 'production',
+                DEBUG_MODE: false,
+                APP_NAME: 'BookStore Frontend',
+                APP_VERSION: '1.0.0',
+                APP_DESCRIPTION: 'Dự án Frontend sử dụng AngularJS + Bootstrap',
+                ITEMS_PER_PAGE: 10,
+                MAX_PAGES_DISPLAY: 5,
+                DATE_FORMAT: 'dd/MM/yyyy',
+                DATETIME_FORMAT: 'dd/MM/yyyy HH:mm:ss',
+                EMAIL_REGEX: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                PHONE_REGEX: /^[0-9]{10,11}$/,
+                MESSAGES: {
+                    SUCCESS: 'Thao tác thành công!',
+                    ERROR: 'Có lỗi xảy ra, vui lòng thử lại!',
+                    LOADING: 'Đang tải dữ liệu...',
+                    NO_DATA: 'Không có dữ liệu',
+                    CONFIRM_DELETE: 'Bạn có chắc chắn muốn xóa?',
+                    REQUIRED_FIELD: 'Trường này là bắt buộc',
+                    INVALID_EMAIL: 'Email không hợp lệ',
+                    INVALID_PHONE: 'Số điện thoại không hợp lệ'
+                },
+                STORAGE_KEYS: {
+                    USER_TOKEN: 'user_token',
+                    USER_INFO: 'user_info',
+                    THEME: 'theme',
+                    LANGUAGE: 'language'
+                },
+                FEATURES: {
+                    ENABLE_DEBUG_LOGS: false,
+                    ENABLE_API_LOGGING: false,
+                    ENABLE_PERFORMANCE_MONITORING: true
+                }
+            };
         };
         
         document.head.appendChild(script);
