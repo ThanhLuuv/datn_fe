@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" ng-app="myApp">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,15 +17,15 @@
     <link href="css/custom/main.css?v=1.5" rel="stylesheet">
     <link href="css/custom/auth.css?v=1.5" rel="stylesheet">
     <style>
-        .bookstore-navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
+        /* Enhanced Navbar Styles */
         .navbar .nav-link {
             font-size: 0.95rem;
             font-weight: 500;
             transition: all 0.3s ease;
+        }
+        
+        .navbar .dropdown-menu .dropdown-item {
+            font-size: 0.95rem;
         }
         
         .navbar .brand-text {
@@ -49,22 +49,37 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            animation: pulse 2s infinite;
         }
         
-        .hero-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 80px 0;
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
         
-        .feature-card {
-            transition: transform 0.3s ease;
-            border: none;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        .navbar-nav .nav-link:hover {
+            color: white !important;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
         }
         
-        .feature-card:hover {
-            transform: translateY(-5px);
+        .navbar-nav .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white !important;
+            border-radius: 8px;
+        }
+        
+        /* Mobile Search */
+        @media (max-width: 991px) {
+            .navbar-search {
+                display: block !important;
+                margin: 1rem 0;
+            }
+            
+            .search-input-group {
+                width: 100%;
+            }
         }
     </style>
     
@@ -72,138 +87,107 @@
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AngularJS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-route.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-animate.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- SheetJS for Excel parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
-<body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bookstore-navbar">
+<body ng-controller="AppController">
+    <!-- Navigation - Hidden for Admin and Auth Pages -->
+    <nav class="navbar navbar-expand-lg navbar-dark bookstore-navbar" ng-hide="isAdminPage || isAuthPage">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="#">
-                <img src="app/assets/images/logo.png" alt="Logo" width="32" height="32" class="me-2">
+            <!-- Brand -->
+            <a class="navbar-brand" href="#!/home">
+                <img src="app/assets/images/logo.png" alt="BookStore Logo" class="navbar-logo">
                 <span class="brand-text">BookStore</span>
             </a>
             
+            <!-- Search Bar -->
+            <div class="navbar-search d-none d-lg-flex">
+                <div class="search-input-group">
+                    <input type="text" 
+                           class="form-control search-input" 
+                           placeholder="Tìm kiếm sách, tác giả..." 
+                           ng-model="searchQuery" 
+                           ng-keypress="$event.which === 13 && goSearch()">
+                    <button class="btn btn-search" type="button" ng-click="goSearch()">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Toggle -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             
+            <!-- Navigation Menu -->
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#home">Trang chủ</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#about">Giới thiệu</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#contact">Liên hệ</a>
-                    </li>
-                </ul>
+                <ul class="navbar-nav me-auto"></ul>
                 
-                <!-- Search Bar -->
-                <div class="navbar-search d-none d-lg-block">
-                    <div class="search-input-group">
-                        <input type="text" class="form-control search-input" placeholder="Tìm kiếm sách, tác giả...">
-                        <button class="btn btn-outline-light search-button" type="button">
-                            <i class="bi bi-search"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Cart and Auth -->
-                <ul class="navbar-nav ms-3">
-                    <li class="nav-item">
-                        <a class="nav-link cart-link" href="#cart">
+                <!-- User Actions -->
+                <ul class="navbar-nav">
+                    <!-- Cart -->
+                    <li class="nav-item me-2">
+                        <a class="nav-link position-relative cart-link" href="#!/cart" aria-label="Giỏ hàng">
                             <i class="bi bi-cart3"></i>
-                            <span class="cart-badge">0</span>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-badge" 
+                                  ng-show="cartCount > 0">{{cartCount}}</span>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#login">Đăng nhập</a>
+                    
+                    <!-- Authentication -->
+                    <li class="nav-item" ng-if="!isAuthenticated">
+                        <a class="nav-link" href="#!/login">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>
+                            <span class="d-none d-md-inline">Đăng nhập</span>
+                        </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#register">Đăng ký</a>
+                    <li class="nav-item" ng-if="!isAuthenticated">
+                        <a class="nav-link" href="#!/register">
+                            <i class="bi bi-person-plus me-1"></i>
+                            <span class="d-none d-md-inline">Đăng ký</span>
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown" ng-if="isAuthenticated">
+                        <a class="nav-link dropdown-toggle user-menu" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle me-1"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#!/admin" ng-if="isAuthenticated && (currentUser.roleId === 3 || currentUser.roleId === 2 || currentUser.roleId === 4)">
+                                <i class="bi bi-person me-2"></i>Trang quản lý
+                            </a></li>
+                            <li><a class="dropdown-item" href="#!/profile">
+                                <i class="bi bi-person me-2"></i>Thông tin cá nhân
+                            </a></li>
+                            <li><a class="dropdown-item" href="#!/orders">
+                                <i class="bi bi-bag me-2"></i>Đơn hàng của tôi
+                            </a></li>
+                            <li><a class="dropdown-item" href="#!/wishlist">
+                                <i class="bi bi-heart me-2"></i>Danh sách yêu thích
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" ng-click="logout()">
+                                <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
+                            </a></li>
+                        </ul>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-6">
-                    <h1 class="display-4 fw-bold mb-4">Chào mừng đến với BookStore</h1>
-                    <p class="lead mb-4">Khám phá thế giới sách với hàng nghìn đầu sách chất lượng cao từ các nhà xuất bản uy tín.</p>
-                    <div class="d-flex gap-3">
-                        <button class="btn btn-light btn-lg" onclick="showBooks()">Xem sách</button>
-                        <button class="btn btn-outline-light btn-lg" onclick="showAbout()">Tìm hiểu thêm</button>
-                    </div>
-                </div>
-                <div class="col-lg-6 text-center">
-                    <i class="bi bi-book" style="font-size: 8rem; opacity: 0.3;"></i>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- Main Content -->
-    <div class="container my-5">
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <h1 class="card-title">BookStore Frontend</h1>
-                        <p class="card-text">Website đã được deploy thành công lên Vercel!</p>
-                        <div class="alert alert-success">
-                            <h5>✅ Deployment Status</h5>
-                            <p><strong>Environment:</strong> Production</p>
-                            <p><strong>API Endpoint:</strong> <code id="api-endpoint">Loading...</code></p>
-                            <p><strong>Status:</strong> Online và hoạt động</p>
-                        </div>
-                        <div class="mt-3">
-                            <button class="btn btn-primary me-2" onclick="testAPI()">Test API Connection</button>
-                            <button class="btn btn-secondary" onclick="showEnvironment()">Show Environment Info</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Features Section -->
-        <div class="row mt-5">
-            <div class="col-md-4 mb-4">
-                <div class="card feature-card h-100">
-                    <div class="card-body text-center">
-                        <i class="bi bi-book text-primary" style="font-size: 3rem;"></i>
-                        <h5 class="card-title mt-3">Sách đa dạng</h5>
-                        <p class="card-text">Hàng nghìn đầu sách từ các thể loại khác nhau</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="card feature-card h-100">
-                    <div class="card-body text-center">
-                        <i class="bi bi-truck text-success" style="font-size: 3rem;"></i>
-                        <h5 class="card-title mt-3">Giao hàng nhanh</h5>
-                        <p class="card-text">Giao hàng tận nơi trong vòng 24-48 giờ</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="card feature-card h-100">
-                    <div class="card-body text-center">
-                        <i class="bi bi-shield-check text-warning" style="font-size: 3rem;"></i>
-                        <h5 class="card-title mt-3">Bảo mật cao</h5>
-                        <p class="card-text">Thanh toán an toàn và bảo mật thông tin</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <main class="container-fluid" ng-class="{'admin-fullscreen': isAdminPage, 'p-0': isAuthPage}">
+        <div ng-view></div>
+    </main>
 
     <!-- Footer -->
-    <footer class="bg-dark text-light text-center py-3 mt-5">
+    <footer class="bg-dark text-light text-center py-3 mt-5" ng-hide="isAuthPage">
         <div class="container">
             <p>&copy; 2024 Dự án Frontend. Tất cả quyền được bảo lưu.</p>
         </div>
@@ -251,64 +235,46 @@
         console.log('✅ Environment config loaded for Vercel production');
         console.log('API Base URL:', window.ENV_CONFIG.API_BASE_URL);
     </script>
-
-    <!-- Simple Static Page functionality -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Page loaded successfully');
-            
-            // Update API endpoint display
-            var apiEndpoint = document.getElementById('api-endpoint');
-            if (apiEndpoint) {
-                apiEndpoint.textContent = window.ENV_CONFIG.API_BASE_URL;
-            }
-            
-            // Simple search functionality
-            var searchInput = document.querySelector('.search-input');
-            var searchButton = document.querySelector('.search-button');
-            
-            if (searchButton && searchInput) {
-                searchButton.addEventListener('click', function() {
-                    var query = searchInput.value.trim();
-                    if (query) {
-                        alert('Search for: ' + query + '\nAPI Endpoint: ' + window.ENV_CONFIG.API_BASE_URL);
-                    }
-                });
-            }
-            
-            // Add click handlers for navigation
-            var navLinks = document.querySelectorAll('.nav-link');
-            navLinks.forEach(function(link) {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    var href = this.getAttribute('href');
-                    if (href && href !== '#') {
-                        alert('Navigate to: ' + href + '\nAPI Endpoint: ' + window.ENV_CONFIG.API_BASE_URL);
-                    }
-                });
-            });
-        });
-
-        // Global functions
-        function testAPI() {
-            alert('Testing API connection to:\n' + window.ENV_CONFIG.API_BASE_URL + '\n\nStatus: Ready for testing!');
-        }
-
-        function showEnvironment() {
-            alert('Environment Information:\n' +
-                  'Environment: ' + window.ENV_CONFIG.ENVIRONMENT + '\n' +
-                  'API Base URL: ' + window.ENV_CONFIG.API_BASE_URL + '\n' +
-                  'App Name: ' + window.ENV_CONFIG.APP_NAME + '\n' +
-                  'Version: ' + window.ENV_CONFIG.APP_VERSION);
-        }
-
-        function showBooks() {
-            alert('Books section would load here!\nAPI Endpoint: ' + window.ENV_CONFIG.API_BASE_URL);
-        }
-
-        function showAbout() {
-            alert('About section would load here!\nAPI Endpoint: ' + window.ENV_CONFIG.API_BASE_URL);
-        }
-    </script>
+    <!-- AngularJS App Module (Simplified) -->
+    <script src="js/angular/app-simple.js?v=1.5"></script>
+    <!-- Configuration -->
+    <script src="js/angular/app.config.js?v=1.3"></script>
+    <!-- Services -->
+    <script src="js/angular/services/dataService.js?v=1.3"></script>
+    <script src="js/angular/services/authService.js?v=1.3"></script>
+    <script src="js/angular/services/bookstoreService.js?v=1.3"></script>
+    <script src="js/angular/services/cartService.js"></script>
+    <!-- Controllers -->
+    <script src="js/angular/controllers/homeController.js"></script>
+    <script src="js/angular/controllers/aboutController.js"></script>
+    <script src="js/angular/controllers/contactController.js"></script>
+    <script src="js/angular/controllers/authController.js"></script>
+    <script src="js/angular/controllers/adminController.js"></script>
+    <script src="js/angular/controllers/employeeController.js"></script>
+    <script src="js/angular/controllers/apiTestController.js"></script>
+    <script src="js/angular/controllers/categoryController.js"></script>
+    <script src="js/angular/controllers/bookController.js"></script>
+    <script src="js/angular/controllers/searchController.js"></script>
+    <script src="js/angular/controllers/cartController.js"></script>
+    <script src="js/angular/controllers/checkoutController.js"></script>
+    <script src="js/angular/controllers/successController.js"></script>
+    <script src="js/angular/controllers/customerOrdersController.js"></script>
+    <script src="js/angular/controllers/purchaseOrderController.js"></script>
+    <script src="js/angular/controllers/goodsReceiptController.js"></script>
+    <script src="js/angular/controllers/reportController.js"></script>
+    <script src="js/angular/controllers/rolesController.js"></script>
+	<script src="js/angular/controllers/orderController.js"></script>
+    <script src="js/angular/controllers/returnController.js"></script>
+    <script src="js/angular/controllers/promotionController.js"></script>
+    <!-- Directives -->
+    <script src="js/angular/directives/customDirectives.js?v=1.4"></script>
+    <script src="js/angular/directives/authDirectives.js?v=1.4"></script>
+    <script src="js/angular/directives/permissionDirectives.js?v=1.4"></script>
+    <script src="js/angular/directives/commonDirectives.js?v=1.4"></script>
+    <!-- Filters -->
+    <script src="js/angular/filters/customFilters.js"></script>
+    <script src="js/angular/filters/bookstoreFilters.js"></script>
+    <!-- Custom jQuery -->
+    <script src="js/custom/main.js"></script>
 </body>
 </html>
