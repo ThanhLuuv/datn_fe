@@ -74,14 +74,14 @@
         }
     </style>
     
-    <!-- jQuery -->
+    <!-- jQuery (must load first) -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- AngularJS -->
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-route.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-animate.min.js"></script>
+    <script defer src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script defer src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-route.min.js"></script>
+    <script defer src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-animate.min.js"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <!-- SheetJS for Excel parsing -->
@@ -197,17 +197,40 @@
         </div>
     </footer>
 
-    <!-- Environment Configuration (embedded for Vercel) -->
+    <!-- Environment Configuration (Dynamic Detection) -->
     <script>
-        // Production Environment Configuration for Vercel
+        // Detect environment dynamically with local override
+        const h = location.hostname;
+        const p = Number(location.port || 0);
+        const isLocalHost =
+            h === 'localhost' || h === '127.0.0.1' || h === '0.0.0.0' ||
+            /^192\.168\./.test(h) || /^10\./.test(h) || /\.local$/i.test(h) ||
+            p === 3000 || p === 4200 || p === 5173 || p === 8080; // các cổng dev phổ biến
+
+        const isVercel = /vercel\.app$|now\.sh$/.test(h);
+
+        // Cho phép ép môi trường qua query (?env=local|staging|prod)
+        const qsEnv = new URLSearchParams(location.search).get('env');
+
+        const ENVIRONMENT =
+            qsEnv === 'local' ? 'development' :
+            qsEnv === 'staging' ? 'staging' :
+            qsEnv === 'prod' ? 'production' :
+            isLocalHost ? 'development' :
+            isVercel ? 'production' : 'staging';
+
+        const API_BASE_URL = ENVIRONMENT === 'development'
+            ? 'http://localhost:5256/api'
+            : 'https://bookstore-api-386583671447.asia-southeast1.run.app/api';
+
         window.ENV_CONFIG = {
-            API_BASE_URL: 'https://bookstore-api-386583671447.asia-southeast1.run.app/api',
+            API_BASE_URL,
+            ENVIRONMENT,
             API_TIMEOUT: 15000,
             APP_NAME: 'BookStore Frontend',
             APP_VERSION: '1.0.0',
             APP_DESCRIPTION: 'Dự án Frontend sử dụng AngularJS + Bootstrap',
-            ENVIRONMENT: 'production',
-            DEBUG_MODE: false,
+            DEBUG_MODE: ENVIRONMENT === 'development',
             ITEMS_PER_PAGE: 10,
             MAX_PAGES_DISPLAY: 5,
             DATE_FORMAT: 'dd/MM/yyyy',
@@ -231,73 +254,82 @@
                 LANGUAGE: 'language'
             },
             FEATURES: {
-                ENABLE_DEBUG_LOGS: false,
-                ENABLE_API_LOGGING: false,
+                ENABLE_DEBUG_LOGS: ENVIRONMENT === 'development',
+                ENABLE_API_LOGGING: ENVIRONMENT === 'development',
                 ENABLE_PERFORMANCE_MONITORING: true
             }
         };
-        console.log('✅ Environment config loaded for Vercel production');
-        console.log('API Base URL:', window.ENV_CONFIG.API_BASE_URL);
+        
+        console.log('ENV:', ENVIRONMENT, 'API:', API_BASE_URL);
+        console.log('Hostname:', h, 'Port:', p, 'isLocalHost:', isLocalHost);
     </script>
 
     <!-- AngularJS App Module -->
-    <script src="/js/angular/app.js?v=1.5"></script>
-    
-    <!-- Debug: Check if myApp module exists -->
-    <script>
-        // English: ensure the app module exists before loading the rest
-        // Tiếng Việt: đảm bảo module app tồn tại trước khi load phần còn lại
-        try {
-            angular.module('myApp');
-            console.log('✅ myApp FOUND');
-        } catch (e) {
-            console.error('⛔ myApp NOT FOUND. app.js chưa chạy hoặc lỗi cú pháp?', e);
-        }
-    </script>
+    <script defer src="/js/angular/app.js?v=1.5"></script>
     
     <!-- Configuration -->
-    <script src="/js/angular/app.config.js?v=1.3"></script>
+    <script defer src="/js/angular/app.config.js?v=1.3"></script>
     
     <!-- Services -->
-    <script src="/js/angular/services/dataService.js?v=1.3"></script>
-    <script src="/js/angular/services/authService.js?v=1.3"></script>
-    <script src="/js/angular/services/bookstoreService.js?v=1.3"></script>
-    <script src="/js/angular/services/cartService.js"></script>
+    <script defer src="/js/angular/services/dataService.js?v=1.3"></script>
+    <script defer src="/js/angular/services/authService.js?v=1.3"></script>
+    <script defer src="/js/angular/services/bookstoreService.js?v=1.3"></script>
+    <script defer src="/js/angular/services/cartService.js"></script>
     
     <!-- Controllers -->
-    <script src="/js/angular/controllers/homeController.js"></script>
-    <script src="/js/angular/controllers/aboutController.js"></script>
-    <script src="/js/angular/controllers/contactController.js"></script>
-    <script src="/js/angular/controllers/authController.js"></script>
-    <script src="/js/angular/controllers/adminController.js"></script>
-    <script src="/js/angular/controllers/employeeController.js"></script>
-    <script src="/js/angular/controllers/apiTestController.js"></script>
-    <script src="/js/angular/controllers/categoryController.js"></script>
-    <script src="/js/angular/controllers/bookController.js"></script>
-    <script src="/js/angular/controllers/searchController.js"></script>
-    <script src="/js/angular/controllers/cartController.js"></script>
-    <script src="/js/angular/controllers/checkoutController.js"></script>
-    <script src="/js/angular/controllers/successController.js"></script>
-    <script src="/js/angular/controllers/customerOrdersController.js"></script>
-    <script src="/js/angular/controllers/purchaseOrderController.js"></script>
-    <script src="/js/angular/controllers/goodsReceiptController.js"></script>
-    <script src="/js/angular/controllers/reportController.js"></script>
-    <script src="/js/angular/controllers/rolesController.js"></script>
-    <script src="/js/angular/controllers/orderController.js"></script>
-    <script src="/js/angular/controllers/returnController.js"></script>
-    <script src="/js/angular/controllers/promotionController.js"></script>
+    <script defer src="/js/angular/controllers/homeController.js"></script>
+    <script defer src="/js/angular/controllers/aboutController.js"></script>
+    <script defer src="/js/angular/controllers/contactController.js"></script>
+    <script defer src="/js/angular/controllers/authController.js"></script>
+    <script defer src="/js/angular/controllers/adminController.js"></script>
+    <script defer src="/js/angular/controllers/employeeController.js"></script>
+    <script defer src="/js/angular/controllers/apiTestController.js"></script>
+    <script defer src="/js/angular/controllers/categoryController.js"></script>
+    <script defer src="/js/angular/controllers/bookController.js"></script>
+    <script defer src="/js/angular/controllers/searchController.js"></script>
+    <script defer src="/js/angular/controllers/cartController.js"></script>
+    <script defer src="/js/angular/controllers/checkoutController.js"></script>
+    <script defer src="/js/angular/controllers/successController.js"></script>
+    <script defer src="/js/angular/controllers/customerOrdersController.js"></script>
+    <script defer src="/js/angular/controllers/purchaseOrderController.js"></script>
+    <script defer src="/js/angular/controllers/goodsReceiptController.js"></script>
+    <script defer src="/js/angular/controllers/reportController.js"></script>
+    <script defer src="/js/angular/controllers/rolesController.js"></script>
+    <script defer src="/js/angular/controllers/orderController.js"></script>
+    <script defer src="/js/angular/controllers/returnController.js"></script>
+    <script defer src="/js/angular/controllers/promotionController.js"></script>
     
     <!-- Directives -->
-    <script src="/js/angular/directives/customDirectives.js?v=1.4"></script>
-    <script src="/js/angular/directives/authDirectives.js?v=1.4"></script>
-    <script src="/js/angular/directives/permissionDirectives.js?v=1.4"></script>
-    <script src="/js/angular/directives/commonDirectives.js?v=1.4"></script>
+    <script defer src="/js/angular/directives/customDirectives.js?v=1.4"></script>
+    <script defer src="/js/angular/directives/authDirectives.js?v=1.4"></script>
+    <script defer src="/js/angular/directives/permissionDirectives.js?v=1.4"></script>
+    <script defer src="/js/angular/directives/commonDirectives.js?v=1.4"></script>
     
     <!-- Filters -->
-    <script src="/js/angular/filters/customFilters.js"></script>
-    <script src="/js/angular/filters/bookstoreFilters.js"></script>
+    <script defer src="/js/angular/filters/customFilters.js"></script>
+    <script defer src="/js/angular/filters/bookstoreFilters.js"></script>
     
     <!-- Custom jQuery -->
-    <script src="/js/custom/main.js"></script>
+    <script defer src="/js/custom/main.js"></script>
+    
+    <!-- Check myApp module exists (after all AngularJS scripts load) -->
+    <script defer src="/js/check-myapp.js"></script>
+    
+    <!-- Debug: Check script loading status -->
+    <script defer>
+        console.log('🔍 Debug: Checking script loading status...');
+        console.log('jQuery loaded:', !!window.jQuery);
+        console.log('AngularJS loaded:', !!window.angular);
+        console.log('myApp module:', (function() {
+            try { return !!angular.module('myApp'); } catch(e) { return false; }
+        })());
+        
+        // Check if ng-view is working
+        setTimeout(function() {
+            var ngView = document.querySelector('[ng-view]');
+            console.log('ng-view element:', ngView);
+            console.log('ng-view content:', ngView ? ngView.innerHTML : 'not found');
+        }, 1000);
+    </script>
 </body>
 </html>

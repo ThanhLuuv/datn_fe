@@ -1,13 +1,21 @@
 // Custom jQuery and JavaScript
-$(document).ready(function() {
-    // Initialize tooltips and popovers
-    initializeTooltips();
-    initializePopovers();
+(function () {
+    function start() {
+        if (!window.jQuery) {
+            console.error('jQuery not loaded');
+            return;
+        }
+        
+        // dùng $ an toàn ở đây
+        $(document).ready(function() {
+        // Initialize tooltips and popovers
+        initializeTooltips();
+        initializePopovers();
 
-    // Smooth scrolling for anchor links
-    $('a[href*="#"]').on('click', function(e) {
-        var hash = this.hash;
-        // Skip AngularJS hash routes and only prevent default for internal page anchors
+        // Smooth scrolling for anchor links
+        $('a[href*="#"]').on('click', function(e) {
+            var hash = this.hash;
+            // Skip AngularJS hash routes and only prevent default for internal page anchors
         if (hash && hash.indexOf('#!/') === -1 && hash.length > 1) {
             e.preventDefault();
             var target = $(hash);
@@ -106,3 +114,12 @@ window.showNotification = function(message, type = 'info') {
         $('.alert').last().alert('close');
     }, 3000);
 };
+
+    }
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', start);
+    } else {
+        start();
+    }
+})();
