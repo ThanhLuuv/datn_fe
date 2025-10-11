@@ -48,7 +48,7 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!api/).*)",
+      "source": "/((?!js|css|app|assets|images|fonts|favicon\\.ico|api/).*)",
       "destination": "/index.html"
     }
   ]
