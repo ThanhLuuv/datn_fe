@@ -104,11 +104,11 @@
                                                 ng-click="viewOrderDetail(order)">
                                             <i class="bi bi-eye me-1"></i>Xem chi tiết
                                         </button>
-                                        <button class="btn btn-outline-warning btn-sm mt-1" 
-                                                ng-click="returnOrder(order)"
+                                        <button class="btn btn-outline-success btn-sm mt-1" 
                                                 ng-if="getStatusText(order.status) === 'Đã giao'"
-                                                title="Trả hàng">
-                                            <i class="bi bi-arrow-counterclockwise me-1"></i>Trả hàng
+                                                ng-click="openReview(order)"
+                                                title="Đánh giá sản phẩm">
+                                            <i class="bi bi-star me-1"></i>Đánh giá
                                         </button>
                                     </div>
                                 </div>
@@ -178,7 +178,7 @@
                 <div class="mb-4">
                     <h6>Sản phẩm</h6>
                     <div class="table-responsive">
-                        <table class="table table-sm">
+                        <table class="table table-sm order-detail-table align-middle">
                             <thead>
                                 <tr>
                                     <th>Sản phẩm</th>
@@ -190,15 +190,16 @@
                             <tbody>
                                 <tr ng-repeat="line in selectedOrder.lines">
                                     <td>
-                                        <div class="d-flex align-items-center">
+                                        <div class="product-cell d-flex align-items-center">
                                             <div class="me-3">
-                                                <img ng-src="{{ line.bookImageUrl || 'https://via.placeholder.com/50x60' }}" 
-                                                     alt="{{ line.bookTitle }}" 
+                                                <img ng-src="{{ line.bookImageUrl || (line.book && line.book.imageUrl) || line.imageUrl || 'app/assets/images/book-placeholder.png' }}" 
+                                                     alt="{{ line.bookTitle || line.bookName || line.title }}" 
                                                      class="rounded"
-                                                     style="width: 50px; height: 60px; object-fit: cover;">
+                                                     style="width: 50px; height: 60px; object-fit: cover;"
+                                                     onerror="this.src='app/assets/images/book-placeholder.png'">
                                             </div>
                                             <div>
-                                                <h6 class="mb-0">{{ line.bookTitle }}</h6>
+                                                <h6 class="mb-0">{{ getLineTitle(line) }}</h6>
                                                 <small class="text-muted">ISBN: {{ line.isbn }}</small>
                                             </div>
                                         </div>
@@ -231,6 +232,50 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- Review Modal -->
+<div class="modal fade" id="reviewModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-star me-2"></i>Đánh giá sản phẩm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Chọn sản phẩm</label>
+                    <select class="form-select" ng-model="reviewModel.isbn" ng-options="l.isbn as (l.bookTitle || ('ISBN ' + l.isbn)) for l in reviewLines"></select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Số sao</label>
+                    <div class="d-flex gap-1 align-items-center">
+                        <button type="button" class="btn btn-outline-warning btn-sm" ng-repeat="s in [1,2,3,4,5]" ng-class="{'active': reviewModel.stars>=s}" ng-click="setStars(s)">
+                            <i class="bi" ng-class="reviewModel.stars>=s ? 'bi-star-fill' : 'bi-star'"></i>
+                        </button>
+                        <span class="ms-2">{{reviewModel.stars}}/5</span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Nhận xét</label>
+                    <textarea class="form-control" rows="3" ng-model="reviewModel.comment" placeholder="Cảm nhận của bạn về sản phẩm..."></textarea>
+                </div>
+                <div class="alert alert-info" ng-if="reviewHint">
+                    <i class="bi bi-info-circle me-2"></i>{{reviewHint}}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" ng-click="submitReview()" ng-disabled="!reviewModel.isbn || !reviewModel.stars || submittingReview">
+                    <span ng-if="!submittingReview"><i class="bi bi-send me-1"></i>Gửi đánh giá</span>
+                    <span ng-if="submittingReview"><i class="bi bi-hourglass-split me-1"></i>Đang gửi...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <style>
+    #reviewModal .btn-outline-warning.active { background-color: #ffc107; color: #000; }
+    </style>
 </div>
 
 <!-- Return Modal -->
@@ -418,4 +463,36 @@
         margin-bottom: 0;
     }
 }
+</style>
+
+<style>
+/* Order detail modal alignment */
+.order-detail-table th,
+.order-detail-table td {
+    vertical-align: middle;
+}
+
+.order-detail-table th:first-child,
+.order-detail-table td:first-child {
+    width: 55%;
+}
+
+.order-detail-table th:nth-child(2),
+.order-detail-table td:nth-child(2) {
+    width: 15%;
+    text-align: center;
+}
+
+.order-detail-table th:nth-child(3),
+.order-detail-table td:nth-child(3),
+.order-detail-table th:nth-child(4),
+.order-detail-table td:nth-child(4) {
+    width: 15%;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.order-detail-table .product-cell img { flex-shrink: 0; }
+.order-detail-table .product-cell h6 { font-weight: 600; margin-bottom: 2px; color: var(--gray-800); }
+.order-detail-table .product-cell small { display: block; }
 </style>

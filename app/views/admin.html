@@ -12,7 +12,7 @@
                         </h5>
                     </div>
                     <nav class="admin-nav">
-                        <ul class="admin-nav-list">
+                        <ul class="admin-nav-list" ng-if="!isDeliveryOnly">
                             <li class="admin-nav-item">
                                 <a class="admin-nav-link active" href="#!/admin">
                                     <i class="bi bi-speedometer2"></i>
@@ -70,7 +70,13 @@
                             <li class="admin-nav-item">
                                 <a class="admin-nav-link" href="#!/admin/reports/revenue">
                                     <i class="bi bi-graph-up"></i>
-                                    <span>Báo cáo</span>
+                                    <span>Báo cáo doanh thu</span>
+                                </a>
+                            </li>
+                            <li class="admin-nav-item">
+                                <a class="admin-nav-link" href="#!/admin/reports/inventory">
+                                    <i class="bi bi-boxes"></i>
+                                    <span>Báo cáo tồn kho</span>
                                 </a>
                             </li>
                             <li class="admin-nav-item">
@@ -83,6 +89,14 @@
                                 <a class="admin-nav-link" href="#!/admin/settings">
                                     <i class="bi bi-gear"></i>
                                     <span>Cài đặt</span>
+                                </a>
+                            </li>
+                        </ul>
+                        <ul class="admin-nav-list" ng-if="isDeliveryOnly">
+                            <li class="admin-nav-item">
+                                <a class="admin-nav-link active" href="#!/delivery/orders">
+                                    <i class="bi bi-truck"></i>
+                                    <span>Đơn được phân công</span>
                                 </a>
                             </li>
                         </ul>

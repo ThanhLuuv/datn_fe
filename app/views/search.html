@@ -37,10 +37,12 @@
                          data-bs-toggle="tooltip"
                          ng-attr-title="{{book.title}}&#10;Giá: {{(book.currentPrice || book.unitPrice) | currency:'':0}} VNĐ&#10;ISBN: {{book.isbn}}">
                         <div class="book-image">
-                            <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.png'}}" alt="{{book.title}}">
+                            <a ng-href="#!/book/{{book.isbn}}" title="Xem chi tiết">
+                                <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.png'}}" alt="{{book.title}}">
+                            </a>
                         </div>
                         <div class="book-info">
-                            <h6 class="book-title">{{book.title}}</h6>
+                            <h6 class="book-title"><a class="text-decoration-none" ng-href="#!/book/{{book.isbn}}">{{book.title}}</a></h6>
                             <div class="book-meta mb-2">
                                 <small class="text-muted">ISBN: {{book.isbn}}</small>
                             </div>

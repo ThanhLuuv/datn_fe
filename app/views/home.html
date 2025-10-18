@@ -71,9 +71,11 @@
                          ng-attr-title="{{book.title}}&#10;Giá: {{book.currentPrice | currency:'':0}} VNĐ&#10;Tác giả: {{book.authors[0].fullName}}&#10;Năm xuất bản: {{book.publishYear}}&#10;Nhà xuất bản: {{book.publisherName}}">
                         
                         <div class="book-image">
-                            <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.png'}}" 
-                                 alt="{{book.title}}"
-                                 onerror="this.src='app/assets/images/book-placeholder.png'">
+                            <a ng-href="#!/book/{{book.isbn}}" title="Xem chi tiết">
+                                <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.png'}}" 
+                                     alt="{{book.title}}"
+                                     onerror="this.src='app/assets/images/book-placeholder.png'">
+                            </a>
                             
                             <div class="book-badge" ng-if="hasPromo(book)">
                                 <span class="badge bg-danger">{{calculateDiscountPercent(book)}}% OFF</span>
@@ -84,7 +86,7 @@
                         </div>
                         
                         <div class="book-info">
-                            <h6 class="book-title">{{book.title}}</h6>
+                            <h6 class="book-title"><a class="text-decoration-none" ng-href="#!/book/{{book.isbn}}">{{book.title}}</a></h6>
                             
                             <!-- Author -->
                             <div class="book-author mb-2">
@@ -103,7 +105,7 @@
                             <!-- Price (current above, original below; no percent text) -->
                             <div class="price-block">
                                 <div class="price-current">{{getFinalPrice(book) | currency:'':0}} VNĐ</div>
-                                <div class="price-old">{{book.currentPrice | currency:'':0}} VNĐ</div>
+                                <div class="price-old" ng-if="hasPromo(book)">{{book.currentPrice | currency:'':0}} VNĐ</div>
                             </div>
                             
                             <!-- Actions -->
@@ -160,9 +162,11 @@
                          ng-attr-title="{{book.title}}&#10;Giá gốc: {{book.currentPrice | currency:'':0}} VNĐ&#10;Giá khuyến mãi: {{book.discountedPrice | currency:'':0}} VNĐ&#10;Tác giả: {{book.authors[0].fullName}}&#10;Nhà xuất bản: {{book.publisherName}}">
                         
                         <div class="book-image">
-                            <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.png'}}" 
-                                 alt="{{book.title}}"
-                                 onerror="this.src='app/assets/images/book-placeholder.png'">
+                            <a ng-href="#!/book/{{book.isbn}}" title="Xem chi tiết">
+                                <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.png'}}" 
+                                     alt="{{book.title}}"
+                                     onerror="this.src='app/assets/images/book-placeholder.png'">
+                            </a>
                             
                             <div class="book-badge">
                                 <span class="badge bg-danger">{{calculateDiscountPercent(book)}}% OFF</span>
@@ -170,7 +174,7 @@
                         </div>
                         
                         <div class="book-info">
-                            <h6 class="book-title">{{book.title}}</h6>
+                            <h6 class="book-title"><a class="text-decoration-none" ng-href="#!/book/{{book.isbn}}">{{book.title}}</a></h6>
                             
                             <div class="book-author mb-2">
                                 <small class="text-muted">
@@ -180,7 +184,7 @@
                             
                             <div class="price-block">
                                 <div class="price-current">{{getFinalPrice(book) | currency:'':0}} VNĐ</div>
-                                <div class="price-old">{{book.currentPrice | currency:'':0}} VNĐ</div>
+                                <div class="price-old" ng-if="hasPromo(book)">{{book.currentPrice | currency:'':0}} VNĐ</div>
                             </div>
                             
                             <div class="promotion-info mb-2" ng-if="book.activePromotions && book.activePromotions.length > 0">
@@ -242,9 +246,11 @@
                          ng-attr-title="{{book.title}}&#10;Giá: {{book.currentPrice | currency:'':0}} VNĐ&#10;Tác giả: {{book.authors[0].fullName}}&#10;Bán được: {{book.totalSold}} cuốn&#10;Nhà xuất bản: {{book.publisherName}}">
                         
                         <div class="book-image">
-                            <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.png'}}" 
-                                 alt="{{book.title}}"
-                                 onerror="this.src='app/assets/images/book-placeholder.png'">
+                            <a ng-href="#!/book/{{book.isbn}}" title="Xem chi tiết">
+                                <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.png'}}" 
+                                     alt="{{book.title}}"
+                                     onerror="this.src='app/assets/images/book-placeholder.png'">
+                            </a>
                             
                             <div class="book-badge" ng-if="hasPromo(book)">
                                 <span class="badge bg-danger">{{calculateDiscountPercent(book)}}% OFF</span>
@@ -255,7 +261,7 @@
                         </div>
                         
                         <div class="book-info">
-                            <h6 class="book-title">{{book.title}}</h6>
+                            <h6 class="book-title"><a class="text-decoration-none" ng-href="#!/book/{{book.isbn}}">{{book.title}}</a></h6>
                             
                             <div class="book-author mb-2">
                                 <small class="text-muted">
@@ -265,7 +271,7 @@
                             
                             <div class="price-block">
                                 <div class="price-current">{{getFinalPrice(book) | currency:'':0}} VNĐ</div>
-                                <div class="price-old">{{book.currentPrice | currency:'':0}} VNĐ</div>
+                                <div class="price-old" ng-if="hasPromo(book)">{{book.currentPrice | currency:'':0}} VNĐ</div>
                             </div>
                             
                             <div class="book-stats">

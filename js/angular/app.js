@@ -212,6 +212,19 @@ app.config(['$routeProvider', function($routeProvider) {
                 }]
             }
         })
+        .when('/delivery/orders', {
+            templateUrl: 'app/views/delivery-orders.html',
+            controller: 'DeliveryOrdersController',
+            resolve: {
+                checkAuth: ['AuthService', '$location', function(AuthService, $location) {
+                    if (!AuthService.isDeliveryEmployee() && !AuthService.isAdmin()) {
+                        $location.path('/home');
+                        return false;
+                    }
+                    return true;
+                }]
+            }
+        })
         .when('/admin/purchase-orders', {
             templateUrl: 'app/views/admin-purchase-orders.html',
             controller: 'AdminPurchaseOrdersController',
@@ -267,6 +280,19 @@ app.config(['$routeProvider', function($routeProvider) {
         .when('/admin/reports/revenue', {
             templateUrl: 'app/views/admin-report-revenue.html',
             controller: 'AdminRevenueReportController',
+            resolve: {
+                checkAuth: ['AuthService', '$location', function(AuthService, $location) {
+                    if (!AuthService.isAdminOrTeacher()) {
+                        $location.path('/home');
+                        return false;
+                    }
+                    return true;
+                }]
+            }
+        })
+        .when('/admin/reports/inventory', {
+            templateUrl: 'app/views/admin-inventory-report.html',
+            controller: 'AdminInventoryReportController',
             resolve: {
                 checkAuth: ['AuthService', '$location', function(AuthService, $location) {
                     if (!AuthService.isAdminOrTeacher()) {

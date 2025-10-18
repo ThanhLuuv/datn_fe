@@ -8,6 +8,7 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
     }
 
     $scope.title = 'Admin Dashboard';
+    $scope.isDeliveryOnly = AuthService.isDeliveryEmployee() && !AuthService.isAdmin();
     $scope.stats = {
         totalUsers: 0,
         totalBooks: 0,

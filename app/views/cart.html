@@ -68,14 +68,23 @@
                                             <td class="py-4 px-4">
                                                 <div class="d-flex align-items-center">
                                                     <div class="cart-item-image me-3">
-                                                        <img ng-src="{{ item.imageUrl || 'app/assets/images/book-placeholder.png' }}" 
-                                                             alt="{{ item.bookTitle || item.title }}" 
-                                                             class="rounded shadow-sm"
-                                                             style="width: 80px; height: 100px; object-fit: cover;">
+                                                        <a ng-href="#!/book/{{ item.isbn }}" title="Xem chi tiết">
+                                                            <img ng-src="{{ item.imageUrl || 'app/assets/images/book-placeholder.png' }}" 
+                                                                 alt="{{ item.bookTitle || item.title }}" 
+                                                                 class="rounded shadow-sm"
+                                                                 style="width: 80px; height: 100px; object-fit: cover;">
+                                                        </a>
                                                     </div>
                                                     <div class="cart-item-info">
-                                                        <h6 class="cart-item-title mb-1">{{ item.bookTitle || item.title }}</h6>
+                                                        <h6 class="cart-item-title mb-1">
+                                                            <a class="text-decoration-none" ng-href="#!/book/{{ item.isbn }}">{{ item.bookTitle || item.title }}</a>
+                                                        </h6>
                                                         <small class="text-muted">ISBN: {{ item.isbn }}</small>
+                                                        <div>
+                                                            <a class="small" ng-href="#!/book/{{ item.isbn }}">
+                                                                <i class="bi bi-eye me-1"></i>Xem chi tiết
+                                                            </a>
+                                                        </div>
                                                         <div ng-if="item.hasPromotion" class="mt-1">
                                                             <span class="badge bg-success">Có khuyến mãi</span>
                                                         </div>
@@ -94,8 +103,8 @@
                                                         <button class="btn btn-outline-secondary btn-sm quantity-btn" 
                                                                 type="button" 
                                                                 ng-click="decrement(item)"
-                                                                ng-disabled="item.qty <= 1 || loading">
-                                                            <i class="bi bi-dash"></i>
+                                                                ng-disabled="item.qty <= 1 || loading || item._updating">
+                                                            <i class="bi" ng-class="item._updating ? 'bi-arrow-repeat spinner-border-sm spin' : 'bi-dash'"></i>
                                                         </button>
                                                         <input type="number" 
                                                                min="1" 
@@ -104,12 +113,12 @@
                                                                ng-model="item.qty" 
                                                                ng-change="updateQty(item)"
                                                                ng-blur="validateQuantity(item)"
-                                                               ng-disabled="loading">
+                                                               ng-disabled="loading || item._updating">
                                                         <button class="btn btn-outline-secondary btn-sm quantity-btn" 
                                                                 type="button" 
                                                                 ng-click="increment(item)"
-                                                                ng-disabled="item.stock && item.qty >= item.stock || loading">
-                                                            <i class="bi bi-plus"></i>
+                                                                ng-disabled="item.stock && item.qty >= item.stock || loading || item._updating">
+                                                            <i class="bi" ng-class="item._updating ? 'bi-arrow-repeat spinner-border-sm spin' : 'bi-plus'"></i>
                                                         </button>
                                                     </div>
                                                     <small class="text-danger d-block mt-1" ng-if="item.qtyError">{{ item.qtyError }}</small>
@@ -124,9 +133,9 @@
                                             <td class="py-4 text-center">
                                                 <button class="btn btn-sm btn-outline-danger remove-btn" 
                                                         ng-click="remove(item)"
-                                                        ng-disabled="loading"
+                                                        ng-disabled="loading || item._removing"
                                                         title="Xóa sản phẩm">
-                                                    <i class="bi bi-trash"></i>
+                                                    <i class="bi" ng-class="item._removing ? 'bi-arrow-repeat spinner-border-sm spin' : 'bi-trash'"></i>
                                                 </button>
                                             </td>
                                         </tr>

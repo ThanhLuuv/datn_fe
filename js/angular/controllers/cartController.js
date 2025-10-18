@@ -62,15 +62,28 @@ app.controller('CartController', ['$scope', 'CartService', '$location', function
             });
     };
 
+    function recomputeSubtotal() {
+        var sum = 0;
+        if ($scope.cart && Array.isArray($scope.cart.items)) {
+            for (var i = 0; i < $scope.cart.items.length; i++) {
+                var it = $scope.cart.items[i];
+                var unit = (it.discountedPrice || it.currentPrice || it.unitPrice) || 0;
+                var lineTotal = it.totalPrice != null ? it.totalPrice : unit * (it.qty || 0);
+                sum += Number(lineTotal) || 0;
+            }
+        }
+        $scope.cart.subtotal = sum;
+    }
+
     $scope.updateQty = function(item) {
         if (!item.cartItemId) {
             // Fallback to local storage method
             CartService.updateQty(item.isbn, item.unitPrice, item.qty);
-            compute();
+            recomputeSubtotal();
             return;
         }
 
-        $scope.loading = true;
+        item._updating = true;
         CartService.updateCartItem(item.cartItemId, item.qty)
             .then(function(response) {
                 if (response && response.data && response.data.success) {
@@ -80,14 +93,12 @@ app.controller('CartController', ['$scope', 'CartService', '$location', function
                     item.stock = updatedItem.stock;
                     item.hasPromotion = updatedItem.hasPromotion;
                     item.qty = updatedItem.quantity; // Update qty from API response
-                    
-                    // Reload cart to get updated totals
-                    $scope.loadCartFromAPI();
+                    // Recompute subtotal locally to avoid full re-render
+                    recomputeSubtotal();
                 } else {
                     if (window.showNotification) {
                         window.showNotification('Không thể cập nhật số lượng', 'warning');
                     }
-                    $scope.loading = false;
                 }
             })
             .catch(function(error) {
@@ -95,7 +106,10 @@ app.controller('CartController', ['$scope', 'CartService', '$location', function
                 if (window.showNotification) {
                     window.showNotification('Không thể cập nhật số lượng', 'danger');
                 }
-                $scope.loading = false;
+            })
+            .finally(function() {
+                item._updating = false;
+                $scope.$emit('cart:changed');
             });
     };
 
@@ -119,23 +133,29 @@ app.controller('CartController', ['$scope', 'CartService', '$location', function
         if (!item.cartItemId) {
             // Fallback to local storage method
             CartService.removeItem(item.isbn, item.unitPrice);
-            compute();
+            // Remove from local list
+            var idx = $scope.cart.items.indexOf(item);
+            if (idx >= 0) { $scope.cart.items.splice(idx, 1); }
+            recomputeSubtotal();
+            $scope.$emit('cart:changed');
             return;
         }
 
-        $scope.loading = true;
+        item._removing = true;
         CartService.removeCartItem(item.cartItemId)
             .then(function(response) {
                 if (response && response.data && response.data.success) {
                     if (window.showNotification) {
                         window.showNotification('Đã xóa "' + item.bookTitle + '" khỏi giỏ hàng', 'success');
                     }
-                    $scope.loadCartFromAPI();
+                    // Remove from list without reloading entire cart
+                    var idx = $scope.cart.items.indexOf(item);
+                    if (idx >= 0) { $scope.cart.items.splice(idx, 1); }
+                    recomputeSubtotal();
                 } else {
                     if (window.showNotification) {
                         window.showNotification('Không thể xóa sản phẩm', 'warning');
                     }
-                    $scope.loading = false;
                 }
             })
             .catch(function(error) {
@@ -143,7 +163,10 @@ app.controller('CartController', ['$scope', 'CartService', '$location', function
                 if (window.showNotification) {
                     window.showNotification('Không thể xóa sản phẩm', 'danger');
                 }
-                $scope.loading = false;
+            })
+            .finally(function() {
+                item._removing = false;
+                $scope.$emit('cart:changed');
             });
     };
 

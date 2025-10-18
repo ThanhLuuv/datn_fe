@@ -170,6 +170,19 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
+    // Báo cáo tồn kho theo ngày
+    this.getInventoryReport = function(date) {
+        var queryParams = {
+            date: date || ''
+        };
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/report/inventory',
+            headers: getAuthHeaders(),
+            params: queryParams
+        });
+    };
+
 	// Báo cáo doanh thu theo tháng
 	this.getRevenueReportMonthly = function(params) {
 		var queryParams = {
@@ -936,6 +949,21 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
+    // Lấy danh sách đơn được phân công cho nhân viên giao hàng (DELIVERY)
+    this.getMyAssignedOrders = function(params) {
+        params = params || {};
+        var queryParams = {
+            pageNumber: params.pageNumber || 1,
+            pageSize: params.pageSize || 10
+        };
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/order/my-assigned-orders',
+            headers: getAuthHeaders(),
+            params: queryParams
+        });
+    };
+
     // Lấy chi tiết đơn hàng
     this.getOrderById = function(orderId) {
         return $http({
@@ -991,6 +1019,47 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
             url: baseUrl + '/payment/create-link',
             data: payload,
             headers: getAuthHeaders()
+        });
+    };
+
+    // ==================== INVOICE APIs ====================
+    // Danh sách hóa đơn (filter, phân trang)
+    this.getInvoices = function(params) {
+        params = params || {};
+        var queryParams = {
+            invoiceNumber: params.invoiceNumber || '',
+            orderId: params.orderId || '',
+            paymentStatus: params.paymentStatus || '',
+            fromDate: params.fromDate || '',
+            toDate: params.toDate || '',
+            pageNumber: params.pageNumber || 1,
+            pageSize: params.pageSize || 10
+        };
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/invoice',
+            headers: getAuthHeaders(),
+            params: queryParams
+        });
+    };
+
+    // Danh sách hóa đơn kèm thông tin đơn hàng
+    this.getInvoicesWithOrders = function(params) {
+        params = params || {};
+        var queryParams = {
+            invoiceNumber: params.invoiceNumber || '',
+            orderId: params.orderId || '',
+            paymentStatus: params.paymentStatus || '',
+            fromDate: params.fromDate || '',
+            toDate: params.toDate || '',
+            pageNumber: params.pageNumber || 1,
+            pageSize: params.pageSize || 10
+        };
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/invoice/with-orders',
+            headers: getAuthHeaders(),
+            params: queryParams
         });
     };
 
@@ -1198,6 +1267,36 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         return $http({
             method: 'GET',
             url: baseUrl + '/test/delivery-only',
+            headers: getAuthHeaders()
+        });
+    };
+
+    // ==================== RATINGS APIs ====================
+    // Get ratings list for an ISBN (public)
+    this.getRatings = function(isbn, page, pageSize) {
+        var p = Math.max(parseInt(page) || 1, 1);
+        var ps = Math.min(Math.max(parseInt(pageSize) || 10, 1), 50);
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/ratings/' + encodeURIComponent(isbn),
+            params: { page: p, pageSize: ps }
+        });
+    };
+
+    // Get ratings stats for an ISBN (public)
+    this.getRatingsStats = function(isbn) {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/ratings/' + encodeURIComponent(isbn) + '/stats'
+        });
+    };
+
+    // Create or update rating (authorized)
+    this.createOrUpdateRating = function(payload) {
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/ratings',
+            data: payload,
             headers: getAuthHeaders()
         });
     };

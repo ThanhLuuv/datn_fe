@@ -8,6 +8,8 @@
 					</a>
 					<h2 class="mb-0"><i class="bi bi-bag"></i> Quản lý đơn hàng</h2>
 				</div>
+				<div class="d-flex gap-2">
+				</div>
 			</div>
 
 			<!-- Loading State -->
@@ -123,6 +125,11 @@
 											<!-- Nút xem chi tiết - luôn hiển thị -->
 											<button class="btn btn-outline-secondary" ng-click="viewOrder(o)" title="Chi tiết" data-bs-toggle="modal" data-bs-target="#orderDetailModal">
 												<i class="bi bi-eye"></i>
+											</button>
+											
+											<!-- Nút xem hóa đơn - chỉ hiển thị khi đã thanh toán -->
+											<button class="btn btn-outline-info" ng-click="viewInvoice(o)" title="Xem hóa đơn" ng-if="o.invoice && o.invoice.paymentStatus === 'PAID'">
+												<i class="bi bi-receipt"></i>
 											</button>
 											
 											<!-- Trạng thái 0 (Chờ xác nhận): Phân công, Hủy -->
@@ -381,6 +388,156 @@
 		</div>
 	</div>
 
+	<!-- Invoice Modal -->
+	<div class="modal fade" id="invoiceModal" tabindex="-1">
+		<div class="modal-dialog modal-xl">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">
+						<i class="bi bi-receipt"></i> Hóa đơn
+					</h5>
+					<div class="d-flex gap-2">
+						<button class="btn btn-outline-primary btn-sm" ng-click="printInvoice()" title="In hóa đơn">
+							<i class="bi bi-printer"></i> In
+						</button>
+						<button class="btn btn-outline-success btn-sm" ng-click="downloadInvoice()" title="Tải xuống PDF">
+							<i class="bi bi-download"></i> PDF
+						</button>
+						<button type="button" class="btn-close" ng-click="closeInvoiceModal()" aria-label="Close"></button>
+					</div>
+				</div>
+				<div class="modal-body p-0" id="invoiceContent">
+					<!-- Invoice Content -->
+					<div class="invoice-container" ng-if="$root.selectedInvoice">
+						<div class="invoice-header">
+							<div class="row">
+								<div class="col-6">
+									<h2 class="company-name">BOOKSTORE SYSTEM</h2>
+									<div class="company-info">
+										<p><strong>Địa chỉ:</strong> 123 Đường ABC, Quận XYZ, TP.HCM</p>
+										<p><strong>Điện thoại:</strong> (028) 1234-5678</p>
+										<p><strong>Email:</strong> info@bookstore.com</p>
+										<p><strong>Website:</strong> www.bookstore.com</p>
+									</div>
+								</div>
+								<div class="col-6 text-end">
+									<h1 class="invoice-title">HÓA ĐƠN BÁN HÀNG</h1>
+									<div class="invoice-meta">
+										<p><strong>Số hóa đơn:</strong> {{$root.selectedInvoice.invoiceNumber || 'HD-' + ($root.selectedInvoice.id || 'N/A')}}</p>
+										<p><strong>Ngày xuất:</strong> {{$root.selectedInvoice.createdAt | date:'dd/MM/yyyy HH:mm'}}</p>
+										<p><strong>Mã đơn hàng:</strong> OD-{{$root.selectedOrder.orderId || $root.selectedOrder.id}}</p>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="invoice-body">
+							<div class="row mb-4">
+								<div class="col-6">
+									<h4>Thông tin khách hàng</h4>
+									<div class="customer-info">
+										<p><strong>Tên:</strong> {{$root.selectedOrder.customerName}}</p>
+										<p><strong>Điện thoại:</strong> {{$root.selectedOrder.receiverPhone}}</p>
+										<p><strong>Địa chỉ:</strong> {{$root.selectedOrder.shippingAddress}}</p>
+									</div>
+								</div>
+								<div class="col-6">
+									<h4>Thông tin thanh toán</h4>
+									<div class="payment-info">
+										<p><strong>Phương thức:</strong> {{$root.selectedInvoice.paymentMethod || 'Chuyển khoản'}}</p>
+										<p><strong>Trạng thái:</strong> 
+											<span class="badge" ng-class="{
+												'bg-danger': $root.selectedInvoice.paymentStatus === 'PENDING',
+												'bg-success': $root.selectedInvoice.paymentStatus === 'PAID',
+												'bg-warning': $root.selectedInvoice.paymentStatus === 'FAILED',
+												'bg-info': $root.selectedInvoice.paymentStatus === 'REFUNDED'
+											}">
+												{{$root.selectedInvoice.paymentStatus === 'PENDING' ? 'Chưa thanh toán' : 
+												  $root.selectedInvoice.paymentStatus === 'PAID' ? 'Đã thanh toán' :
+												  $root.selectedInvoice.paymentStatus === 'FAILED' ? 'Thất bại' :
+												  $root.selectedInvoice.paymentStatus === 'REFUNDED' ? 'Đã hoàn tiền' : 'Chưa xác định'}}
+											</span>
+										</p>
+										<p ng-if="$root.selectedInvoice.paymentDate"><strong>Ngày thanh toán:</strong> {{$root.selectedInvoice.paymentDate | date:'dd/MM/yyyy HH:mm'}}</p>
+									</div>
+								</div>
+							</div>
+
+							<h4>Chi tiết sản phẩm</h4>
+							<div class="table-responsive">
+								<table class="table table-bordered invoice-table">
+									<thead>
+										<tr>
+											<th width="10%">STT</th>
+											<th width="15%">ISBN</th>
+											<th width="35%">Tên sách</th>
+											<th width="10%" class="text-center">SL</th>
+											<th width="15%" class="text-end">Đơn giá</th>
+											<th width="15%" class="text-end">Thành tiền</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr ng-repeat="item in ($root.selectedOrder.lines || []) track by $index">
+											<td class="text-center">{{$index + 1}}</td>
+											<td><code>{{item.isbn}}</code></td>
+											<td>{{item.bookTitle}}</td>
+											<td class="text-center">{{item.quantity || item.qty}}</td>
+											<td class="text-end">{{item.unitPrice | numberFormatted}} ₫</td>
+											<td class="text-end"><strong>{{((item.quantity || item.qty) * item.unitPrice) | numberFormatted}} ₫</strong></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+
+							<div class="invoice-summary">
+								<div class="row">
+									<div class="col-8"></div>
+									<div class="col-4">
+										<table class="table table-sm">
+											<tr>
+												<td><strong>Tạm tính:</strong></td>
+												<td class="text-end">{{$root.selectedOrder.totalAmount | numberFormatted}} ₫</td>
+											</tr>
+											<tr>
+												<td><strong>Phí vận chuyển:</strong></td>
+												<td class="text-end">0 ₫</td>
+											</tr>
+											<tr>
+												<td><strong>Giảm giá:</strong></td>
+												<td class="text-end">0 ₫</td>
+											</tr>
+											<tr class="total-row">
+												<td><strong>TỔNG CỘNG:</strong></td>
+												<td class="text-end"><strong>{{$root.selectedOrder.totalAmount | numberFormatted}} ₫</strong></td>
+											</tr>
+										</table>
+									</div>
+								</div>
+							</div>
+
+							<div class="invoice-footer">
+								<div class="row">
+									<div class="col-6">
+										<p><strong>Ghi chú:</strong></p>
+										<p>{{$root.selectedOrder.notes || 'Cảm ơn quý khách đã mua hàng!'}}</p>
+									</div>
+									<div class="col-6 text-end">
+										<p><strong>Người lập hóa đơn</strong></p>
+										<br><br>
+										<p><strong>Ký tên</strong></p>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" ng-click="closeInvoiceModal()">Đóng</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<!-- Toasts -->
 	<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000;">
 		<div class="toast align-items-center text-white bg-{{t.variant}} border-0 mb-2 show" role="alert" aria-live="assertive" aria-atomic="true" ng-repeat="t in toasts">
@@ -390,3 +547,164 @@
 		</div>
 	</div>
 </div>
+
+<style>
+/* Invoice Styles */
+.invoice-container {
+	background: white;
+	padding: 30px;
+	font-family: 'Times New Roman', serif;
+	line-height: 1.4;
+}
+
+.invoice-header {
+	border-bottom: 3px solid #333;
+	padding-bottom: 20px;
+	margin-bottom: 30px;
+}
+
+.company-name {
+	font-size: 28px;
+	font-weight: bold;
+	color: #2c3e50;
+	margin-bottom: 15px;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+}
+
+.company-info p {
+	margin: 5px 0;
+	font-size: 14px;
+	color: #555;
+}
+
+.invoice-title {
+	font-size: 32px;
+	font-weight: bold;
+	color: #e74c3c;
+	margin-bottom: 20px;
+	text-transform: uppercase;
+	letter-spacing: 2px;
+}
+
+.invoice-meta p {
+	margin: 8px 0;
+	font-size: 14px;
+	color: #333;
+}
+
+.invoice-body h4 {
+	font-size: 18px;
+	font-weight: bold;
+	color: #2c3e50;
+	margin-bottom: 15px;
+	border-bottom: 2px solid #3498db;
+	padding-bottom: 5px;
+}
+
+.customer-info p, .payment-info p {
+	margin: 8px 0;
+	font-size: 14px;
+	color: #555;
+}
+
+.invoice-table {
+	margin: 20px 0;
+	border-collapse: collapse;
+}
+
+.invoice-table th {
+	background-color: #34495e;
+	color: white;
+	font-weight: bold;
+	padding: 12px 8px;
+	font-size: 14px;
+	border: 1px solid #2c3e50;
+}
+
+.invoice-table td {
+	padding: 10px 8px;
+	border: 1px solid #bdc3c7;
+	font-size: 14px;
+}
+
+.invoice-table tbody tr:nth-child(even) {
+	background-color: #f8f9fa;
+}
+
+.invoice-table tbody tr:hover {
+	background-color: #e8f4f8;
+}
+
+.invoice-summary {
+	margin-top: 30px;
+}
+
+.invoice-summary table {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+.invoice-summary td {
+	padding: 8px 12px;
+	border: 1px solid #bdc3c7;
+	font-size: 14px;
+}
+
+.total-row {
+	background-color: #3498db !important;
+	color: white !important;
+	font-size: 16px !important;
+}
+
+.total-row td {
+	border-color: #2980b9 !important;
+}
+
+.invoice-footer {
+	margin-top: 40px;
+	padding-top: 20px;
+	border-top: 2px solid #bdc3c7;
+}
+
+.invoice-footer p {
+	margin: 10px 0;
+	font-size: 14px;
+	color: #555;
+}
+
+/* Print Styles */
+@media print {
+	.invoice-container {
+		padding: 0;
+		margin: 0;
+		box-shadow: none;
+	}
+	
+	.modal-header, .modal-footer {
+		display: none !important;
+	}
+	
+	.modal-body {
+		padding: 0 !important;
+	}
+	
+	.invoice-container {
+		font-size: 12px;
+	}
+	
+	.invoice-title {
+		font-size: 24px;
+	}
+	
+	.company-name {
+		font-size: 20px;
+	}
+}
+
+/* Badge styles for payment status */
+.badge.bg-danger { background-color: #dc3545 !important; }
+.badge.bg-success { background-color: #198754 !important; }
+.badge.bg-warning { background-color: #ffc107 !important; color: #000 !important; }
+.badge.bg-info { background-color: #0dcaf0 !important; color: #000 !important; }
+</style>

@@ -1,0 +1,457 @@
+<!-- Admin Inventory Report View -->
+<div class="admin-layout">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 d-md-block admin-sidebar">
+                <div class="admin-sidebar-content">
+                    <div class="admin-sidebar-header">
+                        <h5 class="admin-sidebar-title">
+                            <i class="bi bi-shield-check"></i>
+                            Quản trị hệ thống
+                        </h5>
+                    </div>
+                    <nav class="admin-nav">
+                        <ul class="admin-nav-list">
+                            <li class="admin-nav-item">
+                                <a class="admin-nav-link" href="#!/admin">
+                                    <i class="bi bi-speedometer2"></i>
+                                    <span>Dashboard</span>
+                                </a>
+                            </li>
+                            <li class="admin-nav-item">
+                                <a class="admin-nav-link" href="#!/admin/categories">
+                                    <i class="bi bi-tags"></i>
+                                    <span>Danh mục</span>
+                                </a>
+                            </li>
+                            <li class="admin-nav-item">
+                                <a class="admin-nav-link" href="#!/admin/books">
+                                    <i class="bi bi-book"></i>
+                                    <span>Quản lý sách</span>
+                                </a>
+                            </li>
+                            <li class="admin-nav-item">
+                                <a class="admin-nav-link" href="#!/admin/orders">
+                                    <i class="bi bi-cart-check"></i>
+                                    <span>Đơn hàng</span>
+                                </a>
+                            </li>
+                            <li class="admin-nav-item">
+                                <a class="admin-nav-link" href="#!/admin/purchase-orders">
+                                    <i class="bi bi-cart-plus"></i>
+                                    <span>Đơn đặt hàng</span>
+                                </a>
+                            </li>
+                            <li class="admin-nav-item">
+                                <a class="admin-nav-link" href="#!/admin/goods-receipts">
+                                    <i class="bi bi-box-seam"></i>
+                                    <span>Phiếu nhập</span>
+                                </a>
+                            </li>
+                            <li class="admin-nav-item">
+                                <a class="admin-nav-link" href="#!/admin/returns">
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                    <span>Phiếu trả</span>
+                                </a>
+                            </li>
+                            <li class="admin-nav-item">
+                                <a class="admin-nav-link" href="#!/admin/users">
+                                    <i class="bi bi-people"></i>
+                                    <span>Người dùng</span>
+                                </a>
+                            </li>
+                            <li class="admin-nav-item">
+                                <a class="admin-nav-link" href="#!/admin/roles" admin-only>
+                                    <i class="bi bi-shield-lock"></i>
+                                    <span>Phân quyền</span>
+                                </a>
+                            </li>
+                            <li class="admin-nav-item">
+                                <a class="admin-nav-link" href="#!/admin/reports/revenue">
+                                    <i class="bi bi-graph-up"></i>
+                                    <span>Báo cáo doanh thu</span>
+                                </a>
+                            </li>
+                            <li class="admin-nav-item">
+                                <a class="admin-nav-link active" href="#!/admin/reports/inventory">
+                                    <i class="bi bi-boxes"></i>
+                                    <span>Báo cáo tồn kho</span>
+                                </a>
+                            </li>
+                            <li class="admin-nav-item">
+                                <a class="admin-nav-link" href="#!/admin/promotions">
+                                    <i class="bi bi-gift"></i>
+                                    <span>Khuyến mãi</span>
+                                </a>
+                            </li>
+                            <li class="admin-nav-item">
+                                <a class="admin-nav-link" href="#!/admin/settings">
+                                    <i class="bi bi-gear"></i>
+                                    <span>Cài đặt</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 admin-main-content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">
+                        <i class="bi bi-boxes me-2"></i>
+                        Báo cáo tồn kho
+                    </h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-sm btn-outline-primary" ng-click="exportToExcel()" ng-disabled="!inventoryData || !inventoryData.items || inventoryData.items.length === 0">
+                                <i class="bi bi-download"></i> Xuất Excel
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" ng-click="printReport()" ng-disabled="!inventoryData || !inventoryData.items || inventoryData.items.length === 0">
+                                <i class="bi bi-printer"></i> In báo cáo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter Section -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="bi bi-funnel me-2"></i>
+                            Bộ lọc báo cáo
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="reportDate" class="form-label">Ngày báo cáo</label>
+                                <input type="date" class="form-control" id="reportDate" ng-model="reportDate" ng-change="loadInventoryReport()">
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button type="button" class="btn btn-primary" ng-click="loadInventoryReport()" ng-disabled="loading">
+                                    <i class="bi bi-search me-1" ng-if="!loading"></i>
+                                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true" ng-if="loading"></span>
+                                    {{loading ? 'Đang tải...' : 'Tải báo cáo'}}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alert Messages -->
+                <div class="alert alert-danger alert-dismissible fade show" role="alert" ng-if="error">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    {{error}}
+                    <button type="button" class="btn-close" ng-click="clearError()"></button>
+                </div>
+
+                <div class="alert alert-success alert-dismissible fade show" role="alert" ng-if="success">
+                    <i class="bi bi-check-circle me-2"></i>
+                    {{success}}
+                    <button type="button" class="btn-close" ng-click="clearSuccess()"></button>
+                </div>
+
+                <!-- Report Content -->
+                <div class="card" ng-if="inventoryData">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="bi bi-table me-2"></i>
+                            Báo cáo tồn kho ngày {{reportDate}}
+                        </h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Danh mục</th>
+                                        <th scope="col">ISBN</th>
+                                        <th scope="col">Tên sách</th>
+                                        <th scope="col" class="text-end">Số lượng tồn kho</th>
+                                        <th scope="col" class="text-end">Giá trung bình</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="item in inventoryData.items track by $index">
+                                        <td>{{$index + 1}}</td>
+                                        <td>
+                                            <span class="badge bg-secondary">{{item.category}}</span>
+                                        </td>
+                                        <td>
+                                            <code>{{item.isbn}}</code>
+                                        </td>
+                                        <td>
+                                            <strong>{{item.title}}</strong>
+                                        </td>
+                                        <td class="text-end">
+                                            <span class="badge" ng-class="item.quantityOnHand > 10 ? 'bg-success' : (item.quantityOnHand > 0 ? 'bg-warning' : 'bg-danger')">
+                                                {{item.quantityOnHand}}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <strong>{{item.averagePrice | currency:'VND '}}</strong>
+                                        </td>
+                                    </tr>
+                                    <tr ng-if="!inventoryData.items || inventoryData.items.length === 0">
+                                        <td colspan="6" class="text-center text-muted py-4">
+                                            <i class="bi bi-inbox display-4 d-block mb-2"></i>
+                                            Không có dữ liệu tồn kho cho ngày này
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light" ng-if="inventoryData && inventoryData.items && inventoryData.items.length > 0">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Tổng số sách: <strong>{{inventoryData.items.length}}</strong>
+                                </small>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar me-1"></i>
+                                    Báo cáo ngày: <strong>{{reportDate}}</strong>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div class="card" ng-if="loading">
+                    <div class="card-body text-center py-5">
+                        <div class="spinner-border text-primary mb-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <h5 class="text-muted">Đang tải báo cáo tồn kho...</h5>
+                        <p class="text-muted">Vui lòng chờ trong giây lát</p>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div class="card" ng-if="!loading && !inventoryData">
+                    <div class="card-body text-center py-5">
+                        <i class="bi bi-boxes display-1 text-muted mb-3"></i>
+                        <h5 class="text-muted">Chưa có báo cáo tồn kho</h5>
+                        <p class="text-muted">Chọn ngày và nhấn "Tải báo cáo" để xem dữ liệu tồn kho</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Admin Layout Styles */
+.admin-layout {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    background-color: var(--gray-50);
+    min-height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+}
+
+.admin-sidebar {
+    background: linear-gradient(180deg, var(--primary-color), var(--primary-dark));
+    height: 100vh;
+    padding: 0;
+    box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.admin-sidebar-content {
+    padding: 2rem 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.admin-sidebar-header {
+    padding: 0 1.5rem 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 1rem;
+}
+
+.admin-sidebar-title {
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.admin-nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.admin-nav-item {
+    margin: 0.25rem 0;
+}
+
+.admin-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+    position: relative;
+}
+
+.admin-nav-link:hover {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-left-color: var(--primary-light);
+    transform: translateX(5px);
+}
+
+.admin-nav-link.active {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.15);
+    border-left-color: white;
+    font-weight: 600;
+}
+
+.admin-nav-link i {
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+}
+
+.admin-main-content {
+    background-color: var(--gray-50);
+    padding: 2rem;
+    height: 100vh;
+    overflow-y: auto;
+    margin-left: 0;
+}
+
+/* Card Enhancements */
+.card {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(30, 58, 138, 0.08);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(30, 58, 138, 0.12);
+}
+
+.card-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    border-radius: 16px 16px 0 0 !important;
+    border: none;
+    padding: 1.5rem;
+    font-weight: 600;
+}
+
+.card-footer {
+    border-top: 1px solid var(--gray-200);
+    background-color: var(--gray-50);
+    border-radius: 0 0 16px 16px !important;
+}
+
+/* Table Enhancements */
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: var(--gray-700);
+    background-color: var(--gray-50);
+}
+
+.table td {
+    vertical-align: middle;
+    border-top: 1px solid var(--gray-200);
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--gray-50);
+}
+
+/* Badge Styles */
+.badge {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .admin-sidebar {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 280px;
+        transition: left 0.3s ease;
+        z-index: 1050;
+        height: 100vh;
+    }
+    
+    .admin-sidebar.show {
+        left: 0;
+    }
+    
+    .admin-main-content {
+        margin-left: 0;
+        padding: 1rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+}
+
+/* Scrollbar Styling */
+.admin-sidebar-content::-webkit-scrollbar {
+    width: 4px;
+}
+
+.admin-sidebar-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.admin-sidebar-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+}
+
+.admin-sidebar-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+</style>
+
+<!-- Toasts -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000;">
+    <div class="toast align-items-center text-white bg-{{t.variant}} border-0 mb-2 show" role="alert" aria-live="assertive" aria-atomic="true" ng-repeat="t in toasts">
+        <div class="d-flex">
+            <div class="toast-body">{{t.message}}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" ng-click="toasts.splice($index,1)"></button>
+        </div>
+    </div>
+</div>

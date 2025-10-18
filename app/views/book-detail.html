@@ -24,7 +24,7 @@
                      style="width: 100%; max-width: 400px; height: auto;">
                 
                 <!-- Promo Badge -->
-                <div ng-if="effectivePrice < book.unitPrice" class="promo-badge">
+                <div ng-if="getFinalPrice(book) < (book.currentPrice || 0)" class="promo-badge">
                     <span class="badge bg-danger fs-6 px-3 py-2">
                         <i class="bi bi-percent me-1"></i>SALE
                     </span>
@@ -43,7 +43,7 @@
                     <div class="meta-item">
                         <i class="bi bi-person-fill text-primary me-2"></i>
                         <strong>Tác giả:</strong> 
-                        <span class="text-muted">{{ book.authors.map(a => a.name).join(', ') }}</span>
+                        <span class="text-muted">{{ getAuthorNames() }}</span>
                     </div>
                 </div>
 
@@ -52,7 +52,7 @@
                     <div class="meta-item">
                         <i class="bi bi-building text-primary me-2"></i>
                         <strong>Nhà xuất bản:</strong> 
-                        <span class="text-muted">{{ book.publisher.name }}</span>
+                        <span class="text-muted">{{ book.publisherName }}</span>
                     </div>
                 </div>
 
@@ -61,7 +61,7 @@
                     <div class="meta-item">
                         <i class="bi bi-tag-fill text-primary me-2"></i>
                         <strong>Thể loại:</strong> 
-                        <span class="text-muted">{{ book.category.name }}</span>
+                        <span class="text-muted">{{ book.categoryName }}</span>
                     </div>
                 </div>
 
@@ -87,31 +87,31 @@
                 <div class="book-meta mb-4">
                     <div class="meta-item">
                         <i class="bi bi-calendar-event text-primary me-2"></i>
-                        <strong>Ngày xuất bản:</strong> 
-                        <span class="text-muted">{{ book.publishedDate | date:'dd/MM/yyyy' }}</span>
+                        <strong>Năm xuất bản:</strong> 
+                        <span class="text-muted">{{ book.publishYear }}</span>
                     </div>
                 </div>
 
                 <!-- Price Section -->
-                <div class="price-section mb-4">
-                    <div ng-if="effectivePrice < book.unitPrice" class="price-with-discount">
+                    <div class="price-section mb-4">
+                    <div ng-if="getFinalPrice(book) < (book.currentPrice || 0)" class="price-with-discount">
                         <div class="price-row mb-2">
                             <span class="price-old text-muted text-decoration-line-through me-3">
-                                {{ book.unitPrice | currency:'':0 }} VNĐ
+                                {{ (book.currentPrice || 0) | currency:'':0 }} VNĐ
                             </span>
                             <span class="price-new text-danger fs-3 fw-bold">
-                                {{ effectivePrice | currency:'':0 }} VNĐ
+                                {{ getFinalPrice(book) | currency:'':0 }} VNĐ
                             </span>
                         </div>
                         <div class="discount-info">
                             <span class="badge bg-danger fs-6 px-3 py-2">
-                                Tiết kiệm {{ ((book.unitPrice - effectivePrice) / book.unitPrice * 100) | number:0 }}%
+                                Tiết kiệm {{ (((book.currentPrice || 0) - getFinalPrice(book)) / (book.currentPrice || 1) * 100) | number:0 }}%
                             </span>
                         </div>
                     </div>
-                    <div ng-if="effectivePrice >= book.unitPrice" class="price-normal">
+                    <div ng-if="getFinalPrice(book) >= (book.currentPrice || 0)" class="price-normal">
                         <span class="price-current text-primary fs-3 fw-bold">
-                            {{ book.unitPrice | currency:'':0 }} VNĐ
+                            {{ (book.currentPrice || 0) | currency:'':0 }} VNĐ
                         </span>
                     </div>
                 </div>
@@ -123,13 +123,59 @@
                     </button>
                 </div>
 
-                <!-- Description -->
-                <div class="description-section">
-                    <h4 class="section-title mb-3">
-                        <i class="bi bi-book me-2"></i>Mô tả sách
-                    </h4>
-                    <div class="description-content">
-                        <p class="text-muted lh-lg">{{ book.description || 'Chưa có mô tả cho cuốn sách này.' }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ratings Section -->
+<div class="container mt-4" ng-if="book">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="ratings-card card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="mb-0"><i class="bi bi-chat-left-quote me-2"></i>Đánh giá</h4>
+                        <div class="text-end" ng-if="ratingsStats">
+                            <div class="fs-5 fw-semibold">{{ratingsStats.avgStars | number:1}}/5 ⭐</div>
+                            <small class="text-muted">{{ratingsStats.total}} lượt đánh giá</small>
+                        </div>
+                    </div>
+                    <div class="mb-3" ng-if="ratingsStats && ratingsStats.histogram && ratingsStats.histogram.length">
+                        <div class="row g-2">
+                            <div class="col-12" ng-repeat="h in ratingsStats.histogram | orderBy:'-stars'">
+                                <div class="d-flex align-items-center">
+                                    <div style="width:40px">{{h.stars}} ⭐</div>
+                                    <div class="progress flex-grow-1 mx-2" style="height: 10px;">
+                                        <div class="progress-bar bg-warning" role="progressbar" ng-style="{width: ((h.count/(ratingsStats.total||1))*100)+'%'}"></div>
+                                    </div>
+                                    <div style="width:40px" class="text-end">{{h.count}}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div ng-if="ratingsLoading" class="text-center py-4 text-muted">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <div class="mt-2">Đang tải đánh giá...</div>
+                    </div>
+                    <div ng-if="!ratingsLoading && ratings.length === 0" class="text-center py-4 text-muted">
+                        Chưa có đánh giá nào cho sách này.
+                    </div>
+                    <div class="list-group" ng-if="!ratingsLoading && ratings.length > 0">
+                        <div class="list-group-item" ng-repeat="r in ratings">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <span class="text-warning">{{r.stars}} ⭐</span>
+                                </div>
+                                <small class="text-muted">{{ r.createdAt | date:'dd/MM/yyyy HH:mm' }}</small>
+                            </div>
+                            <div class="mt-1">{{r.comment || 'Không có nhận xét.'}}</div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-3" ng-if="ratingsTotal > ratingsPageSize">
+                        <button class="btn btn-outline-secondary btn-sm" ng-disabled="ratingsPage <= 1" ng-click="changeRatingsPage(ratingsPage-1)">Trước</button>
+                        <small class="text-muted">Trang {{ratingsPage}} / {{Math.ceil(ratingsTotal/ratingsPageSize)}}</small>
+                        <button class="btn btn-outline-secondary btn-sm" ng-disabled="ratingsPage >= Math.ceil(ratingsTotal/ratingsPageSize)" ng-click="changeRatingsPage(ratingsPage+1)">Sau</button>
                     </div>
                 </div>
             </div>

@@ -8,6 +8,11 @@
                     </a>
                     <h2 class="mb-0"><i class="bi bi-arrow-counterclockwise"></i> Quản lý phiếu trả</h2>
                 </div>
+				<div>
+					<button class="btn btn-primary" ng-click="openCreateReturn()">
+						<i class="bi bi-plus-circle"></i> Thêm phiếu trả
+					</button>
+				</div>
             </div>
 
             <div ng-if="loading" class="text-center py-5">
@@ -87,6 +92,153 @@
             </div>
 
             <pagination current-page="currentPage" total-pages="totalPages" on-page-change="onPageChange(page)"></pagination>
+        </div>
+    </div>
+
+    <!-- Create Return Modal (separate, not nested in any other modal) -->
+    <div class="modal fade" id="createReturnModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-arrow-return-left"></i> Tạo phiếu trả</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Step 1: Nhập số hóa đơn / tìm hóa đơn -->
+                    <div class="mb-3">
+                        <label class="form-label">Số hóa đơn</label>
+                        <div class="input-group">
+                            <input class="form-control" ng-model="returnForm.invoiceKeyword" placeholder="Nhập số hóa đơn hoặc từ khóa" ng-keypress="$event.which===13 && searchInvoices()" />
+                            <button class="btn btn-outline-primary" ng-click="searchInvoices()" ng-disabled="invoiceSearching">
+                                <span ng-if="invoiceSearching" class="spinner-border spinner-border-sm me-1"></span>
+                                Tìm hóa đơn
+                            </button>
+                        </div>
+                        <small class="text-muted">Chỉ hiển thị hóa đơn đã thanh toán</small>
+                    </div>
+
+                    <div class="mb-3" ng-if="invoiceSearching">
+                        <div class="text-center py-3">
+                            <div class="spinner-border text-primary"></div>
+                            <div class="text-muted mt-2">Đang tìm hóa đơn...</div>
+                        </div>
+                    </div>
+
+					<div class="mb-2" ng-if="!invoiceSearching && invoiceResults.length > 0">
+						<label class="form-label">Chọn hóa đơn</label>
+						<div class="table-responsive" style="max-height: 260px; overflow:auto;">
+							<table class="table table-sm align-middle">
+								<thead class="table-light">
+									<tr>
+										<th style="width:34px"></th>
+										<th style="width: 190px;">Số hóa đơn</th>
+										<th style="width: 180px;">Ngày tạo</th>
+										<th class="text-end" style="width: 140px;">Tổng tiền</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr ng-repeat="inv in invoiceResults" ng-class="{'table-primary': returnForm.selectedInvoice && returnForm.selectedInvoice.invoiceId === inv.invoiceId}">
+										<td>
+											<input class="form-check-input" type="radio" name="selectedInvoice" ng-model="$parent.returnForm.selectedInvoice" ng-value="inv" ng-change="loadInvoiceDetail()">
+										</td>
+										<td class="text-nowrap"><code>{{inv.invoiceNumber || ('INV-' + inv.invoiceId)}}</code></td>
+										<td>{{inv.createdAt | date:'yyyy-MM-dd HH:mm'}}</td>
+										<td class="text-end">{{inv.totalAmount | numberFormatted}} ₫</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<pagination current-page="invoicePage" total-pages="invoiceTotalPages" on-page-change="onInvoicePageChange(page)"></pagination>
+					</div>
+
+                    <div class="mb-3 text-center text-muted" ng-if="!invoiceSearching && invoiceSearched && invoiceResults.length === 0">
+                        Không tìm thấy hóa đơn phù hợp
+                    </div>
+
+                    <!-- Step 2: Chi tiết hóa đơn & chọn sách trả -->
+                    <div ng-if="invoiceDetailLoading" class="text-center py-3">
+                        <div class="spinner-border text-primary"></div>
+                        <div class="text-muted mt-2">Đang tải chi tiết hóa đơn...</div>
+                    </div>
+                    <div ng-if="!invoiceDetailLoading && invoiceDetail && invoiceDetail.lines && invoiceDetail.lines.length">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="mb-0"><i class="bi bi-journal-text"></i> Chọn sách cần trả</h6>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-secondary" ng-click="selectAllReturn()">Trả hết</button>
+                                <button class="btn btn-outline-secondary" ng-click="clearSelections()">Bỏ chọn</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width:28px"></th>
+                                        <th>ISBN</th>
+                                        <th>Tên sách</th>
+                                        <th class="text-end">SL đã mua</th>
+                                        <th style="width:120px" class="text-end">SL trả</th>
+                                        <th class="text-end">Đơn giá</th>
+                                        <th class="text-end">Số tiền trả</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="l in invoiceDetail.lines">
+                                        <td><input type="checkbox" class="form-check-input" ng-model="l._selected" ng-change="recomputeRefund()"></td>
+                                        <td class="text-nowrap"><code>{{l.isbn}}</code></td>
+                                        <td class="text-truncate" style="max-width: 260px">{{l.bookTitle}}</td>
+                                        <td class="text-end">{{l.qty}}</td>
+                                        <td class="text-end">
+                                            <input type="number" class="form-control form-control-sm text-end" min="1" ng-max="l.qty" ng-model="l._qtyReturn" ng-disabled="!l._selected" ng-change="normalizeQty(l); recomputeRefund();">
+                                        </td>
+                                        <td class="text-end">{{l.unitPrice | numberFormatted}} ₫</td>
+                                        <td class="text-end">{{(l._selected ? (l._qtyReturn * l.unitPrice) : 0) | numberFormatted}} ₫</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label class="form-label">Lý do trả hàng</label>
+                                <textarea class="form-control" rows="2" ng-model="returnForm.reason" placeholder="Nhập lý do trả hàng..."></textarea>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="applyDeduct" ng-model="returnForm.applyDeduction" ng-change="recomputeRefund()">
+                                    <label class="form-check-label" for="applyDeduct">Khấu trừ 10% (hàng không còn nguyên)</label>
+                                </div>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="createPayout" ng-model="returnForm.createPayout">
+                                    <label class="form-check-label" for="createPayout">Lập phiếu chi hoàn tiền</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-body p-2">
+                                        <div class="d-flex justify-content-between">
+                                            <span>Tổng chọn</span>
+                                            <strong>{{refundSummary.totalSelected | numberFormatted}} ₫</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between" ng-if="returnForm.applyDeduction">
+                                            <span>Khấu trừ 10%</span>
+                                            <strong>-{{refundSummary.deductionAmount | numberFormatted}} ₫</strong>
+                                        </div>
+                                        <hr class="my-2">
+                                        <div class="d-flex justify-content-between">
+                                            <span>Tiền hoàn trả</span>
+                                            <strong class="text-success">{{refundSummary.refundAmount | numberFormatted}} ₫</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" ng-click="submitCreateReturn()" ng-disabled="!canSubmitReturn() || creatingReturn">
+                        <span ng-if="creatingReturn" class="spinner-border spinner-border-sm me-2"></span>
+                        <i class="bi bi-save"></i> Tạo phiếu trả
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 

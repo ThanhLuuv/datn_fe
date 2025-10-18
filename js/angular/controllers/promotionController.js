@@ -41,7 +41,7 @@ app.controller('AdminPromotionsController', [
       $scope.formData = {
         name: '',
         description: '',
-        discountPct: 0.01,  // Default to minimum valid value
+        discountPct: 1,  // Default to minimum valid integer value
         startDate: null,   // Date object for input type="date"
         endDate: null,     // Date object for input type="date"
         bookIsbns: []
@@ -52,18 +52,16 @@ app.controller('AdminPromotionsController', [
       // Expose toDateObject to template for ng-change
       $scope.toDateObject = toDateObject;
       
-      // Real-time validation for discount percentage
+      // Real-time validation for discount percentage (integer 1..100)
       $scope.validateDiscountPct = function() {
         if (!$scope.formErrors) $scope.formErrors = {};
-        var pct = Number($scope.formData.discountPct);
-        if (!isFinite(pct)) {
-          $scope.formErrors.discountPct = 'Mức giảm phải là số';
-        } else if (pct < 0.01) {
-          $scope.formErrors.discountPct = 'Mức giảm tối thiểu là 0.01%';
-        } else if (pct > 99.99) {
-          $scope.formErrors.discountPct = 'Mức giảm tối đa là 99.99%';
-        } else if (pct % 0.01 !== 0) {
-          $scope.formErrors.discountPct = 'Mức giảm chỉ được nhập đến 2 chữ số thập phân';
+        var pctNum = Number($scope.formData.discountPct);
+        var pctStr = String($scope.formData.discountPct || '').trim();
+        var isInteger = /^\d+$/.test(pctStr);
+        if (!isFinite(pctNum) || !isInteger) {
+          $scope.formErrors.discountPct = 'Mức giảm phải là số nguyên từ 1 đến 100';
+        } else if (pctNum < 1 || pctNum > 100) {
+          $scope.formErrors.discountPct = 'Mức giảm phải trong khoảng 1% - 100%';
         } else {
           $scope.formErrors.discountPct = null;
         }
@@ -198,9 +196,9 @@ app.controller('AdminPromotionsController', [
         var errs = {};
         if (!$scope.formData.name || !$scope.formData.name.trim()) errs.name = 'Vui lòng nhập tên khuyến mãi';
         var pct = Number($scope.formData.discountPct);
-        if (!isFinite(pct)) errs.discountPct = 'Mức giảm phải là số';
-        else if (pct < 0.01 || pct > 99.99) errs.discountPct = 'Mức giảm phải trong khoảng 0.01% - 99.99%';
-        else if (pct % 0.01 !== 0) errs.discountPct = 'Mức giảm chỉ được nhập đến 2 chữ số thập phân';
+        var pctStr = String($scope.formData.discountPct || '').trim();
+        if (!isFinite(pct) || !/^\d+$/.test(pctStr)) errs.discountPct = 'Mức giảm phải là số nguyên từ 1 đến 100';
+        else if (pct < 1 || pct > 100) errs.discountPct = 'Mức giảm phải trong khoảng 1% - 100%';
         var s = toDateOnlyStringUTC($scope.formData.startDate);
         var e = toDateOnlyStringUTC($scope.formData.endDate);
         if (!s) errs.startDate = 'Vui lòng chọn ngày bắt đầu';
@@ -292,7 +290,9 @@ app.controller('AdminPromotionsController', [
       // ---- Form actions ----
       $scope.showAddForm = function(){
         $scope.formErrors = {};
-        $scope.formData = { name:'', description:'', discountPct:0.01, startDate:null, endDate:null, bookIsbns:[] };
+        $scope.formData = { name:'', description:'', discountPct:1, startDate:null, endDate:null, bookIsbns:[] };
+        // Clear any previous edit context to ensure CREATE flow
+        $scope._originalPromotion = null;
         $scope.editingPromotion = { books: [] }; // allow preview table in Add mode và để ng-if="editingPromotion" hoạt động
         $timeout(function(){ var m=getPromotionModal(); if (m) m.show(); }, 0);
         $scope.bookPicker.searchTerm = '';
@@ -420,6 +420,40 @@ app.controller('AdminPromotionsController', [
       $scope.togglePickBook = function(isbn){
         if (!$scope.bookPicker.selected) $scope.bookPicker.selected = {};
         $scope.bookPicker.selected[isbn] = !$scope.bookPicker.selected[isbn];
+      };
+
+      $scope.selectAllBooksInPicker = function(){
+        if (!$scope.bookPicker) return;
+        if (!$scope.bookPicker.selected) $scope.bookPicker.selected = {};
+        ($scope.bookPicker.books || []).forEach(function(b){
+          if (b && b.isbn) {
+            $scope.bookPicker.selected[b.isbn] = true;
+          }
+        });
+        // ensure UI updates immediately
+        try { $scope.$applyAsync(); } catch(e) {}
+      };
+
+      $scope.clearAllBooksInPicker = function(){
+        if (!$scope.bookPicker || !$scope.bookPicker.selected) return;
+        ($scope.bookPicker.books || []).forEach(function(b){
+          if (b && b.isbn) {
+            $scope.bookPicker.selected[b.isbn] = false;
+          }
+        });
+        try { $scope.$applyAsync(); } catch(e) {}
+      };
+
+      $scope.isAllBooksSelectedInPicker = function(){
+        var books = ($scope.bookPicker && $scope.bookPicker.books) ? $scope.bookPicker.books : [];
+        if (!books.length) return false;
+        var sel = $scope.bookPicker.selected || {};
+        for (var i = 0; i < books.length; i++) {
+          var b = books[i];
+          if (!b || !b.isbn) continue;
+          if (!sel[b.isbn]) return false;
+        }
+        return true;
       };
   
       // Try to resolve full book details for preview

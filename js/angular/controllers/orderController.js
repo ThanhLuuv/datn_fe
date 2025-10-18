@@ -1,7 +1,7 @@
 // Customer Order Controllers
 
 // Admin Orders Controller
-app.controller('AdminOrdersController', ['$scope', '$rootScope', 'BookstoreService', 'AuthService', '$location', '$route', function($scope, $rootScope, BookstoreService, AuthService, $location, $route) {
+app.controller('AdminOrdersController', ['$scope', '$rootScope', 'BookstoreService', 'AuthService', '$location', '$route', '$timeout', function($scope, $rootScope, BookstoreService, AuthService, $location, $route, $timeout) {
 	if (!AuthService.isAdminOrTeacher()) {
 		$location.path('/home');
 		return;
@@ -17,6 +17,7 @@ app.controller('AdminOrdersController', ['$scope', '$rootScope', 'BookstoreServi
 	$scope.orders = [];
     $scope.selectedOrder = null;
     $rootScope.selectedOrder = null;
+    $rootScope.selectedInvoice = null;
     $scope.deliveryCandidates = [];
     $scope.deliveryDateInput = '';
     $scope.candidatesLoading = false;
@@ -172,6 +173,17 @@ $scope.viewOrder = function(order){
     // Show immediately with list data
     $scope.selectedOrder = angular.copy(order || {});
     $rootScope.selectedOrder = $scope.selectedOrder;
+    
+    // Clean up any existing modals before opening new one
+    document.querySelectorAll('.modal-backdrop').forEach(function (b) {
+        try { b.parentNode.removeChild(b); } catch(e){}
+    });
+    
+    // Move modal to body if needed
+    var modalEl = document.getElementById('orderDetailModal');
+    if (modalEl && modalEl.parentNode !== document.body) {
+        document.body.appendChild(modalEl);
+    }
     // Load candidates immediately on open
     var curId = ($scope.selectedOrder.orderId || $scope.selectedOrder.id);
     if (curId && $scope.getOrderStatus($scope.selectedOrder) === 'PendingConfirmation') {
@@ -515,6 +527,127 @@ $scope.submitReturn = function(){
 		$scope.currentPage = 1;
 		$scope.loadOrders();
 	};
+
+	// Invoice functions
+	$scope.viewInvoice = function(order) {
+		// Kiểm tra điều kiện: phải có invoice và đã thanh toán
+		if (!order || !order.invoice || order.invoice.paymentStatus !== 'PAID') {
+			$scope.addToast('warning', 'Chỉ có thể xem hóa đơn của đơn hàng đã thanh toán');
+			return;
+		}
+		
+		$scope.selectedOrder = order;
+		$rootScope.selectedOrder = order;
+		$rootScope.selectedInvoice = order.invoice;
+
+		// Đảm bảo chạy sau khi scope cập nhật
+		$scope.$evalAsync(function () {
+			$timeout(function () {
+				var el = document.getElementById('invoiceModal');
+				if (!el) return;
+
+				try {
+					// 1) Gỡ mọi backdrop cũ (nếu có)
+					document.querySelectorAll('.modal-backdrop').forEach(function (b) {
+						try { b.parentNode.removeChild(b); } catch(e){}
+					});
+
+					// 2) Đưa modal về trực tiếp dưới <body> để tránh stacking context
+					if (el.parentNode !== document.body) {
+						document.body.appendChild(el);
+					}
+
+					// 3) LẤY/TAO instance chuẩn Bootstrap và show
+					if (window.bootstrap && window.bootstrap.Modal) {
+						var modal = bootstrap.Modal.getOrCreateInstance(el, {
+							backdrop: true,   // để Bootstrap tự quản lý backdrop
+							keyboard: true,
+							focus: true
+						});
+						modal.show();
+					} else if (window.$) {
+						// Fallback jQuery nếu cần
+						$(el).modal('show');
+					}
+				} catch (e) {
+					console.error('Error opening invoice modal:', e);
+					// Fallback rất cuối
+					el.classList.add('show');
+					el.style.display = 'block';
+				}
+			}, 0);
+		});
+	};
+
+	$scope.printInvoice = function() {
+		var printContent = document.getElementById('invoiceContent');
+		var originalContent = document.body.innerHTML;
+		
+		// Create a new window for printing
+		var printWindow = window.open('', '_blank');
+		printWindow.document.write(`
+			<html>
+				<head>
+					<title>Hóa đơn - ${$rootScope.selectedOrder ? 'OD-' + ($rootScope.selectedOrder.orderId || $rootScope.selectedOrder.id) : 'N/A'}</title>
+					<style>
+						body { font-family: 'Times New Roman', serif; margin: 0; padding: 20px; }
+						.invoice-container { background: white; padding: 30px; line-height: 1.4; }
+						.invoice-header { border-bottom: 3px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
+						.company-name { font-size: 20px; font-weight: bold; color: #2c3e50; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+						.company-info p { margin: 5px 0; font-size: 12px; color: #555; }
+						.invoice-title { font-size: 24px; font-weight: bold; color: #e74c3c; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; }
+						.invoice-meta p { margin: 8px 0; font-size: 12px; color: #333; }
+						.invoice-body h4 { font-size: 16px; font-weight: bold; color: #2c3e50; margin-bottom: 15px; border-bottom: 2px solid #3498db; padding-bottom: 5px; }
+						.customer-info p, .payment-info p { margin: 8px 0; font-size: 12px; color: #555; }
+						.invoice-table { margin: 20px 0; border-collapse: collapse; width: 100%; }
+						.invoice-table th { background-color: #34495e; color: white; font-weight: bold; padding: 8px; font-size: 12px; border: 1px solid #2c3e50; }
+						.invoice-table td { padding: 8px; border: 1px solid #bdc3c7; font-size: 12px; }
+						.invoice-table tbody tr:nth-child(even) { background-color: #f8f9fa; }
+						.invoice-summary { margin-top: 30px; }
+						.invoice-summary table { border-collapse: collapse; width: 100%; }
+						.invoice-summary td { padding: 6px 12px; border: 1px solid #bdc3c7; font-size: 12px; }
+						.total-row { background-color: #3498db !important; color: white !important; font-size: 14px !important; }
+						.total-row td { border-color: #2980b9 !important; }
+						.invoice-footer { margin-top: 40px; padding-top: 20px; border-top: 2px solid #bdc3c7; }
+						.invoice-footer p { margin: 10px 0; font-size: 12px; color: #555; }
+						.badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; }
+						.bg-danger { background-color: #dc3545 !important; color: white !important; }
+						.bg-success { background-color: #198754 !important; color: white !important; }
+						.bg-warning { background-color: #ffc107 !important; color: #000 !important; }
+						.bg-info { background-color: #0dcaf0 !important; color: #000 !important; }
+					</style>
+				</head>
+				<body>
+					${printContent.innerHTML}
+				</body>
+			</html>
+		`);
+		printWindow.document.close();
+		printWindow.focus();
+		printWindow.print();
+		printWindow.close();
+	};
+
+	$scope.downloadInvoice = function() {
+		// For now, just trigger print - in a real app, you'd generate PDF server-side
+		$scope.printInvoice();
+		$scope.addToast('info', 'Chức năng tải PDF sẽ được phát triển trong phiên bản tiếp theo');
+	};
+
+	// Close modal and cleanup
+	$scope.closeInvoiceModal = function () {
+		var el = document.getElementById('invoiceModal');
+		if (!el) return;
+		try {
+			var modal = bootstrap && bootstrap.Modal ? bootstrap.Modal.getOrCreateInstance(el) : null;
+			if (modal) { modal.hide(); return; }
+		} catch(e){}
+		// fallback
+		el.style.display = 'none';
+		el.classList.remove('show');
+		document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+	};
+
 
 	$scope.onPageChange = function(page){
 		$scope.currentPage = page;

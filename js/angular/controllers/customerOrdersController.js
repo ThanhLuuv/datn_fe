@@ -16,6 +16,10 @@ app.controller('CustomerOrdersController', ['$scope', '$rootScope', 'BookstoreSe
     };
     $scope.returnLoading = false;
     $scope.toasts = [];
+    $scope.reviewModel = { isbn: '', stars: 5, comment: '' };
+    $scope.reviewLines = [];
+    $scope.submittingReview = false;
+    $scope.reviewHint = 'Mỗi đơn chỉ có thể đánh giá những sách đã mua và giao thành công.';
 
     // Load customer orders
     $scope.loadOrders = function() {
@@ -140,6 +144,69 @@ app.controller('CustomerOrdersController', ['$scope', '$rootScope', 'BookstoreSe
                 if (el.showModal) el.showModal();
             }
         }, 0);
+    };
+
+    // Resolve line title robustly
+    $scope.getLineTitle = function(line) {
+        if (!line) return '';
+        return (
+            line.bookTitle ||
+            line.bookName ||
+            line.title ||
+            (line.book && (line.book.bookTitle || line.book.title)) ||
+            ''
+        );
+    };
+
+    // Open review modal for delivered order
+    $scope.openReview = function(order) {
+        if ($scope.getStatusText(order.status) !== 'Đã giao') {
+            $scope.addToast('warning', 'Chỉ đánh giá đơn đã giao thành công');
+            return;
+        }
+        $scope.selectedOrder = angular.copy(order);
+        $scope.reviewLines = (order.lines || []).map(function(line){
+            return {
+                isbn: line.isbn,
+                bookTitle: line.bookTitle || line.title || ('ISBN ' + line.isbn)
+            };
+        });
+        if ($scope.reviewLines.length > 0) {
+            $scope.reviewModel.isbn = $scope.reviewLines[0].isbn;
+        }
+        $scope.reviewModel.stars = 5;
+        $scope.reviewModel.comment = '';
+        setTimeout(function(){
+            var el = document.getElementById('reviewModal');
+            if (!el) return;
+            try { var modal = bootstrap && bootstrap.Modal ? bootstrap.Modal.getOrCreateInstance(el) : null; if (modal) modal.show(); } catch(e) { if (el.showModal) el.showModal(); }
+        },0);
+    };
+
+    $scope.setStars = function(s) { $scope.reviewModel.stars = s; };
+
+    // Submit review
+    $scope.submitReview = function() {
+        if (!$scope.reviewModel.isbn || !$scope.reviewModel.stars) {
+            $scope.addToast('warning', 'Vui lòng chọn sản phẩm và số sao');
+            return;
+        }
+        var payload = {
+            isbn: $scope.reviewModel.isbn,
+            stars: $scope.reviewModel.stars,
+            comment: ($scope.reviewModel.comment || '').trim()
+        };
+        $scope.submittingReview = true;
+        BookstoreService.createOrUpdateRating(payload).then(function(){
+            $scope.addToast('success', 'Đã gửi đánh giá thành công');
+            setTimeout(function(){
+                var el = document.getElementById('reviewModal');
+                if (!el) return; try { var modal = bootstrap && bootstrap.Modal ? bootstrap.Modal.getInstance(el) : null; if (modal) modal.hide(); } catch(e) { if (el.close) el.close(); }
+            },0);
+        }).catch(function(err){
+            var msg = (err && err.data && err.data.message) || 'Không thể gửi đánh giá';
+            $scope.addToast('danger', msg);
+        }).finally(function(){ $scope.submittingReview = false; $scope.$applyAsync(); });
     };
 
     // Return order function
