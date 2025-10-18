@@ -24,6 +24,7 @@ app.controller('AdminRevenueReportController', ['$scope', 'BookstoreService', 'A
 	$scope.report = null;
 	$scope.chart = null;
 	$scope.now = new Date();
+	$scope.downloadingPDF = false;
 
 	$scope.toasts = [];
 	$scope.addToast = function(variant, message) {
@@ -187,6 +188,118 @@ app.controller('AdminRevenueReportController', ['$scope', 'BookstoreService', 'A
 			return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount || 0);
 		} catch(e) { return amount; }
 	};
+
+	// Download PDF report
+	$scope.downloadPDF = function() {
+		if (!$scope.report || !$scope.report.items || $scope.report.items.length === 0) {
+			$scope.addToast('danger', 'Không có dữ liệu để tải');
+			return;
+		}
+
+		$scope.downloadingPDF = true;
+		
+		try {
+			// Create HTML content for PDF
+			var htmlContent = generateRevenuePDFContent();
+			
+			// Create blob and download
+			var blob = new Blob([htmlContent], { type: 'text/html' });
+			var url = URL.createObjectURL(blob);
+			
+			// Create download link
+			var link = document.createElement('a');
+			link.href = url;
+			link.download = 'bao-cao-doanh-thu-' + $scope.filters.fromDate + '-to-' + $scope.filters.toDate + '.html';
+			
+			// Trigger download
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+			
+			// Cleanup
+			URL.revokeObjectURL(url);
+			
+			$scope.addToast('success', 'Tải báo cáo thành công');
+		} catch (error) {
+			console.error('Error downloading PDF:', error);
+			$scope.addToast('danger', 'Có lỗi xảy ra khi tải báo cáo');
+		} finally {
+			$scope.downloadingPDF = false;
+		}
+	};
+
+	// Generate PDF content for revenue report
+	function generateRevenuePDFContent() {
+		var fromDate = new Date($scope.filters.fromDate).toLocaleDateString('vi-VN');
+		var toDate = new Date($scope.filters.toDate).toLocaleDateString('vi-VN');
+		var currentDate = new Date().toLocaleDateString('vi-VN');
+		var currentTime = new Date().toLocaleTimeString('vi-VN');
+		var modeText = $scope.mode === 'daily' ? 'Theo ngày' : ($scope.mode === 'monthly' ? 'Theo tháng' : 'Theo quý');
+		
+		var html = '<!DOCTYPE html>';
+		html += '<html><head>';
+		html += '<meta charset="UTF-8">';
+		html += '<title>Báo cáo doanh thu - ' + fromDate + ' đến ' + toDate + '</title>';
+		html += '<style>';
+		html += 'body { font-family: Arial, sans-serif; margin: 20px; color: #000; }';
+		html += 'h1 { text-align: center; margin-bottom: 30px; font-size: 24px; }';
+		html += 'table { width: 100%; border-collapse: collapse; margin-top: 20px; }';
+		html += 'th, td { border: 1px solid #000; padding: 8px; text-align: left; }';
+		html += 'th { background-color: #f5f5f5; font-weight: bold; }';
+		html += '.header-info { margin-bottom: 20px; }';
+		html += '.summary { margin-bottom: 20px; padding: 15px; border: 1px solid #000; }';
+		html += '.footer { margin-top: 30px; font-size: 12px; }';
+		html += '.text-right { text-align: right; }';
+		html += '.text-center { text-align: center; }';
+		html += '</style></head><body>';
+		
+		// Header
+		html += '<h1>BÁO CÁO DOANH THU</h1>';
+		html += '<div class="header-info">';
+		html += '<div><strong>Khoảng thời gian:</strong> ' + fromDate + ' - ' + toDate + '</div>';
+		html += '<div><strong>Chế độ:</strong> ' + modeText + '</div>';
+		html += '<div><strong>Ngày tạo:</strong> ' + currentDate + ' ' + currentTime + '</div>';
+		html += '</div>';
+		
+		// Summary
+		html += '<div class="summary">';
+		html += '<div><strong>Tổng doanh thu:</strong> ' + $scope.formatCurrency($scope.report.totalRevenue || 0) + '</div>';
+		html += '<div><strong>Số lượng bản ghi:</strong> ' + ($scope.report.items ? $scope.report.items.length : 0) + '</div>';
+		html += '</div>';
+		
+		// Table
+		html += '<table>';
+		html += '<thead>';
+		html += '<tr>';
+		html += '<th class="text-center">Thời gian</th>';
+		html += '<th class="text-right">Doanh thu</th>';
+		html += '</tr>';
+		html += '</thead>';
+		html += '<tbody>';
+		
+		if ($scope.report.items && $scope.report.items.length > 0) {
+			$scope.report.items.forEach(function(item) {
+				html += '<tr>';
+				html += '<td>' + $scope.displayPeriod(item) + '</td>';
+				html += '<td class="text-right">' + $scope.formatCurrency(item.revenue || item.totalRevenue || 0) + '</td>';
+				html += '</tr>';
+			});
+		}
+		
+		html += '</tbody>';
+		html += '</table>';
+		
+		// Footer
+		html += '<div class="footer">';
+		html += '<div><strong>Ghi chú:</strong> Báo cáo doanh thu được tính toán dựa trên khoảng thời gian từ ' + fromDate + ' đến ' + toDate + '</div>';
+		html += '<div><strong>Đơn vị:</strong> Doanh thu tính theo VND</div>';
+		html += '<div class="text-right">Hệ thống quản lý nhà sách - ' + currentDate + ' ' + currentTime + '</div>';
+		html += '</div>';
+		
+		html += '</body></html>';
+		
+		return html;
+	}
 
 	// Initialize chart then auto-load current month revenue
 	setTimeout(function(){

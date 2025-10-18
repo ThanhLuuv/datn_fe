@@ -48,6 +48,7 @@
                                     <th>Lý do</th>
                                     <th>Trạng thái</th>
                                     <th>Ngày tạo</th>
+                                    <th>Người xử lý</th>
                                     <th class="text-end">Tổng tiền</th>
                                     <th class="text-end">Thao tác</th>
                                 </tr>
@@ -58,9 +59,13 @@
                                     <td><code>{{r.invoiceId}}</code></td>
                                     <td class="text-truncate" style="max-width:260px">{{r.reason || '—'}}</td>
                                     <td>
-                                        <span ng-class="getStatusClass(r.status)">{{getStatusText(r.status)}}</span>
+                                        <span ng-class="getStatusClass(r.status)">{{r.statusText || getStatusText(r.status)}}</span>
                                     </td>
                                     <td>{{r.createdAt | date:'yyyy-MM-dd HH:mm'}}</td>
+                                    <td>
+                                        <span ng-if="r.processedByEmployeeName">{{r.processedByEmployeeName}}</span>
+                                        <span ng-if="!r.processedByEmployeeName" class="text-muted">—</span>
+                                    </td>
                                     <td class="text-end">{{r.totalAmount | numberFormatted}} ₫</td>
                                     <td class="text-end">
                                         <div class="btn-group btn-group-sm">
@@ -83,7 +88,7 @@
                                     </td>
                                 </tr>
                                 <tr ng-if="!loading && returns.length === 0">
-                                    <td colspan="7" class="text-center py-3">Chưa có phiếu trả nào</td>
+                                    <td colspan="8" class="text-center py-3">Chưa có phiếu trả nào</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -204,10 +209,6 @@
                                     <input class="form-check-input" type="checkbox" id="applyDeduct" ng-model="returnForm.applyDeduction" ng-change="recomputeRefund()">
                                     <label class="form-check-label" for="applyDeduct">Khấu trừ 10% (hàng không còn nguyên)</label>
                                 </div>
-                                <div class="form-check mt-2">
-                                    <input class="form-check-input" type="checkbox" id="createPayout" ng-model="returnForm.createPayout">
-                                    <label class="form-check-label" for="createPayout">Lập phiếu chi hoàn tiền</label>
-                                </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="card">
@@ -256,7 +257,7 @@
                             <tbody>
                                 <tr>
                                     <td>Mã phiếu</td>
-                                    <td class="text-end"><code>{{selectedReturn.returnId}}</code></td>
+                                    <td class="text-end"><code>RT-{{selectedReturn.returnId}}</code></td>
                                 </tr>
                                 <tr>
                                     <td>Invoice</td>
@@ -267,12 +268,38 @@
                                     <td class="text-end">{{selectedReturn.createdAt | date:'yyyy-MM-dd HH:mm'}}</td>
                                 </tr>
                                 <tr>
+                                    <td>Trạng thái</td>
+                                    <td class="text-end">
+                                        <span ng-class="getStatusClass(selectedReturn.status)">{{selectedReturn.statusText || getStatusText(selectedReturn.status)}}</span>
+                                    </td>
+                                </tr>
+                                <tr ng-if="selectedReturn.processedByEmployeeName">
+                                    <td>Người xử lý</td>
+                                    <td class="text-end">{{selectedReturn.processedByEmployeeName}}</td>
+                                </tr>
+                                <tr ng-if="selectedReturn.processedAt">
+                                    <td>Ngày xử lý</td>
+                                    <td class="text-end">{{selectedReturn.processedAt | date:'yyyy-MM-dd HH:mm'}}</td>
+                                </tr>
+                                <tr>
                                     <td>Lý do</td>
                                     <td class="text-end">{{selectedReturn.reason || '—'}}</td>
+                                </tr>
+                                <tr ng-if="selectedReturn.notes">
+                                    <td>Ghi chú</td>
+                                    <td class="text-end">{{selectedReturn.notes}}</td>
                                 </tr>
                                 <tr>
                                     <td>Tổng tiền</td>
                                     <td class="text-end"><strong>{{selectedReturn.totalAmount | numberFormatted}} ₫</strong></td>
+                                </tr>
+                                <tr ng-if="selectedReturn.applyDeduction">
+                                    <td>Khấu trừ {{selectedReturn.deductionPercent}}%</td>
+                                    <td class="text-end text-danger">-{{selectedReturn.deductionAmount | numberFormatted}} ₫</td>
+                                </tr>
+                                <tr ng-if="selectedReturn.finalAmount !== undefined">
+                                    <td>Số tiền cuối</td>
+                                    <td class="text-end"><strong class="text-success">{{selectedReturn.finalAmount | numberFormatted}} ₫</strong></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -308,6 +335,7 @@
                             <table class="table table-sm">
                                 <thead class="table-light">
                                     <tr>
+                                        <th>Mã dòng</th>
                                         <th>ISBN</th>
                                         <th>Tên sách</th>
                                         <th class="text-end">SL trả</th>
@@ -317,6 +345,7 @@
                                 </thead>
                                 <tbody>
                                     <tr ng-repeat="l in (selectedReturn.lines || [])">
+                                        <td class="text-nowrap"><code>{{l.returnLineId}}</code></td>
                                         <td class="text-nowrap"><code>{{l.isbn}}</code></td>
                                         <td class="text-truncate" style="max-width: 280px">{{l.bookTitle}}</td>
                                         <td class="text-end">{{l.qtyReturned}}</td>

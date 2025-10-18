@@ -108,6 +108,9 @@
                             <button type="button" class="btn btn-sm btn-outline-primary" ng-click="exportToExcel()" ng-disabled="!inventoryData || !inventoryData.items || inventoryData.items.length === 0">
                                 <i class="bi bi-download"></i> Xuất Excel
                             </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#inventoryReportModal" ng-disabled="!inventoryData || !inventoryData.items || inventoryData.items.length === 0">
+                                <i class="bi bi-file-earmark-text"></i> Xem báo cáo
+                            </button>
                             <button type="button" class="btn btn-sm btn-outline-secondary" ng-click="printReport()" ng-disabled="!inventoryData || !inventoryData.items || inventoryData.items.length === 0">
                                 <i class="bi bi-printer"></i> In báo cáo
                             </button>
@@ -206,14 +209,26 @@
                         </div>
                     </div>
                     <div class="card-footer bg-light" ng-if="inventoryData && inventoryData.items && inventoryData.items.length > 0">
-                        <div class="row">
-                            <div class="col-md-6">
+                        <div class="row align-items-center">
+                            <div class="col-md-3">
                                 <small class="text-muted">
                                     <i class="bi bi-info-circle me-1"></i>
                                     Tổng số sách: <strong>{{inventoryData.items.length}}</strong>
                                 </small>
                             </div>
-                            <div class="col-md-6 text-end">
+                            <div class="col-md-3">
+                                <small class="text-muted">
+                                    <i class="bi bi-box me-1"></i>
+                                    Tổng số lượng: <strong>{{getTotalQuantity()}}</strong>
+                                </small>
+                            </div>
+                            <div class="col-md-3">
+                                <small class="text-muted">
+                                    <i class="bi bi-currency-dollar me-1"></i>
+                                    Tổng giá trị: <strong>{{getTotalValue() | currency:'VND '}}</strong>
+                                </small>
+                            </div>
+                            <div class="col-md-3 text-end">
                                 <small class="text-muted">
                                     <i class="bi bi-calendar me-1"></i>
                                     Báo cáo ngày: <strong>{{reportDate}}</strong>
@@ -455,3 +470,100 @@
         </div>
     </div>
 </div>
+
+<!-- Inventory Report Modal -->
+<div class="modal fade" id="inventoryReportModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-file-earmark-text"></i> Báo cáo tồn kho</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Report Header -->
+                <div class="mb-4">
+                    <div class="text-center mb-3">
+                        <h4 class="mb-0">BÁO CÁO TỒN KHO</h4>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="small">
+                                <div><strong>Ngày báo cáo:</strong> {{reportDate | date:'dd/MM/yyyy'}}</div>
+                                <div><strong>Ngày tạo:</strong> {{now | date:'dd/MM/yyyy HH:mm'}}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <div class="small">
+                                <div><strong>Người tạo:</strong> {{currentUser && currentUser.email || 'N/A'}}</div>
+                                <div><strong>Tổng giá trị:</strong> {{getTotalValue() | currency:'VND '}}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Table -->
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th class="text-center" style="width: 50px;">#</th>
+                                <th class="text-center">Danh mục</th>
+                                <th class="text-center">ISBN</th>
+                                <th class="text-center">Tên sách</th>
+                                <th class="text-center">Số lượng tồn kho</th>
+                                <th class="text-center">Giá trung bình</th>
+                                <th class="text-center">Giá trị tồn kho</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in inventoryData.items track by $index">
+                                <td class="text-center">{{$index + 1}}</td>
+                                <td class="text-center">{{item.category}}</td>
+                                <td class="text-center">{{item.isbn}}</td>
+                                <td>{{item.title}}</td>
+                                <td class="text-center">{{item.quantityOnHand}}</td>
+                                <td class="text-end">{{item.averagePrice | currency:'VND '}}</td>
+                                <td class="text-end">{{(item.quantityOnHand * item.averagePrice) | currency:'VND '}}</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="4" class="text-end">TỔNG CỘNG:</th>
+                                <th class="text-center">{{getTotalQuantity()}}</th>
+                                <th class="text-end">{{getAveragePrice() | currency:'VND '}}</th>
+                                <th class="text-end"><strong>{{getTotalValue() | currency:'VND '}}</strong></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <!-- Report Footer -->
+                <div class="mt-4 pt-3 border-top">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="small">
+                                <div><strong>Ghi chú:</strong> Báo cáo tồn kho được tính toán dựa trên số liệu tại ngày {{reportDate | date:'dd/MM/yyyy'}}</div>
+                                <div><strong>Đơn vị:</strong> Số lượng tính theo quyển, giá trị tính theo VND</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <div class="small">
+                                <div>Hệ thống quản lý nhà sách</div>
+                                <div>{{now | date:'dd/MM/yyyy HH:mm'}}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" ng-click="downloadPDF()" ng-disabled="downloadingPDF">
+                    <span ng-if="downloadingPDF" class="spinner-border spinner-border-sm me-2"></span>
+                    <i class="bi bi-download" ng-if="!downloadingPDF"></i> 
+                    {{downloadingPDF ? 'Đang tải...' : 'Tải báo cáo'}}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+

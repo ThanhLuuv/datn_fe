@@ -13,6 +13,10 @@ app.controller('AdminInventoryReportController', ['$scope', 'BookstoreService', 
     $scope.loading = false;
     $scope.error = null;
     $scope.success = null;
+    $scope.now = new Date();
+    $scope.currentUser = AuthService.getCurrentUser();
+    $scope.downloadingPDF = false;
+    $scope.toasts = [];
 
     // Set default date to today
     var today = new Date();
@@ -33,14 +37,14 @@ app.controller('AdminInventoryReportController', ['$scope', 'BookstoreService', 
             .then(function(response) {
                 if (response.data && response.data.success) {
                     $scope.inventoryData = response.data.data;
-                    $scope.success = 'Tải báo cáo tồn kho thành công';
+                    $scope.addToast('success', 'Tải báo cáo tồn kho thành công');
                 } else {
-                    $scope.error = response.data.message || 'Có lỗi xảy ra khi tải báo cáo';
+                    $scope.addToast('danger', response.data.message || 'Có lỗi xảy ra khi tải báo cáo');
                 }
             })
             .catch(function(error) {
                 console.error('Error loading inventory report:', error);
-                $scope.error = 'Có lỗi xảy ra khi tải báo cáo tồn kho';
+                $scope.addToast('danger', 'Có lỗi xảy ra khi tải báo cáo tồn kho');
             })
             .finally(function() {
                 $scope.loading = false;
@@ -50,7 +54,7 @@ app.controller('AdminInventoryReportController', ['$scope', 'BookstoreService', 
     // Export to Excel
     $scope.exportToExcel = function() {
         if (!$scope.inventoryData || !$scope.inventoryData.items || $scope.inventoryData.items.length === 0) {
-            $scope.error = 'Không có dữ liệu để xuất';
+            $scope.addToast('danger', 'Không có dữ liệu để xuất');
             return;
         }
 
@@ -72,32 +76,128 @@ app.controller('AdminInventoryReportController', ['$scope', 'BookstoreService', 
         link.click();
         document.body.removeChild(link);
         
-        $scope.success = 'Xuất file thành công';
+        $scope.addToast('success', 'Xuất file thành công');
     };
 
-    // Print report
-    $scope.printReport = function() {
+    // Download PDF report
+    $scope.downloadPDF = function() {
         if (!$scope.inventoryData || !$scope.inventoryData.items || $scope.inventoryData.items.length === 0) {
-            $scope.error = 'Không có dữ liệu để in';
+            $scope.addToast('danger', 'Không có dữ liệu để tải');
             return;
         }
 
-        var printWindow = window.open('', '_blank');
-        var printContent = '<html><head><title>Báo cáo tồn kho - ' + $scope.reportDate + '</title>';
-        printContent += '<style>body{font-family:Arial,sans-serif;margin:20px;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #ddd;padding:8px;text-align:left;}th{background-color:#f2f2f2;}</style></head><body>';
-        printContent += '<h1>Báo cáo tồn kho ngày ' + $scope.reportDate + '</h1>';
-        printContent += '<table><thead><tr><th>Danh mục</th><th>ISBN</th><th>Tên sách</th><th>Số lượng tồn kho</th><th>Giá trung bình</th></tr></thead><tbody>';
+        $scope.downloadingPDF = true;
         
-        $scope.inventoryData.items.forEach(function(item) {
-            printContent += '<tr><td>' + item.category + '</td><td>' + item.isbn + '</td><td>' + item.title + '</td><td>' + item.quantityOnHand + '</td><td>' + formatCurrency(item.averagePrice) + '</td></tr>';
+        try {
+            // Create HTML content for PDF
+            var htmlContent = generatePDFContent();
+            
+            // Create blob and download
+            var blob = new Blob([htmlContent], { type: 'text/html' });
+            var url = URL.createObjectURL(blob);
+            
+            // Create download link
+            var link = document.createElement('a');
+            link.href = url;
+            link.download = 'bao-cao-ton-kho-' + $scope.reportDate + '.html';
+            
+            // Trigger download
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Cleanup
+            URL.revokeObjectURL(url);
+            
+            $scope.addToast('success', 'Tải báo cáo thành công');
+        } catch (error) {
+            console.error('Error downloading PDF:', error);
+            $scope.addToast('danger', 'Có lỗi xảy ra khi tải báo cáo');
+        } finally {
+            $scope.downloadingPDF = false;
+        }
+    };
+
+    // Generate PDF content
+    function generatePDFContent() {
+        var reportDate = new Date($scope.reportDate).toLocaleDateString('vi-VN');
+        var currentDate = new Date().toLocaleDateString('vi-VN');
+        var currentTime = new Date().toLocaleTimeString('vi-VN');
+        
+        var html = '<!DOCTYPE html>';
+        html += '<html><head>';
+        html += '<meta charset="UTF-8">';
+        html += '<title>Báo cáo tồn kho - ' + reportDate + '</title>';
+        html += '<style>';
+        html += 'body { font-family: Arial, sans-serif; margin: 20px; color: #000; }';
+        html += 'h1 { text-align: center; margin-bottom: 30px; font-size: 24px; }';
+        html += 'table { width: 100%; border-collapse: collapse; margin-top: 20px; }';
+        html += 'th, td { border: 1px solid #000; padding: 8px; text-align: left; }';
+        html += 'th { background-color: #f5f5f5; font-weight: bold; }';
+        html += '.header-info { margin-bottom: 20px; }';
+        html += '.footer { margin-top: 30px; font-size: 12px; }';
+        html += '.text-right { text-align: right; }';
+        html += '.text-center { text-align: center; }';
+        html += '</style></head><body>';
+        
+        // Header
+        html += '<h1>BÁO CÁO TỒN KHO</h1>';
+        html += '<div class="header-info">';
+        html += '<div><strong>Ngày báo cáo:</strong> ' + reportDate + '</div>';
+        html += '<div><strong>Ngày tạo:</strong> ' + currentDate + ' ' + currentTime + '</div>';
+        html += '<div><strong>Người tạo:</strong> ' + ($scope.currentUser && $scope.currentUser.email || 'N/A') + '</div>';
+        html += '<div><strong>Tổng giá trị:</strong> ' + formatCurrency($scope.getTotalValue()) + '</div>';
+        html += '</div>';
+        
+        // Table
+        html += '<table>';
+        html += '<thead>';
+        html += '<tr>';
+        html += '<th class="text-center">#</th>';
+        html += '<th class="text-center">Danh mục</th>';
+        html += '<th class="text-center">ISBN</th>';
+        html += '<th>Tên sách</th>';
+        html += '<th class="text-center">Số lượng tồn kho</th>';
+        html += '<th class="text-right">Giá trung bình</th>';
+        html += '<th class="text-right">Giá trị tồn kho</th>';
+        html += '</tr>';
+        html += '</thead>';
+        html += '<tbody>';
+        
+        $scope.inventoryData.items.forEach(function(item, index) {
+            html += '<tr>';
+            html += '<td class="text-center">' + (index + 1) + '</td>';
+            html += '<td class="text-center">' + item.category + '</td>';
+            html += '<td class="text-center">' + item.isbn + '</td>';
+            html += '<td>' + item.title + '</td>';
+            html += '<td class="text-center">' + item.quantityOnHand + '</td>';
+            html += '<td class="text-right">' + formatCurrency(item.averagePrice) + '</td>';
+            html += '<td class="text-right">' + formatCurrency(item.quantityOnHand * item.averagePrice) + '</td>';
+            html += '</tr>';
         });
         
-        printContent += '</tbody></table></body></html>';
+        html += '</tbody>';
+        html += '<tfoot>';
+        html += '<tr>';
+        html += '<th colspan="4" class="text-right">TỔNG CỘNG:</th>';
+        html += '<th class="text-center">' + $scope.getTotalQuantity() + '</th>';
+        html += '<th class="text-right">' + formatCurrency($scope.getAveragePrice()) + '</th>';
+        html += '<th class="text-right">' + formatCurrency($scope.getTotalValue()) + '</th>';
+        html += '</tr>';
+        html += '</tfoot>';
+        html += '</table>';
         
-        printWindow.document.write(printContent);
-        printWindow.document.close();
-        printWindow.print();
-    };
+        // Footer
+        html += '<div class="footer">';
+        html += '<div><strong>Ghi chú:</strong> Báo cáo tồn kho được tính toán dựa trên số liệu tại ngày ' + reportDate + '</div>';
+        html += '<div><strong>Đơn vị:</strong> Số lượng tính theo quyển, giá trị tính theo VND</div>';
+        html += '<div class="text-right">Hệ thống quản lý nhà sách - ' + currentDate + ' ' + currentTime + '</div>';
+        html += '</div>';
+        
+        html += '</body></html>';
+        
+        return html;
+    }
 
     // Format currency helper
     function formatCurrency(amount) {
@@ -106,6 +206,35 @@ app.controller('AdminInventoryReportController', ['$scope', 'BookstoreService', 
             currency: 'VND'
         }).format(amount);
     }
+
+    // Helper functions for modal
+    $scope.getTotalQuantity = function() {
+        if (!$scope.inventoryData || !$scope.inventoryData.items) return 0;
+        return $scope.inventoryData.items.reduce(function(total, item) {
+            return total + (item.quantityOnHand || 0);
+        }, 0);
+    };
+
+    $scope.getTotalValue = function() {
+        if (!$scope.inventoryData || !$scope.inventoryData.items) return 0;
+        return $scope.inventoryData.items.reduce(function(total, item) {
+            return total + ((item.quantityOnHand || 0) * (item.averagePrice || 0));
+        }, 0);
+    };
+
+    $scope.getAveragePrice = function() {
+        if (!$scope.inventoryData || !$scope.inventoryData.items || $scope.inventoryData.items.length === 0) return 0;
+        var totalPrice = $scope.inventoryData.items.reduce(function(total, item) {
+            return total + (item.averagePrice || 0);
+        }, 0);
+        return totalPrice / $scope.inventoryData.items.length;
+    };
+
+    $scope.getQuantityBadgeClass = function(quantity) {
+        if (quantity > 10) return 'bg-success';
+        if (quantity > 0) return 'bg-warning';
+        return 'bg-danger';
+    };
 
     // Clear messages
     $scope.clearError = function() {
@@ -116,6 +245,18 @@ app.controller('AdminInventoryReportController', ['$scope', 'BookstoreService', 
         $scope.success = null;
     };
 
+    // Toast system
+    $scope.addToast = function(variant, message) {
+        var id = Date.now() + Math.random();
+        $scope.toasts.push({ id: id, variant: variant, message: message });
+        setTimeout(function(){
+            $scope.$applyAsync(function(){
+                $scope.toasts = $scope.toasts.filter(function(t){ return t.id !== id; });
+            });
+        }, 4000);
+    };
+
     // Load report on page load
     $scope.loadInventoryReport();
 }]);
+

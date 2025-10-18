@@ -22,8 +22,7 @@ app.controller('AdminReturnsController', ['$scope', 'BookstoreService', 'AuthSer
         invoiceKeyword: '',
         selectedInvoice: null,
         reason: '',
-        applyDeduction: false,
-        createPayout: false
+        applyDeduction: false
     };
     $scope.invoiceSearching = false;
     $scope.invoiceSearched = false;
@@ -37,7 +36,7 @@ app.controller('AdminReturnsController', ['$scope', 'BookstoreService', 'AuthSer
     $scope.refundSummary = { totalSelected: 0, deductionAmount: 0, refundAmount: 0 };
 
     $scope.openCreateReturn = function(){
-        $scope.returnForm = { invoiceKeyword: '', selectedInvoice: null, reason: '', applyDeduction: false, createPayout: false };
+        $scope.returnForm = { invoiceKeyword: '', selectedInvoice: null, reason: '', applyDeduction: false };
         $scope.invoiceSearching = false;
         $scope.invoiceSearched = false;
         $scope.invoiceResults = [];
@@ -195,7 +194,6 @@ app.controller('AdminReturnsController', ['$scope', 'BookstoreService', 'AuthSer
             reason: $scope.returnForm.reason || '',
             applyDeduction: !!$scope.returnForm.applyDeduction,
             deductionPercent: $scope.returnForm.applyDeduction ? 10 : 0,
-            createPayout: !!$scope.returnForm.createPayout,
             lines: ($scope.invoiceDetail.lines || []).filter(function(l){ return l._selected; }).map(function(l){
                 return { isbn: l.isbn, qtyReturned: l._qtyReturn, unitPrice: l.unitPrice };
             })
