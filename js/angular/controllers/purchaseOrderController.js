@@ -440,7 +440,13 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
     // Update line total
     $scope.updateLineTotal = function(index) {
         var line = $scope.purchaseOrderData.lines[index];
-        line.lineTotal = line.qtyOrdered * line.unitPrice;
+        if (!line) return;
+        
+        // Đảm bảo qtyOrdered và unitPrice là số hợp lệ
+        var qty = parseFloat(line.qtyOrdered) || 0;
+        var price = parseFloat(line.unitPrice) || 0;
+        
+        line.lineTotal = qty * price;
         $scope.updateTotal();
     };
 
@@ -490,12 +496,17 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
 
     // Update total
     $scope.updateTotal = function() {
+        if (!$scope.purchaseOrderData || !$scope.purchaseOrderData.lines) return;
+        
         $scope.purchaseOrderData.totalQuantity = 0;
         $scope.purchaseOrderData.totalAmount = 0;
         
         $scope.purchaseOrderData.lines.forEach(function(line) {
-            $scope.purchaseOrderData.totalQuantity += line.qtyOrdered || 0;
-            $scope.purchaseOrderData.totalAmount += line.lineTotal || 0;
+            var qty = parseFloat(line.qtyOrdered) || 0;
+            var lineTotal = parseFloat(line.lineTotal) || 0;
+            
+            $scope.purchaseOrderData.totalQuantity += qty;
+            $scope.purchaseOrderData.totalAmount += lineTotal;
         });
     };
 

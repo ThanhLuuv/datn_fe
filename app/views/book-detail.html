@@ -118,8 +118,10 @@
 
                 <!-- Add to Cart Button -->
                 <div class="action-section mb-4">
-                    <button class="btn btn-primary btn-lg px-4 py-3" ng-click="addToCart()">
-                        <i class="bi bi-cart-plus me-2"></i>Thêm vào giỏ hàng
+                    <button class="btn btn-primary btn-lg px-4 py-3" ng-click="addToCart()" ng-disabled="addingToCart">
+                        <span ng-if="addingToCart" class="spinner-border spinner-border-sm me-2"></span>
+                        <i ng-if="!addingToCart" class="bi bi-cart-plus me-2"></i>
+                        {{addingToCart ? 'Đang thêm...' : 'Thêm vào giỏ hàng'}}
                     </button>
                 </div>
 

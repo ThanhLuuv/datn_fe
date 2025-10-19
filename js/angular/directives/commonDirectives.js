@@ -108,13 +108,20 @@ app.directive('currencyInput', [function(){
         return isNaN(num) ? null : num;
       });
       
-      // Format on blur
+      // Format on blur - chỉ format nếu giá trị là số hợp lệ
       el.on('blur', function(){
         var val = ngModel.$viewValue;
-        if (val && !isNaN(parseFloat(val))) {
-          var formatted = parseFloat(val).toLocaleString('vi-VN');
-          ngModel.$setViewValue(formatted);
-          ngModel.$render();
+        if (val && val.toString().trim() !== '') {
+          // Parse giá trị hiện tại
+          var cleanVal = val.replace(/[^\d.,]/g, '').replace(',', '.');
+          var num = parseFloat(cleanVal);
+          
+          if (!isNaN(num) && num >= 0) {
+            // Chỉ format nếu là số hợp lệ và >= 0
+            var formatted = num.toLocaleString('vi-VN');
+            ngModel.$setViewValue(formatted);
+            ngModel.$render();
+          }
         }
       });
       

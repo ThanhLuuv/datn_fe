@@ -3,6 +3,7 @@ app.controller('BookDetailController', ['$scope', '$routeParams', 'BookstoreServ
     $scope.book = null;
     $scope.loading = true;
     $scope.error = '';
+    $scope.addingToCart = false;
     $scope.ratings = [];
     $scope.ratingsLoading = false;
     $scope.ratingsTotal = 0;
@@ -25,17 +26,43 @@ app.controller('BookDetailController', ['$scope', '$routeParams', 'BookstoreServ
     };
 
     $scope.addToCart = function() {
-        if (!$scope.book) return;
-        CartService.addItem({
-            isbn: $scope.book.isbn,
-            title: $scope.book.title,
-            unitPrice: $scope.getFinalPrice(),
-            imageUrl: $scope.book.imageUrl,
-            qty: 1
-        });
-        if (window.showNotification) {
-            window.showNotification('Đã thêm "' + $scope.book.title + '" vào giỏ', 'success');
+        if (!$scope.book || !$scope.book.isbn) {
+            if (window.showNotification) {
+                window.showNotification('Thông tin sách không hợp lệ', 'danger');
+            }
+            return;
         }
+
+        $scope.addingToCart = true;
+        CartService.addToCart($scope.book.isbn, 1)
+            .then(function(response) {
+                if (response && response.data && response.data.success) {
+                    if (window.showNotification) {
+                        window.showNotification('Đã thêm "' + $scope.book.title + '" vào giỏ hàng', 'success');
+                    }
+                    // Update cart count
+                    $scope.$emit('cart:changed');
+                } else {
+                    if (window.showNotification) {
+                        window.showNotification('Không thể thêm vào giỏ hàng', 'warning');
+                    }
+                }
+            })
+            .catch(function(error) {
+                console.error('Add to cart error:', error);
+                if (error.data && error.data.message) {
+                    if (window.showNotification) {
+                        window.showNotification(error.data.message, 'danger');
+                    }
+                } else {
+                    if (window.showNotification) {
+                        window.showNotification('Không thể thêm vào giỏ hàng', 'danger');
+                    }
+                }
+            })
+            .finally(function() {
+                $scope.addingToCart = false;
+            });
     };
 
     function load() {
