@@ -93,8 +93,8 @@
                                             </td>
                                             <td class="py-4 text-center">
                                                 <span class="cart-item-price">{{ (item.discountedPrice || item.currentPrice || item.unitPrice) | numberFormatted }} ₫</span>
-                                                <div ng-if="item.hasPromotion && item.unitPrice !== item.discountedPrice" class="mt-1">
-                                                    <small class="text-muted text-decoration-line-through">{{ item.unitPrice | numberFormatted }} ₫</small>
+                                                <div ng-if="item.hasPromotion && item.discountedPrice && item.currentPrice && item.currentPrice !== item.discountedPrice" class="mt-1">
+                                                    <small class="text-muted text-decoration-line-through">{{ item.currentPrice | numberFormatted }} ₫</small>
                                                 </div>
                                             </td>
                                             <td class="py-4 text-center">

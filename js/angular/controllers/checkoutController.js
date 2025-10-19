@@ -15,7 +15,21 @@ app.controller('CheckoutController', ['$scope', '$location', 'CartService', 'Boo
     $scope.areasLoading = false;
 
     function compute() {
-        // Không cần tính toán gì thêm, chỉ giữ cart.subtotal
+        // Tính lại subtotal để đảm bảo tính toán chính xác
+        recomputeSubtotal();
+    }
+
+    function recomputeSubtotal() {
+        var sum = 0;
+        if ($scope.cart && Array.isArray($scope.cart.items)) {
+            for (var i = 0; i < $scope.cart.items.length; i++) {
+                var it = $scope.cart.items[i];
+                var unit = (it.discountedPrice || it.currentPrice || it.unitPrice) || 0;
+                var lineTotal = it.totalPrice != null ? it.totalPrice : unit * (it.qty || 0);
+                sum += Number(lineTotal) || 0;
+            }
+        }
+        $scope.cart.subtotal = sum;
     }
 
     // Load cart from API to ensure data consistency
