@@ -170,7 +170,7 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th scope="col">#</th>
-                                        <th scope="col">Danh mục</th>
+                                        <th scope="col">Thể loại</th>
                                         <th scope="col">ISBN</th>
                                         <th scope="col">Tên sách</th>
                                         <th scope="col" class="text-end">Số lượng tồn kho</th>
@@ -178,11 +178,18 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr ng-repeat="item in inventoryData.items track by $index">
-                                        <td>{{$index + 1}}</td>
-                                        <td>
-                                            <span class="badge bg-secondary">{{item.category}}</span>
+                                    <tr ng-repeat="group in groupedInventoryData track by group.category">
+                                        <td rowspan="{{group.items.length + 1}}" class="text-center align-middle">
+                                            <strong>{{$index + 1}}</strong>
                                         </td>
+                                        <td rowspan="{{group.items.length + 1}}" class="text-center align-middle">
+                                            <span class="badge bg-primary fs-6">{{group.category}}</span>
+                                        </td>
+                                        <td colspan="4" class="bg-light">
+                                            <strong>Tổng thể loại: {{group.totalQuantity}} quyển - {{group.totalValue | number:0}}</strong>
+                                        </td>
+                                    </tr>
+                                    <tr ng-repeat="item in group.items track by item.isbn">
                                         <td>
                                             <code>{{item.isbn}}</code>
                                         </td>
@@ -195,10 +202,10 @@
                                             </span>
                                         </td>
                                         <td class="text-end">
-                                            <strong>{{item.averagePrice | currency:'VND '}}</strong>
+                                            <strong>{{item.averagePrice | number:0}}</strong>
                                         </td>
                                     </tr>
-                                    <tr ng-if="!inventoryData.items || inventoryData.items.length === 0">
+                                    <tr ng-if="!groupedInventoryData || groupedInventoryData.length === 0">
                                         <td colspan="6" class="text-center text-muted py-4">
                                             <i class="bi bi-inbox display-4 d-block mb-2"></i>
                                             Không có dữ liệu tồn kho cho ngày này
@@ -225,7 +232,7 @@
                             <div class="col-md-3">
                                 <small class="text-muted">
                                     <i class="bi bi-currency-dollar me-1"></i>
-                                    Tổng giá trị: <strong>{{getTotalValue() | currency:'VND '}}</strong>
+                                    Tổng giá trị: <strong>{{getTotalValue() | number:0}}</strong>
                                 </small>
                             </div>
                             <div class="col-md-3 text-end">
@@ -495,7 +502,7 @@
                         <div class="col-md-6 text-end">
                             <div class="small">
                                 <div><strong>Người tạo:</strong> {{currentUser && currentUser.email || 'N/A'}}</div>
-                                <div><strong>Tổng giá trị:</strong> {{getTotalValue() | currency:'VND '}}</div>
+                                <div><strong>Tổng giá trị:</strong> {{getTotalValue() | number:0}}</div>
                             </div>
                         </div>
                     </div>
@@ -507,7 +514,7 @@
                         <thead>
                             <tr>
                                 <th class="text-center" style="width: 50px;">#</th>
-                                <th class="text-center">Danh mục</th>
+                                <th class="text-center">Thể loại</th>
                                 <th class="text-center">ISBN</th>
                                 <th class="text-center">Tên sách</th>
                                 <th class="text-center">Số lượng tồn kho</th>
@@ -516,22 +523,31 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr ng-repeat="item in inventoryData.items track by $index">
-                                <td class="text-center">{{$index + 1}}</td>
-                                <td class="text-center">{{item.category}}</td>
+                            <tr ng-repeat="group in groupedInventoryData track by group.category">
+                                <td rowspan="{{group.items.length + 1}}" class="text-center align-middle">
+                                    <strong>{{$index + 1}}</strong>
+                                </td>
+                                <td rowspan="{{group.items.length + 1}}" class="text-center align-middle">
+                                    <span class="badge bg-primary">{{group.category}}</span>
+                                </td>
+                                <td colspan="5" class="bg-light text-center">
+                                    <strong>Tổng thể loại: {{group.totalQuantity}} quyển - {{group.totalValue | number:0}}</strong>
+                                </td>
+                            </tr>
+                            <tr ng-repeat="item in group.items track by item.isbn">
                                 <td class="text-center">{{item.isbn}}</td>
                                 <td>{{item.title}}</td>
                                 <td class="text-center">{{item.quantityOnHand}}</td>
-                                <td class="text-end">{{item.averagePrice | currency:'VND '}}</td>
-                                <td class="text-end">{{(item.quantityOnHand * item.averagePrice) | currency:'VND '}}</td>
+                                <td class="text-end">{{item.averagePrice | number:0}}</td>
+                                <td class="text-end">{{(item.quantityOnHand * item.averagePrice) | number:0}}</td>
                             </tr>
                         </tbody>
                         <tfoot>
                             <tr>
                                 <th colspan="4" class="text-end">TỔNG CỘNG:</th>
                                 <th class="text-center">{{getTotalQuantity()}}</th>
-                                <th class="text-end">{{getAveragePrice() | currency:'VND '}}</th>
-                                <th class="text-end"><strong>{{getTotalValue() | currency:'VND '}}</strong></th>
+                                <th class="text-end">{{getAveragePrice() | number:0}}</th>
+                                <th class="text-end"><strong>{{getTotalValue() | number:0}}</strong></th>
                             </tr>
                         </tfoot>
                     </table>
@@ -543,7 +559,7 @@
                         <div class="col-md-6">
                             <div class="small">
                                 <div><strong>Ghi chú:</strong> Báo cáo tồn kho được tính toán dựa trên số liệu tại ngày {{reportDate | date:'dd/MM/yyyy'}}</div>
-                                <div><strong>Đơn vị:</strong> Số lượng tính theo quyển, giá trị tính theo VND</div>
+                                <div><strong>Đơn vị:</strong> Số lượng tính theo quyển, giá trị tính theo đơn vị tiền tệ</div>
                             </div>
                         </div>
                         <div class="col-md-6 text-end">

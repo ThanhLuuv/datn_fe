@@ -68,7 +68,7 @@ app.controller('CartController', ['$scope', 'CartService', '$location', function
             for (var i = 0; i < $scope.cart.items.length; i++) {
                 var it = $scope.cart.items[i];
                 var unit = (it.discountedPrice || it.currentPrice || it.unitPrice) || 0;
-                var lineTotal = it.totalPrice != null ? it.totalPrice : unit * (it.qty || 0);
+                var lineTotal = unit * (it.qty || 0);
                 sum += Number(lineTotal) || 0;
             }
         }

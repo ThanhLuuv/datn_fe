@@ -10,6 +10,7 @@ app.controller('AdminInventoryReportController', ['$scope', 'BookstoreService', 
     // Initialize scope variables
     $scope.reportDate = '';
     $scope.inventoryData = null;
+    $scope.groupedInventoryData = null;
     $scope.loading = false;
     $scope.error = null;
     $scope.success = null;
@@ -21,6 +22,49 @@ app.controller('AdminInventoryReportController', ['$scope', 'BookstoreService', 
     // Set default date to today
     var today = new Date();
     $scope.reportDate = today.toISOString().split('T')[0];
+
+    // Gộp dữ liệu theo thể loại
+    $scope.groupInventoryByCategory = function(items) {
+        if (!items || !Array.isArray(items)) return [];
+        
+        var grouped = {};
+        
+        // Nhóm các item theo thể loại
+        items.forEach(function(item) {
+            var category = item.category || 'Không phân loại';
+            if (!grouped[category]) {
+                grouped[category] = {
+                    category: category,
+                    items: [],
+                    totalQuantity: 0,
+                    totalValue: 0,
+                    averagePrice: 0
+                };
+            }
+            
+            grouped[category].items.push(item);
+            grouped[category].totalQuantity += item.quantityOnHand || 0;
+            grouped[category].totalValue += (item.quantityOnHand || 0) * (item.averagePrice || 0);
+        });
+        
+        // Tính giá trung bình cho mỗi thể loại
+        Object.keys(grouped).forEach(function(category) {
+            var group = grouped[category];
+            if (group.items.length > 0) {
+                var totalPrice = group.items.reduce(function(sum, item) {
+                    return sum + (item.averagePrice || 0);
+                }, 0);
+                group.averagePrice = totalPrice / group.items.length;
+            }
+        });
+        
+        // Chuyển đổi thành mảng và sắp xếp theo tên thể loại
+        return Object.keys(grouped).map(function(category) {
+            return grouped[category];
+        }).sort(function(a, b) {
+            return a.category.localeCompare(b.category);
+        });
+    };
 
     // Load inventory report
     $scope.loadInventoryReport = function() {
@@ -37,6 +81,8 @@ app.controller('AdminInventoryReportController', ['$scope', 'BookstoreService', 
             .then(function(response) {
                 if (response.data && response.data.success) {
                     $scope.inventoryData = response.data.data;
+                    // Gộp dữ liệu theo thể loại
+                    $scope.groupedInventoryData = $scope.groupInventoryByCategory($scope.inventoryData.items);
                     $scope.addToast('success', 'Tải báo cáo tồn kho thành công');
                 } else {
                     $scope.addToast('danger', response.data.message || 'Có lỗi xảy ra khi tải báo cáo');
@@ -59,10 +105,12 @@ app.controller('AdminInventoryReportController', ['$scope', 'BookstoreService', 
         }
 
         // Create CSV content
-        var csvContent = 'Danh mục,ISBN,Tên sách,Số lượng tồn kho,Giá trung bình\n';
+        var csvContent = 'Thể loại,ISBN,Tên sách,Số lượng tồn kho,Giá trung bình\n';
         
-        $scope.inventoryData.items.forEach(function(item) {
-            csvContent += '"' + item.category + '","' + item.isbn + '","' + item.title + '",' + item.quantityOnHand + ',' + item.averagePrice + '\n';
+        $scope.groupedInventoryData.forEach(function(group) {
+            group.items.forEach(function(item) {
+                csvContent += '"' + group.category + '","' + item.isbn + '","' + item.title + '",' + item.quantityOnHand + ',' + item.averagePrice + '\n';
+            });
         });
 
         // Create and download file
@@ -164,16 +212,26 @@ app.controller('AdminInventoryReportController', ['$scope', 'BookstoreService', 
         html += '</thead>';
         html += '<tbody>';
         
-        $scope.inventoryData.items.forEach(function(item, index) {
+        var itemIndex = 1;
+        $scope.groupedInventoryData.forEach(function(group, groupIndex) {
+            // Header row for category
             html += '<tr>';
-            html += '<td class="text-center">' + (index + 1) + '</td>';
-            html += '<td class="text-center">' + item.category + '</td>';
-            html += '<td class="text-center">' + item.isbn + '</td>';
-            html += '<td>' + item.title + '</td>';
-            html += '<td class="text-center">' + item.quantityOnHand + '</td>';
-            html += '<td class="text-right">' + formatCurrency(item.averagePrice) + '</td>';
-            html += '<td class="text-right">' + formatCurrency(item.quantityOnHand * item.averagePrice) + '</td>';
+            html += '<td class="text-center" rowspan="' + (group.items.length + 1) + '">' + (groupIndex + 1) + '</td>';
+            html += '<td class="text-center" rowspan="' + (group.items.length + 1) + '"><strong>' + group.category + '</strong></td>';
+            html += '<td colspan="5" class="text-center bg-light"><strong>Tổng thể loại: ' + group.totalQuantity + ' quyển - ' + formatCurrency(group.totalValue) + '</strong></td>';
             html += '</tr>';
+            
+            // Items in category
+            group.items.forEach(function(item) {
+                html += '<tr>';
+                html += '<td class="text-center">' + item.isbn + '</td>';
+                html += '<td>' + item.title + '</td>';
+                html += '<td class="text-center">' + item.quantityOnHand + '</td>';
+                html += '<td class="text-right">' + formatCurrency(item.averagePrice) + '</td>';
+                html += '<td class="text-right">' + formatCurrency(item.quantityOnHand * item.averagePrice) + '</td>';
+                html += '</tr>';
+                itemIndex++;
+            });
         });
         
         html += '</tbody>';
@@ -190,7 +248,7 @@ app.controller('AdminInventoryReportController', ['$scope', 'BookstoreService', 
         // Footer
         html += '<div class="footer">';
         html += '<div><strong>Ghi chú:</strong> Báo cáo tồn kho được tính toán dựa trên số liệu tại ngày ' + reportDate + '</div>';
-        html += '<div><strong>Đơn vị:</strong> Số lượng tính theo quyển, giá trị tính theo VND</div>';
+        html += '<div><strong>Đơn vị:</strong> Số lượng tính theo quyển, giá trị tính theo đơn vị tiền tệ</div>';
         html += '<div class="text-right">Hệ thống quản lý nhà sách - ' + currentDate + ' ' + currentTime + '</div>';
         html += '</div>';
         
@@ -199,12 +257,9 @@ app.controller('AdminInventoryReportController', ['$scope', 'BookstoreService', 
         return html;
     }
 
-    // Format currency helper
+    // Format currency helper - bỏ đơn vị VNĐ và làm tròn
     function formatCurrency(amount) {
-        return new Intl.NumberFormat('vi-VN', {
-            style: 'currency',
-            currency: 'VND'
-        }).format(amount);
+        return Math.round(amount || 0).toLocaleString('vi-VN');
     }
 
     // Helper functions for modal
