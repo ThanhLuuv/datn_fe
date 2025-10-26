@@ -333,13 +333,12 @@
                                     <th>Khu vực</th>
                                     <th class="text-center">Khớp khu vực</th>
                                     <th class="text-end">Đang giao</th>
-                                    <th class="text-end">Đã giao</th>
                                     <th class="text-end">Thao tác</th>
                                 </tr>
                             </thead>
 							<tbody>
 								<tr ng-if="candidatesLoading">
-									<td colspan="8" class="text-center py-3">
+								<td colspan="5" class="text-center py-3">
 										<div class="spinner-border spinner-border-sm text-primary" role="status"></div>
 										<span class="ms-2 text-muted small">Đang tải gợi ý...</span>
 									</td>
@@ -354,13 +353,12 @@
                                         <span class="badge" ng-class="{ 'bg-success': c.isAreaMatched, 'bg-secondary': !c.isAreaMatched }">{{c.isAreaMatched ? 'Khớp' : 'Không'}}</span>
                                     </td>
                                     <td class="text-end">{{(c.activeAssignedOrders != null) ? c.activeAssignedOrders : ((c.activeAssigned != null) ? c.activeAssigned : 0)}}</td>
-                                    <td class="text-end">{{(c.totalDeliveredOrders != null) ? c.totalDeliveredOrders : ((c.delivered != null) ? c.delivered : 0)}}</td>
                                     <td class="text-end">
                                         <button class="btn btn-sm btn-outline-primary" ng-click="assignDeliveryCandidate($root.selectedOrder, c)" ng-disabled="dateInvalid || !deliveryDateInput"><i class="bi bi-truck"></i> Phân công</button>
 									</td>
 								</tr>
-								<tr ng-if="!candidatesLoading && deliveryCandidates.length === 0">
-									<td colspan="8" class="text-center text-muted py-2">Chưa có gợi ý.</td>
+							<tr ng-if="!candidatesLoading && deliveryCandidates.length === 0">
+								<td colspan="5" class="text-center text-muted py-2">Chưa có gợi ý.</td>
 								</tr>
 							</tbody>
 						</table>

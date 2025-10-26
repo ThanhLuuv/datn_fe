@@ -24,7 +24,13 @@ app.controller('CheckoutController', ['$scope', '$location', 'CartService', 'Boo
         if ($scope.cart && Array.isArray($scope.cart.items)) {
             for (var i = 0; i < $scope.cart.items.length; i++) {
                 var it = $scope.cart.items[i];
-                var unit = (it.discountedPrice || it.currentPrice || it.unitPrice) || 0;
+                var unit = (it.discountedPrice != null)
+                    ? it.discountedPrice
+                    : (it.effectivePrice != null)
+                        ? it.effectivePrice
+                        : (it.currentPrice != null)
+                            ? it.currentPrice
+                            : (it.unitPrice || 0);
                 var lineTotal = unit * (it.qty || 0);
                 sum += Number(lineTotal) || 0;
             }
@@ -50,6 +56,7 @@ app.controller('CheckoutController', ['$scope', '$location', 'CartService', 'Boo
                             bookTitle: item.bookTitle,
                             unitPrice: item.unitPrice,
                             currentPrice: item.currentPrice,
+                            effectivePrice: item.effectivePrice,
                             discountedPrice: item.discountedPrice,
                             qty: item.quantity,
                             quantity: item.quantity,

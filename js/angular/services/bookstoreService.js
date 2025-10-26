@@ -1012,6 +1012,16 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
+    // Hủy đơn hàng
+    this.cancelOrder = function(orderId, payload) {
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/order/' + orderId + '/cancel',
+            data: payload,
+            headers: getAuthHeaders()
+        });
+    };
+
     // ==================== PAYMENT APIs ====================
     this.createPaymentLink = function(payload) {
         return $http({

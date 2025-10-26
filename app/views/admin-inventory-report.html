@@ -178,18 +178,17 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr ng-repeat="group in groupedInventoryData track by group.category">
-                                        <td rowspan="{{group.items.length + 1}}" class="text-center align-middle">
-                                            <strong>{{$index + 1}}</strong>
+                                    <tr ng-repeat="item in groupedInventoryData track by item.isbn" ng-class="{'category-top': item.isFirstInCategory, 'category-bottom': item.isLastInCategory}">
+                                        <td class="text-center">
+                                            <strong>{{item.rowNumber}}</strong>
                                         </td>
-                                        <td rowspan="{{group.items.length + 1}}" class="text-center align-middle">
-                                            <span class="badge bg-primary fs-6">{{group.category}}</span>
+                                        <td class="category-merged-cell" ng-if="item.isFirstInCategory" rowspan="{{item.categoryRowspan}}">
+                                            <div class="category-content">
+                                                <div class="category-name">{{item.category}}</div>
+                                                <div class="category-total">Tổng: {{item.categoryTotal}} quyển</div>
+                                            </div>
                                         </td>
-                                        <td colspan="4" class="bg-light">
-                                            <strong>Tổng thể loại: {{group.totalQuantity}} quyển - {{group.totalValue | number:0}}</strong>
-                                        </td>
-                                    </tr>
-                                    <tr ng-repeat="item in group.items track by item.isbn">
+                                        <td ng-if="!item.isFirstInCategory" style="display: none;"></td>
                                         <td>
                                             <code>{{item.isbn}}</code>
                                         </td>
@@ -408,13 +407,82 @@
     background-color: var(--gray-50);
 }
 
-.table td {
+/* Ensure consistent row heights for proper merging */
+.table tbody tr {
+    height: 60px;
+}
+
+.table tbody tr td {
     vertical-align: middle;
-    border-top: 1px solid var(--gray-200);
+    padding: 0.75rem 0.5rem;
+}
+
+/* Hide empty category cells completely */
+.table tbody tr td[style*="display: none"] {
+    display: none !important;
+    width: 0 !important;
+    padding: 0 !important;
+    border: none !important;
 }
 
 .table-hover tbody tr:hover {
     background-color: var(--gray-50);
+}
+
+/* Excel-style merged category cells */
+.category-merged-cell {
+    background-color: transparent !important;
+    border: none !important;
+    position: relative;
+    vertical-align: middle !important;
+    text-align: center;
+    padding: 0 !important;
+    min-height: 120px;
+    width: 200px;
+}
+
+/* Override Bootstrap table styles for separators */
+.table {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+}
+
+.table td, .table th { border-left: 0 !important; border-right: 0 !important; }
+.table tbody td { border-bottom: 0 !important; }
+
+/* Minimal horizontal separators for category groups */
+.table tbody tr.category-top td { border-top: 0 !important; }
+.table tbody tr.category-bottom td { border-bottom: 2px solid #b0bec5 !important; }
+.table tbody tr:last-child td { border-bottom: 2px solid #b0bec5 !important; }
+
+/* Remove vertical separator to keep design clean */
+.category-merged-cell::after { display: none; }
+
+.category-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    min-height: 120px;
+    padding: 1rem;
+    position: relative;
+    box-sizing: border-box;
+}
+
+.category-name {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.category-total {
+    font-size: 0.85rem;
+    color: #666;
+    font-weight: 500;
 }
 
 /* Badge Styles */
@@ -523,18 +591,17 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr ng-repeat="group in groupedInventoryData track by group.category">
-                                <td rowspan="{{group.items.length + 1}}" class="text-center align-middle">
-                                    <strong>{{$index + 1}}</strong>
+                            <tr ng-repeat="item in groupedInventoryData track by item.isbn" ng-class="{'category-top': item.isFirstInCategory, 'category-bottom': item.isLastInCategory}">
+                                <td class="text-center">
+                                    <strong>{{item.rowNumber}}</strong>
                                 </td>
-                                <td rowspan="{{group.items.length + 1}}" class="text-center align-middle">
-                                    <span class="badge bg-primary">{{group.category}}</span>
+                                <td class="category-merged-cell" ng-if="item.isFirstInCategory" rowspan="{{item.categoryRowspan}}">
+                                    <div class="category-content">
+                                        <div class="category-name">{{item.category}}</div>
+                                        <div class="category-total">Tổng: {{item.categoryTotal}} quyển</div>
+                                    </div>
                                 </td>
-                                <td colspan="5" class="bg-light text-center">
-                                    <strong>Tổng thể loại: {{group.totalQuantity}} quyển - {{group.totalValue | number:0}}</strong>
-                                </td>
-                            </tr>
-                            <tr ng-repeat="item in group.items track by item.isbn">
+                                <td ng-if="!item.isFirstInCategory" style="display: none;"></td>
                                 <td class="text-center">{{item.isbn}}</td>
                                 <td>{{item.title}}</td>
                                 <td class="text-center">{{item.quantityOnHand}}</td>

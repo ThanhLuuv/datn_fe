@@ -23,13 +23,12 @@ app.controller('AdminInventoryReportController', ['$scope', 'BookstoreService', 
     var today = new Date();
     $scope.reportDate = today.toISOString().split('T')[0];
 
-    // Gộp dữ liệu theo thể loại
-    $scope.groupInventoryByCategory = function(items) {
+    // Tạo dữ liệu nhóm theo thể loại
+    $scope.createGroupedData = function(items) {
         if (!items || !Array.isArray(items)) return [];
         
-        var grouped = {};
-        
         // Nhóm các item theo thể loại
+        var grouped = {};
         items.forEach(function(item) {
             var category = item.category || 'Không phân loại';
             if (!grouped[category]) {
@@ -37,8 +36,7 @@ app.controller('AdminInventoryReportController', ['$scope', 'BookstoreService', 
                     category: category,
                     items: [],
                     totalQuantity: 0,
-                    totalValue: 0,
-                    averagePrice: 0
+                    totalValue: 0
                 };
             }
             
@@ -47,23 +45,41 @@ app.controller('AdminInventoryReportController', ['$scope', 'BookstoreService', 
             grouped[category].totalValue += (item.quantityOnHand || 0) * (item.averagePrice || 0);
         });
         
-        // Tính giá trung bình cho mỗi thể loại
-        Object.keys(grouped).forEach(function(category) {
-            var group = grouped[category];
-            if (group.items.length > 0) {
-                var totalPrice = group.items.reduce(function(sum, item) {
-                    return sum + (item.averagePrice || 0);
-                }, 0);
-                group.averagePrice = totalPrice / group.items.length;
-            }
-        });
-        
         // Chuyển đổi thành mảng và sắp xếp theo tên thể loại
-        return Object.keys(grouped).map(function(category) {
+        var categoryGroups = Object.keys(grouped).map(function(category) {
             return grouped[category];
         }).sort(function(a, b) {
-            return a.category.localeCompare(b.category);
+            return a.category.localeCompare(b.category, 'vi-VN');
         });
+        
+        // Tạo dữ liệu phẳng để hiển thị
+        var flattened = [];
+        var rowNumber = 1;
+        
+        categoryGroups.forEach(function(group) {
+            // Sắp xếp các sách trong thể loại theo tên
+            group.items.sort(function(a, b) {
+                return a.title.localeCompare(b.title, 'vi-VN');
+            });
+            
+            group.items.forEach(function(item, index) {
+                flattened.push({
+                    rowNumber: rowNumber++,
+                    category: group.category,
+                    categoryTotal: group.totalQuantity,
+                    categoryValue: group.totalValue,
+                    categoryRowspan: group.items.length,
+                    isFirstInCategory: index === 0,
+                    isLastInCategory: index === (group.items.length - 1),
+                    isbn: item.isbn,
+                    title: item.title,
+                    quantityOnHand: item.quantityOnHand,
+                    averagePrice: item.averagePrice
+                });
+            });
+        });
+        
+        return flattened;
     };
 
     // Load inventory report
@@ -81,8 +97,8 @@ app.controller('AdminInventoryReportController', ['$scope', 'BookstoreService', 
             .then(function(response) {
                 if (response.data && response.data.success) {
                     $scope.inventoryData = response.data.data;
-                    // Gộp dữ liệu theo thể loại
-                    $scope.groupedInventoryData = $scope.groupInventoryByCategory($scope.inventoryData.items);
+                    // Tạo dữ liệu nhóm theo thể loại
+                    $scope.groupedInventoryData = $scope.createGroupedData($scope.inventoryData.items);
                     $scope.addToast('success', 'Tải báo cáo tồn kho thành công');
                 } else {
                     $scope.addToast('danger', response.data.message || 'Có lỗi xảy ra khi tải báo cáo');
@@ -105,12 +121,10 @@ app.controller('AdminInventoryReportController', ['$scope', 'BookstoreService', 
         }
 
         // Create CSV content
-        var csvContent = 'Thể loại,ISBN,Tên sách,Số lượng tồn kho,Giá trung bình\n';
+        var csvContent = 'Thể loại,ISBN,Tên sách,Số lượng tồn kho,Giá trung bình,Giá trị tồn kho\n';
         
-        $scope.groupedInventoryData.forEach(function(group) {
-            group.items.forEach(function(item) {
-                csvContent += '"' + group.category + '","' + item.isbn + '","' + item.title + '",' + item.quantityOnHand + ',' + item.averagePrice + '\n';
-            });
+        $scope.groupedInventoryData.forEach(function(item) {
+            csvContent += '"' + item.category + '","' + item.isbn + '","' + item.title + '",' + item.quantityOnHand + ',' + item.averagePrice + ',' + (item.quantityOnHand * item.averagePrice) + '\n';
         });
 
         // Create and download file
@@ -212,26 +226,18 @@ app.controller('AdminInventoryReportController', ['$scope', 'BookstoreService', 
         html += '</thead>';
         html += '<tbody>';
         
-        var itemIndex = 1;
-        $scope.groupedInventoryData.forEach(function(group, groupIndex) {
-            // Header row for category
+        $scope.groupedInventoryData.forEach(function(item, index) {
             html += '<tr>';
-            html += '<td class="text-center" rowspan="' + (group.items.length + 1) + '">' + (groupIndex + 1) + '</td>';
-            html += '<td class="text-center" rowspan="' + (group.items.length + 1) + '"><strong>' + group.category + '</strong></td>';
-            html += '<td colspan="5" class="text-center bg-light"><strong>Tổng thể loại: ' + group.totalQuantity + ' quyển - ' + formatCurrency(group.totalValue) + '</strong></td>';
+            html += '<td class="text-center">' + item.rowNumber + '</td>';
+            if (item.isFirstInCategory) {
+                html += '<td class="text-center" rowspan="' + item.categoryRowspan + '"><strong>' + item.category + '</strong><br><small>Tổng: ' + item.categoryTotal + ' quyển</small><br><small>' + formatCurrency(item.categoryValue) + '</small></td>';
+            }
+            html += '<td class="text-center">' + item.isbn + '</td>';
+            html += '<td>' + item.title + '</td>';
+            html += '<td class="text-center">' + item.quantityOnHand + '</td>';
+            html += '<td class="text-right">' + formatCurrency(item.averagePrice) + '</td>';
+            html += '<td class="text-right">' + formatCurrency(item.quantityOnHand * item.averagePrice) + '</td>';
             html += '</tr>';
-            
-            // Items in category
-            group.items.forEach(function(item) {
-                html += '<tr>';
-                html += '<td class="text-center">' + item.isbn + '</td>';
-                html += '<td>' + item.title + '</td>';
-                html += '<td class="text-center">' + item.quantityOnHand + '</td>';
-                html += '<td class="text-right">' + formatCurrency(item.averagePrice) + '</td>';
-                html += '<td class="text-right">' + formatCurrency(item.quantityOnHand * item.averagePrice) + '</td>';
-                html += '</tr>';
-                itemIndex++;
-            });
         });
         
         html += '</tbody>';
@@ -279,10 +285,9 @@ app.controller('AdminInventoryReportController', ['$scope', 'BookstoreService', 
 
     $scope.getAveragePrice = function() {
         if (!$scope.inventoryData || !$scope.inventoryData.items || $scope.inventoryData.items.length === 0) return 0;
-        var totalPrice = $scope.inventoryData.items.reduce(function(total, item) {
-            return total + (item.averagePrice || 0);
-        }, 0);
-        return totalPrice / $scope.inventoryData.items.length;
+        var totalValue = $scope.getTotalValue();
+        var totalQuantity = $scope.getTotalQuantity();
+        return totalQuantity > 0 ? totalValue / totalQuantity : 0;
     };
 
     $scope.getQuantityBadgeClass = function(quantity) {

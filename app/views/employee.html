@@ -1,53 +1,14 @@
 <!-- Employee Dashboard View -->
 <div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
-            <div class="position-sticky pt-3">
-                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                    <span>Nhân viên</span>
-                </h6>
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#!/employee">
-                            <i class="bi bi-speedometer2"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#!/employee/books">
-                            <i class="bi bi-book"></i> Quản lý sách
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#!/employee/orders">
-                            <i class="bi bi-cart-check"></i> Xử lý đơn hàng
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#!/employee/customers">
-                            <i class="bi bi-people"></i> Khách hàng
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
         <!-- Main content -->
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+    <main class="px-md-4">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">Dashboard Nhân viên</h1>
-                <div class="btn-toolbar mb-2 mb-md-0">
-                    <div class="btn-group me-2">
-                        <button type="button" class="btn btn-sm btn-outline-secondary">
-                            <i class="bi bi-download"></i> Export
-                        </button>
-                    </div>
-                </div>
+                <h1 class="h2">Quản lý đơn hàng</h1>
             </div>
 
             <!-- Stats Cards -->
             <div class="row mb-4">
-                <div class="col-xl-3 col-md-6 mb-4">
+                <div class="col-xl-4 col-md-6 mb-4">
                     <div class="card border-left-primary shadow h-100 py-2">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
@@ -65,7 +26,7 @@
                     </div>
                 </div>
 
-                <div class="col-xl-3 col-md-6 mb-4">
+                <div class="col-xl-4 col-md-6 mb-4">
                     <div class="card border-left-success shadow h-100 py-2">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
@@ -83,36 +44,18 @@
                     </div>
                 </div>
 
-                <div class="col-xl-3 col-md-6 mb-4">
+                <div class="col-xl-4 col-md-6 mb-4">
                     <div class="card border-left-info shadow h-100 py-2">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
                                     <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                        Sách cần nhập
+                                        Đơn hàng cần giao
                                     </div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{stats.lowStockBooks}}</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{stats.shippingOrders}}</div>
                                 </div>
                                 <div class="col-auto">
-                                    <i class="bi bi-exclamation-triangle fa-2x text-gray-300"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="card border-left-warning shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                        Doanh thu hôm nay
-                                    </div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{stats.todayRevenue | currency:'VND '}}</div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="bi bi-currency-dollar fa-2x text-gray-300"></i>
+                                    <i class="bi bi-truck fa-2x text-gray-300"></i>
                                 </div>
                             </div>
                         </div>
@@ -120,12 +63,12 @@
                 </div>
             </div>
 
-            <!-- Recent Orders -->
+            <!-- Orders Management -->
             <div class="row">
-                <div class="col-lg-8">
+                <div class="col-12">
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Đơn hàng gần đây</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Danh sách đơn hàng</h6>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
@@ -142,21 +85,30 @@
                                     </thead>
                                     <tbody>
                                         <tr ng-repeat="order in recentOrders">
-                                            <td>{{order.orderId}}</td>
+                                            <td><code>OD-{{order.orderId}}</code></td>
                                             <td>{{order.customer}}</td>
                                             <td>{{order.orderDate | date:'dd/MM/yyyy'}}</td>
-                                            <td>{{order.total | currency:'VND '}}</td>
+                                            <td>{{order.total | number:0}}</td>
                                             <td>
-                                                <span class="badge" ng-class="'bg-' + order.statusClass">
-                                                    {{order.status}}
+                                                <span class="badge" ng-class="{
+                                                    'bg-primary': order.status === 'Confirmed' || order.status === 1,
+                                                    'bg-success': order.status === 'Delivered' || order.status === 2,
+                                                    'bg-danger': order.status === 'Cancelled' || order.status === 3
+                                                }">
+                                                    {{order.status === 'Confirmed' || order.status === 1 ? 'Đã xác nhận' : 
+                                                      (order.status === 'Delivered' || order.status === 2 ? 'Đã giao' : 
+                                                      (order.status === 'Cancelled' || order.status === 3 ? 'Đã hủy' : order.status))}}
                                                 </span>
                                             </td>
                                             <td>
-                                                <button class="btn btn-sm btn-primary" ng-click="viewOrder(order)">
-                                                    <i class="bi bi-eye"></i>
+                                                <button class="btn btn-sm btn-primary" ng-click="viewOrderDetail(order)" data-bs-toggle="modal" data-bs-target="#orderDetailModal">
+                                                    <i class="bi bi-eye"></i> Xem chi tiết
                                                 </button>
-                                                <button class="btn btn-sm btn-success" ng-click="processOrder(order)" ng-if="order.status === 'Chờ xử lý'">
-                                                    <i class="bi bi-check"></i>
+                                                <button class="btn btn-sm btn-success" ng-click="confirmDelivery(order)" ng-if="order.status === 'Confirmed' || order.status === 1">
+                                                    <i class="bi bi-check-circle"></i> Xác nhận đã giao
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" ng-click="cancelOrder(order)" ng-if="order.status === 'Confirmed' || order.status === 1">
+                                                    <i class="bi bi-x-circle"></i> Hủy đơn
                                                 </button>
                                             </td>
                                         </tr>
@@ -166,66 +118,193 @@
                         </div>
                     </div>
                 </div>
+            </div>
+    </main>
+                </div>
 
-                <div class="col-lg-4">
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Thông báo</h6>
+<!-- Order Detail Modal -->
+<div class="modal fade" id="orderDetailModal" tabindex="-1" aria-labelledby="orderDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="orderDetailModalLabel">
+                    <i class="bi bi-receipt me-2"></i>Chi tiết đơn hàng OD-{{selectedOrder.orderId}}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" ng-if="selectedOrder">
+                <!-- Order Info -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6 class="text-primary mb-3">Thông tin đơn hàng</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Mã đơn hàng:</strong></td>
+                                <td><code>OD-{{selectedOrder.orderId}}</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Ngày đặt:</strong></td>
+                                <td>{{selectedOrder.placedAt | date:'dd/MM/yyyy HH:mm'}}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Trạng thái:</strong></td>
+                                <td>
+                                    <span class="badge" ng-class="{
+                                        'bg-primary': selectedOrder.status === 'Confirmed' || selectedOrder.status === 1,
+                                        'bg-success': selectedOrder.status === 'Delivered' || selectedOrder.status === 2,
+                                        'bg-danger': selectedOrder.status === 'Cancelled' || selectedOrder.status === 3
+                                    }">
+                                        {{selectedOrder.status === 'Confirmed' || selectedOrder.status === 1 ? 'Đã xác nhận' : 
+                                          (selectedOrder.status === 'Delivered' || selectedOrder.status === 2 ? 'Đã giao' : 
+                                          (selectedOrder.status === 'Cancelled' || selectedOrder.status === 3 ? 'Đã hủy' : selectedOrder.status))}}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tổng tiền:</strong></td>
+                                <td class="text-danger fw-bold">{{selectedOrder.totalAmount | number:0}} VNĐ</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Ngày giao hàng:</strong></td>
+                                <td>{{selectedOrder.deliveryDate | date:'dd/MM/yyyy' || 'Chưa xác định'}}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-primary mb-3">Thông tin khách hàng</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Tên khách hàng:</strong></td>
+                                <td>{{selectedOrder.customerName}}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Người nhận:</strong></td>
+                                <td>{{selectedOrder.receiverName || 'Chưa cập nhật'}}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Số điện thoại:</strong></td>
+                                <td>{{selectedOrder.receiverPhone || 'Chưa cập nhật'}}</td>
+                            </tr>
+                            <tr ng-if="selectedOrder.status === 'Cancelled' || selectedOrder.status === 3">
+                                <td><strong>Lý do hủy:</strong></td>
+                                <td class="text-danger fw-bold">{{selectedOrder.cancelReason || 'Không có thông tin'}}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Địa chỉ:</strong></td>
+                                <td>{{selectedOrder.shippingAddress || 'Chưa cập nhật'}}</td>
+                            </tr>
+                        </table>
+                    </div>
                         </div>
-                        <div class="card-body">
-                            <div ng-repeat="notification in notifications" class="alert alert-info alert-dismissible fade show">
-                                <i class="bi bi-info-circle"></i> {{notification.message}}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+
+                <!-- Order Items -->
+                <div class="mb-4">
+                    <h6 class="text-primary mb-3">Sản phẩm trong đơn hàng</h6>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Tên sách</th>
+                                    <th>Số lượng</th>
+                                    <th>Đơn giá</th>
+                                    <th>Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in selectedOrder.lines track by $index">
+                                    <td>{{$index + 1}}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div>
+                                                <strong>{{item.bookTitle}}</strong><br>
+                                                <small class="text-muted">ISBN: {{item.isbn}}</small>
                             </div>
                         </div>
+                                    </td>
+                                    <td class="text-center">{{item.qty}}</td>
+                                    <td class="text-end">{{item.unitPrice | number:0}} VNĐ</td>
+                                    <td class="text-end fw-bold">{{item.lineTotal | number:0}} VNĐ</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-success">
+                                    <th colspan="4" class="text-end">TỔNG CỘNG:</th>
+                                    <th class="text-end">{{selectedOrder.totalAmount | number:0}} VNĐ</th>
+                                </tr>
+                            </tfoot>
+                        </table>
                     </div>
-
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Sách sắp hết</h6>
                         </div>
-                        <div class="card-body">
-                            <div ng-repeat="book in lowStockBooks" class="d-flex justify-content-between align-items-center mb-2">
-                                <div>
-                                    <strong>{{book.title}}</strong><br>
-                                    <small class="text-muted">Còn lại: {{book.stock}}</small>
                                 </div>
-                                <button class="btn btn-sm btn-warning" ng-click="restockBook(book)">
-                                    <i class="bi bi-plus"></i>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-success" ng-click="confirmDelivery(selectedOrder)" ng-if="selectedOrder.status === 'Confirmed' || selectedOrder.status === 1" data-bs-dismiss="modal">
+                    <i class="bi bi-check-circle"></i> Xác nhận đã giao
+                </button>
+                <button type="button" class="btn btn-danger" ng-click="cancelOrder(selectedOrder)" ng-if="selectedOrder.status === 'Confirmed' || selectedOrder.status === 1" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Hủy đơn hàng
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
+
+<!-- Cancel Order Modal -->
+<div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-labelledby="cancelOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cancelOrderModalLabel">
+                    <i class="bi bi-x-circle text-danger"></i> Hủy đơn hàng
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-        </main>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <strong>Chú ý:</strong> Hành động này không thể hoàn tác. Đơn hàng sẽ được chuyển sang trạng thái "Đã hủy".
+                </div>
+                
+                <form>
+                    <div class="mb-3">
+                        <label for="cancelReason" class="form-label">
+                            <strong>Lý do hủy đơn hàng <span class="text-danger">*</span></strong>
+                        </label>
+                        <textarea class="form-control" 
+                                  id="cancelReason" 
+                                  rows="3" 
+                                  ng-model="cancelOrderData.reason"
+                                  placeholder="Vui lòng nhập lý do hủy đơn hàng..."
+                                  required></textarea>
+                        <div class="form-text">Tối đa 500 ký tự</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="cancelNote" class="form-label">
+                            <strong>Ghi chú bổ sung</strong>
+                        </label>
+                        <textarea class="form-control" 
+                                  id="cancelNote" 
+                                  rows="2" 
+                                  ng-model="cancelOrderData.note"
+                                  placeholder="Ghi chú bổ sung (tùy chọn)..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x"></i> Hủy bỏ
+                </button>
+                <button type="button" class="btn btn-danger" ng-click="confirmCancelOrder()">
+                    <i class="bi bi-x-circle"></i> Xác nhận hủy đơn
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
 <style>
-.sidebar {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 100;
-    padding: 48px 0 0;
-    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
-}
-
-.sidebar .nav-link {
-    font-weight: 500;
-    color: #333;
-}
-
-.sidebar .nav-link.active {
-    color: #007bff;
-}
-
-.sidebar .nav-link:hover {
-    color: #007bff;
-}
-
 .border-left-primary {
     border-left: 0.25rem solid #4e73df !important;
 }

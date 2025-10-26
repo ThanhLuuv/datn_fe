@@ -36,7 +36,16 @@ app.factory('CartService', ['$rootScope', '$http', 'APP_CONFIG', function($rootS
 
     function computeTotals(cart) {
         var subtotal = 0;
-        cart.items.forEach(function(it) { subtotal += (it.unitPrice || 0) * (it.qty || 0); });
+        cart.items.forEach(function(it) {
+            var unit = (it.discountedPrice != null)
+                ? it.discountedPrice
+                : (it.effectivePrice != null)
+                    ? it.effectivePrice
+                    : (it.currentPrice != null)
+                        ? it.currentPrice
+                        : (it.unitPrice || 0);
+            subtotal += unit * (it.qty || 0);
+        });
         cart.subtotal = Math.round(subtotal);
         return cart;
     }
