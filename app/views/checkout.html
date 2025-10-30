@@ -123,6 +123,16 @@
                                            placeholder="Nhập địa chỉ chi tiết"
                                            required>
                                 </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">
+                                        <i class="bi bi-calendar2-week me-1"></i>Thời gian kiến nghị giao (không bắt buộc)
+                                    </label>
+                                    <input type="datetime-local"
+                                           class="form-control form-control-lg"
+                                           ng-model="form.deliveryAt"
+                                           placeholder="Chọn ngày giờ giao kiến nghị">
+                                    <div class="form-text">Hệ thống sẽ cố gắng giao gần thời gian này.</div>
+                                </div>
                             </div>
                         </div>
                     </div>

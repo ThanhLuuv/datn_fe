@@ -35,7 +35,7 @@
 }
 
 .auth-header {
-    background: linear-gradient(135deg, var(--primary-color), #0056b3);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
     color: white;
     padding: 2rem;
     text-align: center;
@@ -231,7 +231,7 @@
 }
 
 .modal-header {
-    background: linear-gradient(135deg, var(--primary-color), #0056b3);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
     color: white;
     border-radius: 20px 20px 0 0;
     border: none;
@@ -432,6 +432,6 @@
 }
 
 .modal-body::-webkit-scrollbar-thumb:hover {
-    background: #0056b3;
+    background: var(--primary-dark);
 }
 

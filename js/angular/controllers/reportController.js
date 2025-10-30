@@ -16,8 +16,8 @@ app.controller('AdminRevenueReportController', ['$scope', 'BookstoreService', 'A
 	var nowInit = new Date();
 	var monthStart = new Date(nowInit.getFullYear(), nowInit.getMonth(), 1);
 	$scope.filters = {
-		fromDate: formatYMD(monthStart),
-		toDate: formatYMD(nowInit)
+		fromDate: monthStart,
+		toDate: nowInit
 	};
 	$scope.loading = false;
 	$scope.error = null;
@@ -56,6 +56,42 @@ app.controller('AdminRevenueReportController', ['$scope', 'BookstoreService', 'A
 			$scope.loadRevenue();
 		}
 	};
+
+    // Normalize different user-entered date formats to a valid Date object
+    function normalizeToDate(value) {
+        if (value == null || value === '') return null;
+        if (value instanceof Date && !isNaN(value.getTime())) return value;
+        if (typeof value === 'number') {
+            var fromNumber = new Date(value);
+            return isNaN(fromNumber.getTime()) ? null : fromNumber;
+        }
+        if (typeof value === 'string') {
+            var trimmed = value.trim();
+            // Try yyyy-MM-dd (browser date input string)
+            var ymdMatch = /^\d{4}-\d{2}-\d{2}$/;
+            if (ymdMatch.test(trimmed)) {
+                var y = parseInt(trimmed.slice(0, 4), 10);
+                var m = parseInt(trimmed.slice(5, 7), 10) - 1;
+                var d = parseInt(trimmed.slice(8, 10), 10);
+                var dt = new Date(y, m, d);
+                return isNaN(dt.getTime()) ? null : dt;
+            }
+            // Try dd/MM/yyyy (common VN typing)
+            var dmyMatch = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+            var m2 = dmyMatch.exec(trimmed);
+            if (m2) {
+                var dd = parseInt(m2[1], 10);
+                var mm = parseInt(m2[2], 10) - 1;
+                var yyyy = parseInt(m2[3], 10);
+                var dt2 = new Date(yyyy, mm, dd);
+                return isNaN(dt2.getTime()) ? null : dt2;
+            }
+            // Fallback to Date parser
+            var parsed = new Date(trimmed);
+            return isNaN(parsed.getTime()) ? null : parsed;
+        }
+        return null;
+    }
 
 	$scope.displayPeriod = function(item) {
 		if (!item) return '';
@@ -114,53 +150,48 @@ app.controller('AdminRevenueReportController', ['$scope', 'BookstoreService', 'A
 		} catch(e) { console.warn('Chart init error', e); }
 	}
 
-	function isValidYMD(str) {
-		if (!str || typeof str !== 'string') return false;
-		var re = /^\d{4}-\d{2}-\d{2}$/;
-		if (!re.test(str)) return false;
-		var d = new Date(str);
-		if (isNaN(d.getTime())) return false;
-		// Ensure components match (avoid parsing quirks)
-		var parts = str.split('-');
-		var y = d.getFullYear();
-		var m = ('0' + (d.getMonth() + 1)).slice(-2);
-		var day = ('0' + d.getDate()).slice(-2);
-		return String(y) === parts[0] && m === parts[1] && day === parts[2];
-	}
+function isValidDateObject(d) {
+    return d instanceof Date && !isNaN(d.getTime());
+}
 
-	function validateDateRange(fromDate, toDate) {
-		if (!fromDate || !toDate) {
-			return 'Vui lòng chọn khoảng thời gian.';
-		}
-		if (!isValidYMD(fromDate) || !isValidYMD(toDate)) {
-			return 'Định dạng ngày không hợp lệ. Vui lòng dùng yyyy-MM-dd.';
-		}
-		var f = new Date(fromDate);
-		var t = new Date(toDate);
-		if (f.getTime() > t.getTime()) {
-			return 'Khoảng thời gian không hợp lệ: Từ ngày phải nhỏ hơn hoặc bằng Đến ngày.';
-		}
-		return null;
-	}
+function validateDateRange(fromDate, toDate) {
+    if (!fromDate || !toDate) {
+        return 'Vui lòng chọn khoảng thời gian.';
+    }
+    if (!isValidDateObject(fromDate) || !isValidDateObject(toDate)) {
+        return 'Định dạng ngày không hợp lệ. Vui lòng chọn lại.';
+    }
+    if (fromDate.getTime() > toDate.getTime()) {
+        return 'Khoảng thời gian không hợp lệ: Từ ngày phải nhỏ hơn hoặc bằng Đến ngày.';
+    }
+    return null;
+}
 
 	$scope.loadRevenue = function() {
-		var validationError = validateDateRange($scope.filters.fromDate, $scope.filters.toDate);
+		// Coerce potential string inputs to Date objects before validating
+		var normalizedFrom = normalizeToDate($scope.filters.fromDate);
+		var normalizedTo = normalizeToDate($scope.filters.toDate);
+		var validationError = validateDateRange(normalizedFrom, normalizedTo);
 		if (validationError) {
 			$scope.error = validationError;
 			$scope.addToast('danger', validationError);
 			return;
 		}
+		// Persist normalized dates back to model for consistent rendering
+		$scope.filters.fromDate = normalizedFrom;
+		$scope.filters.toDate = normalizedTo;
 		$scope.loading = true;
 		$scope.error = null;
 		$scope.report = null;
-		var apiCall;
-		if ($scope.mode === 'monthly') {
-			apiCall = BookstoreService.getRevenueReportMonthly({ fromDate: $scope.filters.fromDate, toDate: $scope.filters.toDate });
-		} else if ($scope.mode === 'quarterly') {
-			apiCall = BookstoreService.getRevenueReportQuarterly({ fromDate: $scope.filters.fromDate, toDate: $scope.filters.toDate });
-		} else {
-			apiCall = BookstoreService.getRevenueReport({ fromDate: $scope.filters.fromDate, toDate: $scope.filters.toDate });
-		}
+	var params = { fromDate: formatYMD(normalizedFrom), toDate: formatYMD(normalizedTo) };
+	var apiCall;
+	if ($scope.mode === 'monthly') {
+		apiCall = BookstoreService.getRevenueReportMonthly(params);
+	} else if ($scope.mode === 'quarterly') {
+		apiCall = BookstoreService.getRevenueReportQuarterly(params);
+	} else {
+		apiCall = BookstoreService.getRevenueReport(params);
+	}
 		apiCall.then(function(res){
 			var data = res && res.data ? res.data : null;
 			if (data && data.success && data.data) {
@@ -209,7 +240,7 @@ app.controller('AdminRevenueReportController', ['$scope', 'BookstoreService', 'A
 			// Create download link
 			var link = document.createElement('a');
 			link.href = url;
-			link.download = 'bao-cao-doanh-thu-' + $scope.filters.fromDate + '-to-' + $scope.filters.toDate + '.html';
+			link.download = 'bao-cao-doanh-thu-' + formatYMD($scope.filters.fromDate) + '-to-' + formatYMD($scope.filters.toDate) + '.html';
 			
 			// Trigger download
 			document.body.appendChild(link);

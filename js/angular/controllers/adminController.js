@@ -49,10 +49,220 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
         return sum;
     }
 
+    // Bổ sung biến và hàm cho dashboard báo cáo
+    $scope.revenueFilter = { type:'monthly', fromDate:'', toDate:'' };
+    $scope.inventoryFilter = { toDate:'' };
+    $scope.loadingRevenue = false;
+    $scope.loadingInventory = false;
+    $scope.revenueChart = null;
+    $scope.inventoryChart = null;
+    $scope.revenueReportData = null;
+    $scope.inventoryReportData = null;
+    $scope.revenueReportTotal = 0;
+    $scope.inventoryReportTotal = 0;
+    $scope.revenueSummary = null;
+    $scope.inventorySummary = null;
+    $scope.currentUser = AuthService.getCurrentUser ? (AuthService.getCurrentUser()||{}) : {};
+    $scope.now = new Date();
+    // modal flags for custom dashboard modals
+    $scope.showingDashboardReport = false;
+    $scope.showingDashboardInventory = false;
+
+    // Resolve reporter display name robustly
+    $scope.getReporterName = function(user) {
+        var u = user || $scope.currentUser || {};
+        var combined = (u.firstName && u.lastName) ? (u.firstName + ' ' + u.lastName) : (u.firstName || u.lastName);
+        return (
+            u.fullName || u.displayName || u.name || combined || u.email || u.username || '—'
+        );
+    };
+
+    // Header label for revenue report table based on type
+    $scope.getRevenueHeader = function() {
+        var t = ($scope.revenueFilter && $scope.revenueFilter.type) ? String($scope.revenueFilter.type).toLowerCase() : 'daily';
+        if (t === 'quarterly') return 'Quý/Năm';
+        if (t === 'monthly') return 'Tháng/Năm';
+        return 'Ngày';
+    };
+
+    // Helper: giữ chỉ 1 backdrop khi mở modal
+    function ensureSingleBackdrop() {
+      try {
+        var backs = document.querySelectorAll('.modal-backdrop');
+        if (backs && backs.length > 1) {
+          // Giữ lại backdrop cuối (mới nhất)
+          for (var i = 0; i < backs.length - 1; i++) {
+            var el = backs[i];
+            if (el && el.parentNode) el.parentNode.removeChild(el);
+          }
+        }
+      } catch(e) { /* no-op */ }
+    }
+
+    // Xem báo cáo doanh thu
+    $scope.viewRevenueReport = function(openModal) {
+      $scope.loadingRevenue = true;
+      $scope.revenueReportData = null;
+      $scope.revenueChart = null;
+      $scope.revenueReportTotal = 0;
+      // Chuẩn hóa ngày
+      var from = $scope.revenueFilter.fromDate;
+      var to = $scope.revenueFilter.toDate;
+      if (!from || !to) { $scope.loadingRevenue = false; $scope.addToast('danger','Vui lòng chọn đủ khoảng ngày!'); return; }
+      var type = ($scope.revenueFilter.type || 'daily').toLowerCase();
+      var apiPromise;
+      // Helpers to avoid timezone shift and align to month boundaries
+      function toYMDLocal(d){
+        if (!(d instanceof Date)) d = new Date(d);
+        var y = d.getFullYear();
+        var m = ('0'+(d.getMonth()+1)).slice(-2);
+        var day = ('0'+d.getDate()).slice(-2);
+        return y + '-' + m + '-' + day;
+      }
+      function monthStart(d){ return new Date(d.getFullYear(), d.getMonth(), 1); }
+      function monthEnd(d){ return new Date(d.getFullYear(), d.getMonth()+1, 0); }
+
+      var fromObj = (from instanceof Date) ? new Date(from.getTime()) : new Date(from);
+      var toObj = (to instanceof Date) ? new Date(to.getTime()) : new Date(to);
+      if (type === 'monthly' || type === 'quarterly') {
+        fromObj = monthStart(fromObj);
+        toObj = monthEnd(toObj);
+      }
+      var fromStr = toYMDLocal(fromObj);
+      var toStr = toYMDLocal(toObj);
+
+      if (type === 'monthly') {
+        apiPromise = BookstoreService.getRevenueReportMonthly({ fromDate: fromStr, toDate: toStr });
+      } else if (type === 'quarterly') {
+        apiPromise = BookstoreService.getRevenueReportQuarterly({ fromDate: fromStr, toDate: toStr });
+      } else {
+        apiPromise = BookstoreService.getRevenueReport({ fromDate: fromStr, toDate: toStr });
+      }
+
+      apiPromise.then(function(res){
+        var data = res && res.data && res.data.data;
+        // capture generatedBy if provided by API
+        if (data && data.generatedBy) {
+          $scope.reportGeneratedBy = data.generatedBy;
+        } else {
+          $scope.reportGeneratedBy = null;
+        }
+        // Mapping dữ liệu chart
+        function buildRevenueLabel(it){
+          if (it.label) return it.label;
+          if (it.quarter != null && it.year != null) {
+            return  String(it.quarter) + ' / ' + String(it.year);
+          }
+          if (it.month != null && it.year != null) {
+            return String(it.month) + ' / ' + String(it.year);
+          }
+          if (it.monthYear) return it.monthYear; // e.g. '2025-10'
+          if (it.day) {
+            try { return toYMDLocal(new Date(it.day)); } catch(e) { return String(it.day); }
+          }
+          if (it.name) return it.name;
+          return '';
+        }
+        var items = Array.isArray(data.items) ? data.items : data;
+        $scope.revenueReportData = items.map(function(it){
+          return { label: buildRevenueLabel(it), value: Number(it.revenue || it.totalRevenue || it.value || 0) };
+        });
+        $scope.revenueReportTotal = $scope.revenueReportData.reduce(function(a,b){return a+Number(b.value||0)},0);
+        $scope.revenueSummary = {
+          total: $scope.revenueReportTotal,
+          count: ($scope.revenueReportData || []).length,
+          fromDate: fromStr,
+          toDate: toStr,
+          type: $scope.revenueFilter.type
+        };
+        // (Nếu dùng Chart.js thực sẽ attach chart data ở đây)
+        $scope.revenueChart = true;
+        // Mở modal preview khi người dùng yêu cầu (custom modal)
+        if (openModal) {
+          $scope.showingDashboardReport = true;
+        }
+      }).catch(function(e){
+        $scope.addToast('danger','Không thể tải báo cáo doanh thu');
+      }).finally(function(){ $scope.loadingRevenue = false; $scope.$applyAsync(); });
+    };
+
+    // Xem báo cáo tồn kho
+    $scope.viewInventoryReport = function(openModal) {
+      $scope.loadingInventory = true;
+      $scope.inventoryReportData = null;
+      $scope.inventoryChart = null;
+      $scope.inventoryReportTotal = 0;
+      var to = $scope.inventoryFilter.toDate;
+      if (!to) { $scope.loadingInventory = false; $scope.addToast('danger','Vui lòng chọn ngày!'); return; }
+      // chuẩn hóa yyyy-MM-dd
+      if (typeof to === 'string' && to.length > 10) to = to.slice(0,10);
+      if (to instanceof Date) {
+        var d = to; to = d.getFullYear() + '-' + ('0'+(d.getMonth()+1)).slice(-2) + '-' + ('0'+d.getDate()).slice(-2);
+      }
+      BookstoreService.getInventoryReport(to).then(function(res){
+        var data = res && res.data && res.data.data;
+        if (data && data.generatedBy) {
+          $scope.reportGeneratedByInventory = data.generatedBy;
+        } else {
+          $scope.reportGeneratedByInventory = null;
+        }
+        var items = Array.isArray(data && data.items) ? data.items : [];
+        $scope.inventoryReportData = items.map(function(it){
+          var qty = Number(it.quantityOnHand != null ? it.quantityOnHand : (it.quantity || it.stock || 0));
+          var price = Number(it.averagePrice != null ? it.averagePrice : (it.unitPrice || 0));
+          var value = qty * price;
+          return {
+            isbn: it.isbn || '',
+            title: it.title || it.bookTitle || it.name || '',
+            category: it.category || '',
+            quantityOnHand: qty,
+            averagePrice: price,
+            value: value
+          };
+        });
+        $scope.inventoryReportTotal = $scope.inventoryReportData.reduce(function(a,b){return a+Number(b.value||0)},0);
+        var totalQty = $scope.inventoryReportData.reduce(function(a,b){return a+Number(b.quantityOnHand||0)},0);
+        var byCat = {};
+        $scope.inventoryReportData.forEach(function(it){
+          var key = it.category || 'Khác';
+          byCat[key] = (byCat[key]||0) + Number(it.value||0);
+        });
+        var catArr = Object.keys(byCat).map(function(k){ return { category: k, value: byCat[k] }; }).sort(function(a,b){ return b.value - a.value; });
+        var totalVal = $scope.inventoryReportTotal || 1;
+        var catPercents = catArr.slice(0,5).map(function(x){ return { category: x.category, percent: Math.round((x.value/totalVal)*1000)/10, value: x.value }; });
+        $scope.inventorySummary = {
+          totalValue: $scope.inventoryReportTotal,
+          totalQuantity: totalQty,
+          categories: catPercents
+        };
+        $scope.inventoryChart = true;
+        if (openModal) {
+          $scope.showingDashboardInventory = true;
+        }
+      }).catch(function(e){
+        $scope.addToast('danger','Không thể tải báo cáo tồn kho');
+      }).finally(function(){ $scope.loadingInventory = false; $scope.$applyAsync(); });
+    };
+
     // Initialize controller
     $scope.init = function() {
         $scope.loadStats();
         $scope.loadLatestBooks();
+        // Set default filters to current month and today, then auto-load charts (không mở modal)
+        try {
+            var now = new Date();
+            var monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            $scope.revenueFilter.type = 'monthly';
+            // Với AngularJS, input type=date bind Date object để hiển thị
+            $scope.revenueFilter.fromDate = monthStart;
+            $scope.revenueFilter.toDate = now;
+            $scope.inventoryFilter.toDate = now;
+            // Defer to next digest to make sure bindings are ready
+            setTimeout(function(){
+                $scope.viewRevenueReport(false);
+                $scope.viewInventoryReport(false);
+            }, 0);
+        } catch(e) { console.warn('Auto-load dashboard reports failed', e); }
     };
 
     // Load statistics
@@ -151,7 +361,7 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
                 } else if (response.data && Array.isArray(response.data)) {
                     list = response.data;
                 }
-                $scope.latestBooks = list || [];
+                $scope.latestBooks = (list || []).slice(0,5);
             })
             .catch(function(error){
                 console.error('Newest books error:', error);
@@ -210,5 +420,22 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
 
     // Initialize when controller loads
     $scope.init();
+}]);
+
+// Vietnamese number formatting filter (thousands separator by dot)
+app.filter('vnNumber', [function() {
+  return function(input, fractionSize) {
+    var num = Number(input);
+    if (isNaN(num)) return input;
+    var digits = (typeof fractionSize === 'number') ? fractionSize : 0;
+    try {
+      return num.toLocaleString('vi-VN', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+    } catch (e) {
+      // Fallback manual formatting
+      var parts = num.toFixed(digits).split('.');
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      return parts.join(',');
+    }
+  };
 }]);
 

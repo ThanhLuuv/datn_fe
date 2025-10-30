@@ -154,6 +154,21 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
+    // Lấy sách theo danh mục (Public API for storefront/home)
+    this.getBooksByCategory = function(categoryId, params) {
+        params = params || {};
+        var queryParams = {
+            pageNumber: params.pageNumber || 1,
+            pageSize: params.pageSize || 12,
+            search: params.search || params.searchTerm || ''
+        };
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/book/categories/' + encodeURIComponent(categoryId),
+            params: queryParams
+        });
+    };
+
 
     // ==================== REPORT APIs ====================
     // Báo cáo doanh thu theo khoảng thời gian

@@ -143,10 +143,26 @@ app.controller('CheckoutController', ['$scope', '$location', 'CartService', 'Boo
         }
         shippingAddress = ($scope.form.areaType === 'inner' ? 'Nội thành' : 'Ngoại thành') + ', ' + shippingAddress;
         
+        // Convert suggested delivery time to ISO string if provided
+        var deliveryAtIso = null;
+        if ($scope.form.deliveryAt) {
+            try {
+                // input type datetime-local gives local time without timezone
+                // new Date(string) will parse local time; convert to ISO-8601 Z for API
+                var dt = new Date($scope.form.deliveryAt);
+                if (!isNaN(dt.getTime())) {
+                    deliveryAtIso = dt.toISOString();
+                }
+            } catch (e) {
+                deliveryAtIso = null;
+            }
+        }
+
         var payload = {
             receiverName: $scope.form.fullName,
             receiverPhone: $scope.form.phone,
             shippingAddress: shippingAddress,
+            deliveryAt: deliveryAtIso || undefined,
             lines: $scope.cart.items.map(function(it){ return { isbn: it.isbn, qty: it.qty }; })
         };
         

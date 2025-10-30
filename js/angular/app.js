@@ -12,7 +12,9 @@ app.filter('numberFormatted', function() {
 });
 
 // Global controller for navbar visibility
-app.controller('AppController', ['$scope', '$location', 'CartService', 'AuthService', function($scope, $location, CartService, AuthService) {
+app.controller('AppController', ['$scope', '$location', '$injector', 'AuthService', function($scope, $location, $injector, AuthService) {
+    var CartService = null;
+    try { CartService = $injector.get('CartService'); } catch (e) { console.warn('CartService not available yet:', e && e.message ? e.message : e); }
     $scope.isAdminPage = false;
     $scope.isAuthPage = false; // login/register
     $scope.searchQuery = '';
@@ -31,6 +33,7 @@ app.controller('AppController', ['$scope', '$location', 'CartService', 'AuthServ
             return;
         }
 
+        if (!CartService || !CartService.getCartSummary) { $scope.cartCount = 0; return; }
         CartService.getCartSummary()
             .then(function(response) {
                 if (response && response.data && response.data.success) {
@@ -42,7 +45,7 @@ app.controller('AppController', ['$scope', '$location', 'CartService', 'AuthServ
             .catch(function(error) {
                 console.error('Error loading cart count:', error);
                 // Fallback to local storage
-                $scope.cartCount = CartService.getTotalQuantity();
+                try { $scope.cartCount = CartService.getTotalQuantity ? CartService.getTotalQuantity() : 0; } catch(_) { $scope.cartCount = 0; }
             });
     };
 

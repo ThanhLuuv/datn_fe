@@ -549,25 +549,26 @@
 <style>
 /* Invoice Styles */
 .invoice-container {
-	background: white;
-	padding: 30px;
-	font-family: 'Times New Roman', serif;
-	line-height: 1.4;
+    background: white;
+    padding: 30px;
+    font-family: 'Times New Roman', serif;
+    line-height: 1.4;
+    border-top: 3px dashed #e74c3c; /* dashed header line similar to sample */
 }
 
 .invoice-header {
-	border-bottom: 3px solid #333;
-	padding-bottom: 20px;
-	margin-bottom: 30px;
+    border-bottom: 2px solid #333;
+    padding-bottom: 16px;
+    margin-bottom: 24px;
 }
 
 .company-name {
-	font-size: 28px;
-	font-weight: bold;
-	color: #2c3e50;
-	margin-bottom: 15px;
-	text-transform: uppercase;
-	letter-spacing: 1px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .company-info p {
@@ -577,12 +578,12 @@
 }
 
 .invoice-title {
-	font-size: 32px;
-	font-weight: bold;
-	color: #e74c3c;
-	margin-bottom: 20px;
-	text-transform: uppercase;
-	letter-spacing: 2px;
+    font-size: 34px;
+    font-weight: bold;
+    color: #e74c3c;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
 }
 
 .invoice-meta p {
@@ -592,12 +593,12 @@
 }
 
 .invoice-body h4 {
-	font-size: 18px;
-	font-weight: bold;
-	color: #2c3e50;
-	margin-bottom: 15px;
-	border-bottom: 2px solid #3498db;
-	padding-bottom: 5px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 12px;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 4px;
 }
 
 .customer-info p, .payment-info p {
@@ -607,23 +608,26 @@
 }
 
 .invoice-table {
-	margin: 20px 0;
-	border-collapse: collapse;
+    margin: 16px 0;
+    border-collapse: collapse;
+    border: 2px dashed #7f8c8d; /* dashed frame like sample grid */
+    border-radius: 10px;
+    overflow: hidden;
 }
 
 .invoice-table th {
-	background-color: #34495e;
-	color: white;
-	font-weight: bold;
-	padding: 12px 8px;
-	font-size: 14px;
-	border: 1px solid #2c3e50;
+    background-color: #f2f3f5;
+    color: #2c3e50;
+    font-weight: 700;
+    padding: 10px 8px;
+    font-size: 14px;
+    border: 1px solid #bdc3c7;
 }
 
 .invoice-table td {
-	padding: 10px 8px;
-	border: 1px solid #bdc3c7;
-	font-size: 14px;
+    padding: 10px 8px;
+    border: 1px solid #dfe3e6;
+    font-size: 14px;
 }
 
 .invoice-table tbody tr:nth-child(even) {
@@ -635,7 +639,7 @@
 }
 
 .invoice-summary {
-	margin-top: 30px;
+    margin-top: 20px;
 }
 
 .invoice-summary table {
@@ -650,9 +654,9 @@
 }
 
 .total-row {
-	background-color: #3498db !important;
-	color: white !important;
-	font-size: 16px !important;
+    background-color: #3498db !important;
+    color: white !important;
+    font-size: 16px !important;
 }
 
 .total-row td {
@@ -660,9 +664,19 @@
 }
 
 .invoice-footer {
-	margin-top: 40px;
-	padding-top: 20px;
-	border-top: 2px solid #bdc3c7;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 2px solid #bdc3c7;
+}
+
+/* Thank you note similar to sample */
+.invoice-container::after {
+    content: 'Thank you';
+    display: block;
+    text-align: center;
+    font-style: italic;
+    color: #2c3e50;
+    margin-top: 12px;
 }
 
 .invoice-footer p {

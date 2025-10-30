@@ -40,17 +40,49 @@
             </div>
         </div>
 
+        <!-- Tabs -->
+        <ul class="nav nav-tabs mb-3" role="tablist" ng-if="!loading && orders.length > 0">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" ng-class="{active: selectedTab==='all'}" ng-click="setTab('all')">Tất cả</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" ng-class="{active: selectedTab==='pending'}" ng-click="setTab('pending')">Chờ xác nhận</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" ng-class="{active: selectedTab==='confirmed'}" ng-click="setTab('confirmed')">Đã xác nhận</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" ng-class="{active: selectedTab==='delivered'}" ng-click="setTab('delivered')">Đã giao</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" ng-class="{active: selectedTab==='cancelled'}" ng-click="setTab('cancelled')">Đã hủy</button>
+            </li>
+        </ul>
+
+        <!-- Empty state for selected tab -->
+        <div class="row" ng-if="!loading && (orders | filter:tabFilter).length === 0 && orders.length > 0">
+            <div class="col-12">
+                <div class="empty-orders text-center py-5">
+                    <div class="empty-orders-icon mb-4">
+                        <i class="bi bi-inboxes text-muted" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="text-muted mb-2">Không có đơn hàng trong mục này</h5>
+                    <p class="text-muted mb-0">Hãy thử chọn tab khác hoặc tiếp tục mua sắm.</p>
+                </div>
+            </div>
+        </div>
+
         <!-- Orders List -->
         <div class="row" ng-if="!loading && orders.length > 0">
             <div class="col-12">
                 <div class="orders-list">
-                    <div class="card shadow-sm mb-3" ng-repeat="order in orders">
+                    <div class="card shadow-sm mb-3" ng-repeat="order in orders | filter:tabFilter">
                         <div class="card-body">
                             <div class="row align-items-center">
                                 <div class="col-md-3">
                                     <div class="order-info">
                                         <h6 class="order-id mb-1">
-                                            <i class="bi bi-hash me-1"></i>Đơn hàng #{{ order.orderId }}
+                                            Đơn hàng #{{ order.orderId }}
                                         </h6>
                                         <small class="text-muted">
                                             <i class="bi bi-calendar me-1"></i>{{ order.placedAt | date:'dd/MM/yyyy HH:mm' }}
@@ -126,9 +158,12 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">
+                <h5 class="modal-title d-flex align-items-center gap-2">
                     <i class="bi bi-bag me-2"></i>Chi tiết đơn hàng #{{ selectedOrder.orderId }}
                 </h5>
+                <button class="btn btn-outline-info btn-sm" ng-if="selectedOrder && selectedOrder.invoice" data-bs-toggle="modal" data-bs-target="#invoiceModal">
+                    <i class="bi bi-receipt me-1"></i>Hóa đơn
+                </button>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" ng-if="selectedOrder">
@@ -142,6 +177,10 @@
                             <span class="badge" ng-class="getStatusClass(selectedOrder.status)">
                                 {{ getStatusText(selectedOrder.status) }}
                             </span>
+                        </p>
+                        <p class="mb-1" ng-if="selectedOrder.deliveryDate || selectedOrder.deliveryAt">
+                            <strong>Ngày giao dự kiến:</strong>
+                            {{ (selectedOrder.deliveryDate || selectedOrder.deliveryAt) | date:'dd/MM/yyyy HH:mm' }}
                         </p>
                         <p class="mb-1"><strong>Thanh toán:</strong> 
                             <span class="badge" ng-class="getPaymentStatusClass(selectedOrder.invoice)">
@@ -232,6 +271,119 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- Invoice Modal (Customer) -->
+<div class="modal fade" id="invoiceModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-receipt me-2"></i>Hóa đơn</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0" ng-if="selectedOrder && selectedOrder.invoice">
+                <div class="invoice-container">
+                    <div class="invoice-header">
+                        <div class="row">
+                            <div class="col-6">
+                                <h2 class="company-name">BOOKSTORE SYSTEM</h2>
+                                <div class="company-info">
+                                    <p><strong>Địa chỉ:</strong> 123 Đường ABC, Quận XYZ, TP.HCM</p>
+                                    <p><strong>Điện thoại:</strong> (028) 1234-5678</p>
+                                    <p><strong>Email:</strong> info@bookstore.com</p>
+                                </div>
+                            </div>
+                            <div class="col-6 text-end">
+                                <h1 class="invoice-title">HÓA ĐƠN BÁN HÀNG</h1>
+                                <div class="invoice-meta">
+                                    <p><strong>Số hóa đơn:</strong> {{ selectedOrder.invoice.invoiceNumber || ('HD-' + (selectedOrder.invoice.id || 'N/A')) }}</p>
+                                    <p><strong>Ngày xuất:</strong> {{ selectedOrder.invoice.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
+                                    <p><strong>Mã đơn hàng:</strong> OD-{{ selectedOrder.orderId }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="invoice-body">
+                        <div class="row mb-4">
+                            <div class="col-6">
+                                <h4>Thông tin khách hàng</h4>
+                                <div class="customer-info">
+                                    <p><strong>Tên:</strong> {{ selectedOrder.customerName }}</p>
+                                    <p><strong>Điện thoại:</strong> {{ selectedOrder.receiverPhone }}</p>
+                                    <p><strong>Địa chỉ:</strong> {{ selectedOrder.shippingAddress }}</p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <h4>Thông tin giao hàng</h4>
+                                <div class="customer-info">
+                                    <p><strong>Ngày giao dự kiến:</strong> {{ (selectedOrder.deliveryDate || selectedOrder.deliveryAt) | date:'dd/MM/yyyy HH:mm' }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h4>Chi tiết sản phẩm</h4>
+                        <div class="table-responsive">
+                            <table class="table table-bordered invoice-table">
+                                <thead>
+                                    <tr>
+                                        <th width="10%">STT</th>
+                                        <th width="15%">ISBN</th>
+                                        <th width="35%">Tên sách</th>
+                                        <th width="10%" class="text-center">SL</th>
+                                        <th width="15%" class="text-end">Đơn giá</th>
+                                        <th width="15%" class="text-end">Thành tiền</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="item in (selectedOrder.lines || []) track by $index">
+                                        <td class="text-center">{{$index + 1}}</td>
+                                        <td><code>{{item.isbn}}</code></td>
+                                        <td>{{item.bookTitle || item.title}}</td>
+                                        <td class="text-center">{{item.quantity || item.qty}}</td>
+                                        <td class="text-end">{{item.unitPrice | numberFormatted}} ₫</td>
+                                        <td class="text-end"><strong>{{((item.quantity || item.qty) * item.unitPrice) | numberFormatted}} ₫</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="invoice-summary">
+                            <div class="row">
+                                <div class="col-8"></div>
+                                <div class="col-4">
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td><strong>Tạm tính:</strong></td>
+                                            <td class="text-end">{{ selectedOrder.totalAmount | numberFormatted }} ₫</td>
+                                        </tr>
+                                        <tr class="total-row">
+                                            <td><strong>TỔNG CỘNG:</strong></td>
+                                            <td class="text-end"><strong>{{ selectedOrder.totalAmount | numberFormatted }} ₫</strong></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+    <style>
+    .invoice-container { background: #fff; padding: 30px; font-family: 'Times New Roman', serif; line-height: 1.4; border-top: 3px dashed #e74c3c; }
+    .invoice-header { border-bottom: 2px solid #333; padding-bottom: 16px; margin-bottom: 24px; }
+    .company-name { font-size: 28px; font-weight: bold; color: #2c3e50; margin-bottom: 10px; text-transform: uppercase; }
+    .invoice-title { font-size: 34px; font-weight: bold; color: #e74c3c; margin-bottom: 12px; text-transform: uppercase; }
+    .invoice-table { margin: 16px 0; border-collapse: collapse; border: 2px dashed #7f8c8d; border-radius: 10px; overflow: hidden; }
+    .invoice-table th { background-color: #f2f3f5; color: #2c3e50; font-weight: 700; padding: 10px 8px; font-size: 14px; border: 1px solid #bdc3c7; }
+    .invoice-table td { padding: 10px 8px; border: 1px solid #dfe3e6; font-size: 14px; }
+    .invoice-summary { margin-top: 20px; }
+    .invoice-container::after { content: 'Thank you'; display: block; text-align: center; font-style: italic; color: #2c3e50; margin-top: 12px; }
+    </style>
 </div>
 
 <!-- Review Modal -->

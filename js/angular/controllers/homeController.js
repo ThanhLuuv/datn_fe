@@ -1,5 +1,5 @@
 // Home Controller
-app.controller('HomeController', ['$scope', '$http', 'DataService', 'BookstoreService', 'CartService', function($scope, $http, DataService, BookstoreService, CartService) {
+app.controller('HomeController', ['$scope', '$http', '$location', 'DataService', 'BookstoreService', 'CartService', function($scope, $http, $location, DataService, BookstoreService, CartService) {
     $scope.title = 'BookStore - Khám phá thế giới qua những trang sách';
     $scope.message = 'Hệ thống quản lý hiệu sách hiện đại';
     $scope.categories = [];
@@ -193,6 +193,18 @@ app.controller('HomeController', ['$scope', '$http', 'DataService', 'BookstoreSe
                 $scope.error = 'Không tải được sách khuyến mãi';
             })
             .finally(function() { $scope.loading = false; endLoading(); });
+    };
+
+    // Open category: navigate to search page with category filter
+    $scope.openCategory = function(category, keyword) {
+        if (!category) return;
+        var id = category.categoryId || category.id;
+        $location.path('/search').search({
+            categoryId: id,
+            q: (keyword || '').trim(),
+            page: 1,
+            pageSize: 12
+        });
     };
 
     // Load categories data from API

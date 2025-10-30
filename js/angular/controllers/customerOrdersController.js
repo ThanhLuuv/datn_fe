@@ -9,6 +9,18 @@ app.controller('CustomerOrdersController', ['$scope', '$rootScope', 'BookstoreSe
     $scope.title = 'Đơn hàng của tôi';
     $scope.loading = false;
     $scope.orders = [];
+    // Tabs state
+    $scope.selectedTab = 'all'; // all | pending | confirmed | delivered | cancelled
+    $scope.setTab = function(tab) { $scope.selectedTab = tab; };
+    $scope.tabFilter = function(order) {
+        if (!$scope.selectedTab || $scope.selectedTab === 'all') return true;
+        var text = $scope.getStatusText(order.status);
+        if ($scope.selectedTab === 'pending') return text === 'Chờ xác nhận';
+        if ($scope.selectedTab === 'confirmed') return text === 'Đã xác nhận';
+        if ($scope.selectedTab === 'delivered') return text === 'Đã giao';
+        if ($scope.selectedTab === 'cancelled') return text === 'Đã hủy';
+        return true;
+    };
     $scope.selectedOrder = null;
     $scope.returnModel = {
         reason: '',

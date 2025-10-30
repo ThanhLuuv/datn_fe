@@ -192,71 +192,217 @@
                 </div>
             </div>
 
-            <!-- Recent Activity -->
-            <div class="row">
-                <div class="col-lg-8">
-                    <div class="card mb-md">
-                        <div class="card-header">
-                            <h6 class="m-0 font-weight-bold text-primary text-sm">Sách mới</h6>
-                        </div>
-                        <div class="card-body p-md">
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item px-0 py-2" ng-repeat="b in latestBooks">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div class="text-truncate" style="max-width: 520px">
-                                            <i class="bi bi-book me-1"></i><span class="fw-semibold">{{b.title}}</span>
-                                            <div class="small text-muted">ISBN: {{b.isbn}}</div>
-                                        </div>
-                                        <span class="badge bg-primary">{{b.unitPrice | currency}}</span>
-                                    </div>
-                                </li>
-                                <li class="list-group-item px-0 py-2" ng-if="!latestBooks || latestBooks.length === 0">
-                                    <span class="text-muted small">Chưa có dữ liệu</span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="card mb-md">
-                        <div class="card-header">
-                            <h6 class="m-0 font-weight-bold text-primary text-sm">Thống kê nhanh</h6>
-                        </div>
-                        <div class="card-body p-md">
-                            <div class="text-center">
-                                <div class="mb-md">
-                                    <i class="bi bi-graph-up text-success icon-3xl"></i>
-                                </div>
-                                <h4 class="text-success text-2xl">{{stats.growthRate}}%</h4>
-                                <p class="text-muted text-sm">Tăng trưởng so với tháng trước</p>
-                            </div>
-                            
-                            <hr class="my-md">
-                            
-                            <div class="row text-center">
-                                <div class="col-12">
-                                    <div class="d-flex justify-content-between align-items-center small text-muted mb-1">
-                                        <span>Tổng sách</span>
-                                        <strong class="text-primary">{{stats.totalBooks}}</strong>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center small text-muted mb-1">
-                                        <span>Tổng người dùng</span>
-                                        <strong class="text-primary">{{stats.totalUsers}}</strong>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center small text-muted">
-                                        <span>Đơn hàng hôm nay</span>
-                                        <strong class="text-primary">{{stats.todayOrders}}</strong>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
+            <!-- Dashboard Reports: Báo cáo tổng quan -->
+<div class="row mb-4">
+  <!-- Doanh thu -->
+  <div class="col-lg-6 mb-4">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>
+          <i class="bi bi-graph-up"></i> Báo cáo doanh thu
+        </span>
+      </div>
+      <div class="card-body">
+        <!-- Summary revenue -->
+        <div class="mb-3" ng-if="revenueSummary">
+          <div class="alert alert-light border shadow-sm mb-0">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <strong>Tổng doanh thu:</strong>
+                <span class="text-primary fw-bold">{{revenueSummary.total | vnNumber:0}} VNĐ</span>
+              </div>
+              <div class="text-muted small">
+                {{revenueSummary.fromDate | date:'dd/MM/yyyy'}} - {{revenueSummary.toDate | date:'dd/MM/yyyy'}}
+              </div>
             </div>
+          </div>
+        </div>
+        <!-- Báo cáo doanh thu (sửa code html form) -->
+<form class="dashboard-flex-form mb-3" autocomplete="off" ng-submit="viewRevenueReport(true)">
+  <div>
+    <label class="form-label">Loại báo cáo:</label>
+    <select class="form-select" ng-model="revenueFilter.type">
+      <option value="daily">Ngày</option>
+      <option value="monthly">Tháng</option>
+      <option value="quarterly">Quý</option>
+    </select>
+  </div>
+  <div>
+    <label class="form-label">Từ ngày:</label>
+    <input type="date" class="form-control" ng-model="revenueFilter.fromDate">
+  </div>
+  <div>
+    <label class="form-label">Đến ngày:</label>
+    <input type="date" class="form-control" ng-model="revenueFilter.toDate">
+  </div>
+  <div>
+    <label class="form-label" style="opacity:0;">&nbsp;</label>
+    <button class="btn btn-primary w-100" type="submit" ng-disabled="loadingRevenue">
+      <i class="bi bi-search"></i> Xem báo cáo
+    </button>
+  </div>
+</form>
+        
+      </div>
+    </div>
+  </div>
+
+  <!-- Tồn kho -->
+  <div class="col-lg-6 mb-4">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>
+          <i class="bi bi-boxes"></i> Báo cáo tồn kho
+        </span>
+      </div>
+      <div class="card-body">
+        <!-- Summary inventory -->
+        <div class="mb-3" ng-if="inventorySummary">
+          <div class="alert alert-light border shadow-sm mb-2">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <strong>Tổng trị giá tồn kho:</strong>
+                <span class="text-success fw-bold">{{inventorySummary.totalValue | vnNumber:0}} VNĐ</span>
+              </div>
+              <div class="text-muted small">Tổng SL tồn: {{inventorySummary.totalQuantity | number}}</div>
+            </div>
+          </div>
+        </div>
+        <!-- Báo cáo tồn kho (sửa code html form) -->
+<form class="dashboard-flex-form mb-3" autocomplete="off" ng-submit="viewInventoryReport(true)">
+  <div>
+    <label class="form-label">Tính đến ngày:</label>
+    <input type="date" class="form-control" ng-model="inventoryFilter.toDate">
+  </div>
+  <div>
+    <label class="form-label" style="opacity:0;">&nbsp;</label>
+    <button class="btn btn-primary w-100" type="submit" ng-disabled="loadingInventory">
+      <i class="bi bi-search"></i> Xem báo cáo
+    </button>
+  </div>
+</form>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+        
+        <!-- Báo cáo doanh thu modal (đặt trong layout để dùng chung scope) -->
+        <div class="dashboard-backdrop" ng-show="showingDashboardReport"></div>
+        <div class="dashboard-report-modal" id="revenueReportModal" ng-show="showingDashboardReport">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title"><i class="bi bi-bar-chart-line me-2"></i>Preview Báo Cáo Doanh Thu</h5>
+      <button type="button" class="btn-close" ng-click="showingDashboardReport=false"></button>
+    </div>
+    <div class="modal-body">
+      <div ng-if="revenueReportData">
+        <div class="report-header">
+          <div class="brand">
+            <div class="brand-name">BookStore</div>
+            <div class="brand-sub">Hệ thống quản trị báo cáo</div>
+          </div>
+          <div class="report-meta">
+            <div class="meta-item"><span>Thời gian:</span>
+              <strong>{{revenueFilter.fromDate | date:'dd/MM/yyyy'}} - {{revenueFilter.toDate | date:'dd/MM/yyyy'}}</strong>
+            </div>
+            <div class="meta-item"><span>Ngày báo cáo:</span><strong>{{ now | date:'dd/MM/yyyy HH:mm' }}</strong></div>
+            <div class="meta-item"><span>Người lập:</span>
+              <strong>{{getReporterName(reportGeneratedBy) || getReporterName()}}</strong>
+              <span class="text-muted" ng-if="(reportGeneratedBy && reportGeneratedBy.email)">&lt;{{reportGeneratedBy.email}}&gt;</span>
+              <span class="text-muted" ng-if="!(reportGeneratedBy && reportGeneratedBy.email) && currentUser.email">&lt;{{currentUser.email}}&gt;</span>
+            </div>
+          </div>
+        </div>
+        <h2 class="report-title">BÁO CÁO DOANH THU {{revenueFilter.type == 'daily' ? 'Ngày' : revenueFilter.type == 'monthly' ? 'Tháng' : 'Quý' | uppercase}}</h2>
+        <div class="mb-4">
+          <table class="table table-bordered">
+            <thead class="table-light">
+              <tr><th>{{getRevenueHeader()}}</th><th>Doanh Thu (VND)</th></tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="item in revenueReportData">
+                <td ng-bind="item.label"></td>
+                <td ng-bind="item.value | vnNumber:0"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="h4 fw-bold text-end">Tổng doanh thu: <span class="text-danger">{{revenueReportTotal | vnNumber:0}} VNĐ</span></div>
+        <div class="fw-bold mt-4 mb-1" style="text-align:right">Người phê duyệt</div>
+        <div class="fst-italic" style="text-align:right">(Ký và ghi rõ họ & tên)</div>
+      </div>
+      <div ng-if="!revenueReportData" class="text-center text-muted">Chưa có dữ liệu xem chi tiết.</div>
+    </div>
+  </div>
+        </div>
+
+        <!-- Báo cáo tồn kho modal -->
+        <div class="dashboard-backdrop" ng-show="showingDashboardInventory"></div>
+        <div class="dashboard-report-modal" id="inventoryReportModal" ng-show="showingDashboardInventory">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title"><i class="bi bi-archive me-2"></i> Báo Cáo Tồn Kho</h5>
+      <button type="button" class="btn-close" ng-click="showingDashboardInventory=false"></button>
+    </div>
+    <div class="modal-body">
+      <div ng-if="inventoryReportData">
+        <div class="report-header">
+          <div class="brand">
+            <div class="brand-name">BookStore</div>
+            <div class="brand-sub">Hệ thống quản trị báo cáo</div>
+          </div>
+          <div class="report-meta">
+            <div class="meta-item"><span>Tính đến ngày:</span><strong>{{inventoryFilter.toDate | date:'dd/MM/yyyy'}}</strong></div>
+            <div class="meta-item"><span>Ngày báo cáo:</span><strong>{{ now | date:'dd/MM/yyyy HH:mm' }}</strong></div>
+            <div class="meta-item"><span>Người lập:</span>
+              <strong>{{getReporterName(reportGeneratedByInventory) || getReporterName()}}</strong>
+              <span class="text-muted" ng-if="(reportGeneratedByInventory && reportGeneratedByInventory.email)">&lt;{{reportGeneratedByInventory.email}}&gt;</span>
+              <span class="text-muted" ng-if="!(reportGeneratedByInventory && reportGeneratedByInventory.email) && currentUser.email">&lt;{{currentUser.email}}&gt;</span>
+            </div>
+          </div>
+        </div>
+        <h2 class="report-title">BÁO CÁO TỒN KHO</h2>
+        <div>
+          <table class="table table-bordered">
+            <thead class="table-light">
+              <tr>
+                <th>STT</th>
+                <th>ISBN</th>
+                <th>Tên sách</th>
+                <th class="text-end">SL tồn</th>
+                <th class="text-end">Đơn giá TB</th>
+                <th class="text-end">Trị giá</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="item in inventoryReportData">
+                <td>{{$index+1}}</td>
+                <td><code>{{item.isbn}}</code></td>
+                <td>{{item.title}}</td>
+                <td class="text-end">{{item.quantityOnHand | number}}</td>
+                <td class="text-end">{{item.averagePrice | vnNumber:0}}</td>
+                <td class="text-end">{{item.value | vnNumber:0}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="h4 fw-bold text-end mt-2">TỔNG TRỊ GIÁ TỒN KHO: <span class="text-dark">{{inventoryReportTotal | vnNumber:0}} VNĐ</span></div>
+        <div class="fw-bold mt-4 mb-1" style="text-align:right">Người phê duyệt</div>
+        <div class="fst-italic" style="text-align:right">(Ký và ghi rõ họ & tên)</div>
+      </div>
+      <div ng-if="!inventoryReportData" class="text-center text-muted">Chưa có dữ liệu xem chi tiết.</div>
+    </div>
+  </div>
+        </div>
+
         </main>
     </div>
 </div>
 
+<!-- Original Admin Layout Styles (restored) -->
 <style>
 /* Admin Layout Styles */
 .admin-layout {
@@ -283,172 +429,158 @@
     z-index: 1000;
 }
 
-.admin-sidebar-content {
-    padding: 2rem 0;
-    height: 100vh;
-    overflow-y: auto;
-}
+.admin-sidebar-content { padding: 2rem 0; height: 100vh; overflow-y: auto; }
+.admin-sidebar-header { padding: 0 1.5rem 2rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 1rem; }
+.admin-sidebar-title { color: white; font-weight: 700; font-size: 1.1rem; margin: 0; display: flex; align-items: center; gap: 0.5rem; }
+.admin-nav-list { list-style: none; padding: 0; margin: 0; }
+.admin-nav-item { margin: 0.25rem 0; }
+.admin-nav-link { display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.5rem; color: rgba(255, 255, 255, 0.8); text-decoration: none; font-weight: 500; transition: all 0.3s ease; border-left: 3px solid transparent; position: relative; }
+.admin-nav-link:hover { color: white; background-color: rgba(255, 255, 255, 0.1); border-left-color: var(--primary-light); transform: translateX(5px); }
+.admin-nav-link.active { color: white; background-color: rgba(255, 255, 255, 0.15); border-left-color: white; font-weight: 600; }
+.admin-nav-link i { font-size: 1.1rem; width: 20px; text-align: center; }
 
-.admin-sidebar-header {
-    padding: 0 1.5rem 2rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    margin-bottom: 1rem;
-}
-
-.admin-sidebar-title {
-    color: white;
-    font-weight: 700;
-    font-size: 1.1rem;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.admin-nav-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.admin-nav-item {
-    margin: 0.25rem 0;
-}
-
-.admin-nav-link {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 1rem 1.5rem;
-    color: rgba(255, 255, 255, 0.8);
-    text-decoration: none;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    border-left: 3px solid transparent;
-    position: relative;
-}
-
-.admin-nav-link:hover {
-    color: white;
-    background-color: rgba(255, 255, 255, 0.1);
-    border-left-color: var(--primary-light);
-    transform: translateX(5px);
-}
-
-.admin-nav-link.active {
-    color: white;
-    background-color: rgba(255, 255, 255, 0.15);
-    border-left-color: white;
-    font-weight: 600;
-}
-
-.admin-nav-link i {
-    font-size: 1.1rem;
-    width: 20px;
-    text-align: center;
-}
-
-.admin-main-content {
-    background-color: var(--gray-50);
-    padding: 2rem;
-    height: 100vh;
-    overflow-y: auto;
-    margin-left: 0;
-}
-
-/* Stats Cards */
-.border-left-primary {
-    border-left: 4px solid var(--primary-color) !important;
-}
-
-.border-left-success {
-    border-left: 4px solid var(--success-color) !important;
-}
-
-.border-left-info {
-    border-left: 4px solid var(--info-color) !important;
-}
-
-.border-left-warning {
-    border-left: 4px solid var(--warning-color) !important;
-}
-
-.text-xs {
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.text-gray-800 {
-    color: var(--gray-800) !important;
-    font-weight: 700;
-}
-
-.text-gray-300 {
-    color: var(--gray-300) !important;
-}
+.admin-main-content { background-color: var(--gray-50); padding: 2rem; height: 100vh; overflow-y: auto; margin-left: 0; }
 
 /* Card Enhancements */
-.card {
-    border: none;
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(30, 58, 138, 0.08);
-    transition: all 0.3s ease;
-}
+.card { border: none; border-radius: 16px; box-shadow: 0 4px 20px rgba(30, 58, 138, 0.08); transition: all 0.3s ease; }
+.card:hover { transform: translateY(-5px); box-shadow: 0 12px 40px rgba(30, 58, 138, 0.15); }
+.card-header { background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); color: white; border-radius: 16px 16px 0 0 !important; border: none; padding: 1.5rem; font-weight: 600; }
 
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 40px rgba(30, 58, 138, 0.15);
-}
-
-.card-header {
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-    color: white;
-    border-radius: 16px 16px 0 0 !important;
-    border: none;
-    padding: 1.5rem;
-    font-weight: 600;
-}
-
-/* Responsive Design */
+/* Responsive */
 @media (max-width: 768px) {
-    .admin-sidebar {
-        position: fixed;
-        top: 0;
-        left: -100%;
-        width: 280px;
-        transition: left 0.3s ease;
-        z-index: 1050;
-        height: 100vh;
-    }
-    
-    .admin-sidebar.show {
-        left: 0;
-    }
-    
-    .admin-main-content {
-        margin-left: 0;
-        padding: 1rem;
-    }
+    .admin-sidebar { position: fixed; top: 0; left: -100%; width: 280px; transition: left 0.3s ease; z-index: 1050; height: 100vh; }
+    .admin-sidebar.show { left: 0; }
+    .admin-main-content { margin-left: 0; padding: 1rem; }
 }
 
-/* Scrollbar Styling */
-.admin-sidebar-content::-webkit-scrollbar {
-    width: 4px;
+/* Scrollbar */
+.admin-sidebar-content::-webkit-scrollbar { width: 4px; }
+.admin-sidebar-content::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.1); }
+.admin-sidebar-content::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 2px; }
+.admin-sidebar-content::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.5); }
+
+/* Fix modal z-index + layout overrides */
+.modal { z-index: 5000 !important; pointer-events: auto; }
+.modal-backdrop { z-index: 4990 !important; opacity: 0.35 !important; background-color: #000 !important; }
+.modal, .modal-backdrop { position: fixed !important; top: 0; left: 0; right: 0; bottom: 0; }
+.modal-dialog, .modal-content { position: relative; z-index: 5001 !important; }
+
+.dashboard-input-group {
+  align-items: end !important;
+  gap: 10px 12px;
+}
+.dashboard-input-group label.form-label {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  font-weight: 500;
+  color: #222;
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+.dashboard-input-group .form-select,
+.dashboard-input-group .form-control,
+.dashboard-input-group .btn {
+  height: 44px !important;
+  min-height: 44px !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  font-size: 15px;
+}
+.dashboard-input-group .form-select {
+  max-width: 120px !important;
+  min-width: 100px !important;
+}
+.dashboard-input-group .btn {
+  padding: 0 18px;
+  font-weight: 500;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+}
+.dashboard-input-group .col-md-4, .dashboard-input-group .col-md-3, .dashboard-input-group .col-md-2, .dashboard-input-group .col-md-8, .dashboard-input-group .col-md-12, .dashboard-input-group .col-lg-9, .dashboard-input-group .col-lg-3, .dashboard-input-group .d-grid {
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
 }
 
-.admin-sidebar-content::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
+.dashboard-flex-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: nowrap;
+}
+.dashboard-flex-form label {
+  font-size: 15px;
+  height: 20px;
+  font-weight: 500;
+  padding-left: 2px;
+  margin-bottom: 2px;
+  color: #222;
+}
+.dashboard-flex-form .form-select {
+  width: 110px;
+  min-width: 110px;
+  max-width: 130px;
+  height: 44px !important;
+  line-height: 44px !important;
+  border-radius: 8px !important;
+  padding: 0 10px;
+}
+.dashboard-flex-form .form-control {
+  width: 150px;
+  min-width: 120px;
+  max-width: 170px;
+  height: 44px !important;
+  line-height: 44px !important;
+  border-radius: 8px !important;
+  font-size: 15px;
+}
+.dashboard-flex-form .btn {
+  height: 44px !important;
+  min-width: 120px;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 8px !important;
+  padding: 0 24px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: none !important;
+}
+.dashboard-flex-form > div {
+  display: flex; flex-direction: column; justify-content: flex-end;
 }
 
-.admin-sidebar-content::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 2px;
-}
+/* Report modal header styles */
+.report-header { display:flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.report-header .brand { display:flex; flex-direction: column; }
+.report-header .brand-name { font-size: 28px; font-weight: 800; color:#8d6e3b; letter-spacing: .5px; }
+.report-header .brand-sub { color:#6b7280; font-size: 12px; margin-top: 2px; }
+.report-header .report-meta { font-size: 13px; color:#374151; }
+.report-header .report-meta .meta-item { display:flex; gap:8px; justify-content:flex-end; }
+.report-header .report-meta .meta-item span { color:#6b7280; min-width: 110px; text-align: right; }
+.report-title { text-align:center; color:#132a42; font-weight: 700; margin: 6px 0 14px 0; }
 
-.admin-sidebar-content::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.5);
+/* Custom dashboard modal/backdrop */
+.dashboard-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 8998;
+}
+.dashboard-report-modal {
+  position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: 83vw; max-width: 1150px; min-width: 460px; max-height: 90vh;
+  background: #fff; border-radius: 18px; box-shadow: 0 10px 50px #2227; overflow: hidden; padding: 0;
+  z-index: 9000;
+}
+.dashboard-report-modal .modal-content { border: none; border-radius: 18px; box-shadow: none; }
+.dashboard-report-modal .modal-header { border-bottom: 1px solid #f1f3f6; padding: 16px 22px; }
+.dashboard-report-modal .modal-body { padding: 22px; overflow: auto; max-height: calc(90vh - 70px); }
+
+@media (max-width: 850px) {
+  .dashboard-flex-form { flex-wrap: wrap; }
+  .dashboard-flex-form .form-select,
+  .dashboard-flex-form .form-control,
+  .dashboard-flex-form .btn {
+    width: 100%; max-width: unset;
+  }
+  .dashboard-flex-form > div { width: 100%; }
 }
 </style>
 

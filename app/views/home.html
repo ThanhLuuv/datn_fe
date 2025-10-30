@@ -35,12 +35,8 @@
             <div class="container">            
             <div class="row g-4">
                 <div class="col-lg-2 col-md-4 col-sm-6" ng-repeat="category in categories">
-                    <div class="category-card text-center h-100">
-                        <div class="category-icon mb-3">
-                            <i class="bi bi-journal-text"></i>
-                        </div>
-                        <h6 class="category-name">{{category.name || category.categoryName}}</h6>
-                        <small class="text-muted" ng-if="category.bookCount != null">{{category.bookCount}} đầu sách</small>
+                    <div class="category-card text-center h-100" ng-click="openCategory(category)" style="cursor:pointer">
+                        <h6 class="category-name">{{(category.name || category.categoryName)}} <span class="text-muted">({{category.bookCount || 0}})</span></h6>
                     </div>
                 </div>
             </div>
@@ -128,9 +124,7 @@
             <div class="row" ng-if="!loading && newBooks.length === 0">
                 <div class="col-12 text-center">
                     <div class="empty-state">
-                        <i class="bi bi-book empty-icon"></i>
                         <h4>Chưa có sách mới</h4>
-                        <p>Chúng tôi sẽ sớm cập nhật những đầu sách mới!</p>
                     </div>
                 </div>
             </div>
@@ -211,9 +205,7 @@
             <div class="row" ng-if="!loading && promotionBooks.length === 0">
                 <div class="col-12 text-center">
                     <div class="empty-state">
-                        <i class="bi bi-percent empty-icon"></i>
                         <h4>Chưa có sách khuyến mãi</h4>
-                        <p>Hãy quay lại sau để xem những ưu đãi hấp dẫn!</p>
                     </div>
                 </div>
             </div>
@@ -297,9 +289,7 @@
             <div class="row" ng-if="!loading && bestSellers.length === 0">
                 <div class="col-12 text-center">
                     <div class="empty-state">
-                        <i class="bi bi-book empty-icon"></i>
                         <h4>Chưa có sách bán chạy</h4>
-                        <p>Hãy quay lại sau để xem những cuốn sách nổi bật!</p>
                     </div>
                 </div>
             </div>

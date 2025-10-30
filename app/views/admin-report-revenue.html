@@ -101,7 +101,7 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <div><strong>Tên báo cáo:</strong> Báo cáo doanh thu</div>
-                    <div><strong>Khoảng thời gian:</strong> {{filters.fromDate || 'N/A'}} - {{filters.toDate || 'N/A'}}</div>
+                    <div><strong>Khoảng thời gian:</strong> {{filters.fromDate | date:'dd/MM/yyyy' }} - {{filters.toDate | date:'dd/MM/yyyy' }}</div>
                     <div><strong>Ngày tạo:</strong> {{ now | date:'dd/MM/yyyy HH:mm' }}</div>
                     <div><strong>Người tạo:</strong> {{currentUser && currentUser.email || 'N/A'}}</div>
                 </div>
