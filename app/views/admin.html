@@ -105,7 +105,7 @@
             </div>
 
             <!-- Main content -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 admin-main-content">
+            <main class="col-md-9 ms-sm-auto col-lg-10 admin-main-content" ng-class="{'no-scroll': showingDashboardReport || showingDashboardInventory || showingDashboardProfit}">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 class="h2">Dashboard Admin</h1>
                 <div class="btn-toolbar mb-2 mb-md-0">
@@ -288,14 +288,89 @@
   </div>
 </div>
 
+<!-- Profit report row -->
+<div class="row mb-4">
+  <div class="col-lg-6 mb-4">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>
+          <i class="bi bi-cash-coin"></i> Báo cáo lợi nhuận
+        </span>
+      </div>
+      <div class="card-body">
+        <!-- Summary profit -->
+        <div class="mb-3" ng-if="profitSummary">
+          <div class="alert alert-light border shadow-sm mb-0">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <strong>Lợi nhuận:</strong>
+                <span class="fw-bold" ng-class="{'text-success': (profitSummary.profit||0) >= 0, 'text-danger': (profitSummary.profit||0) < 0}">{{profitSummary.profit | vnNumber:0}} VNĐ</span>
+              </div>
+              <div class="text-muted small">{{profitSummary.fromDate | date:'dd/MM/yyyy'}} - {{profitSummary.toDate | date:'dd/MM/yyyy'}}</div>
+            </div>
+          </div>
+        </div>
+
+        <form class="dashboard-flex-form mb-3" autocomplete="off" ng-submit="viewProfitReport(true)">
+          <div>
+            <label class="form-label">Từ ngày:</label>
+            <input type="date" class="form-control" ng-model="profitFilter.fromDate">
+          </div>
+          <div>
+            <label class="form-label">Đến ngày:</label>
+            <input type="date" class="form-control" ng-model="profitFilter.toDate">
+          </div>
+          <div>
+            <label class="form-label" style="opacity:0;">&nbsp;</label>
+            <button class="btn btn-primary w-100" type="submit" ng-disabled="loadingProfit">
+              <i class="bi bi-search"></i> Xem báo cáo
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6 mb-4">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>
+          <i class="bi bi-pie-chart"></i> Tỷ lệ sách theo danh mục
+        </span>
+      </div>
+      <div class="card-body">
+        <div class="row align-items-center">
+          <div class="col-md-6 d-flex justify-content-center mb-3 mb-md-0">
+            <div class="pie-chart" ng-style="{'background': 'conic-gradient(' + (categoryPie.gradient||'transparent') + ')'}"></div>
+          </div>
+          <div class="col-md-6">
+            <ul class="pie-legend list-unstyled mb-0">
+              <li class="d-flex align-items-center mb-2" ng-repeat="it in categoryPie.items">
+                <span class="legend-dot" ng-style="{'background-color': it.color}"></span>
+                <span class="flex-grow-1">{{it.label}}</span>
+                <strong class="ms-2">{{it.percent | number:1}}%</strong>
+              </li>
+              <li ng-if="!categoryPie.items || categoryPie.items.length==0" class="text-muted">Chưa có dữ liệu.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
         
         <!-- Báo cáo doanh thu modal (đặt trong layout để dùng chung scope) -->
-        <div class="dashboard-backdrop" ng-show="showingDashboardReport"></div>
+        <div class="dashboard-backdrop" ng-show="showingDashboardReport" ng-click="showingDashboardReport=false"></div>
         <div class="dashboard-report-modal" id="revenueReportModal" ng-show="showingDashboardReport">
-  <div class="modal-content">
+  <div class="modal-content" ng-click="$event.stopPropagation()">
     <div class="modal-header">
       <h5 class="modal-title"><i class="bi bi-bar-chart-line me-2"></i>Preview Báo Cáo Doanh Thu</h5>
-      <button type="button" class="btn-close" ng-click="showingDashboardReport=false"></button>
+      <div class="d-flex align-items-center" style="gap:8px;">
+        <button type="button" class="btn btn-sm btn-light" ng-click="$event.stopPropagation(); exportRevenuePdf()">
+          <i class="bi bi-download"></i> Tải PDF
+        </button>
+        <button type="button" class="btn-close" ng-click="$event.stopPropagation(); showingDashboardReport=false"></button>
+      </div>
     </div>
     <div class="modal-body">
       <div ng-if="revenueReportData">
@@ -340,12 +415,17 @@
         </div>
 
         <!-- Báo cáo tồn kho modal -->
-        <div class="dashboard-backdrop" ng-show="showingDashboardInventory"></div>
-        <div class="dashboard-report-modal" id="inventoryReportModal" ng-show="showingDashboardInventory">
-  <div class="modal-content">
+        <div class="inventory-backdrop" ng-show="showingDashboardInventory" ng-click="showingDashboardInventory=false"></div>
+        <div class="inventory-report-modal" id="inventoryReportModal" ng-show="showingDashboardInventory">
+  <div class="modal-content" ng-click="$event.stopPropagation()">
     <div class="modal-header">
       <h5 class="modal-title"><i class="bi bi-archive me-2"></i> Báo Cáo Tồn Kho</h5>
-      <button type="button" class="btn-close" ng-click="showingDashboardInventory=false"></button>
+      <div class="d-flex align-items-center" style="gap:8px;">
+        <button type="button" class="btn btn-sm btn-light" ng-click="$event.stopPropagation(); exportInventoryPdf()">
+          <i class="bi bi-download"></i> Tải PDF
+        </button>
+        <button type="button" class="btn-close" ng-click="$event.stopPropagation(); showingDashboardInventory=false"></button>
+      </div>
     </div>
     <div class="modal-body">
       <div ng-if="inventoryReportData">
@@ -364,6 +444,8 @@
             </div>
           </div>
         </div>
+
+        
         <h2 class="report-title">BÁO CÁO TỒN KHO</h2>
         <div>
           <table class="table table-bordered">
@@ -377,14 +459,21 @@
                 <th class="text-end">Trị giá</th>
               </tr>
             </thead>
-            <tbody>
-              <tr ng-repeat="item in inventoryReportData">
+            <tbody ng-repeat="grp in inventoryGroups">
+              <tr class="table-secondary">
+                <td colspan="6"><strong>{{grp.category}}</strong></td>
+              </tr>
+              <tr ng-repeat="item in grp.items">
                 <td>{{$index+1}}</td>
                 <td><code>{{item.isbn}}</code></td>
                 <td>{{item.title}}</td>
                 <td class="text-end">{{item.quantityOnHand | number}}</td>
                 <td class="text-end">{{item.averagePrice | vnNumber:0}}</td>
                 <td class="text-end">{{item.value | vnNumber:0}}</td>
+              </tr>
+              <tr>
+                <td colspan="5" class="text-end"><strong>Tổng trị giá</strong></td>
+                <td class="text-end"><strong>{{grp.subtotal | vnNumber:0}} VNĐ</strong></td>
               </tr>
             </tbody>
           </table>
@@ -394,6 +483,60 @@
         <div class="fst-italic" style="text-align:right">(Ký và ghi rõ họ & tên)</div>
       </div>
       <div ng-if="!inventoryReportData" class="text-center text-muted">Chưa có dữ liệu xem chi tiết.</div>
+    </div>
+  </div>
+        </div>
+
+        <!-- Báo cáo lợi nhuận modal -->
+        <div class="profit-backdrop" ng-show="showingDashboardProfit" ng-click="showingDashboardProfit=false"></div>
+        <div class="profit-report-modal" id="profitReportModal" ng-show="showingDashboardProfit">
+  <div class="modal-content" ng-click="$event.stopPropagation()">
+    <div class="modal-header">
+      <h5 class="modal-title"><i class="bi bi-cash-coin me-2"></i> Báo Cáo Lợi Nhuận</h5>
+      <div class="d-flex align-items-center" style="gap:8px;">
+        <button type="button" class="btn btn-sm btn-light" ng-click="$event.stopPropagation(); exportProfitPdf()">
+          <i class="bi bi-download"></i> Tải PDF
+        </button>
+        <button type="button" class="btn-close" ng-click="$event.stopPropagation(); showingDashboardProfit=false"></button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div ng-if="loadingProfit" class="text-center py-4">
+        <div class="spinner-border text-primary" role="status"></div>
+        <div class="text-muted mt-2">Đang tải báo cáo...</div>
+      </div>
+      <div ng-if="!loadingProfit && profitReportData">
+        <div class="report-header">
+          <div class="brand">
+            <div class="brand-name">BookStore</div>
+            <div class="brand-sub">Hệ thống quản trị báo cáo</div>
+          </div>
+          <div class="report-meta">
+            <div class="meta-item"><span>Thời gian:</span><strong>{{profitFilter.fromDate | date:'dd/MM/yyyy'}} - {{profitFilter.toDate | date:'dd/MM/yyyy'}}</strong></div>
+            <div class="meta-item"><span>Ngày báo cáo:</span><strong>{{ now | date:'dd/MM/yyyy HH:mm' }}</strong></div>
+            <div class="meta-item"><span>Người lập:</span>
+              <strong>{{getReporterName(reportGeneratedByProfit) || getReporterName()}}</strong>
+              <span class="text-muted" ng-if="(reportGeneratedByProfit && reportGeneratedByProfit.email)">&lt;{{reportGeneratedByProfit.email}}&gt;</span>
+              <span class="text-muted" ng-if="!(reportGeneratedByProfit && reportGeneratedByProfit.email) && currentUser.email">&lt;{{currentUser.email}}&gt;</span>
+            </div>
+          </div>
+        </div>
+        <h2 class="report-title">BÁO CÁO LỢI NHUẬN</h2>
+        <div class="mb-3">
+          <table class="table table-bordered">
+            <tbody>
+              <tr><th style="width:40%">Số đơn hàng (đã thanh toán)</th><td class="text-end">{{profitReportData.ordersCount | number}}</td></tr>
+              <tr><th>Doanh thu (thu tiền)</th><td class="text-end">{{profitReportData.revenue | vnNumber:0}} VNĐ</td></tr>
+              <tr><th>Giá vốn hàng bán (COGS)</th><td class="text-end">{{profitReportData.cogs | vnNumber:0}} VNĐ</td></tr>
+              <tr><th>Chi phí hoạt động</th><td class="text-end">{{profitReportData.opex | vnNumber:0}} VNĐ</td></tr>
+              <tr class="table-light"><th>LỢI NHUẬN</th><td class="text-end fw-bold" ng-class="{'text-success': (profitReportData.profit||0) >= 0, 'text-danger': (profitReportData.profit||0) < 0}">{{profitReportData.profit | vnNumber:0}} VNĐ</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="fw-bold mt-4 mb-1" style="text-align:right">Người phê duyệt</div>
+        <div class="fst-italic" style="text-align:right">(Ký và ghi rõ họ & tên)</div>
+      </div>
+      <div ng-if="!loadingProfit && !profitReportData" class="text-center text-muted">Chưa có dữ liệu xem chi tiết.</div>
     </div>
   </div>
         </div>
@@ -560,6 +703,9 @@
 .report-title { text-align:center; color:#132a42; font-weight: 700; margin: 6px 0 14px 0; }
 
 /* Custom dashboard modal/backdrop */
+.pie-chart { width: 220px; height: 220px; border-radius: 50%; box-shadow: inset 0 0 0 14px #fff, 0 6px 18px rgba(0,0,0,.08); }
+.pie-legend .legend-dot { display:inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 8px; }
+.pie-legend li { font-size: 14px; color: #374151; }
 .dashboard-backdrop {
   position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 8998;
 }
@@ -572,6 +718,22 @@
 .dashboard-report-modal .modal-content { border: none; border-radius: 18px; box-shadow: none; }
 .dashboard-report-modal .modal-header { border-bottom: 1px solid #f1f3f6; padding: 16px 22px; }
 .dashboard-report-modal .modal-body { padding: 22px; overflow: auto; max-height: calc(90vh - 70px); }
+
+/* Dedicated styles to avoid modal conflicts */
+.inventory-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 8996; }
+.inventory-report-modal { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 83vw; max-width: 1150px; min-width: 460px; max-height: 90vh; background:#fff; border-radius: 18px; box-shadow: 0 10px 50px #2227; overflow: hidden; padding:0; z-index: 8997; }
+.inventory-report-modal .modal-content { border:none; border-radius:18px; box-shadow:none; }
+.inventory-report-modal .modal-header { border-bottom:1px solid #f1f3f6; padding:16px 22px; }
+.inventory-report-modal .modal-body { padding:22px; overflow:auto; max-height: calc(90vh - 70px); }
+
+.profit-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 10010; }
+.profit-report-modal { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 83vw; max-width: 1150px; min-width: 460px; max-height: 90vh; background:#fff; border-radius:18px; box-shadow:0 10px 50px #2227; overflow:hidden; padding:0; z-index: 10011; }
+.profit-report-modal .modal-content { border:none; border-radius:18px; box-shadow:none; }
+.profit-report-modal .modal-header { border-bottom:1px solid #f1f3f6; padding:16px 22px; }
+.profit-report-modal .modal-body { padding:22px; overflow:auto; max-height: calc(90vh - 70px); }
+
+/* Disable inner scrolling when custom dashboard modals are shown (avoid double scrollbars) */
+.no-scroll { overflow: hidden !important; }
 
 @media (max-width: 850px) {
   .dashboard-flex-form { flex-wrap: wrap; }

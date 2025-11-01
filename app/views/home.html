@@ -172,11 +172,7 @@
                                 <div class="price-old" ng-if="hasPromo(book)">{{book.currentPrice | currency:'':0}} VNĐ</div>
                             </div>
                             
-                            <div class="promotion-info mb-2" ng-if="book.activePromotions && book.activePromotions.length > 0">
-                                <small class="text-success">
-                                    <i class="bi bi-gift me-1"></i>{{book.activePromotions[0].name}}
-                                </small>
-                            </div>
+                            
                             
                             <div class="book-actions">
                                 <button class="btn btn-sm btn-primary" 

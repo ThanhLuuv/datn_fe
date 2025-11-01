@@ -31,12 +31,14 @@ app.controller('BooksController', ['$scope', 'BookstoreService', 'AuthService', 
 		$scope.loading = true;
 		$scope.error = null;
 		
+		var categoryIdParam = ($scope.selectedCategoryId !== '' && $scope.selectedCategoryId != null) ? $scope.selectedCategoryId : undefined;
+		var publisherIdParam = ($scope.selectedPublisherId !== '' && $scope.selectedPublisherId != null) ? $scope.selectedPublisherId : undefined;
 		BookstoreService.getBooks({
 			pageNumber: $scope.currentPage,
 			pageSize: $scope.pageSize,
 			searchTerm: $scope.searchTerm,
-			categoryId: $scope.selectedCategoryId,
-			publisherId: $scope.selectedPublisherId
+			categoryId: categoryIdParam,
+			publisherId: publisherIdParam
 		})
 			.then(function(response) {
 				// Parse API response according to actual structure

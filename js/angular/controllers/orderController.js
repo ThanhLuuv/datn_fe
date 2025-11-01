@@ -289,17 +289,18 @@ $scope.closeOrderDetail = function(){
     $rootScope.selectedOrder = null;
 };
 
-	$scope.cancelOrder = function(order){
-		var id = order.orderId || order.id;
-		BookstoreService.approveOrder(id, { approved: false, note: 'Hủy đơn hàng' })
-			.then(function(){
-				$scope.addToast('success', 'Đã hủy đơn hàng');
-				$scope.loadOrders();
-			})
-			.catch(function(){
-				$scope.addToast('danger', 'Không thể hủy đơn hàng');
-			});
-	};
+$scope.cancelOrder = function(order){
+    var id = order.orderId || order.id;
+    var payload = { reason: 'Hủy đơn hàng', note: 'Admin/Employee hủy' };
+    BookstoreService.cancelOrder(id, payload)
+        .then(function(){
+            $scope.addToast('success', 'Đã hủy đơn hàng');
+            $scope.loadOrders();
+        })
+        .catch(function(){
+            $scope.addToast('danger', 'Không thể hủy đơn hàng');
+        });
+};
 
 $scope.assignDelivery = function(order){
     console.log('Assign delivery clicked for order:', order);

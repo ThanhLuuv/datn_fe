@@ -31,7 +31,8 @@ app.factory('CartService', ['$rootScope', '$http', 'APP_CONFIG', function($rootS
     }
 
     function findIndex(items, isbn, unitPrice) {
-        return items.findIndex(function(x) { return x.isbn === isbn && x.unitPrice === unitPrice; });
+        // Merge items by ISBN only to avoid duplicate lines when price changes/promotions apply
+        return items.findIndex(function(x) { return x.isbn === isbn; });
     }
 
     function computeTotals(cart) {
@@ -169,7 +170,8 @@ app.factory('CartService', ['$rootScope', '$http', 'APP_CONFIG', function($rootS
         },
         removeItem: function(isbn, unitPrice) {
             var cart = readCart();
-            cart.items = cart.items.filter(function(x) { return !(x.isbn === isbn && x.unitPrice === unitPrice); });
+            // Remove by ISBN (ignore unit price variants)
+            cart.items = cart.items.filter(function(x) { return x.isbn !== isbn; });
             writeCart(computeTotals(cart));
             return cart;
         }

@@ -221,6 +221,27 @@ app.controller('CustomerOrdersController', ['$scope', '$rootScope', 'BookstoreSe
         }).finally(function(){ $scope.submittingReview = false; $scope.$applyAsync(); });
     };
 
+    // Customer cancel pending order
+    $scope.cancelOrder = function(order) {
+        if (!order || !order.orderId) return;
+        if ($scope.getStatusText(order.status) !== 'Chờ xác nhận') {
+            $scope.addToast('warning', 'Chỉ có thể hủy đơn đang chờ xác nhận');
+            return;
+        }
+        var ok = confirm('Bạn có chắc muốn hủy đơn #' + order.orderId + ' ?');
+        if (!ok) return;
+        var payload = { reason: 'Khách hàng hủy đơn', note: '' };
+        BookstoreService.cancelOrder(order.orderId, payload)
+            .then(function(){
+                $scope.addToast('success', 'Đã hủy đơn hàng thành công');
+                $scope.loadOrders();
+            })
+            .catch(function(err){
+                var msg = (err && err.data && err.data.message) || 'Không thể hủy đơn';
+                $scope.addToast('danger', msg);
+            });
+    };
+
     // Return order function
     $scope.returnOrder = function(order) {
         if (!order || !order.orderId) {

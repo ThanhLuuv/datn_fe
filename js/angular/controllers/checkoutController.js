@@ -143,20 +143,33 @@ app.controller('CheckoutController', ['$scope', '$location', 'CartService', 'Boo
         }
         shippingAddress = ($scope.form.areaType === 'inner' ? 'Nội thành' : 'Ngoại thành') + ', ' + shippingAddress;
         
-        // Convert suggested delivery time to ISO string if provided
-        var deliveryAtIso = null;
-        if ($scope.form.deliveryAt) {
+        // Convert datetime-local to ISO 8601 with local offset (e.g., 2025-11-03T21:21:00+07:00)
+        function toIsoWithOffset(localStr){
+            // localStr expected: 'YYYY-MM-DDTHH:mm' or 'YYYY-MM-DDTHH:mm:ss'
             try {
-                // input type datetime-local gives local time without timezone
-                // new Date(string) will parse local time; convert to ISO-8601 Z for API
-                var dt = new Date($scope.form.deliveryAt);
-                if (!isNaN(dt.getTime())) {
-                    deliveryAtIso = dt.toISOString();
-                }
-            } catch (e) {
-                deliveryAtIso = null;
+                if (!localStr) return null;
+                // Ensure seconds present
+                var normalized = localStr.length === 16 ? (localStr + ':00') : localStr;
+                var dt = new Date(normalized);
+                if (isNaN(dt.getTime())) return null;
+                var y = dt.getFullYear();
+                var m = String(dt.getMonth()+1).padStart(2,'0');
+                var d = String(dt.getDate()).padStart(2,'0');
+                var hh = String(dt.getHours()).padStart(2,'0');
+                var mm = String(dt.getMinutes()).padStart(2,'0');
+                var ss = String(dt.getSeconds()).padStart(2,'0');
+                var offsetMin = -dt.getTimezoneOffset(); // e.g., +420 for +07:00
+                var sign = offsetMin >= 0 ? '+' : '-';
+                var absMin = Math.abs(offsetMin);
+                var offH = String(Math.floor(absMin/60)).padStart(2,'0');
+                var offM = String(absMin%60).padStart(2,'0');
+                return y+'-'+m+'-'+d+'T'+hh+':'+mm+':'+ss+sign+offH+':'+offM;
+            } catch(e){
+                return null;
             }
         }
+
+        var deliveryAtIso = toIsoWithOffset($scope.form.deliveryAt);
 
         var payload = {
             receiverName: $scope.form.fullName,

@@ -52,21 +52,27 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
     // Bổ sung biến và hàm cho dashboard báo cáo
     $scope.revenueFilter = { type:'monthly', fromDate:'', toDate:'' };
     $scope.inventoryFilter = { toDate:'' };
+    $scope.profitFilter = { fromDate:'', toDate:'' };
     $scope.loadingRevenue = false;
     $scope.loadingInventory = false;
     $scope.revenueChart = null;
     $scope.inventoryChart = null;
+    $scope.categoryShare = { total: 0, items: [] };
+    $scope.categoryPie = { gradient: '', items: [] };
+    $scope.profitReportData = null;
     $scope.revenueReportData = null;
     $scope.inventoryReportData = null;
     $scope.revenueReportTotal = 0;
     $scope.inventoryReportTotal = 0;
     $scope.revenueSummary = null;
     $scope.inventorySummary = null;
+    $scope.profitSummary = null;
     $scope.currentUser = AuthService.getCurrentUser ? (AuthService.getCurrentUser()||{}) : {};
     $scope.now = new Date();
     // modal flags for custom dashboard modals
     $scope.showingDashboardReport = false;
     $scope.showingDashboardInventory = false;
+    $scope.showingDashboardProfit = false;
 
     // Resolve reporter display name robustly
     $scope.getReporterName = function(user) {
@@ -179,6 +185,8 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
         $scope.revenueChart = true;
         // Mở modal preview khi người dùng yêu cầu (custom modal)
         if (openModal) {
+          $scope.showingDashboardInventory = false;
+          $scope.showingDashboardProfit = false;
           $scope.showingDashboardReport = true;
         }
       }).catch(function(e){
@@ -230,6 +238,15 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
         var catArr = Object.keys(byCat).map(function(k){ return { category: k, value: byCat[k] }; }).sort(function(a,b){ return b.value - a.value; });
         var totalVal = $scope.inventoryReportTotal || 1;
         var catPercents = catArr.slice(0,5).map(function(x){ return { category: x.category, percent: Math.round((x.value/totalVal)*1000)/10, value: x.value }; });
+        // Build groups for UI rendering
+        var groupsMap = {};
+        $scope.inventoryReportData.forEach(function(it){
+          var cat = it.category || 'Khác';
+          if (!groupsMap[cat]) groupsMap[cat] = { category: cat, items: [], subtotal: 0 };
+          groupsMap[cat].items.push(it);
+          groupsMap[cat].subtotal += Number(it.value||0);
+        });
+        $scope.inventoryGroups = Object.keys(groupsMap).sort().map(function(k){ return groupsMap[k]; });
         $scope.inventorySummary = {
           totalValue: $scope.inventoryReportTotal,
           totalQuantity: totalQty,
@@ -237,11 +254,57 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
         };
         $scope.inventoryChart = true;
         if (openModal) {
+          $scope.showingDashboardReport = false;
+          $scope.showingDashboardProfit = false;
           $scope.showingDashboardInventory = true;
         }
       }).catch(function(e){
         $scope.addToast('danger','Không thể tải báo cáo tồn kho');
       }).finally(function(){ $scope.loadingInventory = false; $scope.$applyAsync(); });
+    };
+
+    // Xem báo cáo lợi nhuận
+    $scope.viewProfitReport = function(openModal) {
+      $scope.loadingProfit = true;
+      $scope.profitReportData = null;
+      $scope.profitSummary = null;
+      var f = $scope.profitFilter.fromDate;
+      var t = $scope.profitFilter.toDate;
+      if (!f || !t) { $scope.loadingProfit = false; $scope.addToast('danger','Vui lòng chọn đủ khoảng ngày!'); return; }
+      function toYMD(d){ if (typeof d === 'string') return d.slice(0,10); var dt = (d instanceof Date)? d : new Date(d); return dt.getFullYear()+'-'+('0'+(dt.getMonth()+1)).slice(-2)+'-'+('0'+dt.getDate()).slice(-2); }
+      var fromStr = toYMD(f), toStr = toYMD(t);
+      if (openModal) {
+        $scope.showingDashboardReport = false;
+        $scope.showingDashboardInventory = false;
+        $scope.showingDashboardProfit = true;
+      }
+      BookstoreService.getProfitReport({ fromDate: fromStr, toDate: toStr })
+        .then(function(res){
+          var data = res && res.data && res.data.data;
+          if (!data) { $scope.addToast('warning','Không có dữ liệu lợi nhuận'); return; }
+          // capture generatedBy if provided by API
+          if (data && data.generatedBy) {
+            $scope.reportGeneratedByProfit = data.generatedBy;
+          } else {
+            $scope.reportGeneratedByProfit = null;
+          }
+          $scope.profitReportData = {
+            ordersCount: Number(data.ordersCount||0),
+            revenue: Number(data.revenue||0),
+            cogs: Number(data.costOfGoods||0),
+            opex: Number(data.operatingExpenses||0),
+            profit: Number(data.profit||0)
+          };
+          // Always display exactly the user-selected range to avoid timezone shifts
+          $scope.profitSummary = {
+            fromDate: fromStr,
+            toDate: toStr,
+            profit: $scope.profitReportData.profit
+          };
+          // modal đã mở ở trên; chỉ cập nhật dữ liệu
+        })
+        .catch(function(){ $scope.addToast('danger','Không thể tải báo cáo lợi nhuận'); })
+        .finally(function(){ $scope.loadingProfit = false; $scope.$applyAsync(); });
     };
 
     // Initialize controller
@@ -257,13 +320,134 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
             $scope.revenueFilter.fromDate = monthStart;
             $scope.revenueFilter.toDate = now;
             $scope.inventoryFilter.toDate = now;
+            $scope.profitFilter.fromDate = monthStart;
+            $scope.profitFilter.toDate = now;
             // Defer to next digest to make sure bindings are ready
             setTimeout(function(){
                 $scope.viewRevenueReport(false);
                 $scope.viewInventoryReport(false);
+                $scope.viewProfitReport(false);
+                $scope.loadBooksByCategoryShare();
             }, 0);
         } catch(e) { console.warn('Auto-load dashboard reports failed', e); }
     };
+
+    // Load books share by category for pie chart
+    $scope.loadBooksByCategoryShare = function() {
+      BookstoreService.getBooksByCategoryShare()
+        .then(function(res){
+          var data = res && res.data && res.data.data;
+          if (!data || !Array.isArray(data.items)) { $scope.categoryShare = { total:0, items: [] }; return; }
+          var total = Number(data.total || 0);
+          var items = data.items.map(function(it){
+            return {
+              category: it.category || 'Khác',
+              count: Number(it.count || 0),
+              percent: Number(it.percent || (total ? (it.count*100/total) : 0))
+            };
+          }).filter(function(x){ return x.count > 0; });
+          // sort desc by percent and keep top 8, group the rest as 'Khác'
+          items.sort(function(a,b){ return b.percent - a.percent; });
+          var top = items.slice(0,8);
+          var rest = items.slice(8);
+          if (rest.length > 0) {
+            var restCount = rest.reduce(function(a,b){ return a + b.count; }, 0);
+            var restPercent = rest.reduce(function(a,b){ return a + b.percent; }, 0);
+            top.push({ category: 'Khác', count: restCount, percent: Math.round(restPercent*100)/100 });
+          }
+          // normalize percentages to 100
+          var sumPct = top.reduce(function(a,b){ return a + b.percent; }, 0) || 1;
+          top = top.map(function(x){ return { category: x.category, count: x.count, percent: Math.round((x.percent*100/sumPct)*100)/100 }; });
+
+          $scope.categoryShare = { total: total, items: top };
+          // Build conic-gradient string
+          var palette = ['#4f46e5','#22c55e','#f59e0b','#ef4444','#06b6d4','#a855f7','#84cc16','#f97316','#3b82f6','#14b8a6'];
+          var accum = 0;
+          var segments = [];
+          var legend = [];
+          for (var i=0;i<top.length;i++) {
+            var color = palette[i % palette.length];
+            var start = accum;
+            var pct = Math.max(0, Math.min(100, Number(top[i].percent)));
+            accum = Math.min(100, start + pct);
+            segments.push(color + ' ' + start + '% ' + accum + '%');
+            legend.push({ color: color, label: top[i].category, percent: pct });
+          }
+          // fill leftover with transparent if any gap
+          if (accum < 100) segments.push('transparent ' + accum + '% 100%');
+          $scope.categoryPie = { gradient: segments.join(', '), items: legend };
+        })
+        .catch(function(){ $scope.categoryShare = { total:0, items: [] }; });
+    };
+
+    // ===== Export report to PDF =====
+    function ensureHtml2PdfLoaded() {
+      return new Promise(function(resolve, reject){
+        if (window.html2pdf) return resolve();
+        var script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+        script.onload = function(){ resolve(); };
+        script.onerror = function(){ reject(new Error('Failed to load html2pdf.js')); };
+        document.head.appendChild(script);
+      });
+    }
+
+    function exportElementToPdf(el, filename){
+      return ensureHtml2PdfLoaded().then(function(){
+        var opt = {
+          margin:       10,
+          filename:     filename || 'report.pdf',
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  { scale: 2, useCORS: true, scrollY: 0 },
+          jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        return window.html2pdf().set(opt).from(el).save();
+      });
+    }
+
+    // Fallback (print -> user chooses Save as PDF manually)
+    function openPrintWindowWithHtml(html, title) {
+      var win = window.open('', '_blank');
+      if (!win) { $scope.addToast('danger','Trình duyệt chặn cửa sổ mới'); return; }
+      win.document.open();
+      win.document.write('<!doctype html><html><head><meta charset="utf-8"><title>'+ (title||'Report') +'</title>');
+      // clone styles from current document
+      try {
+        var nodes = document.querySelectorAll('link[rel="stylesheet"], style');
+        for (var i=0;i<nodes.length;i++) {
+          win.document.write(nodes[i].outerHTML);
+        }
+      } catch(e) {}
+      // add print styles
+      win.document.write('<style>@page{size:auto;margin:16mm;} body{padding:0 8mm;font-family:inherit;-webkit-print-color-adjust:exact;print-color-adjust:exact;} .modal-header .btn-close,.modal-header .btn{display:none!important;} .dashboard-report-modal,.inventory-report-modal,.profit-report-modal{position:static;transform:none;width:auto;max-width:none;box-shadow:none;} .modal-body{max-height:none;overflow:visible;} .table{width:100%;}</style>');
+      win.document.write('</head><body>');
+      win.document.write('<div class="print-container">' + html + '</div>');
+      win.document.write('</body></html>');
+      win.document.close();
+      // ensure print after load
+      var doPrint = function(){ try { win.focus(); win.print(); } catch(e) {} };
+      if (win.document.readyState === 'complete') {
+        setTimeout(doPrint, 150);
+      } else {
+        win.onload = function(){ setTimeout(doPrint, 150); };
+      }
+    }
+
+    function exportReport(selector, title){
+      try {
+        var el = document.querySelector(selector);
+        if (!el) { $scope.addToast('danger','Không tìm thấy nội dung báo cáo'); return; }
+        // Try html2pdf first for auto-download; fallback to print
+        exportElementToPdf(el, (title||'report') + '.pdf')
+          .catch(function(){ openPrintWindowWithHtml(el.innerHTML, title); });
+      } catch(e) {
+        $scope.addToast('danger','Không thể xuất PDF');
+      }
+    }
+
+    $scope.exportRevenuePdf = function(){ exportReport('#revenueReportModal .modal-body', 'Báo cáo doanh thu'); };
+    $scope.exportInventoryPdf = function(){ exportReport('#inventoryReportModal .modal-body', 'Báo cáo tồn kho'); };
+    $scope.exportProfitPdf = function(){ exportReport('#profitReportModal .modal-body', 'Báo cáo lợi nhuận'); };
 
     // Load statistics
     $scope.loadStats = function() {

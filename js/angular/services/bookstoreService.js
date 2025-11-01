@@ -138,13 +138,21 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     
     // Lấy danh sách sách
     this.getBooks = function(params) {
+        params = params || {};
+        // Only include filters when provided; avoid sending empty strings that may confuse backend
         var queryParams = {
             pageNumber: params.pageNumber || 1,
-            pageSize: params.pageSize || 10,
-            searchTerm: params.searchTerm || '',
-            categoryId: params.categoryId || '',
-            publisherId: params.publisherId || ''
+            pageSize: params.pageSize || 10
         };
+        if (params.searchTerm && String(params.searchTerm).trim() !== '') {
+            queryParams.searchTerm = params.searchTerm;
+        }
+        if (params.categoryId != null && String(params.categoryId) !== '') {
+            queryParams.categoryId = params.categoryId;
+        }
+        if (params.publisherId != null && String(params.publisherId) !== '') {
+            queryParams.publisherId = params.publisherId;
+        }
         
         return $http({
             method: 'GET',
@@ -171,6 +179,14 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
 
 
     // ==================== REPORT APIs ====================
+    // Tỷ lệ sách theo danh mục
+    this.getBooksByCategoryShare = function() {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/report/books-by-category',
+            headers: getAuthHeaders()
+        });
+    };
     // Báo cáo doanh thu theo khoảng thời gian
     this.getRevenueReport = function(params) {
         var queryParams = {
@@ -193,6 +209,21 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         return $http({
             method: 'GET',
             url: baseUrl + '/report/inventory',
+            headers: getAuthHeaders(),
+            params: queryParams
+        });
+    };
+
+    // Báo cáo lợi nhuận (fromDate,toDate)
+    this.getProfitReport = function(params) {
+        params = params || {};
+        var queryParams = {
+            fromDate: params.fromDate || '',
+            toDate: params.toDate || ''
+        };
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/report/profit',
             headers: getAuthHeaders(),
             params: queryParams
         });
