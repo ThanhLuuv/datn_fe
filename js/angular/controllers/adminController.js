@@ -1,5 +1,5 @@
 // Admin Controller
-app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$location', 'BookstoreService', function($scope, AuthService, APP_CONFIG, $location, BookstoreService) {
+app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$location', '$rootScope', 'BookstoreService', function($scope, AuthService, APP_CONFIG, $location, $rootScope, BookstoreService) {
     // Check if user has admin or teacher access
     if (!AuthService.isAdminOrTeacher()) {
         console.log('Access denied: User does not have admin or teacher role');
@@ -8,6 +8,10 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
     }
 
     $scope.title = 'Admin Dashboard';
+    $scope.isEmployeesPage = ($location.path() === '/admin/employees');
+    $rootScope.$on('$routeChangeSuccess', function(){
+        $scope.isEmployeesPage = ($location.path() === '/admin/employees');
+    });
     $scope.isDeliveryOnly = AuthService.isDeliveryEmployee() && !AuthService.isAdmin();
     $scope.stats = {
         totalUsers: 0,
@@ -90,6 +94,88 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
         if (t === 'monthly') return 'Tháng/Năm';
         return 'Ngày';
     };
+
+    // Convert number to Vietnamese words for currency display
+    (function registerVietnameseMoneyHelper(){
+      var DIGITS = ['không','một','hai','ba','bốn','năm','sáu','bảy','tám','chín'];
+      var SCALES = ['', ' nghìn', ' triệu', ' tỷ', ' nghìn tỷ', ' triệu tỷ', ' tỷ tỷ'];
+
+      function readBlock(number, isFirstBlock) {
+        if (!number) return '';
+        var hundred = Math.floor(number / 100);
+        var ten = Math.floor((number % 100) / 10);
+        var unit = number % 10;
+        var parts = [];
+
+        if (hundred !== 0) {
+          parts.push(DIGITS[hundred] + ' trăm');
+        } else if (!isFirstBlock && (ten !== 0 || unit !== 0)) {
+          parts.push('không trăm');
+        }
+
+        if (ten > 1) {
+          parts.push(DIGITS[ten] + ' mươi');
+          if (unit === 1) parts.push('mốt');
+          else if (unit === 4) parts.push('tư');
+          else if (unit === 5) parts.push('lăm');
+          else if (unit !== 0) parts.push(DIGITS[unit]);
+        } else if (ten === 1) {
+          parts.push('mười');
+          if (unit === 1) parts.push('một');
+          else if (unit === 4) parts.push('bốn');
+          else if (unit === 5) parts.push('lăm');
+          else if (unit !== 0) parts.push(DIGITS[unit]);
+        } else if (unit !== 0) {
+          if (hundred !== 0 || (!isFirstBlock && ten === 0)) {
+            parts.push('linh');
+          }
+          if (unit === 5 && (hundred !== 0 || ten !== 0)) parts.push('năm');
+          else parts.push(DIGITS[unit]);
+        }
+
+        return parts.join(' ').replace(/\s+/g, ' ').trim();
+      }
+
+      function capitalize(str) {
+        if (!str) return '';
+        return str.charAt(0).toUpperCase() + str.slice(1);
+      }
+
+      function numberToVietnameseCurrency(amount) {
+        if (amount == null || amount === '') return '';
+        var num = Number(amount);
+        if (!isFinite(num)) return '';
+        var negative = num < 0;
+        var absolute = Math.round(Math.abs(num));
+        if (absolute === 0) return 'Không đồng';
+
+        var blocks = [];
+        while (absolute > 0) {
+          blocks.push(absolute % 1000);
+          absolute = Math.floor(absolute / 1000);
+        }
+
+        var words = [];
+        for (var i = blocks.length - 1; i >= 0; i--) {
+          var blockWords = readBlock(blocks[i], i === blocks.length - 1);
+          if (blockWords) {
+            words.push(blockWords + SCALES[i]);
+          } else if (i === 0 && words.length === 0) {
+            words.push('không');
+          }
+        }
+
+        var sentence = words.join(' ').replace(/\s+/g, ' ').trim();
+        if (!sentence) sentence = 'không';
+        var result = capitalize(sentence) + ' đồng';
+        if (negative) result = 'Âm ' + result.charAt(0).toLowerCase() + result.slice(1);
+        return result;
+      }
+
+      $scope.moneyInWords = function(amount) {
+        return numberToVietnameseCurrency(amount);
+      };
+    })();
 
     // Helper: giữ chỉ 1 backdrop khi mở modal
     function ensureSingleBackdrop() {
@@ -293,7 +379,9 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
             revenue: Number(data.revenue||0),
             cogs: Number(data.costOfGoods||0),
             opex: Number(data.operatingExpenses||0),
-            profit: Number(data.profit||0)
+            profit: Number(data.profit||0),
+            topSoldItems: data.topSoldItems || [],
+            topMarginItems: data.topMarginItems || []
           };
           // Always display exactly the user-selected range to avoid timezone shifts
           $scope.profitSummary = {
@@ -394,14 +482,32 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
 
     function exportElementToPdf(el, filename){
       return ensureHtml2PdfLoaded().then(function(){
+        // Clone element to avoid modifying original
+        var clone = el.cloneNode(true);
+        // Add inline styles to prevent page breaks
+        var tables = clone.querySelectorAll('.profit-table, .table');
+        for (var i = 0; i < tables.length; i++) {
+          tables[i].style.pageBreakInside = 'avoid';
+          tables[i].style.breakInside = 'avoid';
+        }
+        var rows = clone.querySelectorAll('.profit-table tr, .table tr');
+        for (var j = 0; j < rows.length; j++) {
+          rows[j].style.pageBreakInside = 'avoid';
+          rows[j].style.breakInside = 'avoid';
+        }
+        var sections = clone.querySelectorAll('.profit-table-section');
+        for (var k = 0; k < sections.length; k++) {
+          sections[k].style.pageBreakInside = 'avoid';
+          sections[k].style.breakInside = 'avoid';
+        }
         var opt = {
           margin:       10,
           filename:     filename || 'report.pdf',
           image:        { type: 'jpeg', quality: 0.98 },
-          html2canvas:  { scale: 2, useCORS: true, scrollY: 0 },
+          html2canvas:  { scale: 2, useCORS: true, scrollY: 0, logging: false },
           jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
-        return window.html2pdf().set(opt).from(el).save();
+        return window.html2pdf().set(opt).from(clone).save();
       });
     }
 
@@ -419,7 +525,7 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
         }
       } catch(e) {}
       // add print styles
-      win.document.write('<style>@page{size:auto;margin:16mm;} body{padding:0 8mm;font-family:inherit;-webkit-print-color-adjust:exact;print-color-adjust:exact;} .modal-header .btn-close,.modal-header .btn{display:none!important;} .dashboard-report-modal,.inventory-report-modal,.profit-report-modal{position:static;transform:none;width:auto;max-width:none;box-shadow:none;} .modal-body{max-height:none;overflow:visible;} .table{width:100%;}</style>');
+      win.document.write('<style>@page{size:auto;margin:16mm;} body{padding:0 8mm;font-family:inherit;-webkit-print-color-adjust:exact;print-color-adjust:exact;} .modal-header .btn-close,.modal-header .btn{display:none!important;} .dashboard-report-modal,.inventory-report-modal,.profit-report-modal{position:static;transform:none;width:auto;max-width:none;box-shadow:none;} .modal-body{max-height:none;overflow:visible;} .profit-table-section{page-break-inside:avoid!important;break-inside:avoid!important;} .profit-table{page-break-inside:avoid!important;break-inside:avoid!important;} .table{width:100%;page-break-inside:avoid!important;break-inside:avoid!important;} .table thead{display:table-header-group!important;} .table tbody{display:table-row-group!important;page-break-inside:avoid!important;break-inside:avoid!important;} .table tr{page-break-inside:avoid!important;page-break-after:auto!important;break-inside:avoid!important;} .table td,.table th{page-break-inside:avoid!important;break-inside:avoid!important;} .table-responsive{page-break-inside:avoid!important;break-inside:avoid!important;} h4{page-break-after:avoid!important;break-after:avoid!important;}</style>');
       win.document.write('</head><body>');
       win.document.write('<div class="print-container">' + html + '</div>');
       win.document.write('</body></html>');

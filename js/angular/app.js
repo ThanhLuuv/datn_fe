@@ -306,6 +306,19 @@ app.config(['$routeProvider', function($routeProvider) {
                 }]
             }
         })
+        .when('/admin/employees', {
+            templateUrl: 'app/views/admin.html',
+            controller: 'AdminController',
+            resolve: {
+                checkAuth: ['AuthService', '$location', function(AuthService, $location) {
+                    if (!AuthService.isAdmin()) {
+                        $location.path('/home');
+                        return false;
+                    }
+                    return true;
+                }]
+            }
+        })
         .otherwise({
             redirectTo: '/'
         });

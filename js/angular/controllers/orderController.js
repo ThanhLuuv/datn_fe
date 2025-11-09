@@ -115,6 +115,7 @@ app.controller('AdminOrdersController', ['$scope', '$rootScope', 'BookstoreServi
 		keyword: '',
 		customerId: '',
 		status: '',
+		paymentStatus: '',
 		fromDate: '',
 		toDate: ''
 	};
@@ -134,15 +135,30 @@ app.controller('AdminOrdersController', ['$scope', '$rootScope', 'BookstoreServi
 	$scope.loadOrders = function() {
 		$scope.loading = true;
 		$scope.error = null;
-		BookstoreService.getOrders({
-			keyword: $scope.filters.keyword,
-			customerId: $scope.filters.customerId,
-			status: $scope.filters.status,
-			fromDate: $scope.filters.fromDate,
-			toDate: $scope.filters.toDate,
+		// Build params object, only include non-empty values
+		var params = {
 			pageNumber: $scope.currentPage,
 			pageSize: $scope.pageSize
-		}).then(function(response){
+		};
+		if ($scope.filters.keyword && $scope.filters.keyword.trim()) {
+			params.keyword = $scope.filters.keyword.trim();
+		}
+		if ($scope.filters.customerId && $scope.filters.customerId.trim()) {
+			params.customerId = $scope.filters.customerId.trim();
+		}
+		if ($scope.filters.status && $scope.filters.status.trim()) {
+			params.status = $scope.filters.status.trim();
+		}
+		if ($scope.filters.paymentStatus && $scope.filters.paymentStatus.trim()) {
+			params.paymentStatus = $scope.filters.paymentStatus.trim();
+		}
+		if ($scope.filters.fromDate && $scope.filters.fromDate.trim()) {
+			params.fromDate = $scope.filters.fromDate.trim();
+		}
+		if ($scope.filters.toDate && $scope.filters.toDate.trim()) {
+			params.toDate = $scope.filters.toDate.trim();
+		}
+		BookstoreService.getOrders(params).then(function(response){
 			var payload = response && response.data ? response.data : null;
 			var list = [];
 			var totalPages = 0;
@@ -393,14 +409,31 @@ $scope.assignDeliveryCandidate = function(order, candidate){
 };
 
 	$scope.confirmDelivered = function(order){
-		var note = prompt('Ghi chú giao hàng') || 'Đã giao';
-		BookstoreService.confirmOrderDelivered(order.orderId || order.id, { success: true, note: note })
+		$scope.confirmingOrder = order;
+		$scope.deliveryNote = '';
+		$scope.submittingDelivery = false;
+		var modal = new bootstrap.Modal(document.getElementById('confirmDeliveredModal'));
+		modal.show();
+	};
+
+	$scope.submitConfirmDelivered = function(){
+		if (!$scope.confirmingOrder) return;
+		var note = ($scope.deliveryNote && $scope.deliveryNote.trim()) || 'Đã giao';
+		$scope.submittingDelivery = true;
+		BookstoreService.confirmOrderDelivered($scope.confirmingOrder.orderId || $scope.confirmingOrder.id, { success: true, note: note })
 			.then(function(){
 				$scope.addToast('success', 'Đã xác nhận giao thành công');
+				var modal = bootstrap.Modal.getInstance(document.getElementById('confirmDeliveredModal'));
+				if (modal) modal.hide();
+				$scope.confirmingOrder = null;
+				$scope.deliveryNote = '';
 				$scope.loadOrders();
 			})
 			.catch(function(){
 				$scope.addToast('danger', 'Không thể xác nhận giao hàng');
+			})
+			.finally(function(){
+				$scope.submittingDelivery = false;
 			});
 	};
 
@@ -525,6 +558,19 @@ $scope.submitReturn = function(){
 };
 
 	$scope.search = function(){
+		$scope.currentPage = 1;
+		$scope.loadOrders();
+	};
+
+	$scope.resetFilters = function(){
+		$scope.filters = {
+			keyword: '',
+			customerId: '',
+			status: '',
+			paymentStatus: '',
+			fromDate: '',
+			toDate: ''
+		};
 		$scope.currentPage = 1;
 		$scope.loadOrders();
 	};

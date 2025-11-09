@@ -962,13 +962,15 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         params = params || {};
         var queryParams = {
             pageNumber: params.pageNumber || 1,
-            pageSize: params.pageSize || 10,
-            keyword: params.keyword || '',
-            customerId: params.customerId || '',
-            status: params.status || '',
-            fromDate: params.fromDate || '',
-            toDate: params.toDate || ''
+            pageSize: params.pageSize || 10
         };
+        // Only add non-empty parameters
+        if (params.keyword) queryParams.keyword = params.keyword;
+        if (params.customerId) queryParams.customerId = params.customerId;
+        if (params.status) queryParams.status = params.status;
+        if (params.paymentStatus) queryParams.paymentStatus = params.paymentStatus;
+        if (params.fromDate) queryParams.fromDate = params.fromDate;
+        if (params.toDate) queryParams.toDate = params.toDate;
         return $http({
             method: 'GET',
             url: baseUrl + '/order',
@@ -1391,10 +1393,10 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     // Get role name by ID
     this.getRoleName = function(roleId) {
         var roles = {
-            1: 'ADMIN',
+            1: 'CUSTOMER',
             2: 'SALES_EMPLOYEE',
-            3: 'DELIVERY_EMPLOYEE',
-            4: 'CUSTOMER'
+            3: 'ADMIN',
+            4: 'DELIVERY_EMPLOYEE'
         };
         return roles[roleId] || 'UNKNOWN';
     };
@@ -1402,10 +1404,10 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     // Get role display name by ID
     this.getRoleDisplayName = function(roleId) {
         var roles = {
-            1: 'Quản trị viên',
+            1: 'Khách hàng',
             2: 'Nhân viên bán hàng',
-            3: 'Nhân viên giao hàng',
-            4: 'Khách hàng'
+            3: 'Quản trị viên',
+            4: 'Nhân viên giao hàng'
         };
         return roles[roleId] || 'Không xác định';
     };
@@ -1519,4 +1521,105 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
+    // ==================== EMPLOYEE MANAGEMENT APIs ====================
+    // Employees
+    this.getEmployees = function(params) {
+        params = params || {};
+        var queryParams = {
+            pageNumber: params.pageNumber || 1,
+            pageSize: params.pageSize || 10
+        };
+        if (params.searchTerm) queryParams.searchTerm = params.searchTerm;
+        if (params.departmentId) queryParams.departmentId = params.departmentId;
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/employee',
+            headers: getAuthHeaders(),
+            params: queryParams
+        });
+    };
+
+    this.getEmployeeById = function(employeeId) {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/employee/' + employeeId,
+            headers: getAuthHeaders()
+        });
+    };
+
+    this.createEmployeeWithAccount = function(payload) {
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/employee/create-with-account',
+            data: payload,
+            headers: getAuthHeaders()
+        });
+    };
+
+    this.updateEmployee = function(employeeId, payload) {
+        return $http({
+            method: 'PUT',
+            url: baseUrl + '/employee/' + employeeId,
+            data: payload,
+            headers: getAuthHeaders()
+        });
+    };
+
+    this.deleteEmployee = function(employeeId) {
+        return $http({
+            method: 'DELETE',
+            url: baseUrl + '/employee/' + employeeId,
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Departments
+    this.getDepartments = function(params) {
+        params = params || {};
+        var queryParams = {
+            pageNumber: params.pageNumber || 1,
+            pageSize: params.pageSize || 10
+        };
+        if (params.searchTerm) queryParams.searchTerm = params.searchTerm;
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/department',
+            headers: getAuthHeaders(),
+            params: queryParams
+        });
+    };
+
+    this.getDepartmentById = function(departmentId) {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/department/' + departmentId,
+            headers: getAuthHeaders()
+        });
+        };
+
+    this.createDepartment = function(payload) {
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/department',
+            data: payload,
+            headers: getAuthHeaders()
+        });
+    };
+
+    this.updateDepartment = function(departmentId, payload) {
+        return $http({
+            method: 'PUT',
+            url: baseUrl + '/department/' + departmentId,
+            data: payload,
+            headers: getAuthHeaders()
+        });
+    };
+
+    this.deleteDepartment = function(departmentId) {
+        return $http({
+            method: 'DELETE',
+            url: baseUrl + '/department/' + departmentId,
+            headers: getAuthHeaders()
+        });
+    };
 }]);

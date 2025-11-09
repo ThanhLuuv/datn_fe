@@ -56,6 +56,12 @@
                                 </a>
                             </li>
                             <li class="admin-nav-item">
+                                <a class="admin-nav-link" href="#!/admin/employees">
+                                    <i class="bi bi-people"></i>
+                                    <span>Nhân viên & Phòng ban</span>
+                                </a>
+                            </li>
+                            <li class="admin-nav-item">
                                 <a class="admin-nav-link" href="#!/admin/users">
                                     <i class="bi bi-people"></i>
                                     <span>Người dùng</span>
@@ -106,7 +112,12 @@
 
             <!-- Main content -->
             <main class="col-md-9 ms-sm-auto col-lg-10 admin-main-content" ng-class="{'no-scroll': showingDashboardReport || showingDashboardInventory || showingDashboardProfit}">
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            
+            <!-- Employees & Departments Subpage -->
+            <div ng-if="isEmployeesPage" ng-include="'app/views/admin-employees.html'"></div>
+            
+            <!-- Admin Dashboard Content (hidden on subpage) -->
+            <div ng-if="!isEmployeesPage" class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 class="h2">Dashboard Admin</h1>
                 <div class="btn-toolbar mb-2 mb-md-0">
                     <div class="btn-group me-2">
@@ -118,7 +129,7 @@
             </div>
 
             <!-- Stats Cards -->
-            <div class="row mb-md">
+            <div ng-if="!isEmployeesPage" class="row mb-md">
                 <div class="col-xl-3 col-md-6 mb-md">
                     <div class="card card-sm card-primary">
                         <div class="card-body p-md">
@@ -194,7 +205,7 @@
 
 
             <!-- Dashboard Reports: Báo cáo tổng quan -->
-<div class="row mb-4">
+            <div ng-if="!isEmployeesPage" class="row mb-4">
   <!-- Doanh thu -->
   <div class="col-lg-6 mb-4">
     <div class="card">
@@ -211,6 +222,9 @@
               <div>
                 <strong>Tổng doanh thu:</strong>
                 <span class="text-primary fw-bold">{{revenueSummary.total | vnNumber:0}} VNĐ</span>
+                <div class="small text-muted fst-italic mt-1" ng-if="revenueSummary">
+                  Bằng chữ: {{moneyInWords(revenueSummary.total)}}
+                </div>
               </div>
               <div class="text-muted small">
                 {{revenueSummary.fromDate | date:'dd/MM/yyyy'}} - {{revenueSummary.toDate | date:'dd/MM/yyyy'}}
@@ -264,6 +278,9 @@
               <div>
                 <strong>Tổng trị giá tồn kho:</strong>
                 <span class="text-success fw-bold">{{inventorySummary.totalValue | vnNumber:0}} VNĐ</span>
+                <div class="small text-muted fst-italic mt-1" ng-if="inventorySummary">
+                  Bằng chữ: {{moneyInWords(inventorySummary.totalValue)}}
+                </div>
               </div>
               <div class="text-muted small">Tổng SL tồn: {{inventorySummary.totalQuantity | number}}</div>
             </div>
@@ -289,7 +306,7 @@
 </div>
 
 <!-- Profit report row -->
-<div class="row mb-4">
+<div ng-if="!isEmployeesPage" class="row mb-4">
   <div class="col-lg-6 mb-4">
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center">
@@ -305,6 +322,9 @@
               <div>
                 <strong>Lợi nhuận:</strong>
                 <span class="fw-bold" ng-class="{'text-success': (profitSummary.profit||0) >= 0, 'text-danger': (profitSummary.profit||0) < 0}">{{profitSummary.profit | vnNumber:0}} VNĐ</span>
+                <div class="small text-muted fst-italic mt-1" ng-if="profitSummary">
+                  Bằng chữ: {{moneyInWords(profitSummary.profit)}}
+                </div>
               </div>
               <div class="text-muted small">{{profitSummary.fromDate | date:'dd/MM/yyyy'}} - {{profitSummary.toDate | date:'dd/MM/yyyy'}}</div>
             </div>
@@ -406,6 +426,9 @@
           </table>
         </div>
         <div class="h4 fw-bold text-end">Tổng doanh thu: <span class="text-danger">{{revenueReportTotal | vnNumber:0}} VNĐ</span></div>
+        <div class="text-muted fst-italic text-end mt-1" ng-if="revenueReportTotal !== null && revenueReportTotal !== undefined">
+          Bằng chữ: {{moneyInWords(revenueReportTotal)}}
+        </div>
         <div class="fw-bold mt-4 mb-1" style="text-align:right">Người phê duyệt</div>
         <div class="fst-italic" style="text-align:right">(Ký và ghi rõ họ & tên)</div>
       </div>
@@ -479,6 +502,9 @@
           </table>
         </div>
         <div class="h4 fw-bold text-end mt-2">TỔNG TRỊ GIÁ TỒN KHO: <span class="text-dark">{{inventoryReportTotal | vnNumber:0}} VNĐ</span></div>
+        <div class="text-muted fst-italic text-end mt-1" ng-if="inventoryReportTotal !== null && inventoryReportTotal !== undefined">
+          Bằng chữ: {{moneyInWords(inventoryReportTotal)}}
+        </div>
         <div class="fw-bold mt-4 mb-1" style="text-align:right">Người phê duyệt</div>
         <div class="fst-italic" style="text-align:right">(Ký và ghi rõ họ & tên)</div>
       </div>
@@ -533,6 +559,80 @@
             </tbody>
           </table>
         </div>
+        <div class="text-muted fst-italic text-end" ng-if="profitReportData && profitReportData.profit !== undefined && profitReportData.profit !== null">
+          Bằng chữ: {{moneyInWords(profitReportData.profit)}}
+        </div>
+
+        <!-- Top Sold Items -->
+        <div class="mt-4 mb-4 profit-table-section" ng-if="profitReportData.topSoldItems && profitReportData.topSoldItems.length > 0" style="page-break-inside: avoid;">
+          <h4 class="mb-3" style="page-break-after: avoid;">Sách bán chạy nhất</h4>
+          <div class="table-responsive" style="page-break-inside: avoid;">
+            <table class="table table-bordered table-sm profit-table" style="page-break-inside: avoid; border-collapse: collapse;">
+              <thead class="table-light">
+                <tr style="page-break-inside: avoid; page-break-after: avoid;">
+                  <th style="width: 5%">STT</th>
+                  <th style="width: 15%">ISBN</th>
+                  <th style="width: 30%">Tên sách</th>
+                  <th style="width: 10%" class="text-center">SL bán</th>
+                  <th style="width: 15%" class="text-end">Doanh thu</th>
+                  <th style="width: 15%" class="text-end">Giá vốn</th>
+                  <th style="width: 10%" class="text-end">Lợi nhuận</th>
+                </tr>
+              </thead>
+              <tbody style="page-break-inside: avoid;">
+                <tr ng-repeat="item in profitReportData.topSoldItems" style="page-break-inside: avoid; page-break-after: auto;">
+                  <td class="text-center" style="page-break-inside: avoid;">{{$index + 1}}</td>
+                  <td style="page-break-inside: avoid;"><code>{{item.isbn}}</code></td>
+                  <td style="page-break-inside: avoid;">{{item.title}}</td>
+                  <td class="text-center" style="page-break-inside: avoid;">{{item.qtySold | number}}</td>
+                  <td class="text-end" style="page-break-inside: avoid;">{{item.revenue | vnNumber:0}} ₫</td>
+                  <td class="text-end" style="page-break-inside: avoid;">{{item.cogs | vnNumber:0}} ₫</td>
+                  <td class="text-end fw-bold" ng-class="{'text-success': (item.profit||0) >= 0, 'text-danger': (item.profit||0) < 0}" style="page-break-inside: avoid;">
+                    {{item.profit | vnNumber:0}} ₫
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Top Margin Items -->
+        <div class="mt-4 mb-4 profit-table-section" ng-if="profitReportData.topMarginItems && profitReportData.topMarginItems.length > 0" style="page-break-inside: avoid;">
+          <h4 class="mb-3" style="page-break-after: avoid;">Sách có tỷ suất lợi nhuận cao nhất</h4>
+          <div class="table-responsive" style="page-break-inside: avoid;">
+            <table class="table table-bordered table-sm profit-table" style="page-break-inside: avoid; border-collapse: collapse;">
+              <thead class="table-light">
+                <tr style="page-break-inside: avoid; page-break-after: avoid;">
+                  <th style="width: 5%">STT</th>
+                  <th style="width: 15%">ISBN</th>
+                  <th style="width: 30%">Tên sách</th>
+                  <th style="width: 10%" class="text-center">SL bán</th>
+                  <th style="width: 15%" class="text-end">Doanh thu</th>
+                  <th style="width: 15%" class="text-end">Giá vốn</th>
+                  <th style="width: 10%" class="text-end">Lợi nhuận</th>
+                  <th style="width: 10%" class="text-end">Tỷ suất (%)</th>
+                </tr>
+              </thead>
+              <tbody style="page-break-inside: avoid;">
+                <tr ng-repeat="item in profitReportData.topMarginItems" style="page-break-inside: avoid; page-break-after: auto;">
+                  <td class="text-center" style="page-break-inside: avoid;">{{$index + 1}}</td>
+                  <td style="page-break-inside: avoid;"><code>{{item.isbn}}</code></td>
+                  <td style="page-break-inside: avoid;">{{item.title}}</td>
+                  <td class="text-center" style="page-break-inside: avoid;">{{item.qtySold | number}}</td>
+                  <td class="text-end" style="page-break-inside: avoid;">{{item.revenue | vnNumber:0}} ₫</td>
+                  <td class="text-end" style="page-break-inside: avoid;">{{item.cogs | vnNumber:0}} ₫</td>
+                  <td class="text-end fw-bold" ng-class="{'text-success': (item.profit||0) >= 0, 'text-danger': (item.profit||0) < 0}" style="page-break-inside: avoid;">
+                    {{item.profit | vnNumber:0}} ₫
+                  </td>
+                  <td class="text-end fw-bold" ng-class="{'text-success': (item.marginPct||0) >= 0, 'text-danger': (item.marginPct||0) < 0}" style="page-break-inside: avoid;">
+                    {{item.marginPct | number:2}}%
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <div class="fw-bold mt-4 mb-1" style="text-align:right">Người phê duyệt</div>
         <div class="fst-italic" style="text-align:right">(Ký và ghi rõ họ & tên)</div>
       </div>
@@ -731,6 +831,21 @@
 .profit-report-modal .modal-content { border:none; border-radius:18px; box-shadow:none; }
 .profit-report-modal .modal-header { border-bottom:1px solid #f1f3f6; padding:16px 22px; }
 .profit-report-modal .modal-body { padding:22px; overflow:auto; max-height: calc(90vh - 70px); }
+/* Print styles to prevent page breaks in tables */
+@media print {
+  .profit-report-modal .profit-table-section { page-break-inside: avoid !important; break-inside: avoid !important; }
+  .profit-report-modal .profit-table { page-break-inside: avoid !important; break-inside: avoid !important; }
+  .profit-report-modal .table { page-break-inside: avoid !important; break-inside: avoid !important; }
+  .profit-report-modal .table thead { display: table-header-group !important; }
+  .profit-report-modal .table tbody { display: table-row-group !important; page-break-inside: avoid !important; break-inside: avoid !important; }
+  .profit-report-modal .table tr { page-break-inside: avoid !important; page-break-after: auto !important; break-inside: avoid !important; }
+  .profit-report-modal .table td, .profit-report-modal .table th { page-break-inside: avoid !important; break-inside: avoid !important; }
+  .profit-report-modal .table-responsive { page-break-inside: avoid !important; break-inside: avoid !important; }
+  .profit-report-modal .table-responsive table { page-break-inside: avoid !important; break-inside: avoid !important; }
+  /* Prevent breaking sections */
+  .profit-report-modal .mt-4 { page-break-inside: avoid !important; break-inside: avoid !important; }
+  .profit-report-modal h4 { page-break-after: avoid !important; break-after: avoid !important; }
+}
 
 /* Disable inner scrolling when custom dashboard modals are shown (avoid double scrollbars) */
 .no-scroll { overflow: hidden !important; }

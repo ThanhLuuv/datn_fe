@@ -1,0 +1,169 @@
+<div class="container py-4" ng-controller="AdminEmployeesController">
+  <h2 class="mb-4">Quản lý nhân viên & phòng ban</h2>
+
+  <ul class="nav nav-tabs" id="empDeptTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="employees-tab" data-bs-toggle="tab" data-bs-target="#employees" type="button" role="tab">Nhân viên</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="departments-tab" data-bs-toggle="tab" data-bs-target="#departments" type="button" role="tab">Phòng ban</button>
+    </li>
+  </ul>
+
+  <div class="tab-content border border-top-0 p-3">
+    <div class="tab-pane fade show active" id="employees" role="tabpanel">
+      <div class="row g-3">
+        <div class="col-lg-4">
+          <div class="card">
+            <div class="card-header">Tạo nhân viên mới</div>
+            <div class="card-body">
+              <div class="mb-2">
+                <label class="form-label">Email đăng nhập</label>
+                <input type="email" class="form-control" ng-model="newEmployee.accountEmail" placeholder="employee@example.com">
+              </div>
+              <div class="mb-2">
+                <label class="form-label">Mật khẩu</label>
+                <input type="password" class="form-control" ng-model="newEmployee.password" placeholder="Mật khẩu">
+              </div>
+              <div class="mb-2">
+                <label class="form-label">Role</label>
+                <select class="form-select" ng-model="newEmployee.roleId" ng-options="r.id as r.display for r in roles"></select>
+              </div>
+              <div class="mb-2">
+                <label class="form-label">Phòng ban</label>
+                <select class="form-select" ng-model="newEmployee.departmentId" ng-options="d.departmentId as d.name for d in departments"></select>
+              </div>
+              <div class="row">
+                <div class="col-6 mb-2">
+                  <label class="form-label">Họ</label>
+                  <input class="form-control" ng-model="newEmployee.firstName" placeholder="Nguyễn">
+                </div>
+                <div class="col-6 mb-2">
+                  <label class="form-label">Tên</label>
+                  <input class="form-control" ng-model="newEmployee.lastName" placeholder="Văn A">
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-6 mb-2">
+                  <label class="form-label">Giới tính</label>
+                  <select class="form-select" ng-model="newEmployee.gender">
+                    <option value="Male">Nam</option>
+                    <option value="Female">Nữ</option>
+                    <option value="Other">Khác</option>
+                  </select>
+                </div>
+                <div class="col-6 mb-2">
+                  <label class="form-label">Ngày sinh</label>
+                  <input type="date" class="form-control" ng-model="newEmployee.dateOfBirth">
+                </div>
+              </div>
+              <div class="mb-2">
+                <label class="form-label">Số điện thoại</label>
+                <input class="form-control" ng-model="newEmployee.phone" placeholder="090...">
+              </div>
+              <div class="mb-2">
+                <label class="form-label">Email nhân viên</label>
+                <input type="email" class="form-control" ng-model="newEmployee.employeeEmail" placeholder="optional">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Địa chỉ</label>
+                <textarea class="form-control" ng-model="newEmployee.address" rows="2"></textarea>
+              </div>
+              <button class="btn btn-primary w-100" ng-click="createEmployee()" ng-disabled="loading">Tạo nhân viên</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-8">
+          <div class="d-flex align-items-center mb-2 gap-2">
+            <input class="form-control" placeholder="Tìm kiếm tên/email" ng-model="empPage.searchTerm" ng-change="loadEmployees()">
+            <select class="form-select" style="max-width: 240px" ng-model="empPage.departmentId" ng-change="loadEmployees()">
+              <option value="">Tất cả phòng ban</option>
+              <option ng-repeat="d in departments" ng-value="d.departmentId">{{d.name}}</option>
+            </select>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-striped align-middle">
+              <thead>
+                <tr>
+                  <th>Họ tên</th>
+                  <th>Phòng ban</th>
+                  <th>Role</th>
+                  <th>Email đăng nhập</th>
+                  <th>Điện thoại</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="e in employees">
+                  <td>{{e.firstName}} {{e.lastName}}</td>
+                  <td>{{e.departmentName}}</td>
+                  <td>{{BookstoreService.getRoleDisplayName(e.roleId)}}</td>
+                  <td>{{e.accountEmail}}</td>
+                  <td>{{e.phone}}</td>
+                  <td class="text-end">
+                    <button class="btn btn-sm btn-outline-danger" ng-click="deleteEmployee(e)">Xóa</button>
+                  </td>
+                </tr>
+                <tr ng-if="employees.length === 0">
+                  <td colspan="6" class="text-center text-muted">Không có dữ liệu</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-pane fade" id="departments" role="tabpanel">
+      <div class="row g-3">
+        <div class="col-lg-4">
+          <div class="card">
+            <div class="card-header">Tạo phòng ban</div>
+            <div class="card-body">
+              <div class="mb-2">
+                <label class="form-label">Tên phòng ban</label>
+                <input class="form-control" ng-model="newDepartment.name" placeholder="Phòng Kinh doanh">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Mô tả</label>
+                <textarea class="form-control" rows="2" ng-model="newDepartment.description"></textarea>
+              </div>
+              <button class="btn btn-primary w-100" ng-click="createDepartment()">Tạo phòng ban</button>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-8">
+          <div class="table-responsive">
+            <table class="table table-striped align-middle">
+              <thead>
+                <tr>
+                  <th>Tên</th>
+                  <th>Mô tả</th>
+                  <th>Số NV</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="d in departments">
+                  <td>{{d.name}}</td>
+                  <td>{{d.description}}</td>
+                  <td>{{d.employeeCount}}</td>
+                  <td class="text-end">
+                    <button class="btn btn-sm btn-outline-danger" ng-click="deleteDepartment(d)">Xóa</button>
+                  </td>
+                </tr>
+                <tr ng-if="departments.length === 0">
+                  <td colspan="4" class="text-center text-muted">Không có dữ liệu</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+

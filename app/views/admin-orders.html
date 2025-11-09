@@ -23,7 +23,7 @@
 			<!-- Search Filters -->
 			<div class="row g-2 mb-3" ng-if="!loading">
 				<div class="col-md-2">
-					<input class="form-control" placeholder="Từ khóa" ng-model="filters.keyword" />
+					<input class="form-control" placeholder="Từ khóa" ng-model="filters.keyword" ng-keyup="$event.keyCode === 13 && search()" />
 				</div>
 				<div class="col-md-2">
 					<select class="form-select" ng-model="filters.status">
@@ -50,9 +50,14 @@
 					<input type="date" class="form-control" ng-model="filters.toDate" />
 				</div>
 				<div class="col-md-2 text-end">
-					<button class="btn btn-primary" ng-click="search()">
-						<i class="bi bi-search"></i> Tìm kiếm
-					</button>
+					<div class="btn-group">
+						<button class="btn btn-primary" ng-click="search()">
+							<i class="bi bi-search"></i> Tìm kiếm
+						</button>
+						<button class="btn btn-outline-secondary" ng-click="resetFilters()" title="Xóa bộ lọc">
+							<i class="bi bi-x-circle"></i>
+						</button>
+					</div>
 				</div>
 			</div>
 
@@ -536,6 +541,57 @@
 		</div>
 	</div>
 
+	<!-- Confirm Delivered Modal -->
+	<div class="modal fade" id="confirmDeliveredModal" tabindex="-1">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header bg-success text-white">
+					<h5 class="modal-title">
+						<i class="bi bi-check-circle me-2"></i>Xác nhận hoàn thành đơn hàng
+					</h5>
+					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<div class="mb-3">
+						<div class="alert alert-info d-flex align-items-center mb-3">
+							<i class="bi bi-info-circle me-2 fs-5"></i>
+							<div>
+								<strong>Đơn hàng:</strong> OD-{{confirmingOrder.orderId || confirmingOrder.id}}<br>
+								<strong>Khách hàng:</strong> {{confirmingOrder.customerName}}
+							</div>
+						</div>
+						<p class="text-muted mb-3">Bạn có chắc chắn muốn xác nhận đơn hàng này đã được giao thành công?</p>
+					</div>
+					<div class="mb-3">
+						<label for="deliveryNote" class="form-label">
+							<strong>Ghi chú giao hàng</strong> <span class="text-muted">(tùy chọn)</span>
+						</label>
+						<textarea 
+							class="form-control" 
+							id="deliveryNote" 
+							rows="3" 
+							ng-model="deliveryNote" 
+							placeholder="Nhập ghi chú về việc giao hàng (ví dụ: Khách hàng đã nhận hàng, hàng được giao đúng hẹn...)"></textarea>
+						<small class="text-muted">Nếu để trống, hệ thống sẽ tự động ghi "Đã giao"</small>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+						<i class="bi bi-x-circle me-1"></i>Hủy
+					</button>
+					<button type="button" class="btn btn-success" ng-click="submitConfirmDelivered()" ng-disabled="submittingDelivery">
+						<span ng-if="!submittingDelivery">
+							<i class="bi bi-check-circle me-1"></i>Xác nhận đã giao
+						</span>
+						<span ng-if="submittingDelivery">
+							<span class="spinner-border spinner-border-sm me-1"></span>Đang xử lý...
+						</span>
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<!-- Toasts -->
 	<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000;">
 		<div class="toast align-items-center text-white bg-{{t.variant}} border-0 mb-2 show" role="alert" aria-live="assertive" aria-atomic="true" ng-repeat="t in toasts">
@@ -719,4 +775,49 @@
 .badge.bg-success { background-color: #198754 !important; }
 .badge.bg-warning { background-color: #ffc107 !important; color: #000 !important; }
 .badge.bg-info { background-color: #0dcaf0 !important; color: #000 !important; }
+
+/* Confirm Delivered Modal Styles */
+#confirmDeliveredModal .modal-header {
+	border-bottom: none;
+	padding: 1.25rem 1.5rem;
+}
+
+#confirmDeliveredModal .modal-content {
+	border: none;
+	border-radius: 12px;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+#confirmDeliveredModal .modal-body {
+	padding: 1.5rem;
+}
+
+#confirmDeliveredModal .modal-footer {
+	border-top: 1px solid #e9ecef;
+	padding: 1rem 1.5rem;
+}
+
+#confirmDeliveredModal .alert-info {
+	background-color: #e7f3ff;
+	border-color: #b3d9ff;
+	color: #004085;
+	border-radius: 8px;
+}
+
+#confirmDeliveredModal .form-control:focus {
+	border-color: #198754;
+	box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
+}
+
+#confirmDeliveredModal .btn-success {
+	background-color: #198754;
+	border-color: #198754;
+	font-weight: 500;
+	padding: 0.5rem 1.5rem;
+}
+
+#confirmDeliveredModal .btn-success:hover {
+	background-color: #157347;
+	border-color: #146c43;
+}
 </style>
