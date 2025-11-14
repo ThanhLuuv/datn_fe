@@ -1,0 +1,50 @@
+# Git
+.git
+.gitignore
+
+# Node modules
+node_modules
+npm-debug.log
+yarn-error.log
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+!README.md
+
+# Build artifacts
+dist
+build
+.cache
+
+# Environment files (optional - uncomment if you don't want to include env files)
+# env/
+
+# Logs
+*.log
+logs
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Vercel
+.vercel
+vercel.json
+
+# Other
+.env
+.env.local
+.env.*.local
+

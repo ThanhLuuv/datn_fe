@@ -53,7 +53,7 @@
             console.log('Using fallback configuration');
             // Set fallback configuration
             window.ENV_CONFIG = {
-                API_BASE_URL: 'https://bookstore-api-386583671447.asia-southeast1.run.app/api',
+                API_BASE_URL: 'https://api-datn.thanhlaptrinh.online/api',
                 API_TIMEOUT: 15000,
                 ENVIRONMENT: 'production',
                 DEBUG_MODE: false,

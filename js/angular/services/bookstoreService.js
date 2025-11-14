@@ -1,7 +1,7 @@
 // Bookstore Service - Quản lý tất cả API calls cho hệ thống bookstore
 console.log('Loading BookstoreService...');
 app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', function($http, $q, APP_CONFIG, AuthService) {
-    var baseUrl = APP_CONFIG.API_BASE_URL || 'http://localhost:5000/api';
+    var baseUrl = APP_CONFIG.API_BASE_URL || 'https://api-datn.thanhlaptrinh.online/api';
     
     // Helper function to get auth headers
     var getAuthHeaders = function() {

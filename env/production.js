@@ -1,7 +1,7 @@
 // Production Environment Configuration
 window.ENV_CONFIG = {
     // API Configuration
-    API_BASE_URL: 'https://bookstore-api-386583671447.asia-southeast1.run.app/api',
+    API_BASE_URL: 'https://api-datn.thanhlaptrinh.online/api',
     API_TIMEOUT: 15000,
     
     // Application Settings

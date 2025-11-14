@@ -1,7 +1,7 @@
 // Staging Environment Configuration
 window.ENV_CONFIG = {
     // API Configuration
-    API_BASE_URL: 'https://staging-api.bookstore.com/api',
+    API_BASE_URL: 'https://api-datn.thanhlaptrinh.online/api',
     API_TIMEOUT: 12000,
     
     // Application Settings

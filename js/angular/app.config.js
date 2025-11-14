@@ -8,7 +8,7 @@ var isVercelHost = currentHost.includes('vercel.app') || currentHost.includes('n
 
 // Fallback configuration
 var fallbackConfig = {
-    API_BASE_URL: isLocal ? 'http://localhost:5256/api' : 'https://bookstore-api-386583671447.asia-southeast1.run.app/api',
+    API_BASE_URL: 'https://api-datn.thanhlaptrinh.online/api',
     API_TIMEOUT: 15000,
     APP_NAME: 'BookStore Frontend',
     APP_VERSION: '1.0.0',

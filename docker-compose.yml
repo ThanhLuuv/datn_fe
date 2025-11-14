@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  frontend:
+    image: bookstore/frontend:latest
+    container_name: bookstore-frontend
+    restart: unless-stopped
+    ports:
+      - "3002:80"
+    networks:
+      - bookstore_net
+    volumes:
+      # Optional: mount for live reload in development
+      # - .:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
+networks:
+  bookstore_net:
+    name: bookstore_net
+    external: false
+

@@ -219,9 +219,7 @@
             isLocalHost ? 'development' :
             isVercel ? 'production' : 'staging';
 
-        const API_BASE_URL = ENVIRONMENT === 'development'
-            ? 'http://localhost:5256/api'
-            : 'https://bookstore-api-386583671447.asia-southeast1.run.app/api';
+        const API_BASE_URL = 'https://api-datn.thanhlaptrinh.online/api';
 
         window.ENV_CONFIG = {
             API_BASE_URL,
