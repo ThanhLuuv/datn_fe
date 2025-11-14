@@ -29,7 +29,6 @@ pipeline {
         sh '''
           mkdir -p ${DEPLOY_DIR}
           rsync -av ${COMPOSE_FILE} ${DEPLOY_DIR}/
-          rsync -av nginx.conf ${DEPLOY_DIR}/
         '''
       }
     }
@@ -49,7 +48,7 @@ pipeline {
       steps {
         sh '''
           for i in {1..30}; do
-            if curl -fsS http://103.221.223.183:${HEALTH_PORT}/health > /dev/null; then
+            if curl -fsS http://103.221.223.183:${HEALTH_PORT} > /dev/null; then
               echo "Healthy on :${HEALTH_PORT}"; exit 0
             fi
             sleep 2

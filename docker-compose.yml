@@ -6,13 +6,9 @@ services:
     container_name: bookstore-frontend
     restart: unless-stopped
     ports:
-      - "3002:80"
+      - "3002:3002"
     networks:
       - bookstore_net
-    volumes:
-      # Optional: mount for live reload in development
-      # - .:/usr/share/nginx/html:ro
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
 
 networks:
   bookstore_net:
