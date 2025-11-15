@@ -1,7 +1,7 @@
 // Book Controllers
 
 // Books Controller (for viewing books)
-app.controller('BooksController', ['$scope', 'BookstoreService', 'AuthService', function($scope, BookstoreService, AuthService) {
+app.controller('BooksController', ['$scope', 'BookstoreService', 'AuthService', 'CartService', '$location', function($scope, BookstoreService, AuthService, CartService, $location) {
 	$scope.title = 'Danh sách sách';
 	$scope.books = [];
 	$scope.categories = [];
@@ -115,6 +115,50 @@ app.controller('BooksController', ['$scope', 'BookstoreService', 'AuthService', 
 	$scope.onPageChange = function(page) {
 		$scope.currentPage = page;
 		$scope.loadBooks();
+	};
+
+	// Add to cart function
+	$scope.addToCart = function(book) {
+		if (!AuthService.isAuthenticated()) {
+			$location.path('/login');
+			if (window.showNotification) {
+				window.showNotification('Vui lòng đăng nhập để thêm sách vào giỏ hàng', 'warning');
+			}
+			return;
+		}
+
+		if (!book || !book.isbn) {
+			if (window.showNotification) {
+				window.showNotification('Thông tin sách không hợp lệ', 'danger');
+			}
+			return;
+		}
+
+		CartService.addToCart(book.isbn, 1)
+			.then(function(response) {
+				if (response && response.data && response.data.success) {
+					if (window.showNotification) {
+						window.showNotification('Đã thêm "' + book.title + '" vào giỏ hàng', 'success');
+					}
+					// Update cart count
+					$scope.$emit('cart:changed');
+				} else {
+					if (window.showNotification) {
+						window.showNotification('Không thể thêm vào giỏ hàng', 'warning');
+					}
+				}
+			})
+			.catch(function(error) {
+				console.error('Add to cart error:', error);
+				if (window.showNotification) {
+					window.showNotification('Không thể thêm vào giỏ hàng', 'danger');
+				}
+			});
+	};
+
+	// Check authentication status
+	$scope.isAuthenticated = function() {
+		return AuthService.isAuthenticated();
 	};
 
 	// Initialize

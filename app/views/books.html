@@ -48,10 +48,10 @@
                             <span class="price-current">{{(book.discountedPrice || book.currentPrice || book.unitPrice) | currency:'':0}} ₫</span>
                             <span class="price-old" ng-if="book.discountedPrice && book.currentPrice && book.discountedPrice < book.currentPrice">{{book.currentPrice | currency:'':0}} ₫</span>
                         </div>
-                        <button class="add-to-cart" ng-click="viewBook(book)">
-                            <i class="bi bi-eye me-1"></i>Xem chi tiết
-                        </button>
                     </div>
+                    <button class="add-to-cart-icon" ng-click="addToCart(book)" title="Thêm vào giỏ hàng" ng-disabled="!isAuthenticated">
+                        <i class="bi bi-cart-plus"></i>
+                    </button>
                 </div>
             </div>
 
@@ -202,6 +202,10 @@
     transition: all 0.4s;
     cursor: pointer;
     border: 1px solid #f1f5f9;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
 }
 
 .book-card:hover {
@@ -239,6 +243,9 @@
 
 .book-info {
     padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .book-title {
@@ -296,27 +303,34 @@
     font-size: 1rem;
 }
 
-.add-to-cart {
-    width: 100%;
-    padding: 1rem;
+.add-to-cart-icon {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    width: 50px;
+    height: 50px;
     background: #0f172a;
     color: white;
     border: none;
-    border-radius: 10px;
+    border-radius: 50%;
     cursor: pointer;
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: all 0.3s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 10;
 }
 
-.add-to-cart:hover:not(:disabled) {
+.add-to-cart-icon:hover {
     background: #f59e0b;
-    transform: scale(1.02);
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
 }
 
-.add-to-cart:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+.add-to-cart-icon:active {
+    transform: scale(0.95);
 }
 
 .modal-content {

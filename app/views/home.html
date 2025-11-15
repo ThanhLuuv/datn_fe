@@ -116,10 +116,10 @@
                             <span class="price-old" ng-if="hasPromo(book)">{{book.currentPrice | currency:'':0}} ₫</span>
                             <span class="discount-tag" ng-if="hasPromo(book)">-{{calculateDiscountPercent(book)}}%</span>
                         </div>
-                        <button class="add-to-cart" ng-click="addToCart(book)" ng-disabled="!isAuthenticated">
-                            <i class="bi bi-cart-plus me-1"></i>Thêm vào giỏ
-                        </button>
                     </div>
+                    <button class="add-to-cart-icon" ng-click="addToCart(book)" title="Thêm vào giỏ hàng" ng-disabled="!isAuthenticated">
+                        <i class="bi bi-cart-plus"></i>
+                    </button>
                 </div>
             </div>
             <div class="books-grid" ng-if="loading">
@@ -166,10 +166,10 @@
                             <span class="price-old" ng-if="hasPromo(book)">{{book.currentPrice | currency:'':0}} ₫</span>
                             <span class="discount-tag">-{{calculateDiscountPercent(book)}}%</span>
                         </div>
-                        <button class="add-to-cart" ng-click="addToCart(book)" ng-disabled="!isAuthenticated">
-                            <i class="bi bi-cart-plus me-1"></i>Thêm vào giỏ
-                        </button>
                     </div>
+                    <button class="add-to-cart-icon" ng-click="addToCart(book)" title="Thêm vào giỏ hàng" ng-disabled="!isAuthenticated">
+                        <i class="bi bi-cart-plus"></i>
+                    </button>
                 </div>
             </div>
             <div class="books-grid" ng-if="loading">
@@ -215,10 +215,10 @@
                             <span class="price-current">{{getFinalPrice(book) | currency:'':0}} ₫</span>
                             <span class="price-old" ng-if="hasPromo(book)">{{book.currentPrice | currency:'':0}} ₫</span>
                         </div>
-                        <button class="add-to-cart" ng-click="addToCart(book)" ng-disabled="!isAuthenticated">
-                            <i class="bi bi-cart-plus me-1"></i>Thêm vào giỏ
-                        </button>
                     </div>
+                    <button class="add-to-cart-icon" ng-click="addToCart(book)" title="Thêm vào giỏ hàng" ng-disabled="!isAuthenticated">
+                        <i class="bi bi-cart-plus"></i>
+                    </button>
                 </div>
             </div>
             <div class="books-grid" ng-if="loading">
@@ -621,6 +621,10 @@
     transition: all 0.4s;
     cursor: pointer;
     border: 1px solid #f1f5f9;
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .book-card:hover {
@@ -684,6 +688,9 @@
 
 .book-info {
     padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .book-title {
@@ -750,27 +757,39 @@
     font-weight: 700;
 }
 
-.add-to-cart {
-    width: 100%;
-    padding: 1rem;
+.add-to-cart-icon {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    width: 50px;
+    height: 50px;
     background: #0f172a;
     color: white;
     border: none;
-    border-radius: 10px;
+    border-radius: 50%;
     cursor: pointer;
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: all 0.3s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 10;
 }
 
-.add-to-cart:hover:not(:disabled) {
+.add-to-cart-icon:hover:not(:disabled) {
     background: #f59e0b;
-    transform: scale(1.02);
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
 }
 
-.add-to-cart:disabled {
+.add-to-cart-icon:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+.add-to-cart-icon:active:not(:disabled) {
+    transform: scale(0.95);
 }
 
 /* Newsletter */
