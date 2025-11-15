@@ -239,8 +239,82 @@
                 </div>
             </div>
         </section>
+
+        <!-- Newsletter -->
+        <section class="newsletter">
+            <div class="newsletter-content">
+                <h2>Đăng Ký Nhận Tin</h2>
+                <p>Nhận thông tin về sách mới, khuyến mãi đặc biệt và ưu đãi độc quyền</p>
+                <form class="newsletter-form" ng-submit="subscribeNewsletter()">
+                    <input type="email" 
+                           ng-model="newsletterEmail" 
+                           placeholder="Nhập email của bạn" 
+                           required
+                           class="form-control">
+                    <button type="submit" class="btn-subscribe">
+                        <i class="bi bi-envelope me-2"></i>Đăng ký
+                    </button>
+                </form>
+            </div>
+        </section>
     </div>
 </div>
+
+<!-- Footer -->
+<footer class="site-footer">
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>Về BookStore</h3>
+            <p>BookStore là nền tảng mua sách trực tuyến hàng đầu, mang đến cho bạn hơn 100,000+ đầu sách với chất lượng tốt nhất và giá cả hợp lý.</p>
+            <div class="social-links">
+                <a href="#" class="social-icon" title="Facebook">
+                    <i class="bi bi-facebook"></i>
+                </a>
+                <a href="#" class="social-icon" title="Instagram">
+                    <i class="bi bi-instagram"></i>
+                </a>
+                <a href="#" class="social-icon" title="Twitter">
+                    <i class="bi bi-twitter"></i>
+                </a>
+                <a href="#" class="social-icon" title="Youtube">
+                    <i class="bi bi-youtube"></i>
+                </a>
+            </div>
+        </div>
+        <div class="footer-section">
+            <h3>Danh Mục</h3>
+            <ul>
+                <li><a href="#!/books">Tất cả sách</a></li>
+                <li><a href="#!/books?category=van-hoc">Văn học</a></li>
+                <li><a href="#!/books?category=kinh-te">Kinh tế</a></li>
+                <li><a href="#!/books?category=khoa-hoc">Khoa học</a></li>
+                <li><a href="#!/books?category=thieu-nhi">Thiếu nhi</a></li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h3>Hỗ Trợ Khách Hàng</h3>
+            <ul>
+                <li><a href="#!/about">Giới thiệu</a></li>
+                <li><a href="#!/contact">Liên hệ</a></li>
+                <li><a href="#">Chính sách vận chuyển</a></li>
+                <li><a href="#">Chính sách đổi trả</a></li>
+                <li><a href="#">Câu hỏi thường gặp</a></li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h3>Liên Hệ</h3>
+            <ul>
+                <li><i class="bi bi-telephone me-2"></i>Hotline: 1900.xxxx</li>
+                <li><i class="bi bi-envelope me-2"></i>Email: support@bookstore.com</li>
+                <li><i class="bi bi-geo-alt me-2"></i>Địa chỉ: 123 Đường ABC, Quận XYZ, TP.HCM</li>
+                <li><i class="bi bi-clock me-2"></i>Giờ làm việc: 8:00 - 22:00 (Tất cả các ngày)</li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2024 BookStore. Tất cả quyền được bảo lưu.</p>
+    </div>
+</footer>
 
 <style>
 /* Modern Homepage Styles */
@@ -255,7 +329,7 @@
 .hero-banner {
     position: relative;
     height: 500px;
-    background: linear-gradient(135deg, #d8dcf0 0%, #dccbed 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     overflow: hidden;
 }
 
@@ -715,6 +789,166 @@
     cursor: not-allowed;
 }
 
+/* Newsletter */
+.newsletter {
+    background: #0f172a;
+    color: white;
+    padding: 4rem 0;
+    margin: 4rem 0;
+}
+
+.newsletter-content {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 0 2rem;
+}
+
+.newsletter h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    font-weight: 800;
+}
+
+.newsletter p {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+}
+
+.newsletter-form {
+    display: flex;
+    gap: 1rem;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.newsletter-form input {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    border: none;
+    border-radius: 50px;
+    font-size: 1rem;
+    outline: none;
+}
+
+.newsletter-form input:focus {
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.3);
+}
+
+.btn-subscribe {
+    padding: 1rem 2.5rem;
+    background: #f59e0b;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 1rem;
+}
+
+.btn-subscribe:hover {
+    background: #d97706;
+    transform: scale(1.05);
+}
+
+/* Footer */
+.site-footer {
+    background: #f8fafc;
+    padding: 4rem 0 2rem;
+    margin-top: 4rem;
+}
+
+.footer-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 3rem;
+    margin-bottom: 3rem;
+}
+
+.footer-section h3 {
+    color: #0f172a;
+    margin-bottom: 1.5rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.footer-section p {
+    color: #64748b;
+    line-height: 1.8;
+    margin-bottom: 1rem;
+}
+
+.footer-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-section ul li {
+    margin-bottom: 0.8rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+}
+
+.footer-section ul li i {
+    color: #f59e0b;
+    margin-right: 0.5rem;
+}
+
+.footer-section a {
+    color: #64748b;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.footer-section a:hover {
+    color: #f59e0b;
+}
+
+.social-links {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.social-icon {
+    width: 40px;
+    height: 40px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    transition: all 0.3s;
+    cursor: pointer;
+    color: #64748b;
+    text-decoration: none;
+}
+
+.social-icon:hover {
+    background: #f59e0b;
+    color: white;
+    transform: translateY(-3px);
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 2rem;
+    border-top: 1px solid #e5e7eb;
+    color: #64748b;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding-left: 2rem;
+    padding-right: 2rem;
+}
+
 /* Loading & Placeholder */
 .content-loading {
     text-align: center;
@@ -803,6 +1037,17 @@
     }
     .banner-text h2 {
         font-size: 2rem;
+    }
+    .footer-content {
+        grid-template-columns: 1fr;
+    }
+    .newsletter-form {
+        flex-direction: column;
+    }
+    .newsletter-form input,
+    .btn-subscribe {
+        width: 100%;
+        border-radius: 15px;
     }
 }
 </style>
