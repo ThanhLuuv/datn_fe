@@ -113,130 +113,282 @@
 </div>
 
 <style>
+/* Modern Search Page Styles - Đồng bộ với Home */
 .search-page {
-    background-color: var(--gray-50);
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    background-color: #f8fafc;
     min-height: calc(100vh - 60px);
+}
+
+.search-page .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
 }
 
 .search-header {
     background: white;
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
 }
 
 .search-title {
-    color: var(--gray-800);
-    font-weight: 700;
+    color: #0f172a;
+    font-weight: 800;
+    font-size: 2.5rem;
+    margin: 0;
+}
+
+.search-title i {
+    color: #f59e0b;
+}
+
+.search-stats .badge {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    font-size: 1rem;
 }
 
 .search-form .card {
     border: none;
-    border-radius: 12px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
 .search-input-group {
     display: flex;
-    border-radius: 12px;
+    border-radius: 15px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .search-input-group .form-control {
-    border-radius: 12px 0 0 12px;
+    border-radius: 15px 0 0 15px;
+    border: 2px solid #e2e8f0;
     border-right: none;
-    padding: 0.75rem 1rem;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
 }
 
 .search-input-group .form-control:focus {
     box-shadow: none;
-    border-color: var(--primary-color);
+    border-color: #f59e0b;
 }
 
 .search-input-group .btn {
-    border-radius: 0 12px 12px 0;
+    border-radius: 0 15px 15px 0;
     border-left: none;
-    padding: 0.75rem 1.5rem;
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    border: none;
+    color: white;
+    font-weight: 700;
+    transition: all 0.3s;
+}
+
+.search-input-group .btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(245, 158, 11, 0.4);
 }
 
 .search-filters .form-select {
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    border: 2px solid #e2e8f0;
+    padding: 0.75rem 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s;
+}
+
+.search-filters .form-select:focus {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
 }
 
 .search-results .book-card {
-    transition: all 0.3s ease;
+    background: white;
+    border: 1px solid #f1f5f9;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.4s;
+    cursor: pointer;
 }
 
 .search-results .book-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transform: translateY(-10px);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+    border-color: #f59e0b;
+}
+
+.book-image {
+    width: 100%;
+    height: 300px;
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.book-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.book-card:hover .book-image img {
+    transform: scale(1.1);
+}
+
+.book-info {
+    padding: 1.5rem;
+}
+
+.book-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.book-title a {
+    color: #0f172a;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.book-title a:hover {
+    color: #f59e0b;
+}
+
+.book-meta {
+    color: #64748b;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+}
+
+.price-block {
+    margin-bottom: 1rem;
+}
+
+.price-current {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #f59e0b;
+}
+
+.price-old {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    text-decoration: line-through;
+    margin-left: 0.5rem;
 }
 
 .book-actions .btn {
-    border-radius: 8px;
-    font-weight: 500;
+    border-radius: 10px;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+}
+
+.book-actions .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
 }
 
 .no-results {
     background: white;
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    padding: 3rem;
 }
 
 .no-results-icon {
     opacity: 0.5;
+    color: #f59e0b;
+}
+
+.no-results h4 {
+    color: #0f172a;
+    font-weight: 700;
+    font-size: 1.5rem;
 }
 
 .suggestions {
-    background: var(--gray-50);
-    border-radius: 8px;
-    padding: 1rem;
-    margin-top: 1rem;
+    background: #f8fafc;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+    border: 2px solid #f1f5f9;
+}
+
+.suggestions ul {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.suggestions li {
+    color: #64748b;
+    margin-bottom: 0.5rem;
 }
 
 .pagination-section {
     background: white;
-    border-radius: 12px;
+    border-radius: 20px;
     padding: 2rem;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
 .pagination .page-link {
-    border-radius: 8px;
-    margin: 0 2px;
-    border: 1px solid var(--gray-300);
-    color: var(--gray-700);
-    font-weight: 500;
+    border-radius: 10px;
+    margin: 0 3px;
+    border: 2px solid #e2e8f0;
+    color: #64748b;
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s;
 }
 
 .pagination .page-link:hover {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
     color: white;
+    transform: translateY(-2px);
 }
 
 .pagination .page-item.active .page-link {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    color: white;
 }
 
 .pagination .page-item.disabled .page-link {
-    color: var(--gray-400);
-    background-color: var(--gray-100);
+    color: #cbd5e1;
+    background-color: #f1f5f9;
+    border-color: #e2e8f0;
+    cursor: not-allowed;
 }
 
 .pagination-info {
-    color: var(--gray-600);
+    color: #64748b;
+    font-weight: 500;
 }
 
 @media (max-width: 768px) {
     .search-header {
-        padding: 1rem;
+        padding: 1.5rem;
     }
     
     .search-title {
-        font-size: 1.5rem;
+        font-size: 1.8rem;
     }
     
     .search-input-group {
@@ -245,7 +397,7 @@
     
     .search-input-group .form-control,
     .search-input-group .btn {
-        border-radius: 12px;
+        border-radius: 15px;
         margin-bottom: 0.5rem;
     }
     
@@ -254,7 +406,11 @@
     }
     
     .pagination-section {
-        padding: 1rem;
+        padding: 1.5rem;
+    }
+    
+    .search-page .container {
+        padding: 0 1rem;
     }
 }
 </style>

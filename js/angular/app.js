@@ -26,6 +26,49 @@ app.controller('AppController', ['$scope', '$location', '$injector', 'AuthServic
         $location.path('/search').search({ q: q, page: 1, pageSize: 12 });
     };
 
+    // Handle smooth scroll for menu items
+    $scope.scrollToSection = function(sectionId, event) {
+        if (event) {
+            event.preventDefault();
+        }
+        
+        // If not on home page, navigate to home first
+        if ($location.path() !== '/home' && $location.path() !== '/') {
+            $location.path('/home').search({});
+            // Wait for route to load, then scroll
+            setTimeout(function() {
+                scrollToSectionId(sectionId);
+            }, 500);
+        } else {
+            // Already on home page, just scroll
+            if (sectionId === 'home') {
+                // Scroll to top
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            } else {
+                scrollToSectionId(sectionId);
+            }
+        }
+    };
+
+    function scrollToSectionId(sectionId) {
+        setTimeout(function() {
+            var element = document.getElementById(sectionId);
+            if (element) {
+                var headerOffset = 250; // Account for sticky header
+                var elementPosition = element.getBoundingClientRect().top;
+                var offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        }, 200);
+    }
+
     // Load cart count from API
     $scope.loadCartCount = function() {
         if (!$scope.isAuthenticated) {
@@ -62,6 +105,14 @@ app.controller('AppController', ['$scope', '$location', '$injector', 'AuthServic
             $scope.loadCartCount();
         } else {
             $scope.cartCount = 0;
+        }
+
+        // Handle hash in URL for smooth scroll
+        var hash = $location.hash();
+        if (hash && (path === '/home' || path === '/')) {
+            setTimeout(function() {
+                scrollToSectionId(hash);
+            }, 500);
         }
     });
 

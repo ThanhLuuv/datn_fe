@@ -1,19 +1,47 @@
-<!-- BookStore Homepage - Simplified -->
-<div class="bookstore-homepage">
-    <!-- Banner (non-gradient) - Always visible -->
-    <section class="home-banner">
-        <div class="banner-inner container">
-            <div class="row align-items-center">
-                <div class="col-lg-6">
-                    <h1 class="banner-title">Khám phá kho sách phong phú</h1>
-                    <p class="banner-subtitle">Từ văn học, khoa học đến kinh tế, lịch sử và nhiều hơn nữa. Tìm cuốn sách bạn yêu thích ngay hôm nay.</p>
-                    <a class="btn btn-primary btn-lg" href="#!/books">
-                        <i class="bi bi-search me-1"></i>Khám phá ngay
-                    </a>
+<!-- BookStore Homepage - Modern Design -->
+<div class="bookstore-homepage-modern" id="home">
+    <!-- Hero Banner -->
+    <section class="hero-banner">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>Khám Phá Thế Giới Tri Thức Cùng BookStore</h1>
+                <p>Hơn 100,000+ đầu sách đang chờ bạn khám phá với ưu đãi lên đến 50%</p>
+                <a href="#!/books" class="hero-btn">
+                    <i class="bi bi-arrow-right me-2"></i>Mua sắm ngay
+                </a>
+            </div>
+            <div class="hero-image">
+                <img src="app/assets/images/banner-books.jpg" alt="Sách" class="hero-banner-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="hero-image-fallback" style="display: none;">
+                    <i class="bi bi-book" style="font-size: 8rem; color: rgba(255,255,255,0.3);"></i>
                 </div>
-                <div class="col-lg-6 text-center">
-                    <img class="banner-image" src="app/assets/images/banner-books.jpg" alt="Sách" onerror="this.src='app/assets/images/book-placeholder.png'">
+            </div>
+        </div>
+    </section>
+
+    <!-- Promo Cards -->
+    <section class="promo-section">
+        <div class="promo-grid">
+            <div class="promo-card">
+                <div class="promo-icon">
+                    <i class="bi bi-truck"></i>
                 </div>
+                <h3>Miễn phí vận chuyển</h3>
+                <p>Cho đơn hàng từ 300.000đ trên toàn quốc</p>
+            </div>
+            <div class="promo-card">
+                <div class="promo-icon">
+                    <i class="bi bi-credit-card"></i>
+                </div>
+                <h3>Thanh toán linh hoạt</h3>
+                <p>Hỗ trợ nhiều hình thức thanh toán an toàn</p>
+            </div>
+            <div class="promo-card">
+                <div class="promo-icon">
+                    <i class="bi bi-gift"></i>
+                </div>
+                <h3>Ưu đãi độc quyền</h3>
+                <p>Giảm giá đặc biệt cho thành viên thân thiết</p>
             </div>
         </div>
     </section>
@@ -31,265 +59,750 @@
     <!-- Main Content -->
     <div ng-if="!loadingGlobal">
         <!-- Categories Section -->
-        <section class="categories-section py-5">
-            <div class="container">            
-            <div class="row g-4">
-                <div class="col-lg-2 col-md-4 col-sm-6" ng-repeat="category in categories">
-                    <div class="category-card text-center h-100" ng-click="openCategory(category)" style="cursor:pointer">
-                        <h6 class="category-name">{{(category.name || category.categoryName)}} <span class="text-muted">({{category.bookCount || 0}})</span></h6>
+        <section id="danh-muc" class="categories-section">
+            <div class="section-header">
+                <h2 class="section-title">Danh Mục Sách</h2>
+                <a href="#!/categories" class="view-all">
+                    Xem tất cả <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+            <div class="categories-grid">
+                <div class="category-item" ng-repeat="category in categories | limitTo:6" ng-click="openCategory(category)" style="cursor:pointer">
+                    <div class="icon">
+                        <i class="bi bi-book"></i>
                     </div>
+                    <h4>{{(category.name || category.categoryName)}} <span class="text-muted">({{category.bookCount || 0}})</span></h4>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- New Books -->
-    <section class="new-books-section py-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-12 mb-4">
-                    <h4 class="text-start">Sách mới</h4>
+        <!-- Banner Promotion -->
+        <section class="banner-promo">
+            <div class="banner-large">
+                <div class="banner-text">
+                    <h2>Tuần lễ vàng<br>Giảm giá 50%</h2>
+                    <p>Áp dụng cho hơn 10,000 đầu sách hot nhất</p>
+                    <a href="#!/books" class="banner-btn">Mua ngay</a>
+                </div>
+                <div class="banner-image">
+                    <i class="bi bi-gift" style="font-size: 10rem; color: rgba(255,255,255,0.3);"></i>
                 </div>
             </div>
-            
-            <div class="row g-4" ng-if="!loading">
-                <div class="col-lg-3 col-md-4 col-sm-6" ng-repeat="book in newBooks | limitTo:8" ng-if="book.status">
-                    <div class="book-card h-100" 
-                         data-bs-toggle="tooltip" 
-                         ng-attr-title="{{book.title}}&#10;Giá: {{book.currentPrice | currency:'':0}} VNĐ&#10;Tác giả: {{book.authors[0].fullName}}&#10;Năm xuất bản: {{book.publishYear}}&#10;Nhà xuất bản: {{book.publisherName}}">
-                        
-                        <div class="book-image">
-                            <a ng-href="#!/book/{{book.isbn}}" title="Xem chi tiết">
-                                <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.png'}}" 
-                                     alt="{{book.title}}"
-                                     onerror="this.src='app/assets/images/book-placeholder.png'">
-                            </a>
-                            
-                            <div class="book-badge" ng-if="hasPromo(book)">
-                                <span class="badge bg-danger">{{calculateDiscountPercent(book)}}% OFF</span>
-                            </div>
-                            <div class="book-badge new-badge">
-                                <span class="badge bg-success">Mới</span>
-                            </div>
-                        </div>
-                        
-                        <div class="book-info">
-                            <h6 class="book-title"><a class="text-decoration-none" ng-href="#!/book/{{book.isbn}}">{{book.title}}</a></h6>
-                            
-                            <!-- Author -->
-                            <div class="book-author mb-2">
-                                <small class="text-muted">
-                                    <i class="bi bi-person me-1"></i>{{book.authors[0].fullName}}
-                                </small>
-                            </div>
-                            
-                            <!-- Publisher & Year -->
-                            <div class="book-meta mb-2">
-                                <small class="text-muted">
-                                    <i class="bi bi-building me-1"></i>{{book.publisherName}} • {{book.publishYear}}
-                                </small>
-                            </div>
-                            
-                            <!-- Price (current above, original below; no percent text) -->
-                            <div class="price-block">
-                                <div class="price-current">{{getFinalPrice(book) | currency:'':0}} VNĐ</div>
-                                <div class="price-old" ng-if="hasPromo(book)">{{book.currentPrice | currency:'':0}} VNĐ</div>
-                            </div>
-                            
-                            <!-- Actions -->
-                            <div class="book-actions">
-                                <button class="btn btn-sm btn-primary" 
-                                        ng-click="addToCart(book)"
-                                        ng-disabled="!isAuthenticated">
-                                    <i class="bi bi-cart-plus me-1"></i>Thêm vào giỏ
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="row g-4" ng-if="loading">
-                <div class="col-lg-3 col-md-4 col-sm-6" ng-repeat="n in [1,2,3,4,5,6,7,8]">
-                    <div class="book-placeholder h-100">
-                        <div class="placeholder-image"></div>
-                        <div class="placeholder-content">
-                            <div class="placeholder-title"></div>
-                            <div class="placeholder-price"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="row" ng-if="!loading && newBooks.length === 0">
-                <div class="col-12 text-center">
-                    <div class="empty-state">
-                        <h4>Chưa có sách mới</h4>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Promotions -->
-    <section id="promotions" class="promotions-section py-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-12 mb-4">
-                    <h4 class="text-start">Sách khuyến mãi</h4>
-                </div>
+        <!-- Best Sellers -->
+        <section id="best-seller" class="books-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="bi bi-graph-up me-2"></i>Sách Bán Chạy Nhất
+                </h2>
+                <a href="#!/books" class="view-all">
+                    Xem tất cả <i class="bi bi-arrow-right"></i>
+                </a>
             </div>
-            
-            <div class="row g-4" ng-if="!loading">
-                <div class="col-lg-3 col-md-4 col-sm-6" ng-repeat="book in promotionBooks | limitTo:8" ng-if="book.status">
-                    <div class="book-card h-100" 
-                         data-bs-toggle="tooltip" 
-                         ng-attr-title="{{book.title}}&#10;Giá gốc: {{book.currentPrice | currency:'':0}} VNĐ&#10;Giá khuyến mãi: {{book.discountedPrice | currency:'':0}} VNĐ&#10;Tác giả: {{book.authors[0].fullName}}&#10;Nhà xuất bản: {{book.publisherName}}">
-                        
-                        <div class="book-image">
-                            <a ng-href="#!/book/{{book.isbn}}" title="Xem chi tiết">
-                                <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.png'}}" 
-                                     alt="{{book.title}}"
-                                     onerror="this.src='app/assets/images/book-placeholder.png'">
-                            </a>
-                            
-                            <div class="book-badge">
-                                <span class="badge bg-danger">{{calculateDiscountPercent(book)}}% OFF</span>
-                            </div>
+            <div class="books-grid" ng-if="!loading">
+                <div class="book-card" ng-repeat="book in bestSellers | limitTo:5" ng-if="book.status">
+                    <div class="book-image">
+                        <a ng-href="#!/book/{{book.isbn}}" title="Xem chi tiết">
+                            <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.png'}}" 
+                                 alt="{{book.title}}"
+                                 onerror="this.src='app/assets/images/book-placeholder.png'">
+                        </a>
+                        <span class="badge badge-hot" ng-if="book.totalSold > 0">HOT</span>
+                        <span class="badge badge-sale" ng-if="hasPromo(book)">-{{calculateDiscountPercent(book)}}%</span>
+                    </div>
+                    <div class="book-info">
+                        <h3 class="book-title">
+                            <a ng-href="#!/book/{{book.isbn}}">{{book.title}}</a>
+                        </h3>
+                        <p class="book-author">{{book.authors[0].fullName}}</p>
+                        <div class="rating">
+                            <i class="bi bi-star-fill star" ng-repeat="i in [1,2,3,4,5]"></i>
                         </div>
-                        
-                        <div class="book-info">
-                            <h6 class="book-title"><a class="text-decoration-none" ng-href="#!/book/{{book.isbn}}">{{book.title}}</a></h6>
-                            
-                            <div class="book-author mb-2">
-                                <small class="text-muted">
-                                    <i class="bi bi-person me-1"></i>{{book.authors[0].fullName}}
-                                </small>
-                            </div>
-                            
-                            <div class="price-block">
-                                <div class="price-current">{{getFinalPrice(book) | currency:'':0}} VNĐ</div>
-                                <div class="price-old" ng-if="hasPromo(book)">{{book.currentPrice | currency:'':0}} VNĐ</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="book-actions">
-                                <button class="btn btn-sm btn-primary" 
-                                        ng-click="addToCart(book)"
-                                        ng-disabled="!isAuthenticated">
-                                    <i class="bi bi-cart-plus me-1"></i>Thêm vào giỏ
-                                </button>
-                            </div>
+                        <div class="book-price">
+                            <span class="price-current">{{getFinalPrice(book) | currency:'':0}} ₫</span>
+                            <span class="price-old" ng-if="hasPromo(book)">{{book.currentPrice | currency:'':0}} ₫</span>
+                            <span class="discount-tag" ng-if="hasPromo(book)">-{{calculateDiscountPercent(book)}}%</span>
                         </div>
+                        <button class="add-to-cart" ng-click="addToCart(book)" ng-disabled="!isAuthenticated">
+                            <i class="bi bi-cart-plus me-1"></i>Thêm vào giỏ
+                        </button>
                     </div>
                 </div>
             </div>
-            
-            <div class="row g-4" ng-if="loading">
-                <div class="col-lg-3 col-md-4 col-sm-6" ng-repeat="n in [1,2,3,4,5,6,7,8]">
-                    <div class="book-placeholder h-100">
-                        <div class="placeholder-image"></div>
-                        <div class="placeholder-content">
-                            <div class="placeholder-title"></div>
-                            <div class="placeholder-price"></div>
-                        </div>
+            <div class="books-grid" ng-if="loading">
+                <div class="book-placeholder" ng-repeat="n in [1,2,3,4,5]">
+                    <div class="placeholder-image"></div>
+                    <div class="placeholder-content">
+                        <div class="placeholder-title"></div>
+                        <div class="placeholder-price"></div>
                     </div>
                 </div>
             </div>
-            
-            <div class="row" ng-if="!loading && promotionBooks.length === 0">
-                <div class="col-12 text-center">
-                    <div class="empty-state">
-                        <h4>Chưa có sách khuyến mãi</h4>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Bestsellers -->
-    <section id="bestsellers" class="bestsellers-section py-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-12 mb-4">
-                    <h4 class="text-start">Sách bán chạy</h4>
-                </div>
+        <!-- Sale Books -->
+        <section id="khuyen-mai" class="books-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="bi bi-fire me-2"></i>Sách Khuyến Mãi Hot
+                </h2>
+                <a href="#!/books" class="view-all">
+                    Xem tất cả <i class="bi bi-arrow-right"></i>
+                </a>
             </div>
-            
-            <div class="row g-4" ng-if="!loading">
-                <div class="col-lg-3 col-md-4 col-sm-6" ng-repeat="book in bestSellers | limitTo:8" ng-if="book.status">
-                    <div class="book-card h-100" 
-                         data-bs-toggle="tooltip" 
-                         ng-attr-title="{{book.title}}&#10;Giá: {{book.currentPrice | currency:'':0}} VNĐ&#10;Tác giả: {{book.authors[0].fullName}}&#10;Bán được: {{book.totalSold}} cuốn&#10;Nhà xuất bản: {{book.publisherName}}">
-                        
-                        <div class="book-image">
-                            <a ng-href="#!/book/{{book.isbn}}" title="Xem chi tiết">
-                                <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.png'}}" 
-                                     alt="{{book.title}}"
-                                     onerror="this.src='app/assets/images/book-placeholder.png'">
-                            </a>
-                            
-                            <div class="book-badge" ng-if="hasPromo(book)">
-                                <span class="badge bg-danger">{{calculateDiscountPercent(book)}}% OFF</span>
-                            </div>
-                            <div class="book-badge bestseller-badge" ng-if="book.totalSold > 0">
-                                <span class="badge bg-warning">Bán chạy</span>
-                            </div>
+            <div class="books-grid" ng-if="!loading">
+                <div class="book-card" ng-repeat="book in promotionBooks | limitTo:5" ng-if="book.status">
+                    <div class="book-image">
+                        <a ng-href="#!/book/{{book.isbn}}" title="Xem chi tiết">
+                            <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.png'}}" 
+                                 alt="{{book.title}}"
+                                 onerror="this.src='app/assets/images/book-placeholder.png'">
+                        </a>
+                        <span class="badge badge-sale">-{{calculateDiscountPercent(book)}}%</span>
+                    </div>
+                    <div class="book-info">
+                        <h3 class="book-title">
+                            <a ng-href="#!/book/{{book.isbn}}">{{book.title}}</a>
+                        </h3>
+                        <p class="book-author">{{book.authors[0].fullName}}</p>
+                        <div class="rating">
+                            <i class="bi bi-star-fill star" ng-repeat="i in [1,2,3,4,5]"></i>
                         </div>
-                        
-                        <div class="book-info">
-                            <h6 class="book-title"><a class="text-decoration-none" ng-href="#!/book/{{book.isbn}}">{{book.title}}</a></h6>
-                            
-                            <div class="book-author mb-2">
-                                <small class="text-muted">
-                                    <i class="bi bi-person me-1"></i>{{book.authors[0].fullName}}
-                                </small>
-                            </div>
-                            
-                            <div class="price-block">
-                                <div class="price-current">{{getFinalPrice(book) | currency:'':0}} VNĐ</div>
-                                <div class="price-old" ng-if="hasPromo(book)">{{book.currentPrice | currency:'':0}} VNĐ</div>
-                            </div>
-                            
-                            <div class="book-stats">
-                                <small class="text-muted">
-                                    <i class="bi bi-graph-up me-1"></i>{{book.totalSold ? (book.totalSold + ' cuốn đã bán') : 'Chưa có đơn hàng nào'}}
-                                </small>
-                            </div>
-                            
-                            <div class="book-actions">
-                                <button class="btn btn-sm btn-primary" 
-                                        ng-click="addToCart(book)"
-                                        ng-disabled="!isAuthenticated">
-                                    <i class="bi bi-cart-plus me-1"></i>Thêm vào giỏ
-                                </button>
-                            </div>
+                        <div class="book-price">
+                            <span class="price-current">{{getFinalPrice(book) | currency:'':0}} ₫</span>
+                            <span class="price-old" ng-if="hasPromo(book)">{{book.currentPrice | currency:'':0}} ₫</span>
+                            <span class="discount-tag">-{{calculateDiscountPercent(book)}}%</span>
                         </div>
+                        <button class="add-to-cart" ng-click="addToCart(book)" ng-disabled="!isAuthenticated">
+                            <i class="bi bi-cart-plus me-1"></i>Thêm vào giỏ
+                        </button>
                     </div>
                 </div>
             </div>
-            
-            <div class="row g-4" ng-if="loading">
-                <div class="col-lg-3 col-md-4 col-sm-6" ng-repeat="n in [1,2,3,4,5,6,7,8]">
-                    <div class="book-placeholder h-100">
-                        <div class="placeholder-image"></div>
-                        <div class="placeholder-content">
-                            <div class="placeholder-title"></div>
-                            <div class="placeholder-price"></div>
+            <div class="books-grid" ng-if="loading">
+                <div class="book-placeholder" ng-repeat="n in [1,2,3,4,5]">
+                    <div class="placeholder-image"></div>
+                    <div class="placeholder-content">
+                        <div class="placeholder-title"></div>
+                        <div class="placeholder-price"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- New Books -->
+        <section id="sach-moi" class="books-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="bi bi-star me-2"></i>Sách Mới Phát Hành
+                </h2>
+                <a href="#!/books" class="view-all">
+                    Xem tất cả <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+            <div class="books-grid" ng-if="!loading">
+                <div class="book-card" ng-repeat="book in newBooks | limitTo:5" ng-if="book.status">
+                    <div class="book-image">
+                        <a ng-href="#!/book/{{book.isbn}}" title="Xem chi tiết">
+                            <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.png'}}" 
+                                 alt="{{book.title}}"
+                                 onerror="this.src='app/assets/images/book-placeholder.png'">
+                        </a>
+                        <span class="badge badge-new">MỚI</span>
+                    </div>
+                    <div class="book-info">
+                        <h3 class="book-title">
+                            <a ng-href="#!/book/{{book.isbn}}">{{book.title}}</a>
+                        </h3>
+                        <p class="book-author">{{book.authors[0].fullName}}</p>
+                        <div class="rating">
+                            <i class="bi bi-star-fill star" ng-repeat="i in [1,2,3,4,5]"></i>
                         </div>
+                        <div class="book-price">
+                            <span class="price-current">{{getFinalPrice(book) | currency:'':0}} ₫</span>
+                            <span class="price-old" ng-if="hasPromo(book)">{{book.currentPrice | currency:'':0}} ₫</span>
+                        </div>
+                        <button class="add-to-cart" ng-click="addToCart(book)" ng-disabled="!isAuthenticated">
+                            <i class="bi bi-cart-plus me-1"></i>Thêm vào giỏ
+                        </button>
                     </div>
                 </div>
             </div>
-            
-            <div class="row" ng-if="!loading && bestSellers.length === 0">
-                <div class="col-12 text-center">
-                    <div class="empty-state">
-                        <h4>Chưa có sách bán chạy</h4>
+            <div class="books-grid" ng-if="loading">
+                <div class="book-placeholder" ng-repeat="n in [1,2,3,4,5]">
+                    <div class="placeholder-image"></div>
+                    <div class="placeholder-content">
+                        <div class="placeholder-title"></div>
+                        <div class="placeholder-price"></div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
     </div>
 </div>
+
+<style>
+/* Modern Homepage Styles */
+.bookstore-homepage-modern {
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    line-height: 1.6;
+    color: #1a1a1a;
+    background-color: #ffffff;
+}
+
+/* Hero Banner */
+.hero-banner {
+    position: relative;
+    height: 500px;
+    background: linear-gradient(135deg, #d8dcf0 0%, #dccbed 100%);
+    overflow: hidden;
+}
+
+.hero-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+}
+
+.hero-text {
+    max-width: 600px;
+    color: white;
+}
+
+.hero-text h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+}
+
+.hero-text p {
+    font-size: 1.3rem;
+    margin-bottom: 2rem;
+    opacity: 0.95;
+}
+
+.hero-btn {
+    display: inline-block;
+    padding: 1.2rem 3rem;
+    background: white;
+    color: #667eea;
+    text-decoration: none;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    transition: all 0.3s;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.hero-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+    color: #667eea;
+}
+
+.hero-image {
+    width: 500px;
+    height: 400px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+
+.hero-banner-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 20px;
+    transition: transform 0.3s;
+}
+
+.hero-image:hover .hero-banner-img {
+    transform: scale(1.05);
+}
+
+.hero-image-fallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Promo Banners */
+.promo-section {
+    max-width: 1400px;
+    margin: -80px auto 4rem;
+    padding: 0 2rem;
+    position: relative;
+    z-index: 2;
+}
+
+.promo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+}
+
+.promo-card {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    transition: all 0.3s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.promo-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: #f59e0b;
+}
+
+.promo-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+
+.promo-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #f59e0b;
+}
+
+.promo-card h3 {
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+    color: #0f172a;
+    font-weight: 700;
+}
+
+.promo-card p {
+    color: #64748b;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+/* Categories */
+.categories-section {
+    max-width: 1400px;
+    margin: 4rem auto;
+    padding: 0 2rem;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+}
+
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+}
+
+.view-all {
+    color: #f59e0b;
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: gap 0.3s;
+}
+
+.view-all:hover {
+    gap: 1rem;
+    color: #d97706;
+}
+
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1.5rem;
+}
+
+.category-item {
+    background: #f8fafc;
+    padding: 2rem 1rem;
+    border-radius: 15px;
+    text-align: center;
+    transition: all 0.3s;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.category-item:hover {
+    background: white;
+    border-color: #f59e0b;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.category-item .icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #f59e0b;
+}
+
+.category-item h4 {
+    color: #0f172a;
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Banner Promotion */
+.banner-promo {
+    max-width: 1400px;
+    margin: 4rem auto;
+    padding: 0 2rem;
+}
+
+.banner-large {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    border-radius: 25px;
+    padding: 4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.banner-large::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+}
+
+.banner-text {
+    position: relative;
+    z-index: 1;
+}
+
+.banner-text h2 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    font-weight: 800;
+}
+
+.banner-text p {
+    font-size: 1.3rem;
+    margin-bottom: 2rem;
+    opacity: 0.95;
+}
+
+.banner-btn {
+    display: inline-block;
+    padding: 1rem 2.5rem;
+    background: white;
+    color: #f59e0b;
+    text-decoration: none;
+    border-radius: 50px;
+    font-weight: 700;
+    transition: all 0.3s;
+}
+
+.banner-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    color: #f59e0b;
+}
+
+.banner-image {
+    position: relative;
+    z-index: 1;
+}
+
+/* Books Section */
+.books-section {
+    max-width: 1400px;
+    margin: 4rem auto;
+    padding: 0 2rem;
+}
+
+.books-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 2rem;
+}
+
+.book-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.4s;
+    cursor: pointer;
+    border: 1px solid #f1f5f9;
+}
+
+.book-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+    border-color: #f59e0b;
+}
+
+.book-image {
+    width: 100%;
+    height: 350px;
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.book-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.book-image::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(to top, rgba(0,0,0,0.1), transparent);
+}
+
+.badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    padding: 0.5rem 1rem;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 25px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    z-index: 1;
+}
+
+.badge-sale {
+    background: #ef4444;
+}
+
+.badge-new {
+    background: #10b981;
+}
+
+.badge-hot {
+    background: #f59e0b;
+}
+
+.book-info {
+    padding: 1.5rem;
+}
+
+.book-title {
+    font-size: 1.1rem;
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    min-height: 2.5rem;
+    line-height: 1.3;
+}
+
+.book-title a {
+    color: #0f172a;
+    text-decoration: none;
+}
+
+.book-title a:hover {
+    color: #f59e0b;
+}
+
+.book-author {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.rating {
+    display: flex;
+    gap: 0.3rem;
+    margin-bottom: 1rem;
+}
+
+.star {
+    color: #fbbf24;
+    font-size: 0.9rem;
+}
+
+.book-price {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.price-current {
+    font-size: 1.5rem;
+    color: #ef4444;
+    font-weight: 800;
+}
+
+.price-old {
+    text-decoration: line-through;
+    color: #94a3b8;
+    font-size: 1rem;
+}
+
+.discount-tag {
+    background: #fee2e2;
+    color: #ef4444;
+    padding: 0.2rem 0.5rem;
+    border-radius: 5px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.add-to-cart {
+    width: 100%;
+    padding: 1rem;
+    background: #0f172a;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.add-to-cart:hover:not(:disabled) {
+    background: #f59e0b;
+    transform: scale(1.02);
+}
+
+.add-to-cart:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Loading & Placeholder */
+.content-loading {
+    text-align: center;
+    padding: 4rem 0;
+}
+
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.book-placeholder {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    border: 1px solid #f1f5f9;
+}
+
+.placeholder-image {
+    width: 100%;
+    height: 350px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+.placeholder-content {
+    padding: 1.5rem;
+}
+
+.placeholder-title {
+    height: 20px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.placeholder-price {
+    height: 24px;
+    width: 100px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 4px;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .books-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    .categories-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-banner {
+        height: 400px;
+    }
+    .hero-text h1 {
+        font-size: 2rem;
+    }
+    .hero-image {
+        display: none;
+    }
+    .promo-grid {
+        grid-template-columns: 1fr;
+    }
+    .books-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .categories-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    .section-title {
+        font-size: 1.8rem;
+    }
+    .banner-text h2 {
+        font-size: 2rem;
+    }
+}
+</style>
