@@ -86,7 +86,7 @@
         <section id="best-seller" class="books-section">
             <div class="section-header">
                 <h2 class="section-title">
-                    <i class="bi bi-graph-up me-2"></i>Sách Bán Chạy Nhất
+                    Sách Bán Chạy Nhất
                 </h2>
                 <a href="#!/books" class="view-all">
                     Xem tất cả <i class="bi bi-arrow-right"></i>
@@ -137,7 +137,7 @@
         <section id="khuyen-mai" class="books-section">
             <div class="section-header">
                 <h2 class="section-title">
-                    <i class="bi bi-fire me-2"></i>Sách Khuyến Mãi Hot
+                    Sách Khuyến Mãi Hot
                 </h2>
                 <a href="#!/books" class="view-all">
                     Xem tất cả <i class="bi bi-arrow-right"></i>
@@ -187,7 +187,7 @@
         <section id="sach-moi" class="books-section">
             <div class="section-header">
                 <h2 class="section-title">
-                    <i class="bi bi-star me-2"></i>Sách Mới Phát Hành
+                    Sách Mới Phát Hành
                 </h2>
                 <a href="#!/books" class="view-all">
                     Xem tất cả <i class="bi bi-arrow-right"></i>
@@ -321,11 +321,22 @@
 .hero-banner {
     position: relative;
     height: 500px;
+    overflow: hidden;
+}
+
+.hero-banner::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
     background-image: url('app/assets/images/banner-books.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    overflow: hidden;
+    filter: blur(10px);
+    z-index: 0;
 }
 
 .hero-overlay {
@@ -334,7 +345,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.4) 0%, rgba(15, 23, 42, 0.6) 100%);
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(15, 23, 42, 0.75) 100%);
     z-index: 1;
 }
 
@@ -400,13 +411,13 @@
 .promo-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
+    gap: 1.5rem;
 }
 
 .promo-card {
     background: white;
-    padding: 2.5rem;
-    border-radius: 20px;
+    padding: 1.5rem;
+    border-radius: 15px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.1);
     transition: all 0.3s;
     cursor: pointer;
@@ -430,22 +441,23 @@
 }
 
 .promo-icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
     color: #f59e0b;
 }
 
 .promo-card h3 {
-    font-size: 1.3rem;
-    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+    margin-bottom: 0.4rem;
     color: #0f172a;
     font-weight: 700;
 }
 
 .promo-card p {
     color: #64748b;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     margin: 0;
+    line-height: 1.4;
 }
 
 /* Categories */
