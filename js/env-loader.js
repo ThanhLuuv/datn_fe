@@ -26,8 +26,13 @@
         }
         
         // Development detection (localhost, 127.0.0.1, etc.)
-        if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.')) {
+        if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '' || hostname.startsWith('192.168.') || hostname.startsWith('10.') || hostname.startsWith('172.')) {
             return 'development';
+        }
+        
+        // Production domain detection
+        if (hostname === 'bookstore.thanhlaptrinh.online' || hostname === 'thanhlaptrinh.online' || hostname.includes('thanhlaptrinh.online')) {
+            return 'production';
         }
         
         // Default to production for Vercel deployments
@@ -51,12 +56,17 @@
         script.onerror = function() {
             console.error('❌ Failed to load environment script:', env);
             console.log('Using fallback configuration');
-            // Set fallback configuration
+            // Set fallback configuration based on detected environment
+            var fallbackEnv = detectEnvironment();
+            var fallbackApiUrl = fallbackEnv === 'development' 
+                ? 'http://localhost:5256/api' 
+                : 'https://api-datn.thanhlaptrinh.online/api';
+            
             window.ENV_CONFIG = {
-                API_BASE_URL: 'https://api-datn.thanhlaptrinh.online/api',
+                API_BASE_URL: fallbackApiUrl,
                 API_TIMEOUT: 15000,
-                ENVIRONMENT: 'production',
-                DEBUG_MODE: false,
+                ENVIRONMENT: fallbackEnv,
+                DEBUG_MODE: fallbackEnv === 'development',
                 APP_NAME: 'BookStore Frontend',
                 APP_VERSION: '1.0.0',
                 APP_DESCRIPTION: 'Dự án Frontend sử dụng AngularJS + Bootstrap',

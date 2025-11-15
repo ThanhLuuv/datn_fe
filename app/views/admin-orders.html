@@ -541,34 +541,25 @@
 		</div>
 	</div>
 
-	<!-- Confirm Delivered Modal -->
-	<div class="modal fade" id="confirmDeliveredModal" tabindex="-1">
+	<!-- Admin Order Confirm Delivered Modal -->
+	<div class="modal fade" id="adminOrderConfirmDeliveredModal" tabindex="-1" aria-labelledby="adminOrderConfirmDeliveredModalLabel" aria-hidden="true">
 		<div class="modal-dialog modal-dialog-centered">
 			<div class="modal-content">
 				<div class="modal-header bg-success text-white">
-					<h5 class="modal-title">
+					<h5 class="modal-title" id="adminOrderConfirmDeliveredModalLabel">
 						<i class="bi bi-check-circle me-2"></i>Xác nhận hoàn thành đơn hàng
 					</h5>
 					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
 				<div class="modal-body">
+					<p class="text-muted mb-3">Bạn có chắc chắn muốn xác nhận đơn hàng này đã được giao thành công?</p>
 					<div class="mb-3">
-						<div class="alert alert-info d-flex align-items-center mb-3">
-							<i class="bi bi-info-circle me-2 fs-5"></i>
-							<div>
-								<strong>Đơn hàng:</strong> OD-{{confirmingOrder.orderId || confirmingOrder.id}}<br>
-								<strong>Khách hàng:</strong> {{confirmingOrder.customerName}}
-							</div>
-						</div>
-						<p class="text-muted mb-3">Bạn có chắc chắn muốn xác nhận đơn hàng này đã được giao thành công?</p>
-					</div>
-					<div class="mb-3">
-						<label for="deliveryNote" class="form-label">
+						<label for="adminOrderDeliveryNote" class="form-label">
 							<strong>Ghi chú giao hàng</strong> <span class="text-muted">(tùy chọn)</span>
 						</label>
 						<textarea 
 							class="form-control" 
-							id="deliveryNote" 
+							id="adminOrderDeliveryNote" 
 							rows="3" 
 							ng-model="deliveryNote" 
 							placeholder="Nhập ghi chú về việc giao hàng (ví dụ: Khách hàng đã nhận hàng, hàng được giao đúng hẹn...)"></textarea>
@@ -579,7 +570,7 @@
 					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
 						<i class="bi bi-x-circle me-1"></i>Hủy
 					</button>
-					<button type="button" class="btn btn-success" ng-click="submitConfirmDelivered()" ng-disabled="submittingDelivery">
+					<button type="button" class="btn btn-success" ng-click="submitConfirmDelivered(); $event.stopPropagation()" ng-disabled="submittingDelivery">
 						<span ng-if="!submittingDelivery">
 							<i class="bi bi-check-circle me-1"></i>Xác nhận đã giao
 						</span>
@@ -777,47 +768,127 @@
 .badge.bg-info { background-color: #0dcaf0 !important; color: #000 !important; }
 
 /* Confirm Delivered Modal Styles */
-#confirmDeliveredModal .modal-header {
+#adminOrderConfirmDeliveredModal .modal-header {
 	border-bottom: none;
 	padding: 1.25rem 1.5rem;
 }
 
-#confirmDeliveredModal .modal-content {
+#adminOrderConfirmDeliveredModal .modal-content {
 	border: none;
 	border-radius: 12px;
 	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
 }
 
-#confirmDeliveredModal .modal-body {
+#adminOrderConfirmDeliveredModal .modal-body {
 	padding: 1.5rem;
 }
 
-#confirmDeliveredModal .modal-footer {
+#adminOrderConfirmDeliveredModal .modal-footer {
 	border-top: 1px solid #e9ecef;
 	padding: 1rem 1.5rem;
 }
 
-#confirmDeliveredModal .alert-info {
+#adminOrderConfirmDeliveredModal .alert-info {
 	background-color: #e7f3ff;
 	border-color: #b3d9ff;
 	color: #004085;
 	border-radius: 8px;
 }
 
-#confirmDeliveredModal .form-control:focus {
+#adminOrderConfirmDeliveredModal .form-control:focus {
 	border-color: #198754;
 	box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
 }
 
-#confirmDeliveredModal .btn-success {
+#adminOrderConfirmDeliveredModal .btn-success {
 	background-color: #198754;
 	border-color: #198754;
 	font-weight: 500;
 	padding: 0.5rem 1.5rem;
 }
 
-#confirmDeliveredModal .btn-success:hover {
+#adminOrderConfirmDeliveredModal .btn-success:hover {
 	background-color: #157347;
 	border-color: #146c43;
 }
+
+/* Confirmation Modal Styles */
+#confirmModal .modal-header {
+	border-bottom: none;
+	padding: 1.25rem 1.5rem;
+}
+
+#confirmModal .modal-content {
+	border: none;
+	border-radius: 12px;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+#confirmModal .modal-body {
+	padding: 1.5rem;
+}
+
+#confirmModal .modal-footer {
+	border-top: 1px solid #e9ecef;
+	padding: 1rem 1.5rem;
+}
+
+#confirmModal .form-control:focus {
+	border-color: var(--primary-color);
+	box-shadow: 0 0 0 0.25rem rgba(30, 58, 138, 0.25);
+}
 </style>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" ng-class="{
+                'bg-info text-white': confirmModal.type === 'info',
+                'bg-warning text-dark': confirmModal.type === 'warning',
+                'bg-danger text-white': confirmModal.type === 'danger'
+            }">
+                <h5 class="modal-title" id="confirmModalLabel">
+                    <i class="bi" ng-class="{
+                        'bi-info-circle': confirmModal.type === 'info',
+                        'bi-exclamation-triangle': confirmModal.type === 'warning',
+                        'bi-exclamation-circle': confirmModal.type === 'danger'
+                    }"></i>
+                    {{confirmModal.title}}
+                </h5>
+                <button type="button" class="btn-close" ng-class="{'btn-close-white': confirmModal.type !== 'warning'}" data-bs-dismiss="modal" aria-label="Close" ng-click="hideConfirmModal()"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-3" ng-bind-html="confirmModal.message"></p>
+                
+                <!-- Additional fields for cancel order -->
+                <div ng-if="confirmModal.type === 'danger' && confirmModal.order">
+                    <div class="mb-3">
+                        <label for="cancelReason" class="form-label">
+                            <strong>Lý do hủy</strong> <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control" id="cancelReason" ng-model="confirmModal.cancelReason" placeholder="Nhập lý do hủy đơn" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cancelNote" class="form-label">
+                            <strong>Ghi chú</strong> <span class="text-muted">(tùy chọn)</span>
+                        </label>
+                        <textarea class="form-control" id="cancelNote" ng-model="confirmModal.cancelNote" rows="2" placeholder="Nhập ghi chú bổ sung"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" ng-click="hideConfirmModal()">
+                    <i class="bi bi-x-circle me-1"></i>Hủy
+                </button>
+                <button type="button" class="btn" ng-class="{
+                    'btn-info': confirmModal.type === 'info',
+                    'btn-warning': confirmModal.type === 'warning',
+                    'btn-danger': confirmModal.type === 'danger'
+                }" ng-click="confirmAction()" ng-disabled="confirmModal.type === 'danger' && !confirmModal.cancelReason">
+                    <i class="bi bi-check-circle me-1"></i>Xác nhận
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

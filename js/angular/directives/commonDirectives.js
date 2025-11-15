@@ -100,9 +100,11 @@ app.directive('currencyInput', [function(){
       // View (formatted string) -> Model (number)
       ngModel.$parsers.push(function(viewVal){
         if (!viewVal) return null;
-        // Remove all non-digit characters except decimal point
+        // Remove all non-digit characters except decimal point and comma
         var cleanVal = viewVal.replace(/[^\d.,]/g, '');
-        // Replace comma with dot for decimal
+        // Remove dots (thousands separator in Vietnamese format)
+        cleanVal = cleanVal.replace(/\./g, '');
+        // Replace comma with dot for decimal separator
         cleanVal = cleanVal.replace(',', '.');
         var num = parseFloat(cleanVal);
         return isNaN(num) ? null : num;
@@ -112,8 +114,8 @@ app.directive('currencyInput', [function(){
       el.on('blur', function(){
         var val = ngModel.$viewValue;
         if (val && val.toString().trim() !== '') {
-          // Parse giá trị hiện tại
-          var cleanVal = val.replace(/[^\d.,]/g, '').replace(',', '.');
+          // Parse giá trị hiện tại - remove dots (thousands separator) first
+          var cleanVal = val.replace(/[^\d.,]/g, '').replace(/\./g, '').replace(',', '.');
           var num = parseFloat(cleanVal);
           
           if (!isNaN(num) && num >= 0) {
@@ -129,7 +131,8 @@ app.directive('currencyInput', [function(){
       el.on('focus', function(){
         var val = ngModel.$viewValue;
         if (val) {
-          var cleanVal = val.replace(/[^\d.,]/g, '').replace(',', '.');
+          // Remove dots (thousands separator) and keep only digits and comma
+          var cleanVal = val.replace(/[^\d.,]/g, '').replace(/\./g, '').replace(',', '.');
           ngModel.$setViewValue(cleanVal);
           ngModel.$render();
         }

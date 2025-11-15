@@ -1,7 +1,9 @@
 // Bookstore Service - Quản lý tất cả API calls cho hệ thống bookstore
 console.log('Loading BookstoreService...');
 app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', function($http, $q, APP_CONFIG, AuthService) {
-    var baseUrl = APP_CONFIG.API_BASE_URL || 'https://api-datn.thanhlaptrinh.online/api';
+    // Auto-detect API URL: use local backend for localhost, production otherwise
+    var isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    var baseUrl = APP_CONFIG.API_BASE_URL || (isLocal ? 'http://localhost:5256/api' : 'https://api-datn.thanhlaptrinh.online/api');
     
     // Helper function to get auth headers
     var getAuthHeaders = function() {
@@ -145,14 +147,24 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
             pageSize: params.pageSize || 10
         };
         if (params.searchTerm && String(params.searchTerm).trim() !== '') {
-            queryParams.searchTerm = params.searchTerm;
+            queryParams.searchTerm = String(params.searchTerm).trim();
         }
-        if (params.categoryId != null && String(params.categoryId) !== '') {
-            queryParams.categoryId = params.categoryId;
+        if (params.categoryId != null && params.categoryId !== '' && params.categoryId !== undefined) {
+            // Convert to number if it's a valid number
+            var catId = Number(params.categoryId);
+            if (!isNaN(catId) && catId > 0) {
+                queryParams.categoryId = catId;
+            }
         }
-        if (params.publisherId != null && String(params.publisherId) !== '') {
-            queryParams.publisherId = params.publisherId;
+        if (params.publisherId != null && params.publisherId !== '' && params.publisherId !== undefined) {
+            // Convert to number if it's a valid number
+            var pubId = Number(params.publisherId);
+            if (!isNaN(pubId) && pubId > 0) {
+                queryParams.publisherId = pubId;
+            }
         }
+        
+        console.log('[BookstoreService] getBooks params:', queryParams);
         
         return $http({
             method: 'GET',

@@ -205,10 +205,18 @@ app.controller('AdminBooksController', ['$scope', 'BookstoreService', 'AuthServi
 		$scope.showError = false;
 		$scope.errorMessage = '';
 		
+		console.log('[AdminBooks] loadBooks called with:', {
+			searchTerm: $scope.searchTerm,
+			selectedCategoryId: $scope.selectedCategoryId,
+			selectedPublisherId: $scope.selectedPublisherId,
+			currentPage: $scope.currentPage,
+			pageSize: $scope.pageSize
+		});
+		
 		BookstoreService.getBooks({
 			pageNumber: $scope.currentPage,
 			pageSize: $scope.pageSize,
-			searchTerm: $scope.searchTerm,
+			searchTerm: $scope.searchTerm || '',
 			categoryId: $scope.selectedCategoryId,
 			publisherId: $scope.selectedPublisherId
 		})

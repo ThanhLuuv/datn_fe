@@ -1,7 +1,7 @@
 // Customer Order Controllers
 
 // Admin Orders Controller
-app.controller('AdminOrdersController', ['$scope', '$rootScope', 'BookstoreService', 'AuthService', '$location', '$route', '$timeout', function($scope, $rootScope, BookstoreService, AuthService, $location, $route, $timeout) {
+app.controller('AdminOrdersController', ['$scope', '$rootScope', 'BookstoreService', 'AuthService', '$location', '$route', '$timeout', '$sce', '$compile', function($scope, $rootScope, BookstoreService, AuthService, $location, $route, $timeout, $sce, $compile) {
 	if (!AuthService.isAdminOrTeacher()) {
 		$location.path('/home');
 		return;
@@ -305,17 +305,85 @@ $scope.closeOrderDetail = function(){
     $rootScope.selectedOrder = null;
 };
 
+    // Modal confirmation state
+    $scope.confirmModal = {
+        show: false,
+        title: '',
+        message: '',
+        type: 'info', // info, warning, danger
+        onConfirm: null,
+        order: null,
+        cancelReason: '',
+        cancelNote: ''
+    };
+
+    // Show confirmation modal
+    $scope.showConfirmModal = function(title, message, type, onConfirm, order) {
+        $scope.confirmModal = {
+            show: true,
+            title: title,
+            message: $sce.trustAsHtml(message), // Trust HTML for rendering
+            type: type || 'info',
+            onConfirm: onConfirm,
+            order: order,
+            cancelReason: '',
+            cancelNote: ''
+        };
+        var modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+        modal.show();
+    };
+
+    // Hide confirmation modal
+    $scope.hideConfirmModal = function() {
+        $scope.confirmModal.show = false;
+        var modal = bootstrap.Modal.getInstance(document.getElementById('confirmModal'));
+        if (modal) {
+            modal.hide();
+        }
+    };
+
+    // Confirm action
+    $scope.confirmAction = function() {
+        if ($scope.confirmModal.onConfirm) {
+            $scope.confirmModal.onConfirm($scope.confirmModal.order, $scope.confirmModal);
+        }
+        $scope.hideConfirmModal();
+    };
+
 $scope.cancelOrder = function(order){
-    var id = order.orderId || order.id;
-    var payload = { reason: 'Hủy đơn hàng', note: 'Admin/Employee hủy' };
-    BookstoreService.cancelOrder(id, payload)
-        .then(function(){
-            $scope.addToast('success', 'Đã hủy đơn hàng');
-            $scope.loadOrders();
-        })
-        .catch(function(){
-            $scope.addToast('danger', 'Không thể hủy đơn hàng');
-        });
+    var orderStatus = $scope.getOrderStatus(order);
+    if (orderStatus !== 'PendingConfirmation') {
+        $scope.showConfirmModal(
+            'Không thể hủy đơn',
+            'Chỉ có thể hủy đơn hàng ở trạng thái <strong>Chờ xác nhận</strong>.',
+            'warning',
+            null,
+            null
+        );
+        return;
+    }
+
+    $scope.showConfirmModal(
+        'Xác nhận hủy đơn hàng',
+        'Bạn có chắc chắn muốn hủy đơn hàng <strong>OD-' + (order.orderId || order.id) + '</strong>?<br><small class="text-muted">Hành động này không thể hoàn tác.</small>',
+        'danger',
+        function(selectedOrder, modalData) {
+            var id = selectedOrder.orderId || selectedOrder.id;
+            var payload = { 
+                reason: modalData.cancelReason || 'Hủy đơn hàng', 
+                note: modalData.cancelNote || 'Admin/Employee hủy' 
+            };
+            BookstoreService.cancelOrder(id, payload)
+                .then(function(){
+                    $scope.addToast('success', 'Đã hủy đơn hàng');
+                    $scope.loadOrders();
+                })
+                .catch(function(){
+                    $scope.addToast('danger', 'Không thể hủy đơn hàng');
+                });
+        },
+        order
+    );
 };
 
 $scope.assignDelivery = function(order){
@@ -409,31 +477,154 @@ $scope.assignDeliveryCandidate = function(order, candidate){
 };
 
 	$scope.confirmDelivered = function(order){
-		$scope.confirmingOrder = order;
+		console.log('confirmDelivered called with order:', order);
+		
+		// Store order data in scope BEFORE showing modal
+		$scope.confirmingOrder = angular.copy(order); // Use copy to avoid reference issues
+        // Also store a stable orderId on rootScope so we never lose it between scopes/modals
+        $rootScope.confirmDeliveredOrderId = order && (order.orderId || order.id) ? (order.orderId || order.id) : null;
 		$scope.deliveryNote = '';
 		$scope.submittingDelivery = false;
-		var modal = new bootstrap.Modal(document.getElementById('confirmDeliveredModal'));
-		modal.show();
+		
+		// Force scope update
+		if (!$scope.$$phase && !$scope.$root.$$phase) {
+			$scope.$apply();
+		}
+		
+		// Small delay to ensure scope is updated
+		$timeout(function() {
+			// Get or create modal instance with proper options
+			var modalEl = document.getElementById('adminOrderConfirmDeliveredModal');
+			if (!modalEl) {
+				console.error('Modal element adminOrderConfirmDeliveredModal not found');
+				return;
+			}
+			
+			// Clean up any existing backdrops
+			document.querySelectorAll('.modal-backdrop').forEach(function(b) {
+				try { b.remove(); } catch(e) {}
+			});
+			
+			// Move modal to body for proper z-index, but compile Angular bindings first
+			var originalParent = modalEl.parentNode;
+			if (modalEl.parentNode !== document.body) {
+				// Compile Angular bindings before moving
+				if ($compile) {
+					$compile(modalEl)($scope);
+				}
+				document.body.appendChild(modalEl);
+			}
+			
+			try {
+				var modal = bootstrap.Modal.getOrCreateInstance(modalEl, {
+					backdrop: true,
+					keyboard: true,
+					focus: true
+				});
+				modal.show();
+			} catch (e) {
+				console.error('Error showing admin order confirm delivered modal:', e);
+				// Fallback: try direct show
+				modalEl.classList.add('show');
+				modalEl.style.display = 'block';
+				modalEl.setAttribute('aria-hidden', 'false');
+				modalEl.setAttribute('aria-modal', 'true');
+				var backdrop = document.createElement('div');
+				backdrop.className = 'modal-backdrop fade show';
+				document.body.appendChild(backdrop);
+				document.body.classList.add('modal-open');
+			}
+		}, 100);
 	};
 
 	$scope.submitConfirmDelivered = function(){
-		if (!$scope.confirmingOrder) return;
+		console.log('=== submitConfirmDelivered CALLED ===');
+		console.log('confirmingOrder:', $scope.confirmingOrder);
+		console.log('deliveryNote:', $scope.deliveryNote);
+		console.log('submittingDelivery:', $scope.submittingDelivery);
+		
+		// Try to get order from scope or fallback to stored order / rootScope id
+		var order = $scope.confirmingOrder;
+		if (!order && $rootScope && $rootScope.selectedOrder) {
+			// Try to get from rootScope or other sources
+			console.warn('confirmingOrder is null, using selectedOrder from rootScope...');
+			order = $rootScope.selectedOrder;
+			console.log('Using selectedOrder from rootScope:', order);
+		}
+		
+		var orderId = null;
+		if (order && (order.orderId || order.id)) {
+			orderId = order.orderId || order.id;
+		} else if ($rootScope && $rootScope.confirmDeliveredOrderId) {
+			console.warn('Using confirmDeliveredOrderId from rootScope as fallback');
+			orderId = $rootScope.confirmDeliveredOrderId;
+		}
+		
+		if (!orderId) {
+			console.error('No orderId found for confirming delivery. order =', order, ', rootScope.confirmDeliveredOrderId =', $rootScope && $rootScope.confirmDeliveredOrderId);
+			alert('Không tìm thấy thông tin đơn hàng. Vui lòng thử lại.');
+			$scope.addToast('warning', 'Không tìm thấy thông tin đơn hàng');
+			return;
+		}
+		
 		var note = ($scope.deliveryNote && $scope.deliveryNote.trim()) || 'Đã giao';
 		$scope.submittingDelivery = true;
-		BookstoreService.confirmOrderDelivered($scope.confirmingOrder.orderId || $scope.confirmingOrder.id, { success: true, note: note })
-			.then(function(){
+		
+		console.log('Calling confirmOrderDelivered API with:', {
+			orderId: orderId,
+			payload: { success: true, note: note }
+		});
+		
+		// Ensure scope is updated
+		if (!$scope.$$phase && !$scope.$root.$$phase) {
+			$scope.$apply();
+		}
+		
+		BookstoreService.confirmOrderDelivered(orderId, { success: true, note: note })
+			.then(function(response){
+				console.log('API response:', response);
 				$scope.addToast('success', 'Đã xác nhận giao thành công');
-				var modal = bootstrap.Modal.getInstance(document.getElementById('confirmDeliveredModal'));
-				if (modal) modal.hide();
+				
+				// Hide modal properly
+				var modalEl = document.getElementById('adminOrderConfirmDeliveredModal');
+				if (modalEl) {
+					try {
+						var modal = bootstrap.Modal.getInstance(modalEl);
+						if (modal) {
+							modal.hide();
+						} else {
+							// Fallback: manual hide
+							modalEl.classList.remove('show');
+							modalEl.style.display = 'none';
+							document.querySelectorAll('.modal-backdrop').forEach(function(b) {
+								try { b.remove(); } catch(e) {}
+							});
+						}
+					} catch (e) {
+						console.error('Error hiding admin order confirm delivered modal:', e);
+					}
+				}
+				
 				$scope.confirmingOrder = null;
 				$scope.deliveryNote = '';
 				$scope.loadOrders();
 			})
-			.catch(function(){
-				$scope.addToast('danger', 'Không thể xác nhận giao hàng');
+			.catch(function(error){
+				console.error('Error confirming delivery:', error);
+				var errorMsg = 'Không thể xác nhận giao hàng';
+				if (error && error.data && error.data.message) {
+					errorMsg = error.data.message;
+				} else if (error && error.message) {
+					errorMsg = error.message;
+				}
+				alert('Lỗi: ' + errorMsg);
+				$scope.addToast('danger', errorMsg);
 			})
 			.finally(function(){
 				$scope.submittingDelivery = false;
+				if (!$scope.$$phase && !$scope.$root.$$phase) {
+					$scope.$apply();
+				}
 			});
 	};
 

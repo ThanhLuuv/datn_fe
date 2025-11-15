@@ -25,6 +25,9 @@ app.controller('AdminEmployeesController', ['$scope', 'BookstoreService', 'AuthS
         { id: 4, name: 'DELIVERY_EMPLOYEE', display: $scope.roleDisplayMap['DELIVERY_EMPLOYEE'] }
     ];
 
+    // Areas state
+    $scope.areas = [];
+    
     // Create employee form
     $scope.newEmployee = {
         accountEmail: '',
@@ -38,7 +41,9 @@ app.controller('AdminEmployeesController', ['$scope', 'BookstoreService', 'AuthS
         dateOfBirth: '',
         address: '',
         phone: '',
-        employeeEmail: ''
+        employeeEmail: '',
+        areaIds: [],
+        selectedAreaId: null
     };
 
     $scope.getRoleName = function(roleId){
@@ -98,6 +103,49 @@ app.controller('AdminEmployeesController', ['$scope', 'BookstoreService', 'AuthS
         });
     };
 
+    // Load areas
+    $scope.loadAreas = function() {
+        BookstoreService.getAreas().then(function(resp) {
+            if (resp.data && resp.data.success && resp.data.data && resp.data.data.areas) {
+                $scope.areas = resp.data.data.areas || [];
+            } else if (resp.data && resp.data.data && Array.isArray(resp.data.data)) {
+                $scope.areas = resp.data.data;
+            } else {
+                $scope.areas = [];
+            }
+        }).catch(function(err) {
+            console.error('Load areas error', err);
+            $scope.areas = [];
+        });
+    };
+
+    // Get area name by ID
+    $scope.getAreaName = function(areaId) {
+        var area = $scope.areas.find(function(a) { return a.areaId === areaId; });
+        return area ? area.name : 'Unknown';
+    };
+
+    // Add area to employee
+    $scope.addArea = function() {
+        if (!$scope.newEmployee.selectedAreaId) return;
+        if (!$scope.newEmployee.areaIds) {
+            $scope.newEmployee.areaIds = [];
+        }
+        if ($scope.newEmployee.areaIds.indexOf($scope.newEmployee.selectedAreaId) === -1) {
+            $scope.newEmployee.areaIds.push($scope.newEmployee.selectedAreaId);
+        }
+        $scope.newEmployee.selectedAreaId = null;
+    };
+
+    // Remove area from employee
+    $scope.removeArea = function(areaId) {
+        if (!$scope.newEmployee.areaIds) return;
+        var index = $scope.newEmployee.areaIds.indexOf(areaId);
+        if (index > -1) {
+            $scope.newEmployee.areaIds.splice(index, 1);
+        }
+    };
+
     // Create employee with account
     $scope.createEmployee = function() {
         if (!$scope.newEmployee.accountEmail || !$scope.newEmployee.password || !$scope.newEmployee.firstName || !$scope.newEmployee.lastName || !$scope.newEmployee.departmentId) {
@@ -108,11 +156,19 @@ app.controller('AdminEmployeesController', ['$scope', 'BookstoreService', 'AuthS
         if (payload.dateOfBirth instanceof Date) {
             payload.dateOfBirth = payload.dateOfBirth.toISOString();
         }
+        // Convert areaIds array to the format expected by API
+        if (payload.areaIds && payload.areaIds.length > 0) {
+            payload.areaIds = payload.areaIds.map(function(id) { return Number(id); });
+        } else {
+            payload.areaIds = null;
+        }
+        // Remove selectedAreaId from payload (it's only for UI)
+        delete payload.selectedAreaId;
         $scope.loading = true;
         BookstoreService.createEmployeeWithAccount(payload).then(function(resp) {
             if (resp.data && resp.data.success) {
                 alert('Tạo nhân viên thành công');
-                $scope.newEmployee = { accountEmail: '', password: '', roleId: 2, isActive: true, departmentId: '', firstName: '', lastName: '', gender: 'Other', dateOfBirth: '', address: '', phone: '', employeeEmail: '' };
+                $scope.newEmployee = { accountEmail: '', password: '', roleId: 2, isActive: true, departmentId: '', firstName: '', lastName: '', gender: 'Other', dateOfBirth: '', address: '', phone: '', employeeEmail: '', areaIds: [], selectedAreaId: null };
                 $scope.loadEmployees();
             } else {
                 alert(resp.data && resp.data.message ? resp.data.message : 'Không thể tạo nhân viên');
@@ -165,6 +221,7 @@ app.controller('AdminEmployeesController', ['$scope', 'BookstoreService', 'AuthS
     $scope.init = function() {
         if (!AuthService.isAdmin()) return;
         $scope.loadDepartments();
+        $scope.loadAreas();
         $scope.loadEmployees();
     };
 

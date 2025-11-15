@@ -6,9 +6,13 @@ var currentHost = window.location.hostname;
 var isLocal = currentHost === 'localhost' || currentHost === '127.0.0.1' || currentHost === '';
 var isVercelHost = currentHost.includes('vercel.app') || currentHost.includes('now.sh');
 
-// Fallback configuration
+// Fallback configuration - detect environment for API URL
+var fallbackApiUrl = isLocal 
+    ? 'http://localhost:5256/api'  // Local backend
+    : 'https://api-datn.thanhlaptrinh.online/api';  // Production backend
+
 var fallbackConfig = {
-    API_BASE_URL: 'https://api-datn.thanhlaptrinh.online/api',
+    API_BASE_URL: fallbackApiUrl,
     API_TIMEOUT: 15000,
     APP_NAME: 'BookStore Frontend',
     APP_VERSION: '1.0.0',

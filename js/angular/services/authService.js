@@ -2,7 +2,9 @@
 console.log('Loading AuthService...');
 app.service('AuthService', ['$http', '$q', 'APP_CONFIG', function($http, $q, APP_CONFIG) {
     console.log('AuthService - APP_CONFIG received:', APP_CONFIG);
-    var baseUrl = APP_CONFIG.API_BASE_URL || 'https://api-datn.thanhlaptrinh.online/api';
+    // Auto-detect API URL: use local backend for localhost, production otherwise
+    var isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    var baseUrl = APP_CONFIG.API_BASE_URL || (isLocal ? 'http://localhost:5256/api' : 'https://api-datn.thanhlaptrinh.online/api');
     
     // Debug log
     console.log('AuthService - API Base URL:', baseUrl);

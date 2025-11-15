@@ -219,7 +219,10 @@
             isLocalHost ? 'development' :
             isVercel ? 'production' : 'staging';
 
-        const API_BASE_URL = 'https://api-datn.thanhlaptrinh.online/api';
+        // Auto-detect API URL based on environment
+        const API_BASE_URL = ENVIRONMENT === 'development' 
+            ? 'http://localhost:5256/api'  // Local backend
+            : 'https://api-datn.thanhlaptrinh.online/api';  // Production backend
 
         window.ENV_CONFIG = {
             API_BASE_URL,

@@ -1,7 +1,7 @@
 // Development Environment Configuration
 window.ENV_CONFIG = {
-    // API Configuration
-    API_BASE_URL: 'https://api-datn.thanhlaptrinh.online/api',
+    // API Configuration - Local Backend
+    API_BASE_URL: 'http://localhost:5256/api',
     API_TIMEOUT: 10000,
     
     // Application Settings

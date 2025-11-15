@@ -432,3 +432,39 @@
         color: #198754 !important;
     }
 </style>
+
+<!-- Purchase Order Confirmation Modal -->
+<div class="modal fade" id="poConfirmModal" tabindex="-1" aria-labelledby="poConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" ng-class="{
+                'bg-info text-white': poConfirmModal.type === 'info',
+                'bg-warning text-dark': poConfirmModal.type === 'warning',
+                'bg-danger text-white': poConfirmModal.type === 'danger'
+            }">
+                <h5 class="modal-title" id="poConfirmModalLabel">
+                    <i class="bi" ng-class="{
+                        'bi-info-circle': poConfirmModal.type === 'info',
+                        'bi-exclamation-triangle': poConfirmModal.type === 'warning',
+                        'bi-exclamation-circle': poConfirmModal.type === 'danger'
+                    }"></i>
+                    {{poConfirmModal.title}}
+                </h5>
+                <button type="button" class="btn-close" ng-class="{'btn-close-white': poConfirmModal.type !== 'warning'}" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0" ng-bind-html="poConfirmModal.message"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" ng-click="hidePoConfirmModal()">Hủy</button>
+                <button type="button" class="btn" ng-class="{
+                    'btn-info': poConfirmModal.type === 'info',
+                    'btn-warning': poConfirmModal.type === 'warning',
+                    'btn-danger': poConfirmModal.type === 'danger'
+                }" ng-click="confirmPoAction()">
+                    <i class="bi bi-check-circle me-1"></i>Xác nhận
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
