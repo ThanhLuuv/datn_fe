@@ -16,6 +16,7 @@
     <!-- Custom CSS -->
     <link href="/css/custom/main.css?v=1.5" rel="stylesheet">
     <link href="/css/custom/auth.css?v=1.5" rel="stylesheet">
+    <link href="/css/book-card.css" rel="stylesheet">
     
     <style>
         /* Header Styles */
@@ -325,7 +326,7 @@
                             <li><a class="dropdown-item" href="#!/admin" ng-if="isAuthenticated && (currentUser.roleId === 3 || currentUser.roleId === 2 || currentUser.roleId === 4)">
                                 <i class="bi bi-person me-2"></i>Trang quản lý
                             </a></li>
-                            <li><a class="dropdown-item" href="#!/profile">
+                            <li><a class="dropdown-item" href="#!/profile" ng-if="currentUser && currentUser.roleId === 1">
                                 <i class="bi bi-person me-2"></i>Thông tin cá nhân
                             </a></li>
                             <li><a class="dropdown-item" href="#!/orders">
@@ -473,12 +474,14 @@
     <script defer src="/js/angular/controllers/returnController.js"></script>
     <script defer src="/js/angular/controllers/promotionController.js"></script>
     <script defer src="/js/angular/controllers/deliveryOrdersController.js"></script>
+    <script defer src="/js/angular/controllers/profileController.js"></script>
     
     <!-- Directives -->
     <script defer src="/js/angular/directives/customDirectives.js?v=1.4"></script>
     <script defer src="/js/angular/directives/authDirectives.js?v=1.4"></script>
     <script defer src="/js/angular/directives/permissionDirectives.js?v=1.4"></script>
     <script defer src="/js/angular/directives/commonDirectives.js?v=1.4"></script>
+    <script defer src="/js/angular/directives/bookCardDirective.js"></script>
     
     <!-- Custom jQuery -->
     <script defer src="/js/custom/main.js"></script>

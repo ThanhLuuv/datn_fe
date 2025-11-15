@@ -27,32 +27,17 @@
 
             <!-- Books Grid -->
             <div class="books-grid" ng-if="!isLoading && !showError">
-                <div class="book-card" ng-repeat="book in books | filter:searchTerm">
-                    <div class="book-image">
-                        <a ng-href="#!/book/{{book.isbn}}">
-                            <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.png'}}" 
-                                 alt="{{book.title}}"
-                                 onerror="this.src='app/assets/images/book-placeholder.png'">
-                        </a>
-                    </div>
-                    <div class="book-info">
-                        <h3 class="book-title">
-                            <a ng-href="#!/book/{{book.isbn}}">{{book.title}}</a>
-                        </h3>
-                        <p class="book-author" ng-if="book.authors && book.authors.length > 0">{{book.authors[0].fullName}}</p>
-                        <p class="book-author" ng-if="!book.authors || book.authors.length === 0">Chưa có tác giả</p>
-                        <div class="rating">
-                            <i class="bi bi-star-fill star" ng-repeat="i in [1,2,3,4,5]"></i>
-                        </div>
-                        <div class="book-price">
-                            <span class="price-current">{{(book.discountedPrice || book.currentPrice || book.unitPrice) | currency:'':0}} ₫</span>
-                            <span class="price-old" ng-if="book.discountedPrice && book.currentPrice && book.discountedPrice < book.currentPrice">{{book.currentPrice | currency:'':0}} ₫</span>
-                        </div>
-                    </div>
-                    <button class="add-to-cart-icon" ng-click="addToCart(book)" title="Thêm vào giỏ hàng" ng-disabled="!isAuthenticated">
-                        <i class="bi bi-cart-plus"></i>
-                    </button>
-                </div>
+                <book-card 
+                    ng-repeat="book in books | filter:searchTerm"
+                    book="book"
+                    on-add-to-cart="addToCart(book)"
+                    is-authenticated="isAuthenticated()"
+                    get-final-price="getFinalPrice(book)"
+                    has-promo="hasPromo(book)"
+                    calculate-discount-percent="calculateDiscountPercent(book)"
+                    show-badge="{{hasPromo(book) ? 'sale' : ''}}"
+                    show-discount-tag="{{hasPromo(book) ? 'true' : 'false'}}">
+                </book-card>
             </div>
 
             <!-- Empty State -->
@@ -294,9 +279,17 @@
 
 .book-price {
     display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+    margin-bottom: 1rem;
+    text-align: left;
+}
+
+.price-row {
+    display: flex;
     align-items: center;
     gap: 0.8rem;
-    margin-bottom: 1rem;
     flex-wrap: wrap;
 }
 

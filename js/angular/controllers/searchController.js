@@ -38,7 +38,17 @@ app.controller('SearchController', ['$scope', '$location', 'BookstoreService', '
 
     $scope.getFinalPrice = function(book) {
         if (!book) return 0;
-        var base = book.unitPrice || 0;
+        
+        // Use discountedPrice if available (from new API)
+        if (book.discountedPrice != null) return Math.round(book.discountedPrice);
+        
+        // Use currentPrice as fallback
+        if (book.currentPrice != null) return Math.round(book.currentPrice);
+        
+        // Legacy support for old API structure
+        if (book.effectivePrice != null) return Math.round(book.effectivePrice);
+        
+        var base = book.unitPrice || book.averagePrice || 0;
         var percent = book.promoPercent || book.discountPercent || null;
         var amount = book.promoAmount || book.discountAmount || null;
         var priceByPercent = (percent && percent > 0) ? Math.round(base * (1 - percent / 100)) : null;
@@ -48,7 +58,24 @@ app.controller('SearchController', ['$scope', '$location', 'BookstoreService', '
         if (priceByAmount !== null) candidates.push(priceByAmount);
         return Math.min.apply(null, candidates);
     };
-    $scope.hasPromo = function(book) { return $scope.getFinalPrice(book) < (book.unitPrice || 0); };
+    
+    $scope.hasPromo = function(book) { 
+        if (!book) return false;
+        var finalPrice = $scope.getFinalPrice(book);
+        var originalPrice = book.currentPrice || book.unitPrice || book.averagePrice || 0;
+        return finalPrice < originalPrice || book.hasPromotion === true;
+    };
+    
+    // Calculate discount percentage
+    $scope.calculateDiscountPercent = function(book) {
+        if (!book) return 0;
+        var finalPrice = $scope.getFinalPrice(book);
+        var originalPrice = book.currentPrice || book.unitPrice || book.averagePrice || 0;
+        if (originalPrice > 0 && finalPrice < originalPrice) {
+            return Math.round(((originalPrice - finalPrice) / originalPrice) * 100);
+        }
+        return 0;
+    };
 
     // Filter results to only show books with status: true and stock > 1
     $scope.filterActiveBooks = function() {

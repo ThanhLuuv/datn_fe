@@ -1634,4 +1634,35 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
             headers: getAuthHeaders()
         });
     };
+
+    // ==================== CUSTOMER PROFILE APIs ====================
+
+    // Lấy thông tin cá nhân của khách hàng hiện tại
+    this.getMyProfile = function() {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/customer/me',
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Cập nhật thông tin cá nhân của khách hàng hiện tại
+    this.updateMyProfile = function(profile) {
+        var payload = {
+            firstName: (profile.firstName || '').trim(),
+            lastName: (profile.lastName || '').trim(),
+            gender: profile.gender || 'Other',
+            dateOfBirth: profile.dateOfBirth || null,
+            address: (profile.address || '').trim(),
+            phone: (profile.phone || '').trim(),
+            email: (profile.email || '').trim()
+        };
+
+        return $http({
+            method: 'PUT',
+            url: baseUrl + '/customer/me',
+            data: payload,
+            headers: getAuthHeaders()
+        });
+    };
 }]);

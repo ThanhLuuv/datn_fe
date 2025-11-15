@@ -195,6 +195,19 @@ app.config(['$routeProvider', function($routeProvider) {
             templateUrl: 'app/views/customer-orders.html',
             controller: 'CustomerOrdersController'
         })
+        .when('/profile', {
+            templateUrl: 'app/views/profile.html',
+            controller: 'ProfileController',
+            resolve: {
+                checkAuth: ['AuthService', '$location', function(AuthService, $location) {
+                    if (!AuthService.isAuthenticated() || !AuthService.isCustomer()) {
+                        $location.path('/login');
+                        return false;
+                    }
+                    return true;
+                }]
+            }
+        })
         .when('/search', {
             templateUrl: 'app/views/search.html',
             controller: 'SearchController'

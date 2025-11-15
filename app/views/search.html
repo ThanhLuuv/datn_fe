@@ -31,31 +31,18 @@
 
         <!-- Search Results -->
         <div class="search-results" ng-if="!loading && filteredResults.length > 0">
-            <div class="row g-4">
-                <div class="col-lg-3 col-md-4 col-sm-6" ng-repeat="book in filteredResults">
-                    <div class="book-card h-100"
-                         data-bs-toggle="tooltip"
-                         ng-attr-title="{{book.title}}&#10;Giá: {{(book.currentPrice || book.unitPrice) | currency:'':0}} VNĐ&#10;ISBN: {{book.isbn}}">
-                        <div class="book-image">
-                            <a ng-href="#!/book/{{book.isbn}}" title="Xem chi tiết">
-                                <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.png'}}" alt="{{book.title}}">
-                            </a>
-                        </div>
-                        <div class="book-info">
-                            <h6 class="book-title"><a class="text-decoration-none" ng-href="#!/book/{{book.isbn}}">{{book.title}}</a></h6>
-                            <div class="book-meta mb-2">
-                                <small class="text-muted">ISBN: {{book.isbn}}</small>
-                            </div>
-                            <div class="price-block">
-                                <div class="price-current">{{(getFinalPrice && getFinalPrice(book)) || (book.currentPrice || book.unitPrice) | currency:'':0}} ₫</div>
-                                <div class="price-old" ng-if="getFinalPrice && getFinalPrice(book) < (book.currentPrice || book.unitPrice)">{{(book.currentPrice || book.unitPrice) | currency:'':0}} ₫</div>
-                            </div>
-                        </div>
-                        <button class="add-to-cart-icon" ng-click="addToCart(book)" title="Thêm vào giỏ hàng" ng-disabled="!isAuthenticated">
-                            <i class="bi bi-cart-plus"></i>
-                        </button>
-                    </div>
-                </div>
+            <div class="books-grid">
+                <book-card 
+                    ng-repeat="book in filteredResults"
+                    book="book"
+                    on-add-to-cart="addToCart(book)"
+                    is-authenticated="isAuthenticated()"
+                    get-final-price="getFinalPrice(book)"
+                    has-promo="hasPromo(book)"
+                    calculate-discount-percent="calculateDiscountPercent(book)"
+                    show-badge="{{hasPromo(book) ? 'sale' : ''}}"
+                    show-discount-tag="{{hasPromo(book) ? 'true' : 'false'}}">
+                </book-card>
             </div>
         </div>
 
@@ -215,6 +202,7 @@
     cursor: pointer;
     position: relative;
     height: 100%;
+    min-height: 600px;
     display: flex;
     flex-direction: column;
 }
@@ -233,6 +221,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
     overflow: hidden;
     flex-shrink: 0;
 }
@@ -241,11 +230,42 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.3s;
 }
 
-.book-card:hover .book-image img {
-    transform: scale(1.1);
+.book-image::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(to top, rgba(0,0,0,0.1), transparent);
+}
+
+.badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    padding: 0.5rem 1rem;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 25px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    z-index: 1;
+}
+
+.badge-sale {
+    background: #ef4444;
+}
+
+.badge-new {
+    background: #10b981;
+}
+
+.badge-hot {
+    background: #f59e0b;
 }
 
 .book-info {
@@ -257,20 +277,31 @@
 
 .book-title {
     font-size: 1.1rem;
-    font-weight: 600;
     color: #0f172a;
     margin-bottom: 0.5rem;
-    line-height: 1.4;
+    font-weight: 700;
+    min-height: 3rem;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .book-title a {
     color: #0f172a;
     text-decoration: none;
-    transition: color 0.3s;
 }
 
 .book-title a:hover {
     color: #f59e0b;
+}
+
+.book-author {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    min-height: 1.5rem;
 }
 
 .book-meta {
@@ -279,21 +310,56 @@
     margin-bottom: 1rem;
 }
 
-.price-block {
+.book-meta small {
+    color: #94a3b8;
+}
+
+.rating {
+    display: flex;
+    gap: 0.3rem;
     margin-bottom: 1rem;
 }
 
+.star {
+    color: #fbbf24;
+    font-size: 0.9rem;
+}
+
+.book-price {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+    margin-bottom: 1rem;
+    text-align: left;
+}
+
+.price-row {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+}
+
 .price-current {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: #f59e0b;
+    font-size: 1.5rem;
+    color: #ef4444;
+    font-weight: 800;
 }
 
 .price-old {
-    font-size: 0.9rem;
-    color: #94a3b8;
     text-decoration: line-through;
-    margin-left: 0.5rem;
+    color: #94a3b8;
+    font-size: 1rem;
+}
+
+.discount-tag {
+    background: #fee2e2;
+    color: #ef4444;
+    padding: 0.2rem 0.5rem;
+    border-radius: 5px;
+    font-size: 0.75rem;
+    font-weight: 700;
 }
 
 .add-to-cart-icon {

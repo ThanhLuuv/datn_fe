@@ -93,34 +93,18 @@
                 </a>
             </div>
             <div class="books-grid" ng-if="!loading">
-                <div class="book-card" ng-repeat="book in bestSellers | limitTo:5" ng-if="book.status">
-                    <div class="book-image">
-                        <a ng-href="#!/book/{{book.isbn}}" title="Xem chi tiết">
-                            <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.png'}}" 
-                                 alt="{{book.title}}"
-                                 onerror="this.src='app/assets/images/book-placeholder.png'">
-                        </a>
-                        <span class="badge badge-hot" ng-if="book.totalSold > 0">HOT</span>
-                        <span class="badge badge-sale" ng-if="hasPromo(book)">-{{calculateDiscountPercent(book)}}%</span>
-                    </div>
-                    <div class="book-info">
-                        <h3 class="book-title">
-                            <a ng-href="#!/book/{{book.isbn}}">{{book.title}}</a>
-                        </h3>
-                        <p class="book-author">{{book.authors[0].fullName}}</p>
-                        <div class="rating">
-                            <i class="bi bi-star-fill star" ng-repeat="i in [1,2,3,4,5]"></i>
-                        </div>
-                        <div class="book-price">
-                            <span class="price-current">{{getFinalPrice(book) | currency:'':0}} ₫</span>
-                            <span class="price-old" ng-if="hasPromo(book)">{{book.currentPrice | currency:'':0}} ₫</span>
-                            <span class="discount-tag" ng-if="hasPromo(book)">-{{calculateDiscountPercent(book)}}%</span>
-                        </div>
-                    </div>
-                    <button class="add-to-cart-icon" ng-click="addToCart(book)" title="Thêm vào giỏ hàng" ng-disabled="!isAuthenticated">
-                        <i class="bi bi-cart-plus"></i>
-                    </button>
-                </div>
+                <book-card 
+                    ng-repeat="book in bestSellers | limitTo:5" 
+                    ng-if="book.status"
+                    book="book"
+                    on-add-to-cart="addToCart(book)"
+                    is-authenticated="isAuthenticated()"
+                    get-final-price="getFinalPrice(book)"
+                    has-promo="hasPromo(book)"
+                    calculate-discount-percent="calculateDiscountPercent(book)"
+                    show-badge="{{book.totalSold > 0 ? 'hot' : (hasPromo(book) ? 'sale' : '')}}"
+                    show-discount-tag="{{hasPromo(book) ? 'true' : 'false'}}">
+                </book-card>
             </div>
             <div class="books-grid" ng-if="loading">
                 <div class="book-placeholder" ng-repeat="n in [1,2,3,4,5]">
@@ -144,33 +128,18 @@
                 </a>
             </div>
             <div class="books-grid" ng-if="!loading">
-                <div class="book-card" ng-repeat="book in promotionBooks | limitTo:5" ng-if="book.status">
-                    <div class="book-image">
-                        <a ng-href="#!/book/{{book.isbn}}" title="Xem chi tiết">
-                            <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.png'}}" 
-                                 alt="{{book.title}}"
-                                 onerror="this.src='app/assets/images/book-placeholder.png'">
-                        </a>
-                        <span class="badge badge-sale">-{{calculateDiscountPercent(book)}}%</span>
-                    </div>
-                    <div class="book-info">
-                        <h3 class="book-title">
-                            <a ng-href="#!/book/{{book.isbn}}">{{book.title}}</a>
-                        </h3>
-                        <p class="book-author">{{book.authors[0].fullName}}</p>
-                        <div class="rating">
-                            <i class="bi bi-star-fill star" ng-repeat="i in [1,2,3,4,5]"></i>
-                        </div>
-                        <div class="book-price">
-                            <span class="price-current">{{getFinalPrice(book) | currency:'':0}} ₫</span>
-                            <span class="price-old" ng-if="hasPromo(book)">{{book.currentPrice | currency:'':0}} ₫</span>
-                            <span class="discount-tag">-{{calculateDiscountPercent(book)}}%</span>
-                        </div>
-                    </div>
-                    <button class="add-to-cart-icon" ng-click="addToCart(book)" title="Thêm vào giỏ hàng" ng-disabled="!isAuthenticated">
-                        <i class="bi bi-cart-plus"></i>
-                    </button>
-                </div>
+                <book-card 
+                    ng-repeat="book in promotionBooks | limitTo:5" 
+                    ng-if="book.status"
+                    book="book"
+                    on-add-to-cart="addToCart(book)"
+                    is-authenticated="isAuthenticated()"
+                    get-final-price="getFinalPrice(book)"
+                    has-promo="hasPromo(book)"
+                    calculate-discount-percent="calculateDiscountPercent(book)"
+                    show-badge="sale"
+                    show-discount-tag="true">
+                </book-card>
             </div>
             <div class="books-grid" ng-if="loading">
                 <div class="book-placeholder" ng-repeat="n in [1,2,3,4,5]">
@@ -194,32 +163,17 @@
                 </a>
             </div>
             <div class="books-grid" ng-if="!loading">
-                <div class="book-card" ng-repeat="book in newBooks | limitTo:5" ng-if="book.status">
-                    <div class="book-image">
-                        <a ng-href="#!/book/{{book.isbn}}" title="Xem chi tiết">
-                            <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.png'}}" 
-                                 alt="{{book.title}}"
-                                 onerror="this.src='app/assets/images/book-placeholder.png'">
-                        </a>
-                        <span class="badge badge-new">MỚI</span>
-                    </div>
-                    <div class="book-info">
-                        <h3 class="book-title">
-                            <a ng-href="#!/book/{{book.isbn}}">{{book.title}}</a>
-                        </h3>
-                        <p class="book-author">{{book.authors[0].fullName}}</p>
-                        <div class="rating">
-                            <i class="bi bi-star-fill star" ng-repeat="i in [1,2,3,4,5]"></i>
-                        </div>
-                        <div class="book-price">
-                            <span class="price-current">{{getFinalPrice(book) | currency:'':0}} ₫</span>
-                            <span class="price-old" ng-if="hasPromo(book)">{{book.currentPrice | currency:'':0}} ₫</span>
-                        </div>
-                    </div>
-                    <button class="add-to-cart-icon" ng-click="addToCart(book)" title="Thêm vào giỏ hàng" ng-disabled="!isAuthenticated">
-                        <i class="bi bi-cart-plus"></i>
-                    </button>
-                </div>
+                <book-card 
+                    ng-repeat="book in newBooks | limitTo:5" 
+                    ng-if="book.status"
+                    book="book"
+                    on-add-to-cart="addToCart(book)"
+                    is-authenticated="isAuthenticated()"
+                    get-final-price="getFinalPrice(book)"
+                    has-promo="hasPromo(book)"
+                    calculate-discount-percent="calculateDiscountPercent(book)"
+                    show-badge="new">
+                </book-card>
             </div>
             <div class="books-grid" ng-if="loading">
                 <div class="book-placeholder" ng-repeat="n in [1,2,3,4,5]">
@@ -722,8 +676,18 @@
 .book-author {
     color: #64748b;
     font-size: 0.9rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     min-height: 1.5rem;
+}
+
+.book-meta {
+    color: #64748b;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+}
+
+.book-meta small {
+    color: #94a3b8;
 }
 
 .rating {
@@ -739,9 +703,17 @@
 
 .book-price {
     display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+    margin-bottom: 1rem;
+    text-align: left;
+}
+
+.price-row {
+    display: flex;
     align-items: center;
     gap: 0.8rem;
-    margin-bottom: 1rem;
     flex-wrap: wrap;
 }
 

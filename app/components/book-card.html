@@ -1,0 +1,36 @@
+<div class="book-card">
+    <div class="book-image">
+        <a ng-href="#!/book/{{book.isbn}}" title="Xem chi tiết">
+            <img ng-src="{{book.imageUrl || 'app/assets/images/book-placeholder.png'}}" 
+                 alt="{{book.title}}"
+                 onerror="this.src='app/assets/images/book-placeholder.png'">
+        </a>
+        <span class="badge badge-new" ng-if="showBadge === 'new'">MỚI</span>
+        <span class="badge badge-hot" ng-if="showBadge === 'hot'">HOT</span>
+        <span class="badge badge-sale" ng-if="showBadge === 'sale'">-{{discountPercent}}%</span>
+    </div>
+    <div class="book-info">
+        <h3 class="book-title">
+            <a ng-href="#!/book/{{book.isbn}}">{{book.title}}</a>
+        </h3>
+        <p class="book-author" ng-if="book.authors && book.authors.length > 0">{{book.authors[0].fullName}}</p>
+        <p class="book-author" ng-if="!book.authors || book.authors.length === 0">Chưa có tác giả</p>
+        <div class="book-meta">
+            <small class="text-muted">ISBN: {{book.isbn}}</small>
+        </div>
+        <div class="rating">
+            <i class="bi bi-star-fill star" ng-repeat="i in [1,2,3,4,5]"></i>
+        </div>
+        <div class="book-price">
+            <div class="price-row">
+                <span class="price-current">{{finalPrice | number:0}} ₫</span>
+                <span class="discount-tag" ng-if="showDiscountTag">-{{discountPercent}}%</span>
+            </div>
+            <span class="price-old" ng-if="showOldPrice">{{oldPrice | number:0}} ₫</span>
+        </div>
+    </div>
+    <button class="add-to-cart-icon" ng-click="onAddToCartClick()" title="Thêm vào giỏ hàng" ng-disabled="!isAuthenticated">
+        <i class="bi bi-cart-plus"></i>
+    </button>
+</div>
+
