@@ -16,6 +16,6 @@ COPY . .
 # Expose port 3002
 EXPOSE 3002
 
-# Start http-server
-CMD ["http-server", "-p", "3002", "-a", "0.0.0.0", "--cors"]
+# Start http-server với cache disabled
+CMD ["http-server", "-p", "3002", "-a", "0.0.0.0", "--cors", "-c-1"]
 

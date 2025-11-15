@@ -3,9 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Prevent caching in development -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>BookStore</title>
     <link rel="icon" type="image/png" href="app/assets/images/logo.png">
     <link rel="shortcut icon" type="image/png" href="app/assets/images/logo.png">
+    
+    <!-- Auto Cache Busting Script - CHẠY NGAY LẬP TỨC, KHÔNG DEFER -->
+    <script>
+        // Tự động chống cache - chạy NGAY LẬP TỨC trước khi trình duyệt load file
+        // Mỗi lần F5 sẽ tự động có bản mới, KHÔNG CẦN Ctrl+F5!
+        // Áp dụng cho CẢ DEVELOPMENT VÀ PRODUCTION
+        (function() {
+            // LUÔN BẬT - không kiểm tra môi trường nữa
+            var alwaysEnabled = true;
+            
+            if (alwaysEnabled) {
+                var timestamp = Date.now();
+                var random = Math.random().toString(36).substring(7);
+                var cacheBuster = timestamp + '-' + random;
+                
+                // Override createElement để intercept các thẻ được tạo động
+                var originalCreateElement = document.createElement;
+                document.createElement = function(tagName) {
+                    var element = originalCreateElement.call(document, tagName);
+                    
+                    if (tagName === 'link' || tagName === 'script') {
+                        var originalSetAttribute = element.setAttribute;
+                        element.setAttribute = function(name, value) {
+                            if ((name === 'href' || name === 'src') && value) {
+                                // Chỉ thêm cache buster cho file local
+                                if (!value.includes('cdn.jsdelivr.net') && 
+                                    !value.includes('googleapis.com') && 
+                                    !value.includes('code.jquery.com') &&
+                                    !value.includes('ajax.googleapis.com')) {
+                                    var url = value.split('?')[0];
+                                    var newValue = url + '?v=' + cacheBuster + '&_=' + Date.now();
+                                    return originalSetAttribute.call(this, name, newValue);
+                                }
+                            }
+                            return originalSetAttribute.call(this, name, value);
+                        };
+                    }
+                    
+                    return element;
+                };
+                
+                // Function để cập nhật tất cả thẻ đã có trong HTML
+                function updateAllTags() {
+                    // Cập nhật CSS links
+                    var links = document.querySelectorAll('link[rel="stylesheet"]');
+                    links.forEach(function(link) {
+                        var href = link.getAttribute('href');
+                        if (href && !href.includes('cdn.jsdelivr.net') && !href.includes('googleapis.com')) {
+                            var url = href.split('?')[0];
+                            var newHref = url + '?v=' + cacheBuster + '&_=' + Date.now();
+                            if (link.href !== newHref) {
+                                link.href = newHref;
+                            }
+                        }
+                    });
+                    
+                    // Cập nhật JS scripts
+                    var scripts = document.querySelectorAll('script[src]');
+                    scripts.forEach(function(script) {
+                        var src = script.getAttribute('src');
+                        if (src && !src.includes('cdn.jsdelivr.net') && 
+                            !src.includes('ajax.googleapis.com') && 
+                            !src.includes('code.jquery.com') &&
+                            !src.includes('googleapis.com')) {
+                            var url = src.split('?')[0];
+                            var newSrc = url + '?v=' + cacheBuster + '&_=' + Date.now();
+                            if (script.src !== newSrc) {
+                                script.src = newSrc;
+                            }
+                        }
+                    });
+                }
+                
+                // Chạy ngay lập tức và liên tục
+                updateAllTags();
+                
+                // Chạy lại khi DOM ready
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', updateAllTags);
+                }
+                
+                // Chạy lại sau một chút để đảm bảo
+                setTimeout(updateAllTags, 10);
+                setTimeout(updateAllTags, 100);
+                
+                console.log('🔧 Auto cache busting: ENABLED (Production Mode)');
+                console.log('💡 Mỗi lần F5 sẽ tự động load bản mới!');
+                console.log('📝 Cache buster:', cacheBuster);
+            }
+        })();
+    </script>
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -16,7 +111,7 @@
     <!-- Custom CSS -->
     <link href="/css/custom/main.css?v=1.5" rel="stylesheet">
     <link href="/css/custom/auth.css?v=1.5" rel="stylesheet">
-    <link href="/css/book-card.css" rel="stylesheet">
+    <link href="/css/book-card.css?v=1.5" rel="stylesheet">
     
     <style>
         /* Header Styles */
@@ -258,14 +353,40 @@
     
     <!-- Debug Scripts -->
     <script>
-        // English: log any script load error (404, CORS, MIME)
-        // Tiếng Việt: log lỗi tải file .js (404, CORS, MIME)
-        window.addEventListener('error', function (e) {
-            const t = e.target || e.srcElement;
-            if (t && t.tagName === 'SCRIPT') {
-                console.error('❌ Script load failed:', t.src || t.getAttribute('src'));
+        // Disable cache và service workers trong development
+        (function() {
+            var isDev = window.location.hostname === 'localhost' || 
+                        window.location.hostname === '127.0.0.1' || 
+                        window.location.hostname.includes('localhost') ||
+                        window.location.search.includes('dev=true');
+            
+            if (isDev) {
+                // Disable cache for all requests
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                        for(let registration of registrations) {
+                            registration.unregister();
+                        }
+                    });
+                }
+                
+                // Force reload if user navigates back/forward
+                window.addEventListener('pageshow', function(event) {
+                    if (event.persisted) {
+                        window.location.reload();
+                    }
+                });
             }
-        }, true);
+            
+            // English: log any script load error (404, CORS, MIME)
+            // Tiếng Việt: log lỗi tải file .js (404, CORS, MIME)
+            window.addEventListener('error', function (e) {
+                const t = e.target || e.srcElement;
+                if (t && t.tagName === 'SCRIPT') {
+                    console.error('❌ Script load failed:', t.src || t.getAttribute('src'));
+                }
+            }, true);
+        })();
     </script>
 </head>
 <body ng-controller="AppController">
@@ -442,52 +563,52 @@
     <script defer src="/js/angular/services/dataService.js?v=1.3"></script>
     <script defer src="/js/angular/services/authService.js?v=1.3"></script>
     <script defer src="/js/angular/services/bookstoreService.js?v=1.3"></script>
-    <script defer src="/js/angular/services/cartService.js"></script>
+    <script defer src="/js/angular/services/cartService.js?v=1.6"></script>
     
     <!-- Filters (defer to ensure Angular is loaded first) -->
-    <script defer src="/js/angular/filters/customFilters.js"></script>
-    <script defer src="/js/angular/filters/bookstoreFilters.js"></script>
+    <script defer src="/js/angular/filters/customFilters.js?v=1.6"></script>
+    <script defer src="/js/angular/filters/bookstoreFilters.js?v=1.6"></script>
     
     <!-- Controllers -->
-    <script defer src="/js/angular/controllers/homeController.js"></script>
-    <script defer src="/js/angular/controllers/aboutController.js"></script>
-    <script defer src="/js/angular/controllers/contactController.js"></script>
-    <script defer src="/js/angular/controllers/authController.js"></script>
-    <script defer src="/js/angular/controllers/adminController.js"></script>
-    <script defer src="/js/angular/controllers/employeeController.js"></script>
-    <script defer src="/js/angular/controllers/apiTestController.js"></script>
-    <script defer src="/js/angular/controllers/categoryController.js"></script>
-    <script defer src="/js/angular/controllers/bookController.js"></script>
-    <script defer src="/js/angular/controllers/searchController.js"></script>
-    <script defer src="/js/angular/controllers/cartController.js"></script>
-    <script defer src="/js/angular/controllers/checkoutController.js"></script>
-    <script defer src="/js/angular/controllers/successController.js"></script>
-    <script defer src="/js/angular/controllers/bookDetailController.js"></script>
-    <script defer src="/js/angular/controllers/customerOrdersController.js"></script>
-    <script defer src="/js/angular/controllers/purchaseOrderController.js"></script>
-    <script defer src="/js/angular/controllers/goodsReceiptController.js"></script>
-    <script defer src="/js/angular/controllers/reportController.js"></script>
-    <script defer src="/js/angular/controllers/adminInventoryReportController.js"></script>
-    <script defer src="/js/angular/controllers/adminEmployeesController.js"></script>
-    <script defer src="/js/angular/controllers/rolesController.js"></script>
-    <script defer src="/js/angular/controllers/orderController.js"></script>
-    <script defer src="/js/angular/controllers/returnController.js"></script>
-    <script defer src="/js/angular/controllers/promotionController.js"></script>
-    <script defer src="/js/angular/controllers/deliveryOrdersController.js"></script>
-    <script defer src="/js/angular/controllers/profileController.js"></script>
+    <script defer src="/js/angular/controllers/homeController.js?v=1.6"></script>
+    <script defer src="/js/angular/controllers/aboutController.js?v=1.6"></script>
+    <script defer src="/js/angular/controllers/contactController.js?v=1.6"></script>
+    <script defer src="/js/angular/controllers/authController.js?v=1.6"></script>
+    <script defer src="/js/angular/controllers/adminController.js?v=1.6"></script>
+    <script defer src="/js/angular/controllers/employeeController.js?v=1.6"></script>
+    <script defer src="/js/angular/controllers/apiTestController.js?v=1.6"></script>
+    <script defer src="/js/angular/controllers/categoryController.js?v=1.6"></script>
+    <script defer src="/js/angular/controllers/bookController.js?v=1.6"></script>
+    <script defer src="/js/angular/controllers/searchController.js?v=1.6"></script>
+    <script defer src="/js/angular/controllers/cartController.js?v=1.6"></script>
+    <script defer src="/js/angular/controllers/checkoutController.js?v=1.6"></script>
+    <script defer src="/js/angular/controllers/successController.js?v=1.6"></script>
+    <script defer src="/js/angular/controllers/bookDetailController.js?v=1.6"></script>
+    <script defer src="/js/angular/controllers/customerOrdersController.js?v=1.6"></script>
+    <script defer src="/js/angular/controllers/purchaseOrderController.js?v=1.6"></script>
+    <script defer src="/js/angular/controllers/goodsReceiptController.js?v=1.6"></script>
+    <script defer src="/js/angular/controllers/reportController.js?v=1.6"></script>
+    <script defer src="/js/angular/controllers/adminInventoryReportController.js?v=1.6"></script>
+    <script defer src="/js/angular/controllers/adminEmployeesController.js?v=1.6"></script>
+    <script defer src="/js/angular/controllers/rolesController.js?v=1.6"></script>
+    <script defer src="/js/angular/controllers/orderController.js?v=1.6"></script>
+    <script defer src="/js/angular/controllers/returnController.js?v=1.6"></script>
+    <script defer src="/js/angular/controllers/promotionController.js?v=1.6"></script>
+    <script defer src="/js/angular/controllers/deliveryOrdersController.js?v=1.6"></script>
+    <script defer src="/js/angular/controllers/profileController.js?v=1.6"></script>
     
     <!-- Directives -->
     <script defer src="/js/angular/directives/customDirectives.js?v=1.4"></script>
     <script defer src="/js/angular/directives/authDirectives.js?v=1.4"></script>
     <script defer src="/js/angular/directives/permissionDirectives.js?v=1.4"></script>
     <script defer src="/js/angular/directives/commonDirectives.js?v=1.4"></script>
-    <script defer src="/js/angular/directives/bookCardDirective.js"></script>
+    <script defer src="/js/angular/directives/bookCardDirective.js?v=1.6"></script>
     
     <!-- Custom jQuery -->
-    <script defer src="/js/custom/main.js"></script>
+    <script defer src="/js/custom/main.js?v=1.6"></script>
     
     <!-- Check myApp module exists (after all AngularJS scripts load) -->
-    <script defer src="/js/check-myapp.js"></script>
+    <script defer src="/js/check-myapp.js?v=1.6"></script>
     
     <!-- Debug: Check script loading status -->
     <script defer>

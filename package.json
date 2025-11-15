@@ -4,8 +4,8 @@
   "description": "BookStore Frontend - AngularJS SPA",
   "main": "index.html",
   "scripts": {
-    "start": "http-server -p 8080 -o --proxy http://localhost:8080/",
-    "dev": "http-server -p 3000 -o --proxy http://localhost:3000/",
+    "start": "http-server -p 8080 -o --proxy http://localhost:8080/ -c-1",
+    "dev": "http-server -p 3000 -o --proxy http://localhost:3000/ -c-1",
     "build": "echo 'Static build - no build process needed'",
     "test": "echo 'No tests specified'",
     "vercel-build": "echo 'Vercel build - static files ready'"
