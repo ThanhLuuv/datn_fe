@@ -1,7 +1,0 @@
-{
-  "version": 2,
-  "name": "bookstore-frontend",
-  "outputDirectory": ".",
-  "buildCommand": "echo 'Static files ready'",
-  "installCommand": "echo 'No dependencies to install'"
-}

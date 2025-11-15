@@ -1,5 +1,5 @@
 // Home Controller
-app.controller('HomeController', ['$scope', '$http', '$location', 'DataService', 'BookstoreService', 'CartService', function($scope, $http, $location, DataService, BookstoreService, CartService) {
+app.controller('HomeController', ['$scope', '$http', '$location', 'DataService', 'BookstoreService', 'CartService', 'AuthService', function($scope, $http, $location, DataService, BookstoreService, CartService, AuthService) {
     $scope.title = 'BookStore - Khám phá thế giới qua những trang sách';
     $scope.message = 'Hệ thống quản lý hiệu sách hiện đại';
     $scope.categories = [];
@@ -232,6 +232,15 @@ app.controller('HomeController', ['$scope', '$http', '$location', 'DataService',
 
     // Add to cart function
     $scope.addToCart = function(book) {
+        // Check authentication first
+        if (!AuthService.isAuthenticated()) {
+            $location.path('/login');
+            if (window.showNotification) {
+                window.showNotification('Vui lòng đăng nhập để thêm sách vào giỏ hàng', 'warning');
+            }
+            return;
+        }
+
         if (!book || !book.isbn) {
             if (window.showNotification) {
                 window.showNotification('Thông tin sách không hợp lệ', 'danger');

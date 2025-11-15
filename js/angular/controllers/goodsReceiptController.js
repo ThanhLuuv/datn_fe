@@ -376,25 +376,31 @@ app.controller('AdminGoodsReceiptsController', ['$scope', 'BookstoreService', 'A
         if ($scope.selectedPurchaseOrder && Array.isArray($scope.selectedPurchaseOrder.lines)) {
             $scope.selectedPurchaseOrder.lines.forEach(function(poLine, idx){
                 var errs = [];
+                var productErrors = []; // Lỗi về sản phẩm (disable nút)
                 var gl = (poLine && poLine.isbn) ? goodsMapByIsbn[poLine.isbn] : null;
                 if (!gl) {
-                    errs.push('Thiếu dòng từ Excel');
+                    var errorMsg = 'Thiếu dòng từ Excel';
+                    errs.push(errorMsg);
+                    productErrors.push(errorMsg); // Lỗi sản phẩm
                 } else {
-                    // Validation số lượng nhận không vượt quá số lượng đặt
+                    // Validation số lượng nhận không vượt quá số lượng đặt (chỉ cảnh báo, không disable)
                     var qOrdered = parseInt(poLine.qtyOrdered) || 0;
                     var qReceived = parseInt(gl.qtyReceived) || 0;
                     if (qReceived > qOrdered) {
                         errs.push('SL nhận (' + qReceived + ') vượt quá SL đặt (' + qOrdered + ')');
+                        // Không thêm vào productErrors - cho phép nhập
                     }
                     
                     var pricePo = parseFloat(poLine.unitPrice) || 0;
                     var priceRecv = (gl.unitCost != null) ? (parseFloat(gl.unitCost) || 0) : pricePo;
                     if (priceRecv !== pricePo) {
                         errs.push('Đơn giá khác đơn đặt');
+                        productErrors.push('Đơn giá khác đơn đặt'); // Lỗi sản phẩm
                     }
                 }
-                result.lineErrors[idx] = { hasError: errs.length>0, errors: errs };
-                if (errs.length>0) result.hasError = true;
+                result.lineErrors[idx] = { hasError: errs.length>0, errors: errs, productError: productErrors.length>0 };
+                // Chỉ set hasError = true nếu có lỗi về sản phẩm
+                if (productErrors.length>0) result.hasError = true;
             });
         }
         $scope.receiptValidation = result;

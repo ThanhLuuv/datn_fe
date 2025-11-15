@@ -228,7 +228,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-primary" ng-disabled="goodsReceiptForm.$invalid || isSaving || !selectedPurchaseOrder">
+                    <button type="submit" class="btn btn-primary" ng-disabled="goodsReceiptForm.$invalid || isSaving || !selectedPurchaseOrder || (receiptValidation && receiptValidation.hasError)">
                         <span ng-if="isSaving" class="spinner-border spinner-border-sm me-2"></span>
                         {{isEditMode ? 'Cập nhật' : 'Tạo mới'}}
                     </button>

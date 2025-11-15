@@ -64,6 +64,7 @@
                             </h5>
                         </div>
                         <div class="card-body">
+                            <form name="checkoutForm" novalidate>
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">
@@ -72,8 +73,13 @@
                                     <input type="text" 
                                            class="form-control form-control-lg" 
                                            ng-model="form.fullName" 
+                                           name="fullName"
+                                           ng-class="{'is-invalid': checkoutForm.fullName.$invalid && checkoutForm.fullName.$touched}"
                                            placeholder="Nhập họ và tên"
                                            required>
+                                    <div class="invalid-feedback" ng-show="checkoutForm.fullName.$invalid && checkoutForm.fullName.$touched">
+                                        Vui lòng nhập họ và tên
+                                    </div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">
@@ -82,35 +88,50 @@
                                     <input type="tel" 
                                            class="form-control form-control-lg" 
                                            ng-model="form.phone" 
+                                           name="phone"
+                                           ng-class="{'is-invalid': checkoutForm.phone.$invalid && checkoutForm.phone.$touched}"
                                            placeholder="Nhập số điện thoại"
                                            required>
+                                    <div class="invalid-feedback" ng-show="checkoutForm.phone.$invalid && checkoutForm.phone.$touched">
+                                        Vui lòng nhập số điện thoại
+                                    </div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">
                                         <i class="bi bi-geo-alt me-1"></i>Khu vực <span class="text-danger">*</span>
                                     </label>
-                                    <select class="form-select form-select-lg" 
+                                    <select class="form-select form-select-lg checkout-select" 
                                             ng-model="form.areaType" 
                                             ng-change="onAreaTypeChange()"
+                                            ng-class="{'is-invalid': checkoutForm.areaType.$invalid && checkoutForm.areaType.$touched}"
+                                            name="areaType"
                                             required>
                                         <option value="">Chọn khu vực</option>
                                         <option value="inner">Nội thành</option>
                                         <option value="outer">Ngoại thành</option>
                                     </select>
+                                    <div class="invalid-feedback" ng-show="checkoutForm.areaType.$invalid && checkoutForm.areaType.$touched">
+                                        Vui lòng chọn khu vực
+                                    </div>
                                 </div>
                                 <div class="col-md-6" ng-if="form.areaType === 'inner'">
                                     <label class="form-label fw-semibold">
                                         <i class="bi bi-geo me-1"></i>Phường/Xã <span class="text-danger">*</span>
                                     </label>
-                                    <select class="form-select form-select-lg" 
+                                    <select class="form-select form-select-lg checkout-select" 
                                             ng-model="form.areaId" 
                                             ng-disabled="areasLoading"
+                                            ng-class="{'is-invalid': checkoutForm.areaId.$invalid && checkoutForm.areaId.$touched}"
+                                            name="areaId"
                                             required>
                                         <option value="">Chọn phường/xã</option>
                                         <option ng-repeat="area in areas" value="{{area.areaId}}">{{area.name}}</option>
                                     </select>
                                     <div ng-if="areasLoading" class="form-text">
                                         <i class="bi bi-hourglass-split me-1"></i>Đang tải danh sách phường/xã...
+                                    </div>
+                                    <div class="invalid-feedback" ng-show="checkoutForm.areaId.$invalid && checkoutForm.areaId.$touched">
+                                        Vui lòng chọn phường/xã
                                     </div>
                                 </div>
                                 <div class="col-12">
@@ -120,8 +141,13 @@
                                     <input type="text" 
                                            class="form-control form-control-lg" 
                                            ng-model="form.address" 
+                                           name="address"
+                                           ng-class="{'is-invalid': checkoutForm.address.$invalid && checkoutForm.address.$touched}"
                                            placeholder="Nhập địa chỉ chi tiết"
                                            required>
+                                    <div class="invalid-feedback" ng-show="checkoutForm.address.$invalid && checkoutForm.address.$touched">
+                                        Vui lòng nhập địa chỉ chi tiết
+                                    </div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">
@@ -134,6 +160,7 @@
                                     <div class="form-text">Hệ thống sẽ cố gắng giao gần thời gian này.</div>
                                 </div>
                             </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -197,9 +224,9 @@
                                             <small class="text-muted">x{{ item.qty }}</small>
                                         </div>
                                         <div class="ms-auto text-end">
-                                            <div class="fw-semibold">{{ ((item.discountedPrice || item.currentPrice || item.unitPrice) * item.qty) | currency:'':0 }} VNĐ</div>
+                                            <div class="fw-semibold">{{ ((item.discountedPrice || item.currentPrice || item.unitPrice) * item.qty) | currency:'':0 }} ₫</div>
                                             <div ng-if="item.hasPromotion && item.discountedPrice && item.currentPrice && item.currentPrice !== item.discountedPrice" class="mt-1">
-                                                <small class="text-muted text-decoration-line-through">{{ (item.currentPrice * item.qty) | currency:'':0 }} VNĐ</small>
+                                                <small class="text-muted text-decoration-line-through">{{ (item.currentPrice * item.qty) | currency:'':0 }} ₫</small>
                                             </div>
                                         </div>
                                     </div>
@@ -212,7 +239,7 @@
                             <div class="price-breakdown">
                                 <div class="summary-total d-flex justify-content-between mb-4">
                                     <span class="fs-5 fw-bold">Tổng cộng</span>
-                                    <span class="fs-5 fw-bold text-primary">{{ cart.subtotal | currency:'':0 }} VNĐ</span>
+                                    <span class="fs-5 fw-bold text-primary">{{ cart.subtotal | currency:'':0 }} ₫</span>
                                 </div>
                             </div>
                             
@@ -376,23 +403,56 @@
     margin-right: 0.25rem;
 }
 
-.form-control, .form-select {
+.form-control, .form-select, .checkout-select {
     border: 2px solid #e2e8f0;
     border-radius: 10px;
     padding: 0.75rem 1rem;
     transition: all 0.3s;
     font-size: 1rem;
+    background-color: white;
+    color: #0f172a;
+    line-height: 1.5;
 }
 
-.form-control:focus, .form-select:focus {
+.form-control:focus, .form-select:focus, .checkout-select:focus {
     border-color: #f59e0b;
     box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
     outline: none;
+    background-color: white;
 }
 
-.form-control-lg, .form-select-lg {
-    padding: 1rem 1.25rem;
-    font-size: 1rem;
+.form-control-lg, .form-select-lg, .checkout-select.form-select-lg {
+    padding: 1rem 1.25rem !important;
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+    height: auto !important;
+}
+
+/* Override Bootstrap default select styling */
+.form-select-lg, .checkout-select.form-select-lg {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1.25rem center;
+    background-size: 16px 12px;
+    padding-right: 3rem !important;
+}
+
+.form-select.is-invalid, .checkout-select.is-invalid {
+    border-color: #ef4444;
+    background-color: white;
+}
+
+.form-select.is-invalid:focus, .checkout-select.is-invalid:focus {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.invalid-feedback {
+    display: block;
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    padding-left: 0.25rem;
 }
 
 .form-text {

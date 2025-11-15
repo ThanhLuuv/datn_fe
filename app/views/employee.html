@@ -1,14 +1,14 @@
 <!-- Employee Dashboard View -->
 <div class="container-fluid">
         <!-- Main content -->
-    <main class="px-md-4">
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <main class="px-md-3">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-2 pb-1 mb-2 border-bottom">
                 <h1 class="h2">Quản lý đơn hàng</h1>
             </div>
 
             <!-- Stats Cards -->
-            <div class="row mb-4">
-                <div class="col-xl-4 col-md-6 mb-4">
+            <div class="row mb-3">
+                <div class="col-xl-4 col-md-6 mb-3">
                     <div class="card border-left-primary shadow h-100 py-2">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
@@ -26,7 +26,7 @@
                     </div>
                 </div>
 
-                <div class="col-xl-4 col-md-6 mb-4">
+                <div class="col-xl-4 col-md-6 mb-3">
                     <div class="card border-left-success shadow h-100 py-2">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
@@ -44,7 +44,7 @@
                     </div>
                 </div>
 
-                <div class="col-xl-4 col-md-6 mb-4">
+                <div class="col-xl-4 col-md-6 mb-3">
                     <div class="card border-left-info shadow h-100 py-2">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
@@ -66,8 +66,8 @@
             <!-- Orders Management -->
             <div class="row">
                 <div class="col-12">
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3">
+                    <div class="card shadow mb-3">
+                        <div class="card-header py-2">
                             <h6 class="m-0 font-weight-bold text-primary">Danh sách đơn hàng</h6>
                         </div>
                         <div class="card-body">
@@ -134,9 +134,9 @@
             </div>
             <div class="modal-body" ng-if="selectedOrder">
                 <!-- Order Info -->
-                <div class="row mb-4">
+                <div class="row mb-3">
                     <div class="col-md-6">
-                        <h6 class="text-primary mb-3">Thông tin đơn hàng</h6>
+                        <h6 class="text-primary mb-2">Thông tin đơn hàng</h6>
                         <table class="table table-sm">
                             <tr>
                                 <td><strong>Mã đơn hàng:</strong></td>
@@ -171,7 +171,7 @@
                         </table>
                     </div>
                     <div class="col-md-6">
-                        <h6 class="text-primary mb-3">Thông tin khách hàng</h6>
+                        <h6 class="text-primary mb-2">Thông tin khách hàng</h6>
                         <table class="table table-sm">
                             <tr>
                                 <td><strong>Tên khách hàng:</strong></td>
@@ -198,8 +198,8 @@
                         </div>
 
                 <!-- Order Items -->
-                <div class="mb-4">
-                    <h6 class="text-primary mb-3">Sản phẩm trong đơn hàng</h6>
+                <div class="mb-3">
+                    <h6 class="text-primary mb-2">Sản phẩm trong đơn hàng</h6>
                     <div class="table-responsive">
                         <table class="table table-bordered">
                             <thead class="table-light">
@@ -267,7 +267,7 @@
                 </div>
                 
                 <form>
-                    <div class="mb-3">
+                    <div class="mb-2">
                         <label for="cancelReason" class="form-label">
                             <strong>Lý do hủy đơn hàng <span class="text-danger">*</span></strong>
                         </label>
@@ -280,7 +280,7 @@
                         <div class="form-text">Tối đa 500 ký tự</div>
                     </div>
                     
-                    <div class="mb-3">
+                    <div class="mb-2">
                         <label for="cancelNote" class="form-label">
                             <strong>Ghi chú bổ sung</strong>
                         </label>

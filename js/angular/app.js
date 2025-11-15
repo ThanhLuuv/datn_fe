@@ -96,6 +96,7 @@ app.controller('AppController', ['$scope', '$location', '$injector', 'AuthServic
         var path = $location.path();
         $scope.isAdminPage = path.indexOf('/admin') === 0;
         $scope.isAuthPage = (path === '/login' || path === '/register');
+        $scope.isEmployeePage = (path === '/employee' || path.indexOf('/delivery') === 0);
         
         // Update authentication status
         $scope.isAuthenticated = AuthService.isAuthenticated();

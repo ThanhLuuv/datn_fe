@@ -20,16 +20,19 @@ myApp.controller('AppController', ['$scope', '$location', '$rootScope', 'AuthSer
     // Check if current page is admin page
     $scope.isAdminPage = false;
     $scope.isAuthPage = false;
+    $scope.isEmployeePage = false;
     
     // Watch for route changes
     $rootScope.$on('$routeChangeSuccess', function(event, current, previous) {
         var path = $location.path();
         $scope.isAdminPage = path.indexOf('/admin') === 0;
         $scope.isAuthPage = path === '/login' || path === '/register';
+        $scope.isEmployeePage = (path === '/employee' || path.indexOf('/delivery') === 0);
         
         console.log('Route changed to:', path);
         console.log('Is admin page:', $scope.isAdminPage);
         console.log('Is auth page:', $scope.isAuthPage);
+        console.log('Is employee page:', $scope.isEmployeePage);
     });
     
     // Initialize authentication

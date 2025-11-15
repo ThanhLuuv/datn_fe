@@ -1,15 +1,15 @@
 <!-- Login View -->
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-primary text-white text-center py-4">
-                    <h3 class="mb-0">
-                        <i class="bi bi-book"></i> BookStore
-                    </h3>
-                    <p class="mb-0 mt-2">Đăng nhập vào tài khoản</p>
+<div class="auth-page-wrapper">
+    <div class="auth-background"></div>
+    <div class="auth-card">
+            <div class="auth-body">
+                <div class="auth-title-section">
+                    <div class="auth-logo">
+                        <i class="bi bi-book"></i>
+                    </div>
+                    <h2>Đăng nhập</h2>
+                    <p>Chào mừng trở lại BookStore</p>
                 </div>
-                <div class="card-body p-5">
                     <!-- Alert Messages -->
                     <alert-message 
                         message="errorMessage"
@@ -23,84 +23,332 @@
                         show="showSuccess">
                     </alert-message>
 
-                    <!-- Login Form -->
-                    <form name="loginForm" ng-submit="login()" novalidate>
-                        <div class="mb-4">
-                            <label for="email" class="form-label">
-                                <i class="bi bi-envelope"></i> Email
-                            </label>
-                            <input type="email" 
-                                   class="form-control" 
-                                   id="email" 
-                                   ng-model="loginData.email" 
-                                   ng-class="{'is-invalid': loginForm.email.$invalid && loginForm.email.$touched}"
-                                   placeholder="Nhập email của bạn"
+                <!-- Login Form -->
+                <form name="loginForm" ng-submit="login()" novalidate class="auth-form">
+                    <div class="form-group">
+                        <label for="email" class="form-label">
+                            <i class="bi bi-envelope"></i> Email
+                        </label>
+                        <input type="email" 
+                               class="auth-input" 
+                               id="email" 
+                               ng-model="loginData.email" 
+                               ng-class="{'is-invalid': loginForm.email.$invalid && loginForm.email.$touched}"
+                               placeholder="Nhập email của bạn"
+                               required>
+                        <div class="invalid-feedback" ng-show="loginForm.email.$invalid && loginForm.email.$touched">
+                            <span ng-show="loginForm.email.$error.required">Email là bắt buộc</span>
+                            <span ng-show="loginForm.email.$error.email">Email không hợp lệ</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" class="form-label">
+                            <i class="bi bi-lock"></i> Mật khẩu
+                        </label>
+                        <div class="input-group-password">
+                            <input type="{{showPassword ? 'text' : 'password'}}" 
+                                   class="auth-input" 
+                                   id="password" 
+                                   ng-model="loginData.password"
+                                   ng-class="{'is-invalid': loginForm.password.$invalid && loginForm.password.$touched}"
+                                   placeholder="Nhập mật khẩu"
                                    required>
-                            <div class="invalid-feedback" ng-show="loginForm.email.$invalid && loginForm.email.$touched">
-                                <span ng-show="loginForm.email.$error.required">Email là bắt buộc</span>
-                                <span ng-show="loginForm.email.$error.email">Email không hợp lệ</span>
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="password" class="form-label">
-                                <i class="bi bi-lock"></i> Mật khẩu
-                            </label>
-                            <div class="input-group">
-                                <input type="{{showPassword ? 'text' : 'password'}}" 
-                                       class="form-control" 
-                                       id="password" 
-                                       ng-model="loginData.password"
-                                       ng-class="{'is-invalid': loginForm.password.$invalid && loginForm.password.$touched}"
-                                       placeholder="Nhập mật khẩu"
-                                       required>
-                                <button class="btn btn-outline-secondary" 
-                                        type="button" 
-                                        ng-click="togglePassword()">
-                                    <i class="bi" ng-class="showPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
-                                </button>
-                            </div>
-                            <div class="invalid-feedback" ng-show="loginForm.password.$invalid && loginForm.password.$touched">
-                                Mật khẩu là bắt buộc
-                            </div>
-                        </div>
-
-                        <div class="mb-4 form-check">
-                            <input type="checkbox" 
-                                   class="form-check-input" 
-                                   id="rememberMe" 
-                                   ng-model="loginData.rememberMe">
-                            <label class="form-check-label" for="rememberMe">
-                                Ghi nhớ đăng nhập
-                            </label>
-                        </div>
-
-                        <div class="d-grid mb-3">
-                            <button type="submit" 
-                                    class="btn btn-primary btn-lg" 
-                                    ng-disabled="loginForm.$invalid || isLoading">
-                                <span ng-if="!isLoading">
-                                    <i class="bi bi-box-arrow-in-right"></i> Đăng nhập
-                                </span>
-                                <span ng-if="isLoading">
-                                    <span class="spinner-border spinner-border-sm me-2"></span>
-                                    Đang đăng nhập...
-                                </span>
+                            <button class="password-toggle" 
+                                    type="button" 
+                                    ng-click="togglePassword()">
+                                <i class="bi" ng-class="showPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
                             </button>
                         </div>
-
-                        <div class="text-center">
-                            <p class="mb-0">
-                                Chưa có tài khoản? 
-                                <a href="#!/register" class="text-decoration-none">
-                                    Đăng ký ngay
-                                </a>
-                            </p>
+                        <div class="invalid-feedback" ng-show="loginForm.password.$invalid && loginForm.password.$touched">
+                            Mật khẩu là bắt buộc
                         </div>
-                    </form>
-                </div>
+                    </div>
+
+                    <div class="form-check-remember">
+                        <input type="checkbox" 
+                               class="form-check-input" 
+                               id="rememberMe" 
+                               ng-model="loginData.rememberMe">
+                        <label class="form-check-label" for="rememberMe">
+                            Ghi nhớ đăng nhập
+                        </label>
+                    </div>
+
+                    <button type="submit" 
+                            class="auth-button" 
+                            ng-disabled="loginForm.$invalid || isLoading">
+                        <span ng-if="!isLoading">
+                            <i class="bi bi-box-arrow-in-right me-2"></i> Đăng nhập
+                        </span>
+                        <span ng-if="isLoading">
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                            Đang đăng nhập...
+                        </span>
+                    </button>
+
+                    <div class="auth-footer">
+                        <p>
+                            Chưa có tài khoản? 
+                            <a href="#!/register">Đăng ký ngay</a>
+                        </p>
+                    </div>
+                </form>
             </div>
         </div>
-    </div>
 </div>
+
+<style>
+/* Auth Page Styles - Đồng bộ với home.html */
+/* Override container-fluid padding when auth page */
+main.container-fluid.p-0 {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+main.container-fluid.p-0 > div {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.auth-page-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    margin: 0;
+    z-index: 1000;
+    overflow: auto;
+}
+
+.auth-background {
+    position: fixed;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    background-image: url('app/assets/images/banner-books.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: blur(10px);
+    z-index: 0;
+}
+
+.auth-card {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 600px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 25px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.auth-title-section {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.auth-logo {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #f59e0b;
+}
+
+.auth-title-section h2 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0 0 0.5rem 0;
+    color: #0f172a;
+}
+
+.auth-title-section p {
+    font-size: 1rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.auth-body {
+    padding: 2.5rem;
+}
+
+.auth-form {
+    width: 100%;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.form-label i {
+    color: #f59e0b;
+    margin-right: 0.5rem;
+}
+
+.auth-input {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 50px;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s;
+    background: white;
+    color: #0f172a;
+}
+
+.auth-input:focus {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+}
+
+.auth-input.is-invalid {
+    border-color: #ef4444;
+}
+
+.auth-input.is-invalid:focus {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.input-group-password {
+    position: relative;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    padding: 0.5rem;
+    font-size: 1.2rem;
+    transition: color 0.3s;
+    z-index: 1;
+}
+
+.password-toggle:hover {
+    color: #f59e0b;
+}
+
+.invalid-feedback {
+    display: block;
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    padding-left: 1.5rem;
+}
+
+.form-check-remember {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    gap: 0.5rem;
+}
+
+.form-check-input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #f59e0b;
+}
+
+.form-check-label {
+    font-size: 0.9rem;
+    color: #64748b;
+    cursor: pointer;
+    user-select: none;
+}
+
+.auth-button {
+    width: 100%;
+    padding: 1rem;
+    background: #0f172a;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-button:hover:not(:disabled) {
+    background: #f59e0b;
+    transform: scale(1.02);
+}
+
+.auth-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.auth-footer {
+    text-align: center;
+}
+
+.auth-footer p {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.auth-footer a {
+    color: #f59e0b;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s;
+}
+
+.auth-footer a:hover {
+    color: #d97706;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .auth-page-wrapper {
+        padding: 1rem;
+    }
+    
+    .auth-title-section h2 {
+        font-size: 1.5rem;
+    }
+    
+    .auth-body {
+        padding: 2rem 1.5rem;
+    }
+    
+    .auth-logo {
+        font-size: 2.5rem;
+    }
+}
+</style>
 

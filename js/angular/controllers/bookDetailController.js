@@ -1,4 +1,4 @@
-app.controller('BookDetailController', ['$scope', '$routeParams', 'BookstoreService', 'CartService', function($scope, $routeParams, BookstoreService, CartService) {
+app.controller('BookDetailController', ['$scope', '$routeParams', '$location', 'BookstoreService', 'CartService', 'AuthService', function($scope, $routeParams, $location, BookstoreService, CartService, AuthService) {
     $scope.isbn = $routeParams.isbn;
     $scope.book = null;
     $scope.loading = true;
@@ -26,6 +26,15 @@ app.controller('BookDetailController', ['$scope', '$routeParams', 'BookstoreServ
     };
 
     $scope.addToCart = function() {
+        // Check authentication first
+        if (!AuthService.isAuthenticated()) {
+            $location.path('/login');
+            if (window.showNotification) {
+                window.showNotification('Vui lòng đăng nhập để thêm sách vào giỏ hàng', 'warning');
+            }
+            return;
+        }
+
         if (!$scope.book || !$scope.book.isbn) {
             if (window.showNotification) {
                 window.showNotification('Thông tin sách không hợp lệ', 'danger');
