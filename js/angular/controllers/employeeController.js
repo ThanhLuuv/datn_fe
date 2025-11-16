@@ -9,6 +9,68 @@ app.controller('EmployeeController', ['$scope', 'AuthService', 'BookstoreService
     
     $scope.recentOrders = [];
     $scope.selectedOrder = null;
+    
+    // Tabs state
+    $scope.selectedTab = 'all'; // all | confirmed | delivered
+    $scope.setTab = function(tab) { 
+        $scope.selectedTab = tab; 
+    };
+    
+    // Filter orders by tab
+    $scope.filteredOrders = [];
+    $scope.$watch('recentOrders', function(newVal) {
+        if (!newVal) return;
+        $scope.updateFilteredOrders();
+    }, true);
+    
+    $scope.$watch('selectedTab', function() {
+        $scope.updateFilteredOrders();
+    });
+    
+    $scope.updateFilteredOrders = function() {
+        if (!$scope.recentOrders || $scope.recentOrders.length === 0) {
+            $scope.filteredOrders = [];
+            return;
+        }
+        
+        if ($scope.selectedTab === 'all') {
+            $scope.filteredOrders = $scope.recentOrders;
+        } else if ($scope.selectedTab === 'confirmed') {
+            // Đơn đang giao = Confirmed (1)
+            $scope.filteredOrders = $scope.recentOrders.filter(function(order) {
+                return order.deliveryStatus === 'Confirmed' || order.deliveryStatus === 1;
+            });
+        } else if ($scope.selectedTab === 'delivered') {
+            // Đơn đã giao = Delivered (2)
+            $scope.filteredOrders = $scope.recentOrders.filter(function(order) {
+                return order.deliveryStatus === 'Delivered' || order.deliveryStatus === 2;
+            });
+        } else {
+            $scope.filteredOrders = $scope.recentOrders;
+        }
+    };
+
+    // Helper function to get delivery status class
+    $scope.getDeliveryStatusClass = function(status) {
+        if (!status && status !== 0) return 'bg-secondary';
+        var statusValue = typeof status === 'number' ? status : status;
+        if (statusValue === 'Confirmed' || statusValue === 1) return 'bg-primary';
+        if (statusValue === 'Delivered' || statusValue === 2) return 'bg-success';
+        if (statusValue === 'Cancelled' || statusValue === 3) return 'bg-danger';
+        if (statusValue === 'PendingConfirmation' || statusValue === 0) return 'bg-warning';
+        return 'bg-secondary';
+    };
+    
+    // Helper function to get delivery status text
+    $scope.getDeliveryStatusText = function(status) {
+        if (!status && status !== 0) return 'Không xác định';
+        var statusValue = typeof status === 'number' ? status : status;
+        if (statusValue === 'Confirmed' || statusValue === 1) return 'Đã xác nhận';
+        if (statusValue === 'Delivered' || statusValue === 2) return 'Đã giao';
+        if (statusValue === 'Cancelled' || statusValue === 3) return 'Đã hủy';
+        if (statusValue === 'PendingConfirmation' || statusValue === 0) return 'Chờ xác nhận';
+        return statusValue || 'Không xác định';
+    };
 
     // Initialize controller
     $scope.init = function() {
@@ -31,7 +93,7 @@ app.controller('EmployeeController', ['$scope', 'AuthService', 'BookstoreService
 
         $scope.recentOrders.forEach(function(order) {
             // Count by status - check both string and number
-            if (order.status === 'Confirmed' || order.status === 1) {
+            if (order.deliveryStatus === 'Confirmed' || order.deliveryStatus === 1) {
                 shippingOrders++; // Đơn đã xác nhận, cần giao hàng
             }
 
@@ -64,34 +126,57 @@ app.controller('EmployeeController', ['$scope', 'AuthService', 'BookstoreService
                 
                 // Map API data to expected format
                 $scope.recentOrders = orders.map(function(order) {
-                    return {
+                    // Normalize status - try multiple possible fields from API
+                    var normalizedStatus = order.deliveryStatus;
+                    if (normalizedStatus === null || normalizedStatus === undefined) {
+                        normalizedStatus = order.status;
+                    }
+                    if (normalizedStatus === null || normalizedStatus === undefined) {
+                        normalizedStatus = order.statusId;
+                    }
+                    if (normalizedStatus === null || normalizedStatus === undefined) {
+                        normalizedStatus = order.orderStatus;
+                    }
+                    
+                    var mapped = {
                         orderId: order.orderId,
                         customer: order.customerName,
                         orderDate: order.placedAt,
                         total: order.totalAmount,
-                        status: order.status, // Keep as string from API
+                        // both generic status & dedicated deliveryStatus để tránh conflict chỗ khác
+                        status: normalizedStatus,
+                        deliveryStatus: normalizedStatus,
                         receiverName: order.receiverName,
                         receiverPhone: order.receiverPhone,
                         shippingAddress: order.shippingAddress,
                         deliveryDate: order.deliveryDate,
                         lines: order.lines || [],
-                        cancelReason: (order.status === 'Cancelled' || order.status === 3) ? order.note : null
+                        cancelReason: (normalizedStatus === 'Cancelled' || normalizedStatus === 3) ? order.note : null
                     };
+
+                    // Log ra để debug nếu cần
+                    console.log('Mapped assigned order:', order, '=>', mapped);
+                    return mapped;
                 });
                 
                 console.log('Loaded assigned orders:', $scope.recentOrders);
                 
                 // Update stats based on real data
                 $scope.updateStatsFromOrders();
+                
+                // Update filtered orders
+                $scope.updateFilteredOrders();
             } else {
                 console.log('No assigned orders found');
                 $scope.recentOrders = [];
                 $scope.stats = { pendingOrders: 0, todayOrders: 0, shippingOrders: 0 };
+                $scope.updateFilteredOrders();
             }
         }).catch(function(error) {
             console.error('Error loading assigned orders:', error);
             $scope.recentOrders = [];
             $scope.stats = { pendingOrders: 0, todayOrders: 0, shippingOrders: 0 };
+            $scope.updateFilteredOrders();
             showNotification('Không thể tải danh sách đơn hàng: ' + (error.data?.message || 'Lỗi không xác định'), 'danger');
         }).finally(function() {
             $scope.loading = false;
@@ -107,12 +192,25 @@ app.controller('EmployeeController', ['$scope', 'AuthService', 'BookstoreService
                 var orderData = response.data.data;
                 
                 // Map API data to expected format for modal
+                var detailStatus = orderData.deliveryStatus;
+                if (detailStatus === null || detailStatus === undefined) {
+                    detailStatus = orderData.status;
+                }
+                if (detailStatus === null || detailStatus === undefined) {
+                    detailStatus = orderData.statusId;
+                }
+                if (detailStatus === null || detailStatus === undefined) {
+                    detailStatus = orderData.orderStatus;
+                }
+
                 $scope.selectedOrder = {
                     orderId: orderData.orderId,
                     customerName: orderData.customerName,
                     placedAt: orderData.placedAt,
                     totalAmount: orderData.totalAmount,
-                    status: orderData.status, // Keep as string from API
+                    status: detailStatus,
+                    // field riêng cho UI
+                    deliveryStatus: detailStatus,
                     receiverName: orderData.receiverName,
                     receiverPhone: orderData.receiverPhone,
                     shippingAddress: orderData.shippingAddress,
@@ -120,7 +218,7 @@ app.controller('EmployeeController', ['$scope', 'AuthService', 'BookstoreService
                     lines: orderData.lines || [],
                     invoice: orderData.invoice,
                     paymentUrl: orderData.paymentUrl,
-                    cancelReason: (orderData.status === 'Cancelled' || orderData.status === 3) ? orderData.note : null
+                    cancelReason: (detailStatus === 'Cancelled' || detailStatus === 3) ? orderData.note : null
                 };
                 
                 console.log('Loaded order details:', $scope.selectedOrder);
@@ -154,6 +252,7 @@ app.controller('EmployeeController', ['$scope', 'AuthService', 'BookstoreService
                 
                 // Reload orders to get updated data
                 $scope.loadRecentOrders();
+                $scope.updateFilteredOrders();
             } else {
                 showNotification('Không thể duyệt đơn hàng: ' + (response.data.message || 'Lỗi không xác định'), 'danger');
             }
@@ -174,6 +273,7 @@ app.controller('EmployeeController', ['$scope', 'AuthService', 'BookstoreService
                 
                 // Reload orders to get updated data
                 $scope.loadRecentOrders();
+                $scope.updateFilteredOrders();
             } else {
                 showNotification('Không thể phân công giao hàng: ' + (response.data.message || 'Lỗi không xác định'), 'danger');
             }
@@ -194,6 +294,7 @@ app.controller('EmployeeController', ['$scope', 'AuthService', 'BookstoreService
                 
                 // Reload orders to get updated data
                 $scope.loadRecentOrders();
+                $scope.updateFilteredOrders();
             } else {
                 showNotification('Không thể xác nhận giao hàng: ' + (response.data.message || 'Lỗi không xác định'), 'danger');
             }
@@ -237,6 +338,7 @@ app.controller('EmployeeController', ['$scope', 'AuthService', 'BookstoreService
                 
                 // Reload orders to get updated data
                 $scope.loadRecentOrders();
+                $scope.updateFilteredOrders();
             } else {
                 showNotification('Không thể hủy đơn hàng: ' + (response.data.message || 'Lỗi không xác định'), 'danger');
             }

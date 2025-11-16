@@ -55,7 +55,7 @@
     background: linear-gradient(to top, rgba(0,0,0,0.1), transparent);
 }
 
-.badge {
+.book-card .badge {
     position: absolute;
     top: 15px;
     right: 15px;
