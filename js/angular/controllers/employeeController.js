@@ -1,6 +1,8 @@
 // Employee Controller
 app.controller('EmployeeController', ['$scope', 'AuthService', 'BookstoreService', 'APP_CONFIG', function($scope, AuthService, BookstoreService, APP_CONFIG) {
     $scope.title = 'Employee Dashboard';
+    // Thông tin nhân viên giao hàng hiện tại
+    $scope.currentUser = AuthService.getCurrentUser ? (AuthService.getCurrentUser() || {}) : {};
     $scope.stats = {
         pendingOrders: 0,
         todayOrders: 0,

@@ -2,8 +2,19 @@
 <div class="container-fluid employee-dashboard">
         <!-- Main content -->
     <main class="px-md-3">
+            <!-- Header với thông tin nhân viên giao hàng -->
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-2 pb-1 mb-2 border-bottom">
-                <h1 class="h2">Quản lý đơn hàng</h1>
+                <div>
+                    <h1 class="h2 mb-1">Quản lý đơn hàng giao</h1>
+                    <div class="text-muted small">
+                        Xin chào, <strong>{{ (currentUser.fullName || (currentUser.firstName + ' ' + currentUser.lastName) || currentUser.email || 'Nhân viên giao hàng') }}</strong>
+                        <span ng-if="currentUser.phone"> · {{currentUser.phone}}</span>
+                    </div>
+                </div>
+                <div class="text-end small text-muted" ng-if="currentUser">
+                    <div><i class="bi bi-person-badge me-1"></i>ID: {{currentUser.userId || currentUser.id}}</div>
+                    <div ng-if="currentUser.email"><i class="bi bi-envelope me-1"></i>{{currentUser.email}}</div>
+                </div>
             </div>
 
             <!-- Stats Cards -->
