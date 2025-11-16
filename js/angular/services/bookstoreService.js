@@ -789,13 +789,18 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
 
     // ==================== PURCHASE ORDER APIs ====================
     
-    // Lấy danh sách đơn đặt mua
+    // Lấy danh sách đơn đặt mua (hỗ trợ lọc theo từ khóa, NXB, ngày)
     this.getPurchaseOrders = function(params) {
+        params = params || {};
         var queryParams = {
             pageNumber: params.pageNumber || 1,
-            pageSize: params.pageSize || 10,
-            searchTerm: params.searchTerm || ''
+            pageSize: params.pageSize || 10
         };
+        // Chỉ add những tham số có giá trị để backend linh hoạt
+        if (params.searchTerm) queryParams.searchTerm = params.searchTerm;
+        if (params.publisherId) queryParams.publisherId = params.publisherId;
+        if (params.fromDate) queryParams.fromDate = params.fromDate;
+        if (params.toDate) queryParams.toDate = params.toDate;
         
         return $http({
             method: 'GET',
@@ -849,12 +854,17 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
 
     // ==================== GOODS RECEIPT APIs ====================
     
-    // Lấy danh sách phiếu nhập
+    // Lấy danh sách phiếu nhập (hỗ trợ lọc theo từ khóa, NXB, ngày)
     this.getGoodsReceipts = function(params) {
+        params = params || {};
         var queryParams = {
             pageNumber: params.pageNumber || 1,
             pageSize: params.pageSize || 10
         };
+        if (params.searchTerm) queryParams.searchTerm = params.searchTerm;
+        if (params.publisherId) queryParams.publisherId = params.publisherId;
+        if (params.fromDate) queryParams.fromDate = params.fromDate;
+        if (params.toDate) queryParams.toDate = params.toDate;
         
         return $http({
             method: 'GET',

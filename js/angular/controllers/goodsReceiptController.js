@@ -18,6 +18,17 @@ app.controller('AdminGoodsReceiptsController', ['$scope', 'BookstoreService', 'A
     $scope.pageSize = 10;
     $scope.totalPages = 0;
 
+    // Tìm kiếm & bộ lọc (NXB + ngày)
+    $scope.searchTerm = '';
+    $scope.filters = {
+        publisherId: '',
+        fromDate: '',
+        toDate: ''
+    };
+
+    // Danh sách NXB dùng cho filter
+    $scope.publishers = [];
+
     // Toasts
     $scope.toasts = [];
     $scope.addToast = function(variant, message) {
@@ -40,6 +51,29 @@ app.controller('AdminGoodsReceiptsController', ['$scope', 'BookstoreService', 'A
     $scope.editingReceipt = null;
     $scope.showForm = false;
 
+    // Load danh sách NXB
+    $scope.loadPublishers = function() {
+        BookstoreService.getPublishers({})
+            .then(function(response) {
+                var payload = response && response.data ? response.data : null;
+                var list = [];
+                if (payload) {
+                    if (payload.data && Array.isArray(payload.data.publishers)) {
+                        list = payload.data.publishers;
+                    } else if (Array.isArray(payload.data)) {
+                        list = payload.data;
+                    } else if (Array.isArray(payload)) {
+                        list = payload;
+                    }
+                }
+                $scope.publishers = list;
+            })
+            .catch(function(error) {
+                console.error('Error loading publishers for goods receipts:', error);
+                $scope.publishers = [];
+            });
+    };
+
     // Load goods receipts
     $scope.loadGoodsReceipts = function() {
         $scope.loading = true;
@@ -47,7 +81,11 @@ app.controller('AdminGoodsReceiptsController', ['$scope', 'BookstoreService', 'A
         
         BookstoreService.getGoodsReceipts({
             pageNumber: $scope.currentPage,
-            pageSize: $scope.pageSize
+            pageSize: $scope.pageSize,
+            searchTerm: $scope.searchTerm,
+            publisherId: $scope.filters.publisherId,
+            fromDate: $scope.filters.fromDate,
+            toDate: $scope.filters.toDate
         })
             .then(function(response) {
                 // Normalize API response: support { data: { goodsReceipts: [...] } }
@@ -529,15 +567,27 @@ app.controller('AdminGoodsReceiptsController', ['$scope', 'BookstoreService', 'A
             });
     };
 
-    // Search goods receipts
+    // Search goods receipts (từ search-box hoặc nút Lọc)
     $scope.searchGoodsReceipts = function() {
         $scope.currentPage = 1;
         $scope.loadGoodsReceipts();
     };
 
-    // Clear search
+    // Clear chỉ ô tìm kiếm
     $scope.clearSearch = function() {
         $scope.searchTerm = '';
+        $scope.currentPage = 1;
+        $scope.loadGoodsReceipts();
+    };
+
+    // Reset toàn bộ bộ lọc (từ khóa + NXB + ngày)
+    $scope.resetFilters = function() {
+        $scope.searchTerm = '';
+        $scope.filters = {
+            publisherId: '',
+            fromDate: '',
+            toDate: ''
+        };
         $scope.currentPage = 1;
         $scope.loadGoodsReceipts();
     };
@@ -554,6 +604,7 @@ app.controller('AdminGoodsReceiptsController', ['$scope', 'BookstoreService', 'A
     };
 
     // Initialize
+    $scope.loadPublishers();
     $scope.loadGoodsReceipts();
 
     // ==================== Excel Import ====================

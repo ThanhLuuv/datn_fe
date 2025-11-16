@@ -372,8 +372,8 @@ app.config(['$routeProvider', function($routeProvider) {
             }
         })
         .when('/admin/employees', {
-            templateUrl: 'app/views/admin.html',
-            controller: 'AdminController',
+            templateUrl: 'app/views/admin-employees.html',
+            controller: 'AdminEmployeesController',
             resolve: {
                 checkAuth: ['AuthService', '$location', function(AuthService, $location) {
                     if (!AuthService.isAdmin()) {

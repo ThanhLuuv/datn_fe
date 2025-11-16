@@ -31,6 +31,37 @@
                 on-clear="clearSearch()">
             </search-box>
 
+            <!-- Bộ lọc nâng cao -->
+            <div class="row g-2 mb-3 admin-filter-row" ng-if="!loading">
+                <div class="col-md-3">
+                    <label class="form-label small text-muted mb-1">Nhà xuất bản</label>
+                    <select class="form-select" ng-model="filters.publisherId">
+                        <option value="">Tất cả NXB</option>
+                        <option ng-repeat="publisher in publishers" value="{{publisher.publisherId}}">
+                            {{publisher.name || publisher.publisherName}}
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small text-muted mb-1">Từ ngày đặt</label>
+                    <input type="date" class="form-control" ng-model="filters.fromDate" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small text-muted mb-1">Đến ngày đặt</label>
+                    <input type="date" class="form-control" ng-model="filters.toDate" />
+                </div>
+                <div class="col-md-3 d-flex align-items-end justify-content-end">
+                    <div class="btn-group">
+                        <button class="btn btn-primary" ng-click="searchPurchaseOrders()">
+                            <i class="bi bi-funnel"></i> Lọc
+                        </button>
+                        <button class="btn btn-outline-secondary" ng-click="resetFilters()" title="Xóa bộ lọc">
+                            <i class="bi bi-x-circle"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Error State -->
             <error-state 
                 show="showError" 

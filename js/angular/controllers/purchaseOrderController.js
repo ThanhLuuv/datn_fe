@@ -18,6 +18,13 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
     $scope.pageSize = 10;
     $scope.totalPages = 0;
 
+    // Bộ lọc danh sách (NXB + ngày)
+    $scope.filters = {
+        publisherId: '',
+        fromDate: '',
+        toDate: ''
+    };
+
     // Toasts
     $scope.toasts = [];
     $scope.addToast = function(variant, message) {
@@ -102,7 +109,10 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
         BookstoreService.getPurchaseOrders({
             pageNumber: $scope.currentPage,
             pageSize: $scope.pageSize,
-            searchTerm: $scope.searchTerm
+            searchTerm: $scope.searchTerm,
+            publisherId: $scope.filters.publisherId,
+            fromDate: $scope.filters.fromDate,
+            toDate: $scope.filters.toDate
         })
             .then(function(response) {
                 // Normalize API response to expected shape
@@ -736,19 +746,32 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
             });
     };
 
-    // Search purchase orders
+    // Search purchase orders (từ search-box hoặc nút Lọc)
     $scope.searchPurchaseOrders = function() {
         $scope.currentPage = 1;
         $scope.loadPurchaseOrders();
     };
 
-    // Clear search
+    // Clear chỉ ô tìm kiếm
     $scope.clearSearch = function() {
         $scope.searchTerm = '';
         $scope.currentPage = 1;
         $scope.loadPurchaseOrders();
     };
 
+    // Reset toàn bộ bộ lọc (từ khóa + NXB + ngày)
+    $scope.resetFilters = function() {
+        $scope.searchTerm = '';
+        $scope.filters = {
+            publisherId: '',
+            fromDate: '',
+            toDate: ''
+        };
+        $scope.currentPage = 1;
+        $scope.loadPurchaseOrders();
+    };
+
     // Initialize
+    $scope.loadPublishers();
     $scope.loadPurchaseOrders();
 }]);
