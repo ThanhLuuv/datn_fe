@@ -269,6 +269,46 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
 		});
 	};
 
+    // ==================== AI ASSISTANT APIs ====================
+
+    // Gợi ý sách bằng AI (GPT-4o) cho khách hàng
+    this.aiRecommendBooks = function(prompt, maxResults) {
+        if (!prompt || !String(prompt).trim()) {
+            return $q.reject('Prompt is required');
+        }
+
+        var payload = {
+            prompt: String(prompt).trim(),
+            maxResults: maxResults || 12
+        };
+
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/ai/recommend-books',
+            data: payload,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+    };
+
+    // Trợ lý AI cho admin: gợi ý mặt hàng, thể loại, cải thiện theo dữ liệu bán chạy + đánh giá
+    this.adminAiAssistant = function(params) {
+        params = params || {};
+        var payload = {
+            fromDate: params.fromDate || '',
+            toDate: params.toDate || '',
+            language: params.language || 'vi'
+        };
+
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/ai/admin-assistant',
+            data: payload,
+            headers: getAuthHeaders()
+        });
+    };
+
     // ==================== ROLE & PERMISSION APIs ====================
     // Get roles
     this.getRoles = function() {

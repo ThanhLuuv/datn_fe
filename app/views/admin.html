@@ -205,7 +205,7 @@
 
 
             <!-- Dashboard Reports: Báo cáo tổng quan -->
-            <div ng-if="!isEmployeesPage" class="row mb-4">
+            <div ng-if="!isEmployeesPage" class="row mb-4 dashboard-row">
   <!-- Doanh thu -->
   <div class="col-lg-6 mb-4">
     <div class="card">
@@ -306,7 +306,7 @@
 </div>
 
 <!-- Profit report row -->
-<div ng-if="!isEmployeesPage" class="row mb-4">
+<div ng-if="!isEmployeesPage" class="row mb-4 dashboard-row">
   <div class="col-lg-6 mb-4">
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center">
@@ -351,6 +351,7 @@
     </div>
   </div>
   <div class="col-lg-6 mb-4">
+  <div class="col-lg-6 mb-4">
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center">
         <span>
@@ -372,6 +373,88 @@
               <li ng-if="!categoryPie.items || categoryPie.items.length==0" class="text-muted">Chưa có dữ liệu.</li>
             </ul>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AI Assistant row -->
+<div ng-if="!isEmployeesPage" class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>
+          <i class="bi bi-robot"></i> Trợ lý AI cho quản lý nhập hàng
+        </span>
+        <button class="btn btn-sm btn-light" type="button" ng-click="runAdminAiAssistant()" ng-disabled="aiAssistantLoading">
+          <span ng-if="!aiAssistantLoading"><i class="bi bi-play-circle"></i> Phân tích bằng AI</span>
+          <span ng-if="aiAssistantLoading">
+            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+            Đang phân tích...
+          </span>
+        </button>
+      </div>
+      <div class="card-body">
+        <p class="text-muted small mb-3">
+          Trợ lý AI sẽ dựa trên dữ liệu bán hàng và đánh giá khách hàng trong khoảng thời gian đã chọn để gợi ý
+          <strong>mặt hàng bán chạy</strong>, <strong>thể loại nên ưu tiên nhập</strong> và các
+          <strong>cải thiện theo phản hồi khách</strong>.
+        </p>
+
+        <div class="alert alert-danger py-2" ng-if="aiAssistantError">
+          {{aiAssistantError}}
+        </div>
+
+        <div ng-if="aiAssistant.overview || (aiAssistant.bookSuggestions && aiAssistant.bookSuggestions.length)">
+          <div class="mb-3" ng-if="aiAssistant.overview">
+            <h6 class="fw-semibold mb-2">1. Tổng quan từ AI</h6>
+            <p class="mb-0 text-muted" ng-bind="aiAssistant.overview"></p>
+          </div>
+
+          <div class="mb-3" ng-if="aiAssistant.recommendedCategories && aiAssistant.recommendedCategories.length">
+            <h6 class="fw-semibold mb-2">2. Thể loại nên ưu tiên nhập thêm</h6>
+            <div class="d-flex flex-wrap gap-2">
+              <span class="badge bg-warning text-dark" ng-repeat="cat in aiAssistant.recommendedCategories">
+                <i class="bi bi-bookmark-star me-1"></i>{{cat}}
+              </span>
+            </div>
+          </div>
+
+          <div class="mb-3" ng-if="aiAssistant.bookSuggestions && aiAssistant.bookSuggestions.length">
+            <h6 class="fw-semibold mb-2">3. Gợi ý sách cụ thể</h6>
+            <div class="table-responsive">
+              <table class="table table-sm align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th style="width:5%">#</th>
+                    <th style="width:15%">ISBN</th>
+                    <th style="width:35%">Tên sách</th>
+                    <th style="width:20%">Thể loại</th>
+                    <th style="width:25%">Lý do</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="s in aiAssistant.bookSuggestions">
+                    <td>{{$index + 1}}</td>
+                    <td><code ng-if="s.isbn">{{s.isbn}}</code><span ng-if="!s.isbn" class="text-muted">—</span></td>
+                    <td>{{s.title}}</td>
+                    <td>{{s.category || '—'}}</td>
+                    <td>{{s.reason}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="mb-0" ng-if="aiAssistant.customerFeedbackSummary">
+            <h6 class="fw-semibold mb-2">4. Tóm tắt phản hồi khách hàng & gợi ý cải thiện</h6>
+            <p class="mb-0 text-muted" ng-bind="aiAssistant.customerFeedbackSummary"></p>
+          </div>
+        </div>
+
+        <div class="text-muted small" ng-if="!aiAssistant.overview && (!aiAssistant.bookSuggestions || !aiAssistant.bookSuggestions.length) && !aiAssistantLoading">
+          Chưa có dữ liệu từ trợ lý AI. Hãy bấm <strong>Phân tích bằng AI</strong> để tạo báo cáo.
         </div>
       </div>
     </div>
@@ -858,6 +941,45 @@
     width: 100%; max-width: unset;
   }
   .dashboard-flex-form > div { width: 100%; }
+}
+
+.dashboard-row > [class*='col-'] {
+  display: flex;
+}
+
+.dashboard-row .card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-row .card-body {
+  flex: 1;
+}
+
+.dashboard-row .pie-chart {
+  width: 220px;
+  height: 220px;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.dashboard-row .pie-legend {
+  margin-bottom: 0;
+}
+
+@media (max-width: 992px) {
+  .dashboard-row > [class*='col-'] {
+    display: block;
+  }
+
+  .dashboard-row .card {
+    height: auto;
+  }
+
+  .dashboard-row .pie-chart {
+    margin-bottom: 1rem;
+  }
 }
 </style>
 

@@ -78,6 +78,16 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
     $scope.showingDashboardInventory = false;
     $scope.showingDashboardProfit = false;
 
+    // AI assistant state
+    $scope.aiAssistantLoading = false;
+    $scope.aiAssistantError = null;
+    $scope.aiAssistant = {
+        overview: '',
+        recommendedCategories: [],
+        bookSuggestions: [],
+        customerFeedbackSummary: ''
+    };
+
     // Resolve reporter display name robustly
     $scope.getReporterName = function(user) {
         var u = user || $scope.currentUser || {};
@@ -393,6 +403,65 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
         })
         .catch(function(){ $scope.addToast('danger','Không thể tải báo cáo lợi nhuận'); })
         .finally(function(){ $scope.loadingProfit = false; $scope.$applyAsync(); });
+    };
+
+    // ===== AI Assistant (Admin) =====
+    $scope.runAdminAiAssistant = function() {
+      // Dùng khoảng ngày của báo cáo lợi nhuận nếu có, nếu không fallback về tháng hiện tại
+      var from = $scope.profitFilter.fromDate || $scope.revenueFilter.fromDate;
+      var to = $scope.profitFilter.toDate || $scope.revenueFilter.toDate;
+
+      if (!from || !to) {
+        $scope.addToast('danger', 'Vui lòng chọn khoảng ngày cho báo cáo lợi nhuận trước khi dùng trợ lý AI.');
+        return;
+      }
+
+      $scope.aiAssistantLoading = true;
+      $scope.aiAssistantError = null;
+
+      function toIso(d) {
+        if (!d) return null;
+        if (typeof d === 'string') return d;
+        try {
+          return d.toISOString();
+        } catch (e) {
+          return null;
+        }
+      }
+
+      var payload = {
+        fromDate: toIso(from),
+        toDate: toIso(to),
+        language: 'vi'
+      };
+
+      BookstoreService.adminAiAssistant(payload)
+        .then(function(res){
+          var data = res && res.data && res.data.data ? res.data.data : null;
+          if (!data) {
+            $scope.aiAssistantError = 'Trợ lý AI không trả về dữ liệu.';
+            $scope.addToast('danger', $scope.aiAssistantError);
+            return;
+          }
+
+          $scope.aiAssistant = {
+            overview: data.overview || '',
+            recommendedCategories: Array.isArray(data.recommendedCategories) ? data.recommendedCategories : [],
+            bookSuggestions: Array.isArray(data.bookSuggestions) ? data.bookSuggestions : [],
+            customerFeedbackSummary: data.customerFeedbackSummary || ''
+          };
+
+          $scope.addToast('success', 'Đã phân tích dữ liệu bằng trợ lý AI.');
+        })
+        .catch(function(err){
+          console.error('Admin AI assistant error:', err);
+          $scope.aiAssistantError = (err && err.data && err.data.message) || 'Không thể gọi trợ lý AI. Vui lòng thử lại sau.';
+          $scope.addToast('danger', $scope.aiAssistantError);
+        })
+        .finally(function(){
+          $scope.aiAssistantLoading = false;
+          $scope.$applyAsync();
+        });
     };
 
     // Initialize controller
