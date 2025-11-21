@@ -336,6 +336,317 @@
                 -webkit-overflow-scrolling: touch;
             }
         }
+
+        /* AI Search Answer Styling */
+        .ai-search-answer {
+            background-color: #e7f3ff !important;
+            border: 1px solid #b3d9ff !important;
+            border-radius: 8px;
+            padding: 1.25rem !important;
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+
+        .ai-search-answer strong {
+            color: #0f172a;
+            font-weight: 600;
+            background-color: rgba(15, 23, 42, 0.05);
+            padding: 0.15rem 0.35rem;
+            border-radius: 4px;
+            display: inline-block;
+            margin: 0.1rem 0;
+        }
+
+        .ai-search-answer br + strong {
+            margin-top: 0.5rem;
+        }
+
+        .ai-search-answer br {
+            line-height: 1.8;
+        }
+
+        /* AI Chat Widget (Floating) */
+        .ai-chat-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1050;
+            font-family: inherit;
+        }
+
+        .ai-chat-widget * {
+            box-sizing: border-box;
+        }
+
+        .ai-chat-toggle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0f172a 0%, #1e40af 100%);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .ai-chat-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        .ai-chat-toggle.active {
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+        }
+
+        .ai-chat-window {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            width: 400px;
+            max-width: calc(100vw - 40px);
+            height: 600px;
+            max-height: calc(100vh - 120px);
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideUp 0.3s ease;
+            z-index: 1051;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .ai-chat-header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e40af 100%);
+            color: white;
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
+            min-height: 60px;
+        }
+
+        .ai-chat-header .d-flex {
+            width: 100%;
+        }
+
+        .ai-chat-header strong {
+            font-size: 0.95rem;
+        }
+
+        .ai-chat-header .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.8rem;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+
+        .ai-chat-header .btn-outline-light {
+            border-color: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .ai-chat-header .btn-outline-light:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .ai-chat-header small {
+            font-size: 0.75rem;
+        }
+
+        .ai-chat-body {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 1rem;
+            background: #f8fafc;
+            min-height: 0;
+        }
+
+        .ai-chat-messages {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            min-height: 100%;
+            padding-bottom: 0.5rem;
+        }
+
+        .ai-chat-message {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .ai-chat-question {
+            background: #e0e7ff;
+            padding: 0.75rem 1rem;
+            border-radius: 12px 12px 4px 12px;
+            font-size: 0.9rem;
+            align-self: flex-end;
+            max-width: 80%;
+            word-wrap: break-word;
+            margin-left: auto;
+        }
+
+        .ai-chat-answer {
+            background: white;
+            padding: 0.75rem 1rem;
+            border-radius: 12px 12px 12px 4px;
+            font-size: 0.9rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            max-width: 90%;
+            word-wrap: break-word;
+            align-self: flex-start;
+        }
+
+        .ai-chat-answer strong {
+            color: #0f172a;
+            font-weight: 600;
+            background-color: rgba(15, 23, 42, 0.05);
+            padding: 0.15rem 0.35rem;
+            border-radius: 4px;
+            display: inline-block;
+            margin: 0.1rem 0;
+        }
+
+        .ai-chat-welcome {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: #64748b;
+            margin-top: auto;
+        }
+
+        .ai-chat-welcome p {
+            margin-bottom: 0.5rem;
+        }
+
+        .ai-chat-welcome p:last-child {
+            margin-bottom: 0;
+        }
+
+        .ai-chat-footer {
+            padding: 0.875rem 1rem;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            flex-shrink: 0;
+        }
+
+        .ai-chat-footer form {
+            margin: 0;
+            width: 100%;
+            display: block;
+        }
+
+        .ai-chat-input-wrapper {
+            display: flex;
+            align-items: stretch;
+            gap: 0.5rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .ai-chat-input {
+            flex: 1 1 auto;
+            border-radius: 20px;
+            border: 1px solid #d1d5db;
+            padding: 0.625rem 1rem;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            min-width: 0;
+            box-sizing: border-box;
+            background: white;
+        }
+
+        .ai-chat-input:focus {
+            border-color: #1e40af;
+            box-shadow: 0 0 0 0.2rem rgba(30, 64, 175, 0.15);
+            outline: none;
+        }
+
+        .ai-chat-send-btn {
+            border-radius: 20px;
+            padding: 0;
+            min-width: 48px;
+            width: 48px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            border: none;
+            background: #1e40af;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+
+        .ai-chat-send-btn:hover:not(:disabled) {
+            background: #1e3a8a;
+        }
+
+        .ai-chat-send-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: #9ca3af;
+        }
+
+        .ai-chat-footer .alert-sm {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0;
+            border-radius: 6px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .ai-chat-widget {
+                bottom: 15px;
+                right: 15px;
+            }
+
+            .ai-chat-window {
+                width: calc(100vw - 30px);
+                height: calc(100vh - 100px);
+                bottom: 70px;
+                right: 0;
+            }
+
+            .ai-chat-toggle {
+                width: 56px;
+                height: 56px;
+                font-size: 20px;
+            }
+
+            .ai-chat-header {
+                padding: 0.75rem;
+            }
+
+            .ai-chat-footer {
+                padding: 0.75rem;
+            }
+
+            .ai-chat-input {
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+        }
     </style>
     
     <!-- jQuery (must load first) -->
@@ -493,6 +804,79 @@
         <div ng-view></div>
     </main>
 
+    <!-- AI Search Chat Widget (Floating) - Only for Admin -->
+    <div ng-controller="AiChatWidgetController" ng-if="isAdminOrTeacher()" class="ai-chat-widget">
+        <!-- Chat Toggle Button -->
+        <button class="ai-chat-toggle" ng-click="toggleAiChat()" ng-class="{'active': aiChatOpen}">
+            <i class="bi" ng-class="aiChatOpen ? 'bi-x-lg' : 'bi-chat-dots'"></i>
+        </button>
+
+        <!-- Chat Window -->
+        <div class="ai-chat-window" ng-show="aiChatOpen">
+            <div class="ai-chat-header">
+                <div class="d-flex justify-content-between align-items-center w-100">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-chat-dots me-2"></i>
+                        <strong>AI Search nội bộ</strong>
+                        <small class="text-muted ms-2" ng-if="aiSearch.lastIndexedAt" style="opacity: 0.8;">
+                            {{aiSearch.lastIndexedAt | date:'dd/MM HH:mm'}}
+                        </small>
+                    </div>
+                    <button class="btn btn-sm btn-outline-light" 
+                            type="button" 
+                            ng-click="reindexAiSearch(); $event.stopPropagation()" 
+                            ng-disabled="aiSearch.indexing" 
+                            title="Rebuild index"
+                            style="flex-shrink: 0;">
+                        <span ng-if="!aiSearch.indexing"><i class="bi bi-arrow-clockwise"></i></span>
+                        <span ng-if="aiSearch.indexing">
+                            <span class="spinner-border spinner-border-sm"></span>
+                        </span>
+                    </button>
+                </div>
+            </div>
+            <div class="ai-chat-body">
+                <div class="ai-chat-messages" id="aiChatMessages">
+                    <div ng-if="aiSearch.history && aiSearch.history.length > 0">
+                        <div ng-repeat="item in aiSearch.history | limitTo:10" class="ai-chat-message">
+                            <div class="ai-chat-question">
+                                <strong>Bạn:</strong> {{item.question}}
+                            </div>
+                            <div class="ai-chat-answer" ng-bind-html="renderAiSearchAnswerText(item.answer)"></div>
+                        </div>
+                    </div>
+                    <div ng-if="!aiSearch.history || aiSearch.history.length === 0" class="ai-chat-welcome">
+                        <p>Xin chào! Tôi là AI trợ lý nội bộ. Hãy đặt câu hỏi về hệ thống.</p>
+                        <p class="text-muted small">Ví dụ: "Doanh thu đơn giao trong 30 ngày gần nhất?"</p>
+                    </div>
+                </div>
+            </div>
+            <div class="ai-chat-footer">
+                <form ng-submit="handleAiChatSubmit($event)" style="margin: 0; width: 100%;">
+                    <div class="ai-chat-input-wrapper">
+                        <input type="text" 
+                               class="ai-chat-input" 
+                               ng-model="aiSearch.question" 
+                               placeholder="Nhập câu hỏi..." 
+                               ng-disabled="aiSearch.loading"
+                               autocomplete="off" />
+                        <button class="ai-chat-send-btn" 
+                                type="submit" 
+                                ng-disabled="aiSearch.loading || !aiSearch.question || !aiSearch.question.trim()">
+                            <span ng-if="!aiSearch.loading"><i class="bi bi-send"></i></span>
+                            <span ng-if="aiSearch.loading">
+                                <span class="spinner-border spinner-border-sm"></span>
+                            </span>
+                        </button>
+                    </div>
+                    <div ng-if="aiSearch.error" class="alert alert-danger alert-sm mt-2 mb-0">
+                        {{aiSearch.error}}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Environment Configuration (Dynamic Detection) -->
     <script>
         // Detect environment dynamically with local override
@@ -583,6 +967,7 @@
     <script defer src="/js/angular/controllers/contactController.js?v=1.6"></script>
     <script defer src="/js/angular/controllers/authController.js?v=1.6"></script>
     <script defer src="/js/angular/controllers/adminController.js?v=1.6"></script>
+    <script defer src="/js/angular/controllers/aiChatWidgetController.js?v=1.6"></script>
     <script defer src="/js/angular/controllers/employeeController.js?v=1.6"></script>
     <script defer src="/js/angular/controllers/apiTestController.js?v=1.6"></script>
     <script defer src="/js/angular/controllers/categoryController.js?v=1.6"></script>

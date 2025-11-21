@@ -51,6 +51,19 @@ typings/
 
 # dotenv environment variables file
 .env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.example
+
+# Configuration files with sensitive data (API keys, endpoints)
+env/production.js
+env/staging.js
+env/development.js
+env/*.js
+!env/example.js
 
 # parcel-bundler cache
 .cache

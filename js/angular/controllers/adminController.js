@@ -7,6 +7,11 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
         return;
     }
 
+    // Expose isAdminOrTeacher to rootScope for AI chat widget
+    $rootScope.isAdminOrTeacher = function() {
+        return AuthService.isAdminOrTeacher();
+    };
+
     $scope.title = 'Admin Dashboard';
     $scope.isEmployeesPage = ($location.path() === '/admin/employees');
     $rootScope.$on('$routeChangeSuccess', function(){
@@ -172,15 +177,11 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
         lastUpdated: null
     };
 
+    $scope.aiChatOpen = false;
     $scope.aiSearch = {
         question: '',
         answer: '',
-        docs: [],
-        metadata: null,
         history: [],
-        topK: 5,
-        language: 'vi',
-        includeDebug: true,
         filters: {
             book: true,
             order: true,
@@ -192,6 +193,37 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
         indexing: false,
         error: null,
         lastIndexedAt: null
+    };
+
+    $scope.toggleAiChat = function() {
+        $scope.aiChatOpen = !$scope.aiChatOpen;
+        if ($scope.aiChatOpen) {
+            setTimeout(function() {
+                $scope.scrollChatToBottom();
+            }, 100);
+        }
+    };
+
+    $scope.scrollChatToBottom = function() {
+        setTimeout(function() {
+            var messagesEl = document.getElementById('aiChatMessages');
+            if (messagesEl) {
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+            }
+        }, 50);
+    };
+
+    $scope.renderAiSearchAnswerText = function(text) {
+        if (!text) {
+            return $sce.trustAsHtml('<em>Chưa có câu trả lời</em>');
+        }
+        var html = String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+        html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        html = html.replace(/\n/g, '<br>');
+        return $sce.trustAsHtml(html);
     };
 
     $scope.aiVoice = {
@@ -1103,10 +1135,16 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
         if (!$scope.aiSearch.answer) {
             return $sce.trustAsHtml('<em>Chưa có câu trả lời</em>');
         }
-        var html = String($scope.aiSearch.answer)
+        var text = String($scope.aiSearch.answer);
+        // Escape HTML trước
+        var html = text
+            .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/\n/g, '<br>');
+            .replace(/>/g, '&gt;');
+        // Convert markdown bold **text** thành <strong>text</strong>
+        html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        // Convert newlines thành <br>
+        html = html.replace(/\n/g, '<br>');
         return $sce.trustAsHtml(html);
     };
 
@@ -1116,16 +1154,24 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
             $scope.addToast('warning', 'Vui lòng nhập câu hỏi cho AI search.');
             return;
         }
-        var refTypes = getSelectedAiSearchRefTypes();
+        
+        // Mở chat nếu chưa mở
+        if (!$scope.aiChatOpen) {
+            $scope.aiChatOpen = true;
+        }
+        
         var payload = {
             query: question,
-            topK: $scope.aiSearch.topK || 5,
-            language: $scope.aiSearch.language || 'vi',
-            refTypes: refTypes.length > 0 ? refTypes : null,
-            includeDebug: $scope.aiSearch.includeDebug !== false
+            topK: 5,
+            language: 'vi',
+            refTypes: null, // Tìm trong tất cả nguồn dữ liệu
+            includeDebug: false
         };
         $scope.aiSearch.loading = true;
         $scope.aiSearch.error = null;
+        var questionToSave = question;
+        $scope.aiSearch.question = ''; // Clear input
+        
         BookstoreService.adminAiSearch(payload)
             .then(function(res){
                 var data = res && res.data && res.data.data;
@@ -1133,22 +1179,22 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
                     throw new Error((res && res.data && res.data.message) || 'AI không trả về dữ liệu');
                 }
                 $scope.aiSearch.answer = data.answer || '';
-                $scope.aiSearch.docs = Array.isArray(data.documents) ? data.documents : [];
-                $scope.aiSearch.metadata = data.metadata || null;
                 $scope.aiSearch.history.unshift({
-                    question: question,
+                    question: questionToSave,
                     answer: data.answer || '',
                     ts: new Date().toISOString()
                 });
                 if ($scope.aiSearch.history.length > 20) {
                     $scope.aiSearch.history = $scope.aiSearch.history.slice(0, 20);
                 }
+                $scope.scrollChatToBottom();
             })
             .catch(function(err){
                 console.error('AI search failed', err);
                 var message = (err && err.data && err.data.message) || err.message || 'Không thể chạy AI search.';
                 $scope.aiSearch.error = message;
                 $scope.addToast('danger', message);
+                $scope.scrollChatToBottom();
             })
             .finally(function(){
                 $scope.aiSearch.loading = false;
@@ -1158,9 +1204,8 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
 
     $scope.reindexAiSearch = function(options) {
         options = options || {};
-        var refTypes = getSelectedAiSearchRefTypes();
         var payload = {
-            refTypes: refTypes.length > 0 ? refTypes : null,
+            refTypes: null, // Index tất cả nguồn dữ liệu
             truncateBeforeInsert: options.truncateBeforeInsert !== false,
             maxBooks: options.maxBooks || 800,
             maxCustomers: options.maxCustomers || 300,
