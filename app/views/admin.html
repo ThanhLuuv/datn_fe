@@ -453,7 +453,7 @@
                     </td>
                     <td>
                       <button class="btn btn-sm btn-outline-primary w-100" type="button"
-                              ng-click="openAiImportModal(s)" ng-disabled="s._importedIsbn">
+                              ng-click="openAiImportModal(s)" ng-disabled="s._importedIsbn || s.isbn">
                         <span ng-if="!s._importedIsbn"><i class="bi bi-plus-circle"></i> Tạo nhanh</span>
                         <span ng-if="s._importedIsbn"><i class="bi bi-check2-circle text-success"></i> Đã tạo</span>
                       </button>

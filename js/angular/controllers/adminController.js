@@ -441,10 +441,11 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
     function buildImportFormFromSuggestion(suggestion) {
         var now = new Date();
         suggestion = suggestion || {};
+        var categoryId = suggestion.suggestedCategoryId ? Number(suggestion.suggestedCategoryId) : '';
         return {
             title: suggestion.title || '',
             isbn: suggestion.suggestedIsbn || '',
-            categoryId: suggestion.suggestedCategoryId || '',
+            categoryId: categoryId || '',
             categoryName: suggestion.category || '',
             publisherName: suggestion.publisherName || '',
             authorName: suggestion.authorName || '',
@@ -458,6 +459,10 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
     }
 
     $scope.openAiImportModal = function(suggestion) {
+        if (suggestion && suggestion.isbn) {
+            $scope.addToast('warning', 'Sách này đã có trong hệ thống, không thể tạo mới.');
+            return;
+        }
         $scope.aiImportModal.suggestion = suggestion;
         $scope.aiImportModal.form = buildImportFormFromSuggestion(suggestion);
         $scope.aiImportModal.visible = true;
