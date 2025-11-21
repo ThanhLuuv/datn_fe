@@ -309,6 +309,26 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
+    // Chatbox AI realtime cho admin (text-based)
+    this.adminAiChat = function(payload) {
+        payload = payload || {};
+        var body = {
+            messages: Array.isArray(payload.messages) ? payload.messages : [],
+            fromDate: payload.fromDate || '',
+            toDate: payload.toDate || '',
+            language: payload.language || 'vi',
+            includeInventorySnapshot: payload.includeInventorySnapshot !== false,
+            includeCategoryShare: payload.includeCategoryShare !== false
+        };
+
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/ai/admin-chat',
+            data: body,
+            headers: getAuthHeaders()
+        });
+    };
+
     // ==================== ROLE & PERMISSION APIs ====================
     // Get roles
     this.getRoles = function() {

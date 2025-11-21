@@ -53,6 +53,22 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
         return sum;
     }
 
+    function toIsoDateTime(value) {
+        if (!value) return null;
+        try {
+            if (value instanceof Date) {
+                return new Date(value.getTime()).toISOString();
+            }
+            var parsed = new Date(value);
+            if (!isNaN(parsed.getTime())) {
+                return parsed.toISOString();
+            }
+        } catch (e) {
+            console.warn('toIsoDateTime failed', e);
+        }
+        return null;
+    }
+
     // Bổ sung biến và hàm cho dashboard báo cáo
     $scope.revenueFilter = { type:'monthly', fromDate:'', toDate:'' };
     $scope.inventoryFilter = { toDate:'' };
@@ -86,6 +102,115 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
         recommendedCategories: [],
         bookSuggestions: [],
         customerFeedbackSummary: ''
+    };
+
+    // Live AI chat widget state
+    $scope.aiChatOpen = false;
+    $scope.aiChatInput = '';
+    $scope.aiChatLoadingLive = false;
+    $scope.aiChatMessages = [];
+    $scope.aiChatMetadata = {
+        sources: [],
+        lastUpdated: null
+    };
+
+    function scrollAiChatToBottom() {
+        setTimeout(function() {
+            try {
+                var body = document.querySelector('.ai-chat-panel .ai-chat-body');
+                if (body) {
+                    body.scrollTop = body.scrollHeight;
+                }
+            } catch (e) { /* ignore */ }
+        }, 30);
+    }
+
+    function buildChatPayloadMessages(messages) {
+        return (messages || [])
+            .map(function(m) {
+                var normalizedRole = (m.role || 'user').toLowerCase() === 'assistant' ? 'assistant' : 'user';
+                return {
+                    role: normalizedRole,
+                    content: (m.text || m.content || '').trim()
+                };
+            })
+            .filter(function(m) { return m.content.length > 0; });
+    }
+
+    $scope.toggleAiChat = function($event) {
+        if ($event) { $event.stopPropagation(); }
+        $scope.aiChatOpen = !$scope.aiChatOpen;
+        if ($scope.aiChatOpen) {
+            scrollAiChatToBottom();
+        }
+    };
+
+    $scope.handleAiChatKey = function($event) {
+        if ($event.key === 'Enter' && !$event.shiftKey) {
+            $event.preventDefault();
+            $scope.sendAiChat();
+        }
+    };
+
+    $scope.sendAiChat = function() {
+        var text = ($scope.aiChatInput || '').trim();
+        if (!text || $scope.aiChatLoadingLive) {
+            return;
+        }
+
+        $scope.aiChatMessages.push({ role: 'user', text: text });
+        $scope.aiChatInput = '';
+        $scope.aiChatLoadingLive = true;
+        scrollAiChatToBottom();
+
+        var history = buildChatPayloadMessages($scope.aiChatMessages).slice(-12);
+        var from = $scope.profitFilter.fromDate || $scope.revenueFilter.fromDate;
+        var to = $scope.profitFilter.toDate || $scope.revenueFilter.toDate || new Date();
+        var payload = {
+            messages: history,
+            fromDate: toIsoDateTime(from),
+            toDate: toIsoDateTime(to),
+            language: 'vi',
+            includeInventorySnapshot: true,
+            includeCategoryShare: true
+        };
+
+        BookstoreService.adminAiChat(payload)
+            .then(function(res) {
+                var data = res && res.data && res.data.data;
+                if (data && Array.isArray(data.messages)) {
+                    $scope.aiChatMessages = data.messages.map(function(m) {
+                        return {
+                            role: (m.role || 'assistant').toLowerCase(),
+                            text: m.content || ''
+                        };
+                    });
+                } else if (data && data.plainTextAnswer) {
+                    $scope.aiChatMessages.push({
+                        role: 'assistant',
+                        text: data.plainTextAnswer
+                    });
+                }
+
+                if (data && Array.isArray(data.dataSources)) {
+                    $scope.aiChatMetadata.sources = data.dataSources;
+                    $scope.aiChatMetadata.lastUpdated = new Date();
+                }
+
+                scrollAiChatToBottom();
+            })
+            .catch(function(err) {
+                console.error('Admin AI chat error:', err);
+                $scope.addToast('danger', 'Không thể gửi câu hỏi tới trợ lý AI.');
+                $scope.aiChatMessages.push({
+                    role: 'assistant',
+                    text: 'Xin lỗi, tôi không thể truy cập dữ liệu ngay lúc này.'
+                });
+            })
+            .finally(function() {
+                $scope.aiChatLoadingLive = false;
+                $scope.$applyAsync(scrollAiChatToBottom);
+            });
     };
 
     // Resolve reporter display name robustly
