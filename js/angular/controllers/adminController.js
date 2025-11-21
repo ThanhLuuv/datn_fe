@@ -172,6 +172,28 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
         lastUpdated: null
     };
 
+    $scope.aiSearch = {
+        question: '',
+        answer: '',
+        docs: [],
+        metadata: null,
+        history: [],
+        topK: 5,
+        language: 'vi',
+        includeDebug: true,
+        filters: {
+            book: true,
+            order: true,
+            customer: true,
+            inventory: true,
+            sales_insight: true
+        },
+        loading: false,
+        indexing: false,
+        error: null,
+        lastIndexedAt: null
+    };
+
     $scope.aiVoice = {
         supported: !!(navigator.mediaDevices && window.MediaRecorder),
         status: 'idle',
@@ -1071,6 +1093,98 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
         }
         $scope.runAdminAiAssistant(true, true);
     }
+
+    function getSelectedAiSearchRefTypes() {
+        var filters = $scope.aiSearch && $scope.aiSearch.filters ? $scope.aiSearch.filters : {};
+        return Object.keys(filters).filter(function(key){ return filters[key]; });
+    }
+
+    $scope.renderAiSearchAnswer = function() {
+        if (!$scope.aiSearch.answer) {
+            return $sce.trustAsHtml('<em>Chưa có câu trả lời</em>');
+        }
+        var html = String($scope.aiSearch.answer)
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/\n/g, '<br>');
+        return $sce.trustAsHtml(html);
+    };
+
+    $scope.runAiSearch = function() {
+        var question = ($scope.aiSearch.question || '').trim();
+        if (!question) {
+            $scope.addToast('warning', 'Vui lòng nhập câu hỏi cho AI search.');
+            return;
+        }
+        var refTypes = getSelectedAiSearchRefTypes();
+        var payload = {
+            query: question,
+            topK: $scope.aiSearch.topK || 5,
+            language: $scope.aiSearch.language || 'vi',
+            refTypes: refTypes.length > 0 ? refTypes : null,
+            includeDebug: $scope.aiSearch.includeDebug !== false
+        };
+        $scope.aiSearch.loading = true;
+        $scope.aiSearch.error = null;
+        BookstoreService.adminAiSearch(payload)
+            .then(function(res){
+                var data = res && res.data && res.data.data;
+                if (!data) {
+                    throw new Error((res && res.data && res.data.message) || 'AI không trả về dữ liệu');
+                }
+                $scope.aiSearch.answer = data.answer || '';
+                $scope.aiSearch.docs = Array.isArray(data.documents) ? data.documents : [];
+                $scope.aiSearch.metadata = data.metadata || null;
+                $scope.aiSearch.history.unshift({
+                    question: question,
+                    answer: data.answer || '',
+                    ts: new Date().toISOString()
+                });
+                if ($scope.aiSearch.history.length > 20) {
+                    $scope.aiSearch.history = $scope.aiSearch.history.slice(0, 20);
+                }
+            })
+            .catch(function(err){
+                console.error('AI search failed', err);
+                var message = (err && err.data && err.data.message) || err.message || 'Không thể chạy AI search.';
+                $scope.aiSearch.error = message;
+                $scope.addToast('danger', message);
+            })
+            .finally(function(){
+                $scope.aiSearch.loading = false;
+                $scope.$applyAsync();
+            });
+    };
+
+    $scope.reindexAiSearch = function(options) {
+        options = options || {};
+        var refTypes = getSelectedAiSearchRefTypes();
+        var payload = {
+            refTypes: refTypes.length > 0 ? refTypes : null,
+            truncateBeforeInsert: options.truncateBeforeInsert !== false,
+            maxBooks: options.maxBooks || 800,
+            maxCustomers: options.maxCustomers || 300,
+            maxOrders: options.maxOrders || 400,
+            historyDays: options.historyDays || 180
+        };
+        $scope.aiSearch.indexing = true;
+        BookstoreService.adminAiReindexSearch(payload)
+            .then(function(res){
+                var data = res && res.data && res.data.data;
+                var indexed = data ? Number(data.indexedDocuments || 0) : 0;
+                $scope.aiSearch.lastIndexedAt = data && data.indexedAt ? data.indexedAt : new Date().toISOString();
+                $scope.addToast('success', 'Đã index ' + indexed + ' tài liệu AI.');
+            })
+            .catch(function(err){
+                console.error('AI reindex failed', err);
+                var message = (err && err.data && err.data.message) || err.message || 'Không thể rebuild AI search.';
+                $scope.addToast('danger', message);
+            })
+            .finally(function(){
+                $scope.aiSearch.indexing = false;
+                $scope.$applyAsync();
+            });
+    };
 
     // Load books share by category for pie chart
     $scope.loadBooksByCategoryShare = function() {

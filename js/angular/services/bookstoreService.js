@@ -3,7 +3,7 @@ console.log('Loading BookstoreService...');
 app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', function($http, $q, APP_CONFIG, AuthService) {
     // Auto-detect API URL: use local backend for localhost, production otherwise
     var isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    var baseUrl = APP_CONFIG.API_BASE_URL || (isLocal ? 'http://localhost:5256/api' : 'https://api-datn.thanhlaptrinh.online/api');
+    var baseUrl = APP_CONFIG.API_BASE_URL || (isLocal ? 'http://localhost:5256/api' : 'https://api.thanhlaptrinh.online/api');
     
     // Helper function to get auth headers
     var getAuthHeaders = function() {
@@ -383,6 +383,41 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         return $http({
             method: 'POST',
             url: baseUrl + '/ai/admin-voice',
+            data: body,
+            headers: getAuthHeaders()
+        });
+    };
+
+    this.adminAiSearch = function(payload) {
+        payload = payload || {};
+        var body = {
+            query: (payload.query || '').trim(),
+            topK: payload.topK || 5,
+            refTypes: Array.isArray(payload.refTypes) && payload.refTypes.length ? payload.refTypes : null,
+            language: payload.language || 'vi',
+            includeDebugDocuments: payload.includeDebug !== false
+        };
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/ai/search',
+            data: body,
+            headers: getAuthHeaders()
+        });
+    };
+
+    this.adminAiReindexSearch = function(payload) {
+        payload = payload || {};
+        var body = {
+            refTypes: Array.isArray(payload.refTypes) && payload.refTypes.length ? payload.refTypes : null,
+            truncateBeforeInsert: payload.truncateBeforeInsert !== false,
+            maxBooks: payload.maxBooks || 800,
+            maxCustomers: payload.maxCustomers || 300,
+            maxOrders: payload.maxOrders || 400,
+            historyDays: payload.historyDays || 180
+        };
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/ai/search/reindex',
             data: body,
             headers: getAuthHeaders()
         });

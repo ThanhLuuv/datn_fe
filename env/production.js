@@ -1,7 +1,7 @@
 // Production Environment Configuration
 window.ENV_CONFIG = {
     // API Configuration
-    API_BASE_URL: 'https://api-datn.thanhlaptrinh.online/api',
+    API_BASE_URL: 'https://api.thanhlaptrinh.online/api',
     API_TIMEOUT: 15000,
     
     // Application Settings
@@ -50,12 +50,5 @@ window.ENV_CONFIG = {
         ENABLE_DEBUG_LOGS: false,
         ENABLE_API_LOGGING: false,
         ENABLE_PERFORMANCE_MONITORING: true
-    },
-
-    // Google AI Live Voice (client-side use only; ensure key is safe to expose)
-    GOOGLE_AI: {
-        API_KEY: '',
-        MODEL: 'gemini-2.5-flash-native-audio-preview-09-2025',
-        VOICE_NAME: 'Zephyr'
     }
 };

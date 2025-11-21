@@ -9,7 +9,7 @@ var isVercelHost = currentHost.includes('vercel.app') || currentHost.includes('n
 // Fallback configuration - detect environment for API URL
 var fallbackApiUrl = isLocal 
     ? 'http://localhost:5256/api'  // Local backend
-    : 'https://api-datn.thanhlaptrinh.online/api';  // Production backend
+    : 'https://api.thanhlaptrinh.online/api';  // Production backend
 
 var fallbackConfig = {
     API_BASE_URL: fallbackApiUrl,

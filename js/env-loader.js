@@ -60,7 +60,7 @@
             var fallbackEnv = detectEnvironment();
             var fallbackApiUrl = fallbackEnv === 'development' 
                 ? 'http://localhost:5256/api' 
-                : 'https://api-datn.thanhlaptrinh.online/api';
+                : 'https://api.thanhlaptrinh.online/api';
             
             window.ENV_CONFIG = {
                 API_BASE_URL: fallbackApiUrl,

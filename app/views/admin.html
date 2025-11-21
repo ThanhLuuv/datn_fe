@@ -543,6 +543,94 @@
   </div>
 </div>
 
+<!-- AI Search row -->
+<div ng-if="!isEmployeesPage" class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>
+          <i class="bi bi-chat-dots"></i> AI Search nội bộ (Gemini 2.5 Flash)
+        </span>
+        <div class="d-flex align-items-center gap-2">
+          <small class="text-muted" ng-if="aiSearch.lastIndexedAt">
+            Indexed: {{aiSearch.lastIndexedAt | date:'dd/MM/yyyy HH:mm'}}
+          </small>
+          <button class="btn btn-sm btn-outline-secondary" type="button" ng-click="reindexAiSearch()" ng-disabled="aiSearch.indexing">
+            <span ng-if="!aiSearch.indexing"><i class="bi bi-arrow-clockwise"></i> Rebuild index</span>
+            <span ng-if="aiSearch.indexing">
+              <span class="spinner-border spinner-border-sm me-1"></span> Đang index...
+            </span>
+          </button>
+        </div>
+      </div>
+      <div class="card-body">
+        <form class="row g-3 align-items-end" ng-submit="runAiSearch()" autocomplete="off">
+          <div class="col-lg-6">
+            <label class="form-label">Câu hỏi</label>
+            <input type="text" class="form-control" ng-model="aiSearch.question" placeholder="Ví dụ: Doanh thu đơn giao trong 30 ngày gần nhất?" />
+          </div>
+          <div class="col-lg-2 col-md-4">
+            <label class="form-label">Top K</label>
+            <input type="number" min="1" max="15" class="form-control" ng-model="aiSearch.topK" />
+          </div>
+          <div class="col-lg-2 col-md-4">
+            <label class="form-label">Ngôn ngữ</label>
+            <select class="form-select" ng-model="aiSearch.language">
+              <option value="vi">Tiếng Việt</option>
+              <option value="en">English</option>
+            </select>
+          </div>
+          <div class="col-lg-2 col-md-4">
+            <label class="form-label d-block">Tùy chọn</label>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="aiSearchDebug" ng-model="aiSearch.includeDebug">
+              <label class="form-check-label" for="aiSearchDebug">Hiện tài liệu</label>
+            </div>
+          </div>
+          <div class="col-12">
+            <label class="form-label d-block">Nguồn dữ liệu</label>
+            <div class="btn-group flex-wrap">
+              <button type="button" class="btn btn-sm" ng-class="aiSearch.filters.book ? 'btn-primary' : 'btn-outline-primary'" ng-click="aiSearch.filters.book = !aiSearch.filters.book">Sách</button>
+              <button type="button" class="btn btn-sm" ng-class="aiSearch.filters.order ? 'btn-primary' : 'btn-outline-primary'" ng-click="aiSearch.filters.order = !aiSearch.filters.order">Đơn hàng</button>
+              <button type="button" class="btn btn-sm" ng-class="aiSearch.filters.customer ? 'btn-primary' : 'btn-outline-primary'" ng-click="aiSearch.filters.customer = !aiSearch.filters.customer">Khách hàng</button>
+              <button type="button" class="btn btn-sm" ng-class="aiSearch.filters.inventory ? 'btn-primary' : 'btn-outline-primary'" ng-click="aiSearch.filters.inventory = !aiSearch.filters.inventory">Tồn kho</button>
+              <button type="button" class="btn btn-sm" ng-class="aiSearch.filters.sales_insight ? 'btn-primary' : 'btn-outline-primary'" ng-click="aiSearch.filters.sales_insight = !aiSearch.filters.sales_insight">Sales insight</button>
+            </div>
+          </div>
+          <div class="col-12">
+            <button class="btn btn-primary" type="submit" ng-disabled="aiSearch.loading">
+              <span ng-if="!aiSearch.loading"><i class="bi bi-search"></i> Hỏi AI</span>
+              <span ng-if="aiSearch.loading">
+                <span class="spinner-border spinner-border-sm me-2"></span> Đang xử lý...
+              </span>
+            </button>
+          </div>
+        </form>
+        <div class="mt-3" ng-if="aiSearch.error">
+          <div class="alert alert-danger mb-0">
+            {{aiSearch.error}}
+          </div>
+        </div>
+        <div class="mt-3" ng-if="aiSearch.answer">
+          <div class="alert alert-light border">
+            <h6 class="fw-bold">Kết quả</h6>
+            <div ng-bind-html="renderAiSearchAnswer()"></div>
+          </div>
+        </div>
+        <div class="mt-3" ng-if="aiSearch.includeDebug && aiSearch.docs && aiSearch.docs.length">
+          <h6 class="fw-bold">Tài liệu tham chiếu</h6>
+          <div class="ai-doc border rounded p-3 mb-2" ng-repeat="doc in aiSearch.docs track by doc.id">
+            <div class="small text-muted mb-2">
+              {{doc.refType}} • {{doc.refId}} • Độ tương đồng: {{doc.similarity | number:3}}
+            </div>
+            <pre class="mb-0 small">{{doc.content}}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
         
         <!-- Báo cáo doanh thu modal (đặt trong layout để dùng chung scope) -->
         <div class="dashboard-backdrop" ng-show="showingDashboardReport" ng-click="showingDashboardReport=false"></div>
