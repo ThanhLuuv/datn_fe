@@ -426,11 +426,14 @@
               <table class="table table-sm align-middle">
                 <thead class="table-light">
                   <tr>
-                    <th style="width:5%">#</th>
-                    <th style="width:15%">ISBN</th>
-                    <th style="width:35%">Tên sách</th>
-                    <th style="width:20%">Thể loại</th>
-                    <th style="width:25%">Lý do</th>
+                    <th style="width:4%">#</th>
+                    <th style="width:12%">ISBN</th>
+                    <th style="width:28%">Tên sách</th>
+                    <th style="width:14%">Thể loại</th>
+                    <th style="width:18%">Lý do</th>
+                    <th style="width:13%">Giá thị trường</th>
+                    <th style="width:11%">Nguồn</th>
+                    <th style="width:10%">Hành động</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -440,6 +443,22 @@
                     <td>{{s.title}}</td>
                     <td>{{s.category || '—'}}</td>
                     <td>{{s.reason}}</td>
+                    <td>{{s.marketPrice || '—'}}</td>
+                    <td>
+                      <a ng-if="s.marketSourceUrl" ng-href="{{s.marketSourceUrl}}" target="_blank" rel="noopener">
+                        {{s.marketSourceName || 'Nguồn'}}
+                        <i class="bi bi-box-arrow-up-right ms-1"></i>
+                      </a>
+                      <span ng-if="!s.marketSourceUrl">{{s.marketSourceName || '—'}}</span>
+                    </td>
+                    <td>
+                      <button class="btn btn-sm btn-outline-primary w-100" type="button"
+                              ng-click="openAiImportModal(s)" ng-disabled="s._importedIsbn">
+                        <span ng-if="!s._importedIsbn"><i class="bi bi-plus-circle"></i> Tạo nhanh</span>
+                        <span ng-if="s._importedIsbn"><i class="bi bi-check2-circle text-success"></i> Đã tạo</span>
+                      </button>
+                      <div class="small text-muted mt-1" ng-if="s.suggestedIsbn">ISBN đề xuất: {{s.suggestedIsbn}}</div>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -740,6 +759,19 @@
         </div>
         <button type="button" class="btn-close btn-close-white" ng-click="toggleAiChat($event)"></button>
     </div>
+    <div class="ai-chat-voice-bar" ng-if="aiVoice.supported">
+        <button class="btn btn-sm ai-voice-btn" type="button" ng-click="toggleVoiceSession()" ng-class="aiVoice.status">
+            <i class="bi" ng-class="getVoiceIconClass()"></i>
+            <span ng-if="aiVoice.status === 'listening' || aiVoice.status === 'speaking'">Đang live voice</span>
+            <span ng-if="aiVoice.status === 'connecting'">Đang kết nối</span>
+            <span ng-if="aiVoice.status === 'idle'">Bật live voice</span>
+            <span ng-if="aiVoice.status === 'error'">Thử lại</span>
+        </button>
+        <div class="ai-voice-status" ng-class="aiVoice.status">{{getVoiceStatusText()}}</div>
+    </div>
+    <div class="alert alert-warning m-0 rounded-0 ai-voice-warning" ng-if="!aiVoice.supported">
+        Thiết bị của bạn không hỗ trợ voice live. Hãy dùng trình duyệt khác.
+    </div>
     <div class="ai-chat-body">
         <div class="ai-chat-message system">
             <div class="ai-chat-bubble">
@@ -765,6 +797,80 @@
             <span ng-if="aiChatLoadingLive" class="spinner-border spinner-border-sm"></span>
         </button>
     </div>
+</div>
+
+<div class="ai-import-backdrop" ng-if="aiImportModal.visible" ng-click="closeAiImportModal()"></div>
+<div class="ai-import-modal" ng-if="aiImportModal.visible">
+  <div class="modal-content" ng-click="$event.stopPropagation()">
+    <div class="modal-header">
+      <h5 class="modal-title"><i class="bi bi-bookmark-plus me-2"></i>Thêm sách từ gợi ý AI</h5>
+      <button type="button" class="btn-close" ng-click="closeAiImportModal()"></button>
+    </div>
+    <div class="modal-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Tiêu đề</label>
+          <input type="text" class="form-control" ng-model="aiImportModal.form.title">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">ISBN</label>
+          <input type="text" class="form-control" ng-model="aiImportModal.form.isbn">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Giá (VNĐ)</label>
+          <input type="number" min="0" class="form-control" ng-model="aiImportModal.form.suggestedPrice">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Danh mục ID</label>
+          <input type="number" class="form-control" ng-model="aiImportModal.form.categoryId">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Danh mục (tên)</label>
+          <input type="text" class="form-control" ng-model="aiImportModal.form.categoryName">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">NXB</label>
+          <input type="text" class="form-control" ng-model="aiImportModal.form.publisherName">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Tác giả</label>
+          <input type="text" class="form-control" ng-model="aiImportModal.form.authorName">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Số trang</label>
+          <input type="number" min="1" class="form-control" ng-model="aiImportModal.form.pageCount">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Năm XB</label>
+          <input type="number" min="1900" class="form-control" ng-model="aiImportModal.form.publishYear">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Tồn kho ban đầu</label>
+          <input type="number" min="0" class="form-control" ng-model="aiImportModal.form.stock">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Ảnh bìa (URL)</label>
+          <input type="text" class="form-control" ng-model="aiImportModal.form.coverImageUrl">
+          <div class="ai-import-cover mt-2" ng-if="aiImportModal.form.coverImageUrl">
+            <img ng-src="{{aiImportModal.form.coverImageUrl}}" alt="Cover preview" onerror="this.style.display='none'">
+          </div>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Mô tả</label>
+          <textarea class="form-control" rows="3" ng-model="aiImportModal.form.description"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light" ng-click="closeAiImportModal()">Huỷ</button>
+      <button type="button" class="btn btn-primary" ng-click="submitAiImport()" ng-disabled="aiImportModal.submitting">
+        <span ng-if="!aiImportModal.submitting"><i class="bi bi-check2"></i> Tạo sách</span>
+        <span ng-if="aiImportModal.submitting">
+          <span class="spinner-border spinner-border-sm me-1"></span>Đang tạo...
+        </span>
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- Original Admin Layout Styles (restored) -->
@@ -1058,6 +1164,48 @@
 .ai-chat-panel.open {
   display: flex;
 }
+.ai-chat-voice-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #eef2ff;
+  border-bottom: 1px solid #e0e7ff;
+}
+.ai-voice-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  color: #1d4ed8;
+  border-color: #c7d2fe;
+}
+.ai-voice-btn.listening,
+.ai-voice-btn.speaking,
+.ai-voice-btn.connecting {
+  background: #1d4ed8;
+  color: #fff;
+  border-color: #1d4ed8;
+}
+.ai-voice-btn.error {
+  background: #fef2f2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+.ai-voice-status {
+  font-size: 12px;
+  color: #475569;
+  flex: 1;
+  text-align: right;
+}
+.ai-voice-status.speaking { color: #0ea5e9; }
+.ai-voice-status.listening { color: #0f766e; }
+.ai-voice-status.error { color: #dc2626; }
+.ai-voice-warning {
+  font-size: 12px;
+  padding: 6px 14px;
+}
 .ai-chat-header {
   background: linear-gradient(135deg, #111827, #1d4ed8);
   color: #fff;
@@ -1162,6 +1310,33 @@
     transform: translateY(-4px);
     opacity: 1;
   }
+}
+
+.ai-import-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  z-index: 13000;
+}
+.ai-import-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90vw;
+  max-width: 960px;
+  z-index: 13001;
+}
+.ai-import-modal .modal-content {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(15,23,42,0.35);
+  overflow: hidden;
+}
+.ai-import-cover img {
+  max-width: 180px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(15,23,42,0.2);
 }
 
 </style>

@@ -329,6 +329,38 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
+    // Voice AI (audio upload -> backend -> Gemini)
+    this.adminAiVoice = function(payload) {
+        payload = payload || {};
+        var body = {
+            audioBase64: payload.audioBase64 || '',
+            mimeType: payload.mimeType || '',
+            fromDate: payload.fromDate || '',
+            toDate: payload.toDate || '',
+            language: payload.language || 'vi',
+            includeInventorySnapshot: payload.includeInventorySnapshot !== false,
+            includeCategoryShare: payload.includeCategoryShare !== false
+        };
+
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/ai/admin-voice',
+            data: body,
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Nhập nhanh sách từ gợi ý AI
+    this.adminAiImportBook = function(payload) {
+        payload = payload || {};
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/ai/admin-import-book',
+            data: payload,
+            headers: getAuthHeaders()
+        });
+    };
+
     // ==================== ROLE & PERMISSION APIs ====================
     // Get roles
     this.getRoles = function() {

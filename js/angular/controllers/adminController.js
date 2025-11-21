@@ -114,6 +114,23 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
         lastUpdated: null
     };
 
+    $scope.aiVoice = {
+        supported: !!(navigator.mediaDevices && window.MediaRecorder),
+        status: 'idle',
+        error: null
+    };
+    var mediaRecorder = null;
+    var voiceStream = null;
+    var recordedChunks = [];
+    var voicePlayer = null;
+
+    $scope.aiImportModal = {
+        visible: false,
+        form: {},
+        submitting: false,
+        suggestion: null
+    };
+
     function scrollAiChatToBottom() {
         setTimeout(function() {
             try {
@@ -136,6 +153,361 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
             })
             .filter(function(m) { return m.content.length > 0; });
     }
+
+    function setAiVoiceStatus(status, errorMessage) {
+        $scope.aiVoice.status = status;
+        $scope.aiVoice.error = errorMessage || null;
+    }
+
+    function cleanupRecording() {
+        if (mediaRecorder) {
+            try {
+                if (mediaRecorder.state !== 'inactive') {
+                    mediaRecorder.stop();
+                }
+            } catch (e) {}
+            mediaRecorder.ondataavailable = null;
+            mediaRecorder.onstop = null;
+            mediaRecorder = null;
+        }
+        if (voiceStream) {
+            try {
+                voiceStream.getTracks().forEach(function(track) { track.stop(); });
+            } catch (err) {}
+            voiceStream = null;
+        }
+        recordedChunks = [];
+    }
+
+    function stopVoicePlayback() {
+        if (voicePlayer) {
+            try { voicePlayer.pause(); } catch (e) {}
+            voicePlayer = null;
+        }
+    }
+
+    function updateVoiceDraft(role, text, isFinal) {
+        if (!text) {
+            return;
+        }
+        $scope.$applyAsync(function() {
+            var normalizedRole = role === 'assistant' ? 'assistant' : 'user';
+            if (!isFinal) {
+                voiceDrafts[normalizedRole] = text;
+                var draftIndex = $scope.aiChatMessages.findIndex(function(m) { return m._voiceDraft && m._voiceRole === normalizedRole; });
+                if (draftIndex >= 0) {
+                    $scope.aiChatMessages[draftIndex].text = text;
+                } else {
+                    $scope.aiChatMessages.push({
+                        role: normalizedRole,
+                        text: text,
+                        _voiceDraft: true,
+                        _voiceRole: normalizedRole
+                    });
+                }
+            } else {
+                var idx = $scope.aiChatMessages.findIndex(function(m) { return m._voiceDraft && m._voiceRole === normalizedRole; });
+                if (idx >= 0) {
+                    $scope.aiChatMessages[idx].text = text;
+                    delete $scope.aiChatMessages[idx]._voiceDraft;
+                    delete $scope.aiChatMessages[idx]._voiceRole;
+                } else {
+                    $scope.aiChatMessages.push({
+                        role: normalizedRole,
+                        text: text
+                    });
+                }
+                voiceDrafts[normalizedRole] = null;
+            }
+            scrollAiChatToBottom();
+        });
+    }
+
+    function getVoiceSystemPrompt() {
+        return [
+            'Bạn là trợ lý AI realtime cho quản trị viên BookStore.',
+            'Trả lời bằng tiếng Việt tự nhiên, giọng thân thiện, súc tích.',
+            'Nếu người dùng hỏi về số liệu, hãy nhắc họ có thể mở báo cáo để xem chi tiết.',
+            'Luôn xác nhận hành động quan trọng và gợi ý bước tiếp theo.'
+        ].join('\n');
+    }
+
+    async function startVoiceSession() {
+        if (!$scope.aiVoice.supported) {
+            $scope.addToast('danger', 'Trình duyệt không hỗ trợ voice chat.');
+            return;
+        }
+        var apiKey = (GOOGLE_AI_CONFIG && GOOGLE_AI_CONFIG.API_KEY) || APP_CONFIG.GOOGLE_AI_API_KEY;
+        if (!apiKey) {
+            $scope.addToast('danger', 'Chưa cấu hình GOOGLE_AI.API_KEY trong env/*.js để dùng voice.');
+            return;
+        }
+        if (aiVoiceSession.sessionPromise) {
+            return;
+        }
+        setAiVoiceStatus('connecting');
+        try {
+            var module = await ensureGoogleGenAiModule();
+            var GoogleGenAI = module.GoogleGenAI;
+            var Modality = module.Modality;
+            aiVoiceSession.SpeakerEnum = module.Speaker;
+            var ai = new GoogleGenAI({ apiKey: apiKey });
+            var modelName = (GOOGLE_AI_CONFIG && GOOGLE_AI_CONFIG.MODEL) || 'gemini-2.5-flash-native-audio-preview-09-2025';
+            var voiceName = (GOOGLE_AI_CONFIG && GOOGLE_AI_CONFIG.VOICE_NAME) || 'Zephyr';
+
+            aiVoiceSession.sessionPromise = ai.live.connect({
+                model: modelName,
+                config: {
+                    responseModalities: [Modality.AUDIO],
+                    speechConfig: {
+                        voiceConfig: { prebuiltVoiceConfig: { voiceName: voiceName } }
+                    },
+                    inputAudioTranscription: {},
+                    outputAudioTranscription: {},
+                    systemInstruction: getVoiceSystemPrompt()
+                },
+                callbacks: {
+                    onopen: async function() {
+                        try {
+                            var AudioContextImpl = window.AudioContext || window.webkitAudioContext;
+                            aiVoiceSession.inputAudioContext = new AudioContextImpl({ sampleRate: 16000 });
+                            aiVoiceSession.outputAudioContext = new AudioContextImpl({ sampleRate: 24000 });
+
+                            aiVoiceSession.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                            var source = aiVoiceSession.inputAudioContext.createMediaStreamSource(aiVoiceSession.stream);
+                            aiVoiceSession.scriptProcessor = aiVoiceSession.inputAudioContext.createScriptProcessor(4096, 1, 1);
+
+                            aiVoiceSession.scriptProcessor.onaudioprocess = function(event) {
+                                var inputData = event.inputBuffer.getChannelData(0);
+                                var int16 = new Int16Array(inputData.length);
+                                for (var i = 0; i < inputData.length; i++) {
+                                    var s = Math.max(-1, Math.min(1, inputData[i]));
+                                    int16[i] = s * 32767;
+                                }
+                                var pcmBlob = {
+                                    data: encodePcm(int16),
+                                    mimeType: 'audio/pcm;rate=16000'
+                                };
+                                aiVoiceSession.sessionPromise && aiVoiceSession.sessionPromise.then(function(session) {
+                                    if (session && typeof session.sendRealtimeInput === 'function') {
+                                        session.sendRealtimeInput({ media: pcmBlob });
+                                    }
+                                });
+                            };
+
+                            source.connect(aiVoiceSession.scriptProcessor);
+                            aiVoiceSession.scriptProcessor.connect(aiVoiceSession.inputAudioContext.destination);
+                            setAiVoiceStatus('listening');
+                            $scope.$applyAsync();
+                        } catch (micErr) {
+                            console.error('Voice mic error', micErr);
+                            cleanupVoiceSession('error');
+                            $scope.addToast('danger', 'Không truy cập được micro: ' + (micErr && micErr.message ? micErr.message : 'Unknown error'));
+                        }
+                    },
+                    onmessage: async function(message) {
+                        var speakerEnum = aiVoiceSession.SpeakerEnum || {};
+                        try {
+                            var inputTrans = message.serverContent && message.serverContent.inputTranscription;
+                            if (inputTrans && inputTrans.text) {
+                                updateVoiceDraft('user', inputTrans.text, inputTrans.isFinal);
+                            }
+                            var outputTrans = message.serverContent && message.serverContent.outputTranscription;
+                            if (outputTrans && outputTrans.text) {
+                                updateVoiceDraft('assistant', outputTrans.text, outputTrans.isFinal);
+                                if (outputTrans.isFinal) {
+                                    setAiVoiceStatus('speaking');
+                                }
+                            }
+                            if (message.serverContent && message.serverContent.turnComplete) {
+                                voiceDrafts.user = null;
+                                voiceDrafts.assistant = null;
+                                setAiVoiceStatus('listening');
+                            }
+                            var audioData = message.serverContent &&
+                                message.serverContent.modelTurn &&
+                                message.serverContent.modelTurn.parts &&
+                                message.serverContent.modelTurn.parts[0] &&
+                                message.serverContent.modelTurn.parts[0].inlineData &&
+                                message.serverContent.modelTurn.parts[0].inlineData.data;
+                            if (audioData && aiVoiceSession.outputAudioContext) {
+                                aiVoiceSession.nextStartTime = Math.max(aiVoiceSession.nextStartTime, aiVoiceSession.outputAudioContext.currentTime);
+                                var audioBuffer = await decodeOutputAudio(decodeBase64(audioData), aiVoiceSession.outputAudioContext, 24000, 1);
+                                var playbackSource = aiVoiceSession.outputAudioContext.createBufferSource();
+                                playbackSource.buffer = audioBuffer;
+                                playbackSource.connect(aiVoiceSession.outputAudioContext.destination);
+                                playbackSource.addEventListener('ended', function() {
+                                    aiVoiceSession.sources.delete(playbackSource);
+                                    if (aiVoiceSession.sources.size === 0 && $scope.aiVoice.status === 'speaking') {
+                                        setAiVoiceStatus('listening');
+                                        $scope.$applyAsync();
+                                    }
+                                });
+                                playbackSource.start(aiVoiceSession.nextStartTime);
+                                aiVoiceSession.nextStartTime += audioBuffer.duration;
+                                aiVoiceSession.sources.add(playbackSource);
+                                setAiVoiceStatus('speaking');
+                                $scope.$applyAsync();
+                            }
+                            if (message.serverContent && message.serverContent.interrupted) {
+                                aiVoiceSession.sources.forEach(function(source) {
+                                    try { source.stop(); } catch (e) {}
+                                });
+                                aiVoiceSession.sources.clear();
+                                aiVoiceSession.nextStartTime = 0;
+                            }
+                        } catch (msgErr) {
+                            console.error('Voice onmessage error', msgErr);
+                        }
+                    },
+                    onerror: function(err) {
+                        console.error('Voice session error', err);
+                        cleanupVoiceSession('error');
+                        $scope.$applyAsync(function() {
+                            $scope.addToast('danger', 'Voice AI lỗi: ' + (err && err.message ? err.message : 'Unknown error'));
+                        });
+                    },
+                    onclose: function() {
+                        cleanupVoiceSession('idle');
+                        $scope.$applyAsync();
+                    }
+                }
+            });
+            aiVoiceSession.sessionPromise.then(function(session) {
+                aiVoiceSession.session = session;
+                return session;
+            });
+        } catch (err) {
+            console.error('Voice session init error', err);
+            cleanupVoiceSession('error');
+            $scope.addToast('danger', 'Không thể khởi tạo phiên voice: ' + (err && err.message ? err.message : 'Unknown error'));
+        }
+    }
+
+    function stopVoiceSession() {
+        if (!aiVoiceSession.sessionPromise) {
+            setAiVoiceStatus('idle');
+            return;
+        }
+        aiVoiceSession.sessionPromise.then(function(session) {
+            try {
+                if (session && typeof session.close === 'function') {
+                    session.close();
+                } else if (session && typeof session.end === 'function') {
+                    session.end();
+                }
+            } catch (err) {
+                console.warn('Voice session close err', err);
+            }
+        }).finally(function() {
+            cleanupVoiceSession('idle');
+            $scope.$applyAsync();
+        });
+    }
+
+    $scope.toggleVoiceSession = function() {
+        if ($scope.aiVoice.status === 'connecting' || $scope.aiVoice.status === 'listening' || $scope.aiVoice.status === 'speaking') {
+            stopVoiceSession();
+        } else {
+            startVoiceSession();
+        }
+    };
+
+    $scope.getVoiceStatusText = function() {
+        switch ($scope.aiVoice.status) {
+            case 'connecting': return 'Đang kết nối...';
+            case 'listening': return 'Đang lắng nghe';
+            case 'speaking': return 'Trợ lý đang trả lời';
+            case 'error': return $scope.aiVoice.error || 'Lỗi voice';
+            default: return 'Voice AI đang tắt';
+        }
+    };
+
+    $scope.getVoiceIconClass = function() {
+        if ($scope.aiVoice.status === 'speaking') return 'bi-volume-up';
+        if ($scope.aiVoice.status === 'listening' || $scope.aiVoice.status === 'connecting') return 'bi-mic-fill';
+        if ($scope.aiVoice.status === 'error') return 'bi-exclamation-triangle';
+        return 'bi-mic';
+    };
+
+    function parsePriceToNumber(value) {
+        if (value == null || value === '') return null;
+        var cleaned = String(value).replace(/[^\d]/g, '');
+        if (!cleaned) return null;
+        var num = Number(cleaned);
+        return isNaN(num) ? null : num;
+    }
+
+    function buildImportFormFromSuggestion(suggestion) {
+        var now = new Date();
+        suggestion = suggestion || {};
+        return {
+            title: suggestion.title || '',
+            isbn: suggestion.suggestedIsbn || '',
+            categoryId: suggestion.suggestedCategoryId || '',
+            categoryName: suggestion.category || '',
+            publisherName: suggestion.publisherName || '',
+            authorName: suggestion.authorName || '',
+            pageCount: suggestion.pageCount || 220,
+            publishYear: suggestion.publishYear || now.getFullYear(),
+            suggestedPrice: suggestion.suggestedPrice || parsePriceToNumber(suggestion.marketPrice) || null,
+            stock: suggestion.suggestedStock || 0,
+            coverImageUrl: suggestion.coverImageUrl || '',
+            description: suggestion.description || suggestion.reason || ''
+        };
+    }
+
+    $scope.openAiImportModal = function(suggestion) {
+        $scope.aiImportModal.suggestion = suggestion;
+        $scope.aiImportModal.form = buildImportFormFromSuggestion(suggestion);
+        $scope.aiImportModal.visible = true;
+        $scope.aiImportModal.submitting = false;
+    };
+
+    $scope.closeAiImportModal = function() {
+        $scope.aiImportModal.visible = false;
+        $scope.aiImportModal.suggestion = null;
+        $scope.aiImportModal.form = {};
+        $scope.aiImportModal.submitting = false;
+    };
+
+    $scope.submitAiImport = function() {
+        if ($scope.aiImportModal.submitting) return;
+        var form = angular.copy($scope.aiImportModal.form || {});
+        if (!form.title || !form.title.trim()) {
+            $scope.addToast('danger', 'Tiêu đề sách không được để trống.');
+            return;
+        }
+
+        form.categoryId = form.categoryId ? Number(form.categoryId) : null;
+        form.pageCount = form.pageCount ? Number(form.pageCount) : null;
+        form.publishYear = form.publishYear ? Number(form.publishYear) : null;
+        form.suggestedPrice = form.suggestedPrice ? Number(form.suggestedPrice) : null;
+        form.stock = form.stock ? Number(form.stock) : 0;
+
+        $scope.aiImportModal.submitting = true;
+        BookstoreService.adminAiImportBook(form)
+            .then(function(res) {
+                var book = res && res.data && res.data.data && res.data.data.book;
+                if (book) {
+                    $scope.addToast('success', 'Đã tạo sách ' + (book.title || '') + ' (ISBN: ' + (book.isbn || '') + ').');
+                    if ($scope.aiImportModal.suggestion) {
+                        $scope.aiImportModal.suggestion._importedIsbn = book.isbn;
+                    }
+                } else {
+                    $scope.addToast('success', 'Đã tạo sách mới.');
+                }
+                $scope.closeAiImportModal();
+            })
+            .catch(function(err) {
+                console.error('adminAiImportBook error', err);
+                var message = (err && err.data && err.data.message) || 'Không thể tạo sách.';
+                $scope.addToast('danger', message);
+            })
+            .finally(function() {
+                $scope.aiImportModal.submitting = false;
+            });
+    };
 
     $scope.toggleAiChat = function($event) {
         if ($event) { $event.stopPropagation(); }
