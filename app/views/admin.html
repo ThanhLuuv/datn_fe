@@ -723,47 +723,47 @@
   </div>
         </div>
 
-        <!-- Floating AI chat widget -->
-        <div class="ai-chat-fab" ng-click="toggleAiChat($event)" title="Trợ lý AI">
-            <i class="bi" ng-class="aiChatOpen ? 'bi-x-lg' : 'bi-robot'"></i>
-        </div>
-
-        <div class="ai-chat-panel" ng-class="{'open': aiChatOpen}">
-            <div class="ai-chat-header">
-                <div>
-                    <div class="fw-semibold">Trợ lý AI Admin</div>
-                    <div class="small text-muted">Hỏi về doanh thu, tồn kho, đơn hàng...</div>
-                </div>
-                <button type="button" class="btn-close btn-close-white" ng-click="toggleAiChat($event)"></button>
-            </div>
-            <div class="ai-chat-body">
-                <div class="ai-chat-message system">
-                    <div class="ai-chat-bubble">
-                        Xin chào! Tôi có thể giúp bạn với số liệu doanh thu, tồn kho, đơn hàng và báo cáo gần đây.
-                    </div>
-                </div>
-                <div class="ai-chat-message" ng-repeat="m in aiChatMessages track by $index" ng-class="{'user': m.role === 'user', 'assistant': m.role !== 'user'}">
-                    <div class="ai-chat-bubble" ng-bind="m.text"></div>
-                </div>
-                <div class="ai-chat-typing" ng-if="aiChatLoadingLive">
-                    <span class="dot"></span>
-                    <span class="dot"></span>
-                    <span class="dot"></span>
-                </div>
-            </div>
-            <div class="ai-chat-meta" ng-if="aiChatMetadata.sources.length">
-                <small class="text-muted">Nguồn dữ liệu: {{aiChatMetadata.sources.join(', ')}}</small>
-            </div>
-            <div class="ai-chat-footer">
-                <textarea class="form-control" rows="1" placeholder="Nhập câu hỏi..." ng-model="aiChatInput" ng-keydown="handleAiChatKey($event)"></textarea>
-                <button class="btn btn-primary ms-2" type="button" ng-click="sendAiChat()" ng-disabled="aiChatLoadingLive || !(aiChatInput && aiChatInput.trim())">
-                    <span ng-if="!aiChatLoadingLive"><i class="bi bi-send-fill"></i></span>
-                    <span ng-if="aiChatLoadingLive" class="spinner-border spinner-border-sm"></span>
-                </button>
-            </div>
-        </div>
-
         </main>
+    </div>
+</div>
+
+<!-- Floating AI chat widget (placed outside layout to avoid clipping) -->
+<div class="ai-chat-fab" ng-click="toggleAiChat($event)" title="Trợ lý AI">
+    <i class="bi" ng-class="aiChatOpen ? 'bi-x-lg' : 'bi-robot'"></i>
+</div>
+
+<div class="ai-chat-panel" ng-class="{'open': aiChatOpen}">
+    <div class="ai-chat-header">
+        <div>
+            <div class="fw-semibold">Trợ lý AI Admin</div>
+            <div class="small text-muted">Hỏi về doanh thu, tồn kho, đơn hàng...</div>
+        </div>
+        <button type="button" class="btn-close btn-close-white" ng-click="toggleAiChat($event)"></button>
+    </div>
+    <div class="ai-chat-body">
+        <div class="ai-chat-message system">
+            <div class="ai-chat-bubble">
+                Xin chào! Tôi có thể giúp bạn với số liệu doanh thu, tồn kho, đơn hàng và báo cáo gần đây.
+            </div>
+        </div>
+        <div class="ai-chat-message" ng-repeat="m in aiChatMessages track by $index" ng-class="{'user': m.role === 'user', 'assistant': m.role !== 'user'}">
+            <div class="ai-chat-bubble" ng-bind="m.text"></div>
+        </div>
+        <div class="ai-chat-typing" ng-if="aiChatLoadingLive">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+        </div>
+    </div>
+    <div class="ai-chat-meta" ng-if="aiChatMetadata.sources.length">
+        <small class="text-muted">Nguồn dữ liệu: {{aiChatMetadata.sources.join(', ')}}</small>
+    </div>
+    <div class="ai-chat-footer">
+        <textarea class="form-control" rows="1" placeholder="Nhập câu hỏi..." ng-model="aiChatInput" ng-keydown="handleAiChatKey($event)"></textarea>
+        <button class="btn btn-primary ms-2" type="button" ng-click="sendAiChat()" ng-disabled="aiChatLoadingLive || !(aiChatInput && aiChatInput.trim())">
+            <span ng-if="!aiChatLoadingLive"><i class="bi bi-send-fill"></i></span>
+            <span ng-if="aiChatLoadingLive" class="spinner-border spinner-border-sm"></span>
+        </button>
     </div>
 </div>
 
