@@ -97,10 +97,10 @@
                     <div ng-if="getFinalPrice(book) < (book.currentPrice || 0)" class="price-with-discount">
                         <div class="price-row mb-2">
                             <span class="price-old text-muted text-decoration-line-through me-3">
-                                {{ (book.currentPrice || 0) | currency:'':0 }} VNĐ
+                                {{ (book.currentPrice || 0) | number:0 }} VNĐ
                             </span>
                             <span class="price-new text-danger fs-3 fw-bold">
-                                {{ getFinalPrice(book) | currency:'':0 }} VNĐ
+                                {{ getFinalPrice(book) | number:0 }} VNĐ
                             </span>
                         </div>
                         <div class="discount-info">
@@ -111,7 +111,7 @@
                     </div>
                     <div ng-if="getFinalPrice(book) >= (book.currentPrice || 0)" class="price-normal">
                         <span class="price-current text-primary fs-3 fw-bold">
-                            {{ (book.currentPrice || 0) | currency:'':0 }} VNĐ
+                            {{ (book.currentPrice || 0) | number:0 }} VNĐ
                         </span>
                     </div>
                 </div>
@@ -139,7 +139,7 @@
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h4 class="mb-0"><i class="bi bi-chat-left-quote me-2"></i>Đánh giá</h4>
                         <div class="text-end" ng-if="ratingsStats">
-                            <div class="fs-5 fw-semibold">{{ratingsStats.avgStars | number:1}}/5 ⭐</div>
+                            <div class="fs-5 fw-semibold">{{formatAvgStars(ratingsStats.avgStars)}}/5 ⭐</div>
                             <small class="text-muted">{{ratingsStats.total}} lượt đánh giá</small>
                         </div>
                     </div>

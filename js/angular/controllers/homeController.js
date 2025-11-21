@@ -94,6 +94,13 @@ app.controller('HomeController', ['$scope', '$http', '$location', 'DataService',
 
     $scope.addToCart = function(book) {
         if (!book) return;
+        if (!AuthService.isAuthenticated()) {
+            $location.path('/login');
+            if (window.showNotification) {
+                window.showNotification('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng', 'warning');
+            }
+            return;
+        }
         var finalPrice = $scope.getFinalPrice(book);
         CartService.addItem({
             isbn: book.isbn,

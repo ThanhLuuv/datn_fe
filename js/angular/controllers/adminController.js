@@ -1,5 +1,5 @@
 // Admin Controller
-app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$location', '$rootScope', 'BookstoreService', function($scope, AuthService, APP_CONFIG, $location, $rootScope, BookstoreService) {
+app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$location', '$rootScope', '$sce', 'BookstoreService', function($scope, AuthService, APP_CONFIG, $location, $rootScope, $sce, BookstoreService) {
     // Check if user has admin or teacher access
     if (!AuthService.isAdminOrTeacher()) {
         console.log('Access denied: User does not have admin or teacher role');
@@ -95,6 +95,63 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
     $scope.showingDashboardProfit = false;
 
     // AI assistant state
+    var AI_ASSISTANT_CACHE_KEY = 'admin_ai_assistant_cache_v1';
+
+    function toIso(value) {
+        if (!value) return null;
+        if (typeof value === 'string') {
+            var trimmed = value.trim();
+            if (!trimmed) return null;
+            var parsed = new Date(trimmed);
+            return isNaN(parsed.getTime()) ? null : parsed.toISOString();
+        }
+        try {
+            return value.toISOString();
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function loadAiAssistantCache() {
+        try {
+            var raw = window.localStorage.getItem(AI_ASSISTANT_CACHE_KEY);
+            return raw ? JSON.parse(raw) : null;
+        } catch (err) {
+            console.warn('Failed to load AI assistant cache', err);
+            return null;
+        }
+    }
+
+    function saveAiAssistantCache(fromIso, toIsoStr, payload) {
+        try {
+            window.localStorage.setItem(AI_ASSISTANT_CACHE_KEY, JSON.stringify({
+                fromDate: fromIso,
+                toDate: toIsoStr,
+                savedAt: new Date().toISOString(),
+                data: payload
+            }));
+        } catch (err) {
+            console.warn('Failed to save AI assistant cache', err);
+        }
+    }
+
+    function applyAiAssistantPayload(data) {
+        if (!data) return;
+        $scope.aiAssistant = {
+            overview: data.overview || '',
+            recommendedCategories: Array.isArray(data.recommendedCategories) ? data.recommendedCategories : [],
+            bookSuggestions: Array.isArray(data.bookSuggestions) ? data.bookSuggestions : [],
+            customerFeedbackSummary: data.customerFeedbackSummary || ''
+        };
+    }
+
+    function isSameAiPayload(a, b) {
+        if (!a || !b) return false;
+        return a.fromDate === b.fromDate &&
+            a.toDate === b.toDate &&
+            (a.language || 'vi') === (b.language || 'vi');
+    }
+
     $scope.aiAssistantLoading = false;
     $scope.aiAssistantError = null;
     $scope.aiAssistant = {
@@ -105,6 +162,7 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
     };
 
     // Live AI chat widget state
+    $scope.aiChatEnabled = false;
     $scope.aiChatOpen = false;
     $scope.aiChatInput = '';
     $scope.aiChatLoadingLive = false;
@@ -123,13 +181,6 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
     var voiceStream = null;
     var recordedChunks = [];
     var voicePlayer = null;
-
-    $scope.aiImportModal = {
-        visible: false,
-        form: {},
-        submitting: false,
-        suggestion: null
-    };
 
     function scrollAiChatToBottom() {
         setTimeout(function() {
@@ -186,246 +237,180 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
         }
     }
 
-    function updateVoiceDraft(role, text, isFinal) {
-        if (!text) {
-            return;
-        }
-        $scope.$applyAsync(function() {
-            var normalizedRole = role === 'assistant' ? 'assistant' : 'user';
-            if (!isFinal) {
-                voiceDrafts[normalizedRole] = text;
-                var draftIndex = $scope.aiChatMessages.findIndex(function(m) { return m._voiceDraft && m._voiceRole === normalizedRole; });
-                if (draftIndex >= 0) {
-                    $scope.aiChatMessages[draftIndex].text = text;
-                } else {
-                    $scope.aiChatMessages.push({
-                        role: normalizedRole,
-                        text: text,
-                        _voiceDraft: true,
-                        _voiceRole: normalizedRole
-                    });
-                }
-            } else {
-                var idx = $scope.aiChatMessages.findIndex(function(m) { return m._voiceDraft && m._voiceRole === normalizedRole; });
-                if (idx >= 0) {
-                    $scope.aiChatMessages[idx].text = text;
-                    delete $scope.aiChatMessages[idx]._voiceDraft;
-                    delete $scope.aiChatMessages[idx]._voiceRole;
-                } else {
-                    $scope.aiChatMessages.push({
-                        role: normalizedRole,
-                        text: text
-                    });
-                }
-                voiceDrafts[normalizedRole] = null;
+    function getSupportedAudioMime() {
+        if (!window.MediaRecorder || !MediaRecorder.isTypeSupported) return '';
+        var list = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4'];
+        for (var i = 0; i < list.length; i++) {
+            if (MediaRecorder.isTypeSupported(list[i])) {
+                return list[i];
             }
+        }
+        return '';
+    }
+
+    function blobToBase64(blob) {
+        return new Promise(function(resolve, reject) {
+            var reader = new FileReader();
+            reader.onloadend = function() {
+                var result = reader.result;
+                if (typeof result === 'string') {
+                    var parts = result.split(',');
+                    resolve(parts.length > 1 ? parts[1] : parts[0]);
+                } else {
+                    reject(new Error('Invalid audio data'));
+                }
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    }
+
+    function sendVoiceRequest(base64Audio, mimeType) {
+        setAiVoiceStatus('processing');
+        var from = $scope.profitFilter.fromDate || $scope.revenueFilter.fromDate;
+        var to = $scope.profitFilter.toDate || $scope.revenueFilter.toDate || new Date();
+
+        BookstoreService.adminAiVoice({
+            audioBase64: base64Audio,
+            mimeType: mimeType,
+            fromDate: toIsoDateTime(from),
+            toDate: toIsoDateTime(to),
+            includeInventorySnapshot: true,
+            includeCategoryShare: true
+        })
+        .then(function(res) {
+            var data = res && res.data && res.data.data;
+            if (!data) {
+                $scope.addToast('danger', 'AI không trả về dữ liệu.');
+                return;
+            }
+
+            if (data.dataSources) {
+                $scope.aiChatMetadata.sources = data.dataSources;
+                $scope.aiChatMetadata.lastUpdated = new Date();
+            }
+
+            if (data.transcript) {
+                $scope.aiChatMessages.push({ role: 'user', text: data.transcript });
+            }
+
+            if (data.answerText) {
+                $scope.aiChatMessages.push({ role: 'assistant', text: data.answerText });
+            }
+
+            if (data.audioBase64) {
+                stopVoicePlayback();
+                var audioSrc = 'data:' + (data.audioMimeType || 'audio/wav') + ';base64,' + data.audioBase64;
+                voicePlayer = new Audio(audioSrc);
+                voicePlayer.play().catch(function(err) {
+                    console.warn('Voice playback error', err);
+                });
+            }
+
             scrollAiChatToBottom();
-        });
-    }
-
-    function getVoiceSystemPrompt() {
-        return [
-            'Bạn là trợ lý AI realtime cho quản trị viên BookStore.',
-            'Trả lời bằng tiếng Việt tự nhiên, giọng thân thiện, súc tích.',
-            'Nếu người dùng hỏi về số liệu, hãy nhắc họ có thể mở báo cáo để xem chi tiết.',
-            'Luôn xác nhận hành động quan trọng và gợi ý bước tiếp theo.'
-        ].join('\n');
-    }
-
-    async function startVoiceSession() {
-        if (!$scope.aiVoice.supported) {
-            $scope.addToast('danger', 'Trình duyệt không hỗ trợ voice chat.');
-            return;
-        }
-        var apiKey = (GOOGLE_AI_CONFIG && GOOGLE_AI_CONFIG.API_KEY) || APP_CONFIG.GOOGLE_AI_API_KEY;
-        if (!apiKey) {
-            $scope.addToast('danger', 'Chưa cấu hình GOOGLE_AI.API_KEY trong env/*.js để dùng voice.');
-            return;
-        }
-        if (aiVoiceSession.sessionPromise) {
-            return;
-        }
-        setAiVoiceStatus('connecting');
-        try {
-            var module = await ensureGoogleGenAiModule();
-            var GoogleGenAI = module.GoogleGenAI;
-            var Modality = module.Modality;
-            aiVoiceSession.SpeakerEnum = module.Speaker;
-            var ai = new GoogleGenAI({ apiKey: apiKey });
-            var modelName = (GOOGLE_AI_CONFIG && GOOGLE_AI_CONFIG.MODEL) || 'gemini-2.5-flash-native-audio-preview-09-2025';
-            var voiceName = (GOOGLE_AI_CONFIG && GOOGLE_AI_CONFIG.VOICE_NAME) || 'Zephyr';
-
-            aiVoiceSession.sessionPromise = ai.live.connect({
-                model: modelName,
-                config: {
-                    responseModalities: [Modality.AUDIO],
-                    speechConfig: {
-                        voiceConfig: { prebuiltVoiceConfig: { voiceName: voiceName } }
-                    },
-                    inputAudioTranscription: {},
-                    outputAudioTranscription: {},
-                    systemInstruction: getVoiceSystemPrompt()
-                },
-                callbacks: {
-                    onopen: async function() {
-                        try {
-                            var AudioContextImpl = window.AudioContext || window.webkitAudioContext;
-                            aiVoiceSession.inputAudioContext = new AudioContextImpl({ sampleRate: 16000 });
-                            aiVoiceSession.outputAudioContext = new AudioContextImpl({ sampleRate: 24000 });
-
-                            aiVoiceSession.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                            var source = aiVoiceSession.inputAudioContext.createMediaStreamSource(aiVoiceSession.stream);
-                            aiVoiceSession.scriptProcessor = aiVoiceSession.inputAudioContext.createScriptProcessor(4096, 1, 1);
-
-                            aiVoiceSession.scriptProcessor.onaudioprocess = function(event) {
-                                var inputData = event.inputBuffer.getChannelData(0);
-                                var int16 = new Int16Array(inputData.length);
-                                for (var i = 0; i < inputData.length; i++) {
-                                    var s = Math.max(-1, Math.min(1, inputData[i]));
-                                    int16[i] = s * 32767;
-                                }
-                                var pcmBlob = {
-                                    data: encodePcm(int16),
-                                    mimeType: 'audio/pcm;rate=16000'
-                                };
-                                aiVoiceSession.sessionPromise && aiVoiceSession.sessionPromise.then(function(session) {
-                                    if (session && typeof session.sendRealtimeInput === 'function') {
-                                        session.sendRealtimeInput({ media: pcmBlob });
-                                    }
-                                });
-                            };
-
-                            source.connect(aiVoiceSession.scriptProcessor);
-                            aiVoiceSession.scriptProcessor.connect(aiVoiceSession.inputAudioContext.destination);
-                            setAiVoiceStatus('listening');
-                            $scope.$applyAsync();
-                        } catch (micErr) {
-                            console.error('Voice mic error', micErr);
-                            cleanupVoiceSession('error');
-                            $scope.addToast('danger', 'Không truy cập được micro: ' + (micErr && micErr.message ? micErr.message : 'Unknown error'));
-                        }
-                    },
-                    onmessage: async function(message) {
-                        var speakerEnum = aiVoiceSession.SpeakerEnum || {};
-                        try {
-                            var inputTrans = message.serverContent && message.serverContent.inputTranscription;
-                            if (inputTrans && inputTrans.text) {
-                                updateVoiceDraft('user', inputTrans.text, inputTrans.isFinal);
-                            }
-                            var outputTrans = message.serverContent && message.serverContent.outputTranscription;
-                            if (outputTrans && outputTrans.text) {
-                                updateVoiceDraft('assistant', outputTrans.text, outputTrans.isFinal);
-                                if (outputTrans.isFinal) {
-                                    setAiVoiceStatus('speaking');
-                                }
-                            }
-                            if (message.serverContent && message.serverContent.turnComplete) {
-                                voiceDrafts.user = null;
-                                voiceDrafts.assistant = null;
-                                setAiVoiceStatus('listening');
-                            }
-                            var audioData = message.serverContent &&
-                                message.serverContent.modelTurn &&
-                                message.serverContent.modelTurn.parts &&
-                                message.serverContent.modelTurn.parts[0] &&
-                                message.serverContent.modelTurn.parts[0].inlineData &&
-                                message.serverContent.modelTurn.parts[0].inlineData.data;
-                            if (audioData && aiVoiceSession.outputAudioContext) {
-                                aiVoiceSession.nextStartTime = Math.max(aiVoiceSession.nextStartTime, aiVoiceSession.outputAudioContext.currentTime);
-                                var audioBuffer = await decodeOutputAudio(decodeBase64(audioData), aiVoiceSession.outputAudioContext, 24000, 1);
-                                var playbackSource = aiVoiceSession.outputAudioContext.createBufferSource();
-                                playbackSource.buffer = audioBuffer;
-                                playbackSource.connect(aiVoiceSession.outputAudioContext.destination);
-                                playbackSource.addEventListener('ended', function() {
-                                    aiVoiceSession.sources.delete(playbackSource);
-                                    if (aiVoiceSession.sources.size === 0 && $scope.aiVoice.status === 'speaking') {
-                                        setAiVoiceStatus('listening');
-                                        $scope.$applyAsync();
-                                    }
-                                });
-                                playbackSource.start(aiVoiceSession.nextStartTime);
-                                aiVoiceSession.nextStartTime += audioBuffer.duration;
-                                aiVoiceSession.sources.add(playbackSource);
-                                setAiVoiceStatus('speaking');
-                                $scope.$applyAsync();
-                            }
-                            if (message.serverContent && message.serverContent.interrupted) {
-                                aiVoiceSession.sources.forEach(function(source) {
-                                    try { source.stop(); } catch (e) {}
-                                });
-                                aiVoiceSession.sources.clear();
-                                aiVoiceSession.nextStartTime = 0;
-                            }
-                        } catch (msgErr) {
-                            console.error('Voice onmessage error', msgErr);
-                        }
-                    },
-                    onerror: function(err) {
-                        console.error('Voice session error', err);
-                        cleanupVoiceSession('error');
-                        $scope.$applyAsync(function() {
-                            $scope.addToast('danger', 'Voice AI lỗi: ' + (err && err.message ? err.message : 'Unknown error'));
-                        });
-                    },
-                    onclose: function() {
-                        cleanupVoiceSession('idle');
-                        $scope.$applyAsync();
-                    }
-                }
-            });
-            aiVoiceSession.sessionPromise.then(function(session) {
-                aiVoiceSession.session = session;
-                return session;
-            });
-        } catch (err) {
-            console.error('Voice session init error', err);
-            cleanupVoiceSession('error');
-            $scope.addToast('danger', 'Không thể khởi tạo phiên voice: ' + (err && err.message ? err.message : 'Unknown error'));
-        }
-    }
-
-    function stopVoiceSession() {
-        if (!aiVoiceSession.sessionPromise) {
             setAiVoiceStatus('idle');
+        })
+        .catch(function(err) {
+            console.error('Voice AI error', err);
+            var message = (err && err.data && err.data.message) || 'Không thể gọi trợ lý AI.';
+            $scope.addToast('danger', message);
+            setAiVoiceStatus('error', message);
+        })
+        .finally(function() {
+            recordedChunks = [];
+        });
+    }
+
+    function startVoiceRecording() {
+        if (!$scope.aiVoice.supported) {
+            $scope.addToast('danger', 'Trình duyệt không hỗ trợ voice.');
             return;
         }
-        aiVoiceSession.sessionPromise.then(function(session) {
+
+        navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
+            voiceStream = stream;
+            recordedChunks = [];
+            var mimeType = getSupportedAudioMime();
             try {
-                if (session && typeof session.close === 'function') {
-                    session.close();
-                } else if (session && typeof session.end === 'function') {
-                    session.end();
-                }
+                mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType: mimeType }) : new MediaRecorder(stream);
             } catch (err) {
-                console.warn('Voice session close err', err);
+                console.error('MediaRecorder init error', err);
+                setAiVoiceStatus('error', 'Không thể khởi tạo ghi âm.');
+                cleanupRecording();
+                return;
             }
-        }).finally(function() {
-            cleanupVoiceSession('idle');
-            $scope.$applyAsync();
+
+            mediaRecorder.ondataavailable = function(event) {
+                if (event.data && event.data.size > 0) {
+                    recordedChunks.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = function() {
+                if (!recordedChunks.length) {
+                    setAiVoiceStatus('idle');
+                    cleanupRecording();
+                    return;
+                }
+                var blob = new Blob(recordedChunks, { type: mimeType || 'audio/webm' });
+                blobToBase64(blob)
+                    .then(function(base64) {
+                        sendVoiceRequest(base64, blob.type || 'audio/webm');
+                    })
+                    .catch(function(error) {
+                        console.error('blobToBase64 error', error);
+                        setAiVoiceStatus('error', 'Không thể đọc dữ liệu audio.');
+                    })
+                    .finally(function() {
+                        cleanupRecording();
+                    });
+            };
+
+            mediaRecorder.start();
+            setAiVoiceStatus('recording');
+        }).catch(function(err) {
+            console.error('getUserMedia error', err);
+            setAiVoiceStatus('error', err && err.message ? err.message : 'Không truy cập được micro.');
         });
+    }
+
+    function stopVoiceRecording() {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+        } else {
+            setAiVoiceStatus('idle');
+        }
+        if (voiceStream) {
+            voiceStream.getTracks().forEach(function(track) { track.stop(); });
+        }
     }
 
     $scope.toggleVoiceSession = function() {
-        if ($scope.aiVoice.status === 'connecting' || $scope.aiVoice.status === 'listening' || $scope.aiVoice.status === 'speaking') {
-            stopVoiceSession();
+        if (!$scope.aiVoice.supported) {
+            $scope.addToast('danger', 'Thiết bị không hỗ trợ voice.');
+            return;
+        }
+        if ($scope.aiVoice.status === 'recording') {
+            stopVoiceRecording();
+        } else if ($scope.aiVoice.status === 'processing') {
+            $scope.addToast('info', 'Đang gửi câu hỏi, vui lòng đợi...');
         } else {
-            startVoiceSession();
+            startVoiceRecording();
         }
     };
 
     $scope.getVoiceStatusText = function() {
         switch ($scope.aiVoice.status) {
-            case 'connecting': return 'Đang kết nối...';
-            case 'listening': return 'Đang lắng nghe';
-            case 'speaking': return 'Trợ lý đang trả lời';
+            case 'recording': return 'Đang ghi âm...';
+            case 'processing': return 'Đang gửi tới AI...';
             case 'error': return $scope.aiVoice.error || 'Lỗi voice';
             default: return 'Voice AI đang tắt';
         }
     };
 
     $scope.getVoiceIconClass = function() {
-        if ($scope.aiVoice.status === 'speaking') return 'bi-volume-up';
-        if ($scope.aiVoice.status === 'listening' || $scope.aiVoice.status === 'connecting') return 'bi-mic-fill';
+        if ($scope.aiVoice.status === 'recording') return 'bi-stop-fill';
+        if ($scope.aiVoice.status === 'processing') return 'bi-hourglass-split';
         if ($scope.aiVoice.status === 'error') return 'bi-exclamation-triangle';
         return 'bi-mic';
     };
@@ -438,10 +423,106 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
         return isNaN(num) ? null : num;
     }
 
+    function escapeHtml(text) {
+        return String(text || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    function markdownToTrustedHtml(markdown) {
+        if (!markdown) return null;
+        var text = escapeHtml(markdown);
+        text = text.replace(/```([\s\S]*?)```/g, '<pre>$1</pre>');
+        text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+        text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        text = text.replace(/\n/g, '<br>');
+        return $sce.trustAsHtml(text);
+    }
+
+    function stripMarkdownFormatting(markdown) {
+        if (!markdown) return '';
+        var text = String(markdown);
+        text = text.replace(/```([\s\S]*?)```/g, '\n$1\n');
+        text = text.replace(/`([^`]+)`/g, '$1');
+        text = text.replace(/\*\*(.+?)\*\*/g, '$1');
+        text = text.replace(/!\[.*?\]\(.*?\)/g, '');
+        text = text.replace(/\[(.*?)\]\(.*?\)/g, '$1');
+        return text.replace(/\s+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+    }
+
+    function buildMarkdownFromStructuredJson(raw) {
+        if (!raw) return '';
+        var trimmed = String(raw).trim();
+        if (!trimmed || trimmed[0] !== '{') return '';
+        try {
+            var obj = JSON.parse(trimmed);
+            var parts = [];
+            if (obj.answer) {
+                parts.push(obj.answer);
+            }
+            if (obj.overview && (!obj.answer || obj.overview !== obj.answer)) {
+                parts.push(obj.overview);
+            }
+            if (Array.isArray(obj.metrics) && obj.metrics.length) {
+                parts.push(obj.metrics.join('\n'));
+            }
+            if (Array.isArray(obj.insights) && obj.insights.length) {
+                parts.push(obj.insights.join('\n'));
+            }
+            if (parts.length) {
+                return parts.join('\n\n').trim();
+            }
+            return '';
+        } catch (err) {
+            return '';
+        }
+    }
+
+    function formatAssistantAnswerPayload(data) {
+        if (!data) return null;
+        var markdown = data.markdownAnswer ? String(data.markdownAnswer).trim() : '';
+        var plain = data.plainTextAnswer ? String(data.plainTextAnswer).trim() : '';
+
+        if (!markdown) {
+            var converted = buildMarkdownFromStructuredJson(plain);
+            if (converted) {
+                markdown = converted;
+            }
+        }
+
+        if (!markdown && !plain && Array.isArray(data.messages)) {
+            for (var i = data.messages.length - 1; i >= 0; i--) {
+                var msg = data.messages[i];
+                if (!msg) continue;
+                var role = (msg.role || msg.Role || '').toLowerCase();
+                if (role && role !== 'assistant' && role !== 'system') continue;
+                var content = (msg.content || msg.Content || msg.text || '').trim();
+                if (!content) continue;
+                var structured = buildMarkdownFromStructuredJson(content);
+                markdown = structured || content;
+                break;
+            }
+        }
+
+        var base = markdown || plain;
+        if (!base) return null;
+        return {
+            text: stripMarkdownFormatting(base),
+            html: markdownToTrustedHtml(base)
+        };
+    }
+
+    $scope.renderAiSummaryHtml = function(text) {
+        if (!text) return '';
+        return markdownToTrustedHtml(text);
+    };
+
     function buildImportFormFromSuggestion(suggestion) {
         var now = new Date();
         suggestion = suggestion || {};
         var categoryId = suggestion.suggestedCategoryId ? Number(suggestion.suggestedCategoryId) : '';
+        var price = suggestion.suggestedPrice || parsePriceToNumber(suggestion.marketPrice) || null;
         return {
             title: suggestion.title || '',
             isbn: suggestion.suggestedIsbn || '',
@@ -451,58 +532,51 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
             authorName: suggestion.authorName || '',
             pageCount: suggestion.pageCount || 220,
             publishYear: suggestion.publishYear || now.getFullYear(),
-            suggestedPrice: suggestion.suggestedPrice || parsePriceToNumber(suggestion.marketPrice) || null,
+            suggestedPrice: price,
             stock: suggestion.suggestedStock || 0,
-            coverImageUrl: suggestion.coverImageUrl || '',
             description: suggestion.description || suggestion.reason || ''
         };
     }
 
-    $scope.openAiImportModal = function(suggestion) {
-        if (suggestion && suggestion.isbn) {
-            $scope.addToast('warning', 'Sách này đã có trong hệ thống, không thể tạo mới.');
-            return;
-        }
-        $scope.aiImportModal.suggestion = suggestion;
-        $scope.aiImportModal.form = buildImportFormFromSuggestion(suggestion);
-        $scope.aiImportModal.visible = true;
-        $scope.aiImportModal.submitting = false;
+    $scope.isExistingAiSuggestion = function(suggestion) {
+        return !!(suggestion && suggestion.isbn);
     };
 
-    $scope.closeAiImportModal = function() {
-        $scope.aiImportModal.visible = false;
-        $scope.aiImportModal.suggestion = null;
-        $scope.aiImportModal.form = {};
-        $scope.aiImportModal.submitting = false;
+    $scope.isNewAiSuggestion = function(suggestion) {
+        return !!(suggestion && !suggestion.isbn);
     };
 
-    $scope.submitAiImport = function() {
-        if ($scope.aiImportModal.submitting) return;
-        var form = angular.copy($scope.aiImportModal.form || {});
-        if (!form.title || !form.title.trim()) {
-            $scope.addToast('danger', 'Tiêu đề sách không được để trống.');
+    $scope.hasExistingAiSuggestions = function() {
+        return ($scope.aiAssistant.bookSuggestions || []).some($scope.isExistingAiSuggestion);
+    };
+
+    $scope.hasNewAiSuggestions = function() {
+        return ($scope.aiAssistant.bookSuggestions || []).some($scope.isNewAiSuggestion);
+    };
+
+    $scope.importSuggestionQuick = function(suggestion) {
+        if (!suggestion || suggestion.isbn || suggestion._importedIsbn) {
+            $scope.addToast('warning', 'Sách này đã có trong hệ thống.');
             return;
         }
-
+        var form = buildImportFormFromSuggestion(suggestion);
         form.categoryId = form.categoryId ? Number(form.categoryId) : null;
         form.pageCount = form.pageCount ? Number(form.pageCount) : null;
         form.publishYear = form.publishYear ? Number(form.publishYear) : null;
         form.suggestedPrice = form.suggestedPrice ? Number(form.suggestedPrice) : null;
         form.stock = form.stock ? Number(form.stock) : 0;
+        suggestion._importing = true;
 
-        $scope.aiImportModal.submitting = true;
         BookstoreService.adminAiImportBook(form)
             .then(function(res) {
                 var book = res && res.data && res.data.data && res.data.data.book;
-                if (book) {
-                    $scope.addToast('success', 'Đã tạo sách ' + (book.title || '') + ' (ISBN: ' + (book.isbn || '') + ').');
-                    if ($scope.aiImportModal.suggestion) {
-                        $scope.aiImportModal.suggestion._importedIsbn = book.isbn;
-                    }
+                if (book && book.isbn) {
+                    suggestion._importedIsbn = book.isbn;
                 } else {
-                    $scope.addToast('success', 'Đã tạo sách mới.');
+                    suggestion._importedIsbn = 'created';
                 }
-                $scope.closeAiImportModal();
+                var createdTitle = (book && book.title) ? book.title : suggestion.title;
+                $scope.addToast('success', 'Đã tạo sách "' + createdTitle + '".');
             })
             .catch(function(err) {
                 console.error('adminAiImportBook error', err);
@@ -510,7 +584,7 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
                 $scope.addToast('danger', message);
             })
             .finally(function() {
-                $scope.aiImportModal.submitting = false;
+                suggestion._importing = false;
             });
     };
 
@@ -555,23 +629,19 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
         BookstoreService.adminAiChat(payload)
             .then(function(res) {
                 var data = res && res.data && res.data.data;
-                if (data && Array.isArray(data.messages)) {
-                    $scope.aiChatMessages = data.messages.map(function(m) {
-                        return {
-                            role: (m.role || 'assistant').toLowerCase(),
-                            text: m.content || ''
-                        };
-                    });
-                } else if (data && data.plainTextAnswer) {
-                    $scope.aiChatMessages.push({
-                        role: 'assistant',
-                        text: data.plainTextAnswer
-                    });
-                }
 
                 if (data && Array.isArray(data.dataSources)) {
                     $scope.aiChatMetadata.sources = data.dataSources;
                     $scope.aiChatMetadata.lastUpdated = new Date();
+                }
+
+                var assistantAnswer = formatAssistantAnswerPayload(data);
+                if (assistantAnswer) {
+                    $scope.aiChatMessages.push({
+                        role: 'assistant',
+                        text: assistantAnswer.text,
+                        html: assistantAnswer.html
+                    });
                 }
 
                 scrollAiChatToBottom();
@@ -908,7 +978,7 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
     };
 
     // ===== AI Assistant (Admin) =====
-    $scope.runAdminAiAssistant = function() {
+    $scope.runAdminAiAssistant = function(isAuto /*, forceRefresh */) {
       // Dùng khoảng ngày của báo cáo lợi nhuận nếu có, nếu không fallback về tháng hiện tại
       var from = $scope.profitFilter.fromDate || $scope.revenueFilter.fromDate;
       var to = $scope.profitFilter.toDate || $scope.revenueFilter.toDate;
@@ -918,47 +988,44 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
         return;
       }
 
-      $scope.aiAssistantLoading = true;
-      $scope.aiAssistantError = null;
+      var fromIso = toIso(from);
+      var toIsoStr = toIso(to);
 
-      function toIso(d) {
-        if (!d) return null;
-        if (typeof d === 'string') return d;
-        try {
-          return d.toISOString();
-        } catch (e) {
-          return null;
-        }
+      if (!fromIso || !toIsoStr) {
+        $scope.addToast('danger', 'Khoảng ngày không hợp lệ. Vui lòng chọn lại.');
+        return;
       }
 
       var payload = {
-        fromDate: toIso(from),
-        toDate: toIso(to),
+        fromDate: fromIso,
+        toDate: toIsoStr,
         language: 'vi'
       };
 
+      $scope.aiAssistantLoading = true;
+      $scope.aiAssistantError = null;
+
       BookstoreService.adminAiAssistant(payload)
         .then(function(res){
-          var data = res && res.data && res.data.data ? res.data.data : null;
+          var data = res && res.data && res.data.data;
           if (!data) {
-            $scope.aiAssistantError = 'Trợ lý AI không trả về dữ liệu.';
-            $scope.addToast('danger', $scope.aiAssistantError);
-            return;
+            var error = new Error('Trợ lý AI không trả về dữ liệu.');
+            error._aiMessage = 'Trợ lý AI không trả về dữ liệu.';
+            throw error;
           }
-
-          $scope.aiAssistant = {
-            overview: data.overview || '',
-            recommendedCategories: Array.isArray(data.recommendedCategories) ? data.recommendedCategories : [],
-            bookSuggestions: Array.isArray(data.bookSuggestions) ? data.bookSuggestions : [],
-            customerFeedbackSummary: data.customerFeedbackSummary || ''
-          };
-
-          $scope.addToast('success', 'Đã phân tích dữ liệu bằng trợ lý AI.');
+          applyAiAssistantPayload(data);
+          saveAiAssistantCache(payload.fromDate, payload.toDate, data);
+          if (!isAuto) {
+            $scope.addToast('success', 'Đã phân tích dữ liệu bằng trợ lý AI.');
+          }
         })
         .catch(function(err){
           console.error('Admin AI assistant error:', err);
-          $scope.aiAssistantError = (err && err.data && err.data.message) || 'Không thể gọi trợ lý AI. Vui lòng thử lại sau.';
-          $scope.addToast('danger', $scope.aiAssistantError);
+          var message = err && (err._aiMessage || err.data && err.data.message) || 'Không thể gọi trợ lý AI. Vui lòng thử lại sau.';
+          $scope.aiAssistantError = message;
+          if (!isAuto) {
+            $scope.addToast('danger', message);
+          }
         })
         .finally(function(){
           $scope.aiAssistantLoading = false;
@@ -987,9 +1054,23 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
                 $scope.viewInventoryReport(false);
                 $scope.viewProfitReport(false);
                 $scope.loadBooksByCategoryShare();
+                autoLoadAiAssistant();
             }, 0);
         } catch(e) { console.warn('Auto-load dashboard reports failed', e); }
     };
+
+    function autoLoadAiAssistant() {
+        var fromIso = toIso($scope.profitFilter.fromDate || $scope.revenueFilter.fromDate);
+        var toIsoStr = toIso($scope.profitFilter.toDate || $scope.revenueFilter.toDate);
+        if (!fromIso || !toIsoStr) {
+            return;
+        }
+        var cache = loadAiAssistantCache();
+        if (cache && cache.fromDate === fromIso && cache.toDate === toIsoStr && cache.data) {
+            applyAiAssistantPayload(cache.data);
+        }
+        $scope.runAdminAiAssistant(true, true);
+    }
 
     // Load books share by category for pie chart
     $scope.loadBooksByCategoryShare = function() {

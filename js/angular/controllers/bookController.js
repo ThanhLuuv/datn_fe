@@ -312,6 +312,26 @@ app.controller('AdminBooksController', ['$scope', 'BookstoreService', 'AuthServi
 	$scope.pageSize = 10;
 	$scope.totalPages = 0;
 	$scope.currentYear = new Date().getFullYear();
+	$scope.publisherManager = {
+		items: [],
+		loading: false,
+		saving: false,
+		deletingId: null,
+		isEdit: false,
+		searchTerm: '',
+		pageNumber: 1,
+		pageSize: 10,
+		totalPages: 1,
+		totalCount: 0
+	};
+	$scope.publisherFormData = {
+		publisherId: null,
+		name: '',
+		address: '',
+		email: '',
+		phone: '',
+		bookCount: 0
+	};
 
 	// Toasts
 	$scope.toasts = [];
@@ -541,6 +561,167 @@ $scope.removeAuthor = function(index) {
 			})
 			.finally(function(){
 				return;
+			});
+	};
+
+	function normalizePublisherListPayload(response) {
+		if (response && response.data) {
+			if (response.data.success && response.data.data) {
+				return response.data.data;
+			}
+			if (Array.isArray(response.data.data)) {
+				return { publishers: response.data.data };
+			}
+			if (Array.isArray(response.data)) {
+				return { publishers: response.data };
+			}
+		} else if (Array.isArray(response)) {
+			return { publishers: response };
+		}
+		return { publishers: [] };
+	}
+
+	$scope.startCreatePublisher = function(form) {
+		$scope.publisherManager.isEdit = false;
+		$scope.publisherFormData = {
+			publisherId: null,
+			name: '',
+			address: '',
+			email: '',
+			phone: '',
+			bookCount: 0
+		};
+		if (form && form.$setPristine) {
+			form.$setPristine();
+			form.$setUntouched();
+		}
+	};
+
+	$scope.editPublisher = function(publisher, form) {
+		if (!publisher) return;
+		$scope.publisherManager.isEdit = true;
+		$scope.publisherFormData = {
+			publisherId: publisher.publisherId,
+			name: publisher.name,
+			address: publisher.address,
+			email: publisher.email,
+			phone: publisher.phone,
+			bookCount: publisher.bookCount || 0
+		};
+		if (form && form.$setPristine) {
+			form.$setPristine();
+			form.$setUntouched();
+		}
+	};
+
+	$scope.openPublisherManager = function() {
+		$scope.publisherManager.searchTerm = '';
+		$scope.publisherManager.pageNumber = 1;
+		$scope.startCreatePublisher();
+		$scope.loadPublisherManagementData().finally(function(){
+			var modalEl = document.getElementById('publisherModal');
+			if (!modalEl) return;
+			var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+			modal.show();
+		});
+	};
+
+	$scope.loadPublisherManagementData = function() {
+		$scope.publisherManager.loading = true;
+		return BookstoreService.getPublishers({
+			pageNumber: $scope.publisherManager.pageNumber,
+			pageSize: $scope.publisherManager.pageSize,
+			searchTerm: $scope.publisherManager.searchTerm || ''
+		})
+		.then(function(response){
+			var payload = normalizePublisherListPayload(response);
+			var list = payload.publishers || [];
+			$scope.publisherManager.items = list;
+			$scope.publisherManager.totalPages = payload.totalPages || 1;
+			$scope.publisherManager.totalCount = payload.totalCount || list.length;
+		})
+		.catch(function(error){
+			console.error('Error loading publisher manager data:', error);
+			$scope.addToast('danger', 'Không thể tải danh sách nhà xuất bản.');
+		})
+		.finally(function(){
+			$scope.publisherManager.loading = false;
+		});
+	};
+
+	$scope.searchPublisherManager = function() {
+		$scope.publisherManager.pageNumber = 1;
+		$scope.loadPublisherManagementData();
+	};
+
+	$scope.changePublisherManagerPage = function(page) {
+		if (page < 1 || page > ($scope.publisherManager.totalPages || 1)) {
+			return;
+		}
+		$scope.publisherManager.pageNumber = page;
+		$scope.loadPublisherManagementData();
+	};
+
+	$scope.submitPublisherForm = function(form) {
+		if (form && form.$setSubmitted) {
+			form.$setSubmitted();
+		}
+		if (!$scope.publisherFormData.name || !$scope.publisherFormData.address || !$scope.publisherFormData.email || !$scope.publisherFormData.phone) {
+			$scope.addToast('warning', 'Vui lòng nhập đầy đủ thông tin nhà xuất bản.');
+			return;
+		}
+		$scope.publisherManager.saving = true;
+		var payload = {
+			name: $scope.publisherFormData.name,
+			address: $scope.publisherFormData.address,
+			email: $scope.publisherFormData.email,
+			phone: $scope.publisherFormData.phone
+		};
+		var requestPromise;
+		if ($scope.publisherManager.isEdit && $scope.publisherFormData.publisherId != null) {
+			requestPromise = BookstoreService.updatePublisher($scope.publisherFormData.publisherId, payload);
+		} else {
+			requestPromise = BookstoreService.createPublisher(payload);
+		}
+		requestPromise
+			.then(function(){
+				$scope.addToast('success', $scope.publisherManager.isEdit ? 'Cập nhật nhà xuất bản thành công.' : 'Thêm nhà xuất bản thành công.');
+				$scope.startCreatePublisher(form);
+				$scope.loadPublisherManagementData();
+				$scope.loadPublishers();
+			})
+			.catch(function(error){
+				console.error('Save publisher error:', error);
+				var message = (error && error.data && error.data.message) || 'Không thể lưu nhà xuất bản.';
+				if (Array.isArray(error?.data?.errors) && error.data.errors.length > 0) {
+					message = error.data.errors.join(', ');
+				}
+				$scope.addToast('danger', message);
+			})
+			.finally(function(){
+				$scope.publisherManager.saving = false;
+			});
+	};
+
+	$scope.confirmDeletePublisher = function(publisher) {
+		if (!publisher || !publisher.publisherId) return;
+		if (!confirm('Bạn chắc chắn muốn xóa nhà xuất bản "' + (publisher.name || '') + '"?')) {
+			return;
+		}
+		$scope.publisherManager.deletingId = publisher.publisherId;
+		BookstoreService.deletePublisher(publisher.publisherId)
+			.then(function(){
+				$scope.addToast('success', 'Đã xóa nhà xuất bản.');
+				$scope.loadPublisherManagementData();
+				$scope.loadPublishers();
+			})
+			.catch(function(error){
+				console.error('Delete publisher error:', error);
+				var message = (error && error.data && error.data.message) || 'Không thể xóa nhà xuất bản.';
+				$scope.addToast('danger', message);
+			})
+			.finally(function(){
+				$scope.publisherManager.deletingId = null;
 			});
 	};
 

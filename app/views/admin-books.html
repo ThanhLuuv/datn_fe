@@ -11,9 +11,14 @@
                     </a>
                     <h2 class="mb-0"><i class="bi bi-book"></i> Quản lý sách</h2>
                 </div>
-                <button class="btn btn-primary" ng-click="openCreateModal()">
-                    <i class="bi bi-plus-circle"></i> Thêm sách
-                </button>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-secondary" type="button" ng-click="openPublisherManager()">
+                        <i class="bi bi-buildings"></i> Quản lý NXB
+                    </button>
+                    <button class="btn btn-primary" ng-click="openCreateModal()">
+                        <i class="bi bi-plus-circle"></i> Thêm sách
+                    </button>
+                </div>
             </div>
 
             <!-- Loading State -->
@@ -184,6 +189,178 @@
                 total-pages="totalPages" 
                 on-page-change="goToPage(page)">
             </pagination>
+        </div>
+    </div>
+</div>
+
+<!-- Publisher management modal -->
+<div class="modal fade" id="publisherModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-buildings"></i> Quản lý nhà xuất bản
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-4">
+                    <div class="col-lg-7 border-end">
+                        <div class="d-flex gap-2 mb-3">
+                            <input type="text" class="form-control" placeholder="Tìm kiếm nhà xuất bản..."
+                                   ng-model="publisherManager.searchTerm"
+                                   ng-keypress="$event.which === 13 && searchPublisherManager()">
+                            <button type="button" class="btn btn-outline-secondary" ng-click="searchPublisherManager()">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                        <div class="table-responsive position-relative">
+                            <div class="text-center py-4" ng-if="publisherManager.loading">
+                                <div class="spinner-border text-primary"></div>
+                                <div class="mt-2 text-muted">Đang tải danh sách nhà xuất bản...</div>
+                            </div>
+                            <table class="table table-sm align-middle" ng-if="!publisherManager.loading && publisherManager.items.length">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 32%">Tên</th>
+                                        <th style="width: 18%">Email</th>
+                                        <th style="width: 14%">Điện thoại</th>
+                                        <th style="width: 22%">Địa chỉ</th>
+                                        <th style="width: 8%">Sách</th>
+                                        <th style="width: 6%"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="pub in publisherManager.items">
+                                        <td>
+                                            <div class="fw-semibold">{{pub.name}}</div>
+                                            <div class="text-muted small" ng-if="pub.publisherId">#{{pub.publisherId}}</div>
+                                        </td>
+                                        <td>
+                                            <a ng-if="pub.email" ng-href="mailto:{{pub.email}}">{{pub.email}}</a>
+                                            <span ng-if="!pub.email">—</span>
+                                        </td>
+                                        <td>{{pub.phone || '—'}}</td>
+                                        <td>
+                                            <span class="text-truncate d-inline-block" style="max-width: 180px;" title="{{pub.address}}">
+                                                {{pub.address || '—'}}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary-subtle text-secondary-emphasis">
+                                                {{pub.bookCount || 0}}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-primary" type="button"
+                                                        ng-click="editPublisher(pub, publisherForm)">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <button class="btn btn-outline-danger" type="button"
+                                                        ng-disabled="publisherManager.deletingId === pub.publisherId"
+                                                        ng-click="confirmDeletePublisher(pub)">
+                                                    <span ng-if="publisherManager.deletingId === pub.publisherId" class="spinner-border spinner-border-sm"></span>
+                                                    <i ng-if="publisherManager.deletingId !== pub.publisherId" class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div class="text-center py-4 text-muted" ng-if="!publisherManager.loading && !publisherManager.items.length">
+                                <i class="bi bi-inboxes display-6 d-block mb-2"></i>
+                                Chưa có nhà xuất bản nào.
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-3" ng-if="publisherManager.totalPages > 1">
+                            <div class="small text-muted">
+                                Tổng: {{publisherManager.totalCount}} nhà xuất bản
+                            </div>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-secondary" type="button"
+                                        ng-disabled="publisherManager.pageNumber === 1"
+                                        ng-click="changePublisherManagerPage(publisherManager.pageNumber - 1)">
+                                    <i class="bi bi-chevron-left"></i>
+                                </button>
+                                <span class="btn btn-outline-secondary disabled">
+                                    Trang {{publisherManager.pageNumber}} / {{publisherManager.totalPages}}
+                                </span>
+                                <button class="btn btn-outline-secondary" type="button"
+                                        ng-disabled="publisherManager.pageNumber === publisherManager.totalPages"
+                                        ng-click="changePublisherManagerPage(publisherManager.pageNumber + 1)">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="card shadow-sm">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span>{{publisherManager.isEdit ? 'Chỉnh sửa nhà xuất bản' : 'Thêm nhà xuất bản mới'}}</span>
+                                <span class="badge bg-light text-dark" ng-if="publisherManager.isEdit">Đang chỉnh sửa</span>
+                            </div>
+                            <div class="card-body">
+                                <form name="publisherForm" novalidate ng-submit="submitPublisherForm(publisherForm)">
+                                    <div class="mb-3">
+                                        <label class="form-label">Tên nhà xuất bản <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control"
+                                               ng-model="publisherFormData.name"
+                                               maxlength="150" required
+                                               ng-class="{'is-invalid': publisherForm.$submitted && !publisherFormData.name}">
+                                        <div class="invalid-feedback d-block" ng-if="publisherForm.$submitted && !publisherFormData.name">
+                                            Vui lòng nhập tên nhà xuất bản.
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Email <span class="text-danger">*</span></label>
+                                        <input type="email" class="form-control"
+                                               ng-model="publisherFormData.email"
+                                               maxlength="191" required
+                                               ng-class="{'is-invalid': publisherForm.$submitted && !publisherFormData.email}">
+                                        <div class="invalid-feedback d-block" ng-if="publisherForm.$submitted && !publisherFormData.email">
+                                            Vui lòng nhập email hợp lệ.
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control"
+                                               ng-model="publisherFormData.phone"
+                                               maxlength="20" required
+                                               ng-class="{'is-invalid': publisherForm.$submitted && !publisherFormData.phone}">
+                                        <div class="invalid-feedback d-block" ng-if="publisherForm.$submitted && !publisherFormData.phone">
+                                            Vui lòng nhập số điện thoại.
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Địa chỉ <span class="text-danger">*</span></label>
+                                        <textarea class="form-control" rows="3"
+                                                  ng-model="publisherFormData.address"
+                                                  maxlength="500" required
+                                                  ng-class="{'is-invalid': publisherForm.$submitted && !publisherFormData.address}"></textarea>
+                                        <div class="invalid-feedback d-block" ng-if="publisherForm.$submitted && !publisherFormData.address">
+                                            Vui lòng nhập địa chỉ.
+                                        </div>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary flex-grow-1" ng-disabled="publisherManager.saving">
+                                            <span ng-if="publisherManager.saving" class="spinner-border spinner-border-sm me-1"></span>
+                                            {{publisherManager.isEdit ? 'Cập nhật' : 'Thêm mới'}}
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary" ng-click="startCreatePublisher(publisherForm)" ng-disabled="publisherManager.saving">
+                                            <i class="bi bi-arrow-counterclockwise"></i> Làm mới
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="alert alert-warning mt-3 mb-0" ng-if="publisherManager.isEdit && publisherFormData.bookCount > 0">
+                            <i class="bi bi-info-circle"></i>
+                            NXB đang liên kết {{publisherFormData.bookCount}} sách. Xóa NXB sẽ ảnh hưởng tới dữ liệu sách liên quan.
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

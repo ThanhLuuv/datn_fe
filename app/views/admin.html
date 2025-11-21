@@ -386,7 +386,7 @@
         <span>
           <i class="bi bi-robot"></i> Trợ lý AI cho quản lý nhập hàng
         </span>
-        <button class="btn btn-sm btn-light" type="button" ng-click="runAdminAiAssistant()" ng-disabled="aiAssistantLoading">
+        <button class="btn btn-sm btn-light" type="button" ng-click="runAdminAiAssistant()">
           <span ng-if="!aiAssistantLoading"><i class="bi bi-play-circle"></i> Phân tích bằng AI</span>
           <span ng-if="aiAssistantLoading">
             <span class="spinner-border spinner-border-sm me-1" role="status"></span>
@@ -422,52 +422,116 @@
 
           <div class="mb-3" ng-if="aiAssistant.bookSuggestions && aiAssistant.bookSuggestions.length">
             <h6 class="fw-semibold mb-2">3. Gợi ý sách cụ thể</h6>
-            <div class="table-responsive">
-              <table class="table table-sm align-middle">
-                <thead class="table-light">
-                  <tr>
-                    <th style="width:4%">#</th>
-                    <th style="width:12%">ISBN</th>
-                    <th style="width:28%">Tên sách</th>
-                    <th style="width:14%">Thể loại</th>
-                    <th style="width:18%">Lý do</th>
-                    <th style="width:13%">Giá thị trường</th>
-                    <th style="width:11%">Nguồn</th>
-                    <th style="width:10%">Hành động</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr ng-repeat="s in aiAssistant.bookSuggestions">
-                    <td>{{$index + 1}}</td>
-                    <td><code ng-if="s.isbn">{{s.isbn}}</code><span ng-if="!s.isbn" class="text-muted">—</span></td>
-                    <td>{{s.title}}</td>
-                    <td>{{s.category || '—'}}</td>
-                    <td>{{s.reason}}</td>
-                    <td>{{s.marketPrice || '—'}}</td>
-                    <td>
-                      <a ng-if="s.marketSourceUrl" ng-href="{{s.marketSourceUrl}}" target="_blank" rel="noopener">
-                        {{s.marketSourceName || 'Nguồn'}}
-                        <i class="bi bi-box-arrow-up-right ms-1"></i>
-                      </a>
-                      <span ng-if="!s.marketSourceUrl">{{s.marketSourceName || '—'}}</span>
-                    </td>
-                    <td>
-                      <button class="btn btn-sm btn-outline-primary w-100" type="button"
-                              ng-click="openAiImportModal(s)" ng-disabled="s._importedIsbn || s.isbn">
-                        <span ng-if="!s._importedIsbn"><i class="bi bi-plus-circle"></i> Tạo nhanh</span>
-                        <span ng-if="s._importedIsbn"><i class="bi bi-check2-circle text-success"></i> Đã tạo</span>
-                      </button>
-                      <div class="small text-muted mt-1" ng-if="s.suggestedIsbn">ISBN đề xuất: {{s.suggestedIsbn}}</div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+
+            <div class="mb-3" ng-if="hasExistingAiSuggestions()">
+              <div class="d-flex align-items-center mb-2">
+                <span class="badge bg-secondary me-2"><i class="bi bi-collection-check me-1"></i>Sách đã có</span>
+                <span class="text-muted small">Đã nằm trong hệ thống, nên rà tồn kho và kế hoạch nhập.</span>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-sm align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th style="width:4%">#</th>
+                      <th style="width:16%">ISBN</th>
+                      <th style="width:28%">Tên sách</th>
+                      <th style="width:16%">Thể loại</th>
+                      <th style="width:18%">Lý do</th>
+                      <th style="width:10%">Giá thị trường</th>
+                      <th style="width:8%">Nguồn</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat="s in aiAssistant.bookSuggestions | filter:isExistingAiSuggestion">
+                      <td>{{$index + 1}}</td>
+                      <td><code>{{s.isbn}}</code></td>
+                      <td>
+                        {{s.title}}
+                        <span class="badge bg-light text-dark ms-1">Đang có</span>
+                      </td>
+                      <td>{{s.category || '—'}}</td>
+                      <td>{{s.reason}}</td>
+                      <td>{{s.marketPrice || '—'}}</td>
+                      <td>
+                        <a ng-if="s.marketSourceUrl" ng-href="{{s.marketSourceUrl}}" target="_blank" rel="noopener">
+                          {{s.marketSourceName || 'Nguồn'}}
+                          <i class="bi bi-box-arrow-up-right ms-1"></i>
+                        </a>
+                        <span ng-if="!s.marketSourceUrl">{{s.marketSourceName || '—'}}</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="mb-3" ng-if="hasNewAiSuggestions()">
+              <div class="d-flex align-items-center mb-2">
+                <span class="badge bg-success-subtle text-success-emphasis me-2"><i class="bi bi-stars me-1"></i>Sách mới đề xuất</span>
+                <span class="text-muted small">Chưa có trong hệ thống, có thể nhập nhanh dựa trên dữ liệu AI.</span>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-sm align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th style="width:4%">#</th>
+                      <th style="width:30%">Tên sách</th>
+                      <th style="width:16%">Thể loại</th>
+                      <th style="width:20%">Lý do</th>
+                      <th style="width:12%">Giá thị trường</th>
+                      <th style="width:10%">Nguồn</th>
+                      <th style="width:8%">Hành động</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat="s in aiAssistant.bookSuggestions | filter:isNewAiSuggestion" ng-class="{'table-success-subtle': !s._importedIsbn}">
+                      <td>{{$index + 1}}</td>
+                      <td>
+                        {{s.title}}
+                        <span class="badge bg-success ms-1">Sách mới</span>
+                        <div class="small text-muted" ng-if="s.suggestedIsbn">ISBN AI đề xuất: {{s.suggestedIsbn}}</div>
+                      </td>
+                      <td>{{s.category || '—'}}</td>
+                      <td>{{s.reason}}</td>
+                      <td>
+                        {{s.marketPrice || '—'}}
+                        <div class="text-muted small" ng-if="s.suggestedPrice">
+                          Giá bán áp dụng: {{s.suggestedPrice | vnNumber:0}} VNĐ
+                        </div>
+                      </td>
+                      <td>
+                        <a ng-if="s.marketSourceUrl" ng-href="{{s.marketSourceUrl}}" target="_blank" rel="noopener">
+                          {{s.marketSourceName || 'Nguồn'}}
+                          <i class="bi bi-box-arrow-up-right ms-1"></i>
+                        </a>
+                        <span ng-if="!s.marketSourceUrl">{{s.marketSourceName || '—'}}</span>
+                      </td>
+                      <td>
+                        <button class="btn btn-sm btn-outline-primary w-100" type="button"
+                                ng-click="importSuggestionQuick(s)" ng-disabled="s._importedIsbn || s._importing">
+                          <span ng-if="s._importedIsbn"><i class="bi bi-check2-circle text-success"></i></span>
+                          <span ng-if="!s._importedIsbn && s._importing">
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                          </span>
+                          <span ng-if="s._importedIsbn">Đã tạo</span>
+                          <span ng-if="!s._importedIsbn && !s._importing"><i class="bi bi-plus-circle"></i> Tạo nhanh</span>
+                          <span ng-if="!s._importedIsbn && s._importing">Đang lưu...</span>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="alert alert-info mb-0" ng-if="!hasExistingAiSuggestions() && !hasNewAiSuggestions()">
+              AI chưa đề xuất thêm sách nào phù hợp cho giai đoạn đã chọn.
             </div>
           </div>
 
           <div class="mb-0" ng-if="aiAssistant.customerFeedbackSummary">
             <h6 class="fw-semibold mb-2">4. Tóm tắt phản hồi khách hàng & gợi ý cải thiện</h6>
-            <p class="mb-0 text-muted" ng-bind="aiAssistant.customerFeedbackSummary"></p>
+            <p class="mb-0 text-muted" ng-bind-html="renderAiSummaryHtml(aiAssistant.customerFeedbackSummary)"></p>
           </div>
         </div>
 
@@ -747,11 +811,11 @@
 </div>
 
 <!-- Floating AI chat widget (placed outside layout to avoid clipping) -->
-<div class="ai-chat-fab" ng-click="toggleAiChat($event)" title="Trợ lý AI">
-    <i class="bi" ng-class="aiChatOpen ? 'bi-x-lg' : 'bi-robot'"></i>
+<div class="ai-chat-fab" ng-if="aiChatEnabled && !aiChatOpen" ng-click="toggleAiChat($event)" title="Trợ lý AI">
+    <i class="bi bi-robot"></i>
 </div>
 
-<div class="ai-chat-panel" ng-class="{'open': aiChatOpen}">
+<div class="ai-chat-panel" ng-if="aiChatEnabled" ng-class="{'open': aiChatOpen}">
     <div class="ai-chat-header">
         <div>
             <div class="fw-semibold">Trợ lý AI Admin</div>
@@ -779,7 +843,8 @@
             </div>
         </div>
         <div class="ai-chat-message" ng-repeat="m in aiChatMessages track by $index" ng-class="{'user': m.role === 'user', 'assistant': m.role !== 'user'}">
-            <div class="ai-chat-bubble" ng-bind="m.text"></div>
+            <div class="ai-chat-bubble" ng-if="!m.html" ng-bind="m.text"></div>
+            <div class="ai-chat-bubble" ng-if="m.html" ng-bind-html="m.html"></div>
         </div>
         <div class="ai-chat-typing" ng-if="aiChatLoadingLive">
             <span class="dot"></span>
@@ -799,79 +864,6 @@
     </div>
 </div>
 
-<div class="ai-import-backdrop" ng-if="aiImportModal.visible" ng-click="closeAiImportModal()"></div>
-<div class="ai-import-modal" ng-if="aiImportModal.visible">
-  <div class="modal-content" ng-click="$event.stopPropagation()">
-    <div class="modal-header">
-      <h5 class="modal-title"><i class="bi bi-bookmark-plus me-2"></i>Thêm sách từ gợi ý AI</h5>
-      <button type="button" class="btn-close" ng-click="closeAiImportModal()"></button>
-    </div>
-    <div class="modal-body">
-      <div class="row g-3">
-        <div class="col-md-6">
-          <label class="form-label">Tiêu đề</label>
-          <input type="text" class="form-control" ng-model="aiImportModal.form.title">
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">ISBN</label>
-          <input type="text" class="form-control" ng-model="aiImportModal.form.isbn">
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">Giá (VNĐ)</label>
-          <input type="number" min="0" class="form-control" ng-model="aiImportModal.form.suggestedPrice">
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">Danh mục ID</label>
-          <input type="number" class="form-control" ng-model="aiImportModal.form.categoryId">
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">Danh mục (tên)</label>
-          <input type="text" class="form-control" ng-model="aiImportModal.form.categoryName">
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">NXB</label>
-          <input type="text" class="form-control" ng-model="aiImportModal.form.publisherName">
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">Tác giả</label>
-          <input type="text" class="form-control" ng-model="aiImportModal.form.authorName">
-        </div>
-        <div class="col-md-2">
-          <label class="form-label">Số trang</label>
-          <input type="number" min="1" class="form-control" ng-model="aiImportModal.form.pageCount">
-        </div>
-        <div class="col-md-2">
-          <label class="form-label">Năm XB</label>
-          <input type="number" min="1900" class="form-control" ng-model="aiImportModal.form.publishYear">
-        </div>
-        <div class="col-md-2">
-          <label class="form-label">Tồn kho ban đầu</label>
-          <input type="number" min="0" class="form-control" ng-model="aiImportModal.form.stock">
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Ảnh bìa (URL)</label>
-          <input type="text" class="form-control" ng-model="aiImportModal.form.coverImageUrl">
-          <div class="ai-import-cover mt-2" ng-if="aiImportModal.form.coverImageUrl">
-            <img ng-src="{{aiImportModal.form.coverImageUrl}}" alt="Cover preview" onerror="this.style.display='none'">
-          </div>
-        </div>
-        <div class="col-12">
-          <label class="form-label">Mô tả</label>
-          <textarea class="form-control" rows="3" ng-model="aiImportModal.form.description"></textarea>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-light" ng-click="closeAiImportModal()">Huỷ</button>
-      <button type="button" class="btn btn-primary" ng-click="submitAiImport()" ng-disabled="aiImportModal.submitting">
-        <span ng-if="!aiImportModal.submitting"><i class="bi bi-check2"></i> Tạo sách</span>
-        <span ng-if="aiImportModal.submitting">
-          <span class="spinner-border spinner-border-sm me-1"></span>Đang tạo...
-        </span>
-      </button>
-    </div>
-  </div>
-</div>
 
 <!-- Original Admin Layout Styles (restored) -->
 <style>
@@ -1310,33 +1302,6 @@
     transform: translateY(-4px);
     opacity: 1;
   }
-}
-
-.ai-import-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.55);
-  z-index: 13000;
-}
-.ai-import-modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 90vw;
-  max-width: 960px;
-  z-index: 13001;
-}
-.ai-import-modal .modal-content {
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 20px 60px rgba(15,23,42,0.35);
-  overflow: hidden;
-}
-.ai-import-cover img {
-  max-width: 180px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(15,23,42,0.2);
 }
 
 </style>

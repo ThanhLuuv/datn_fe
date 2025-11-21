@@ -114,6 +114,16 @@ app.controller('BookDetailController', ['$scope', '$routeParams', '$location', '
 
     $scope.changeRatingsPage = function(p){ if (p>=1) { $scope.loadRatings(p); } };
 
+    $scope.formatAvgStars = function(value) {
+        if (value == null || value === '') return '0';
+        var num = Number(value);
+        if (!isFinite(num)) return value;
+        if (Math.abs(num - Math.round(num)) < 0.000001) {
+            return String(Math.round(num));
+        }
+        return num.toFixed(1);
+    };
+
     load();
 }]);
 

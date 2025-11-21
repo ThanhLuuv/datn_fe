@@ -82,6 +82,44 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
+    // Lấy thông tin nhà xuất bản theo ID
+    this.getPublisherById = function(id) {
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/publisher/' + id,
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Tạo nhà xuất bản mới
+    this.createPublisher = function(payload) {
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/publisher',
+            data: payload,
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Cập nhật nhà xuất bản
+    this.updatePublisher = function(id, payload) {
+        return $http({
+            method: 'PUT',
+            url: baseUrl + '/publisher/' + id,
+            data: payload,
+            headers: getAuthHeaders()
+        });
+    };
+
+    // Xóa nhà xuất bản
+    this.deletePublisher = function(id) {
+        return $http({
+            method: 'DELETE',
+            url: baseUrl + '/publisher/' + id,
+            headers: getAuthHeaders()
+        });
+    };
+
     // Lấy danh sách sách theo nhà xuất bản
     this.getBooksByPublisher = function(publisherId, params) {
         var queryParams = {
@@ -296,8 +334,8 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     this.adminAiAssistant = function(params) {
         params = params || {};
         var payload = {
-            fromDate: params.fromDate || '',
-            toDate: params.toDate || '',
+            fromDate: params.fromDate || null,
+            toDate: params.toDate || null,
             language: params.language || 'vi'
         };
 
