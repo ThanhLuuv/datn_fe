@@ -367,10 +367,10 @@
 
         /* AI Chat Widget (Floating) */
         .ai-chat-widget {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1050;
+            position: fixed !important;
+            bottom: 20px !important;
+            right: 20px !important;
+            z-index: 9999 !important;
             font-family: inherit;
         }
 
@@ -418,7 +418,7 @@
             flex-direction: column;
             overflow: hidden;
             animation: slideUp 0.3s ease;
-            z-index: 1051;
+            z-index: 10000 !important;
         }
 
         @keyframes slideUp {
@@ -523,6 +523,22 @@
             border-radius: 4px;
             display: inline-block;
             margin: 0.1rem 0;
+        }
+        
+        .ai-chat-answer ul {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+            list-style-type: disc;
+        }
+        
+        .ai-chat-answer li {
+            margin: 0.25rem 0;
+            line-height: 1.6;
+        }
+        
+        .ai-chat-answer em {
+            font-style: italic;
+            color: #64748b;
         }
 
         .ai-chat-welcome {
@@ -804,8 +820,8 @@
         <div ng-view></div>
     </main>
 
-    <!-- AI Search Chat Widget (Floating) - Only for Admin -->
-    <div ng-controller="AiChatWidgetController" ng-if="isAdminOrTeacher()" class="ai-chat-widget">
+    <!-- AI Search Chat Widget (Floating) - Chỉ hiển thị ở trang đơn hàng admin -->
+    <div ng-controller="AiChatWidgetController" ng-if="shouldShowChat()" class="ai-chat-widget">
         <!-- Chat Toggle Button -->
         <button class="ai-chat-toggle" ng-click="toggleAiChat()" ng-class="{'active': aiChatOpen}">
             <i class="bi" ng-class="aiChatOpen ? 'bi-x-lg' : 'bi-chat-dots'"></i>
@@ -837,17 +853,29 @@
             </div>
             <div class="ai-chat-body">
                 <div class="ai-chat-messages" id="aiChatMessages">
+                    <div ng-if="!aiSearch.history || aiSearch.history.length === 0" class="ai-chat-welcome">
+                        <p>Xin chào! Tôi là AI trợ lý về đơn hàng. Hãy đặt câu hỏi về đơn hàng, khách hàng và sách trong đơn.</p>
+                        <p class="text-muted small">Ví dụ: "Đơn hàng gần nhất là gì?", "Khách hàng nào mua nhiều nhất?"</p>
+                    </div>
                     <div ng-if="aiSearch.history && aiSearch.history.length > 0">
-                        <div ng-repeat="item in aiSearch.history | limitTo:10" class="ai-chat-message">
+                        <!-- Hiển thị tất cả messages (không limit), tin mới ở dưới -->
+                        <div ng-repeat="item in aiSearch.history" class="ai-chat-message">
                             <div class="ai-chat-question">
-                                <strong>Bạn:</strong> {{item.question}}
+                                {{item.question}}
                             </div>
-                            <div class="ai-chat-answer" ng-bind-html="renderAiSearchAnswerText(item.answer)"></div>
+                            <div ng-if="item.loading" class="ai-chat-answer">
+                                <span class="spinner-border spinner-border-sm me-2"></span>
+                                <em>Đang tìm kiếm...</em>
+                            </div>
+                            <div ng-if="!item.loading" class="ai-chat-answer" ng-bind-html="renderAiSearchAnswerText(item.answer)"></div>
                         </div>
                     </div>
-                    <div ng-if="!aiSearch.history || aiSearch.history.length === 0" class="ai-chat-welcome">
-                        <p>Xin chào! Tôi là AI trợ lý nội bộ. Hãy đặt câu hỏi về hệ thống.</p>
-                        <p class="text-muted small">Ví dụ: "Doanh thu đơn giao trong 30 ngày gần nhất?"</p>
+                    <!-- Loading indicator -->
+                    <div ng-if="aiSearch.loading" class="ai-chat-message ai-chat-loading">
+                        <div class="ai-chat-answer">
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                            Đang tìm kiếm...
+                        </div>
                     </div>
                 </div>
             </div>

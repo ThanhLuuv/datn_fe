@@ -1179,13 +1179,15 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
                     throw new Error((res && res.data && res.data.message) || 'AI không trả về dữ liệu');
                 }
                 $scope.aiSearch.answer = data.answer || '';
-                $scope.aiSearch.history.unshift({
+                // Thêm tin mới vào cuối (push) thay vì đầu (unshift) để tin mới ở dưới
+                $scope.aiSearch.history.push({
                     question: questionToSave,
                     answer: data.answer || '',
                     ts: new Date().toISOString()
                 });
                 if ($scope.aiSearch.history.length > 20) {
-                    $scope.aiSearch.history = $scope.aiSearch.history.slice(0, 20);
+                    // Giữ 20 tin mới nhất (xóa tin cũ nhất)
+                    $scope.aiSearch.history = $scope.aiSearch.history.slice(-20);
                 }
                 $scope.scrollChatToBottom();
             })
@@ -1204,12 +1206,13 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
 
     $scope.reindexAiSearch = function(options) {
         options = options || {};
+        // Chỉ index order, order_line, invoice, book, customer
         var payload = {
-            refTypes: null, // Index tất cả nguồn dữ liệu
+            refTypes: ['order', 'order_line', 'invoice', 'book', 'customer'],
             truncateBeforeInsert: options.truncateBeforeInsert !== false,
-            maxBooks: options.maxBooks || 800,
-            maxCustomers: options.maxCustomers || 300,
-            maxOrders: options.maxOrders || 400,
+            maxBooks: options.maxBooks || 1000,      // Tăng để có đủ context về sách
+            maxCustomers: options.maxCustomers || 500,   // Tăng để có đủ context về khách hàng
+            maxOrders: options.maxOrders || 1000,     // Tăng để có nhiều đơn hàng hơn
             historyDays: options.historyDays || 180
         };
         $scope.aiSearch.indexing = true;

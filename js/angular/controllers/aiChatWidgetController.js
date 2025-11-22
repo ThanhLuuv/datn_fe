@@ -1,5 +1,5 @@
-// AI Chat Widget Controller - Floating chat widget for admin
-app.controller('AiChatWidgetController', ['$scope', 'AuthService', '$sce', 'BookstoreService', function($scope, AuthService, $sce, BookstoreService) {
+// AI Chat Widget Controller - Floating chat widget for admin (chỉ ở trang đơn hàng)
+app.controller('AiChatWidgetController', ['$scope', 'AuthService', '$sce', 'BookstoreService', '$location', function($scope, AuthService, $sce, BookstoreService, $location) {
     $scope.aiChatOpen = false;
     $scope.aiSearch = {
         question: '',
@@ -11,9 +11,63 @@ app.controller('AiChatWidgetController', ['$scope', 'AuthService', '$sce', 'Book
         lastIndexedAt: null
     };
 
-    $scope.isAdminOrTeacher = function() {
-        return AuthService.isAdminOrTeacher();
+    // Chỉ hiển thị chat widget ở trang đơn hàng admin
+    $scope.shouldShowChat = function() {
+        var isAdmin = AuthService.isAdminOrTeacher();
+        if (!isAdmin) {
+            return false;
+        }
+        
+        // Check nhiều cách để đảm bảo detect được route
+        var path = $location.path() || '';
+        var hash = window.location.hash || '';
+        var url = window.location.href || '';
+        var absUrl = window.location.pathname || '';
+        
+        // Normalize
+        var checkStr = (path + ' ' + hash + ' ' + url + ' ' + absUrl).toLowerCase();
+        
+        // Check xem có chứa 'admin/orders' không
+        var isOrdersPage = checkStr.indexOf('admin/orders') !== -1;
+        
+        // Debug log
+        console.log('AI Chat Widget Check:', {
+            path: path,
+            hash: hash,
+            url: url,
+            absUrl: absUrl,
+            isAdmin: isAdmin,
+            isOrdersPage: isOrdersPage,
+            shouldShow: isAdmin && isOrdersPage
+        });
+        
+        return isAdmin && isOrdersPage;
     };
+    
+    // Initialize và watch changes
+    $scope.$on('$routeChangeSuccess', function() {
+        $scope.$applyAsync(function() {
+            // Force update
+        });
+    });
+    
+    // Watch location
+    $scope.$watch(function() {
+        return $location.path();
+    }, function(newVal, oldVal) {
+        if (newVal !== oldVal) {
+            $scope.$applyAsync();
+        }
+    });
+    
+    // Watch hash
+    $scope.$watch(function() {
+        return window.location.hash;
+    }, function(newVal, oldVal) {
+        if (newVal !== oldVal) {
+            $scope.$applyAsync();
+        }
+    });
 
     $scope.toggleAiChat = function() {
         $scope.aiChatOpen = !$scope.aiChatOpen;
@@ -37,12 +91,62 @@ app.controller('AiChatWidgetController', ['$scope', 'AuthService', '$sce', 'Book
         if (!text) {
             return $sce.trustAsHtml('<em>Chưa có câu trả lời</em>');
         }
+        
+        // Escape HTML trước
         var html = String(text)
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;');
+        
+        // Format markdown - thứ tự quan trọng!
+        // 1. Bold: **text** -> <strong>text</strong> (xử lý trước để không conflict)
         html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        
+        // 2. Bullet points: - item hoặc • item -> <li>item</li>
+        var lines = html.split('\n');
+        var inList = false;
+        var result = [];
+        
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            var trimmed = line.trim();
+            
+            // Check if line is a bullet point
+            var bulletMatch = trimmed.match(/^[-•]\s+(.+)$/);
+            var numberMatch = trimmed.match(/^\d+\.\s+(.+)$/);
+            
+            if (bulletMatch || numberMatch) {
+                var content = bulletMatch ? bulletMatch[1] : numberMatch[1];
+                if (!inList) {
+                    result.push('<ul>');
+                    inList = true;
+                }
+                result.push('<li>' + content + '</li>');
+            } else {
+                if (inList) {
+                    result.push('</ul>');
+                    inList = false;
+                }
+                if (trimmed) {
+                    result.push(line);
+                } else {
+                    result.push('<br>');
+                }
+            }
+        }
+        
+        if (inList) {
+            result.push('</ul>');
+        }
+        
+        html = result.join('\n');
+        
+        // 3. Line breaks (sau khi đã xử lý lists)
         html = html.replace(/\n/g, '<br>');
+        
+        // Clean up: remove empty <ul></ul>
+        html = html.replace(/<ul>\s*<\/ul>/g, '');
+        
         return $sce.trustAsHtml(html);
     };
 
@@ -67,8 +171,29 @@ app.controller('AiChatWidgetController', ['$scope', 'AuthService', '$sce', 'Book
             $scope.aiChatOpen = true;
         }
         
+        // Lưu question và clear input ngay lập tức
+        var questionToSave = question;
+        $scope.aiSearch.question = '';
+        
+        // Thêm question vào history ngay lập tức (với answer rỗng, sẽ update sau)
+        var messageItem = {
+            question: questionToSave,
+            answer: '', // Sẽ update khi có kết quả
+            ts: new Date().toISOString(),
+            loading: true // Flag để hiển thị loading
+        };
+        $scope.aiSearch.history.push(messageItem);
+        if ($scope.aiSearch.history.length > 20) {
+            // Giữ 20 tin mới nhất (xóa tin cũ nhất)
+            $scope.aiSearch.history = $scope.aiSearch.history.slice(-20);
+        }
+        
+        // Scroll xuống để thấy message mới
+        $scope.scrollChatToBottom();
+        
+        // Gọi API
         var payload = {
-            query: question,
+            query: questionToSave,
             topK: 5,
             language: 'vi',
             refTypes: null,
@@ -76,8 +201,6 @@ app.controller('AiChatWidgetController', ['$scope', 'AuthService', '$sce', 'Book
         };
         $scope.aiSearch.loading = true;
         $scope.aiSearch.error = null;
-        var questionToSave = question;
-        $scope.aiSearch.question = '';
         
         BookstoreService.adminAiSearch(payload)
             .then(function(res){
@@ -85,21 +208,23 @@ app.controller('AiChatWidgetController', ['$scope', 'AuthService', '$sce', 'Book
                 if (!data) {
                     throw new Error((res && res.data && res.data.message) || 'AI không trả về dữ liệu');
                 }
+                
+                // Update answer cho message vừa thêm
+                messageItem.answer = data.answer || '';
+                messageItem.loading = false;
                 $scope.aiSearch.answer = data.answer || '';
-                $scope.aiSearch.history.unshift({
-                    question: questionToSave,
-                    answer: data.answer || '',
-                    ts: new Date().toISOString()
-                });
-                if ($scope.aiSearch.history.length > 20) {
-                    $scope.aiSearch.history = $scope.aiSearch.history.slice(0, 20);
-                }
+                
                 $scope.scrollChatToBottom();
             })
             .catch(function(err){
                 console.error('AI search failed', err);
                 var message = (err && err.data && err.data.message) || err.message || 'Không thể chạy AI search.';
+                
+                // Update message với error
+                messageItem.answer = '❌ ' + message;
+                messageItem.loading = false;
                 $scope.aiSearch.error = message;
+                
                 $scope.scrollChatToBottom();
             })
             .finally(function(){
@@ -109,12 +234,13 @@ app.controller('AiChatWidgetController', ['$scope', 'AuthService', '$sce', 'Book
     };
 
     $scope.reindexAiSearch = function() {
+        // Chỉ index order, order_line, invoice, book, customer
         var payload = {
-            refTypes: null,
+            refTypes: ['order', 'order_line', 'invoice', 'book', 'customer'],
             truncateBeforeInsert: true,
-            maxBooks: 800,
-            maxCustomers: 300,
-            maxOrders: 400,
+            maxBooks: 1000,      // Tăng để có đủ context về sách
+            maxCustomers: 500,   // Tăng để có đủ context về khách hàng
+            maxOrders: 1000,     // Tăng để có nhiều đơn hàng hơn
             historyDays: 180
         };
         $scope.aiSearch.indexing = true;
