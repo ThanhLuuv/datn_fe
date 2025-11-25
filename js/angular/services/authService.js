@@ -4,7 +4,8 @@ app.service('AuthService', ['$http', '$q', 'APP_CONFIG', function ($http, $q, AP
     console.log('AuthService - APP_CONFIG received:', APP_CONFIG);
     // Auto-detect API URL: use local backend for localhost, production otherwise
     var isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    var baseUrl = APP_CONFIG.API_BASE_URL || (isLocal ? 'http://localhost:5256/api' : 'https://api.thanhlaptrinh.online/api');
+    // Prefer HTTPS locally so OAuth redirects and SameSite cookie requirements are satisfied
+    var baseUrl = APP_CONFIG.API_BASE_URL || (isLocal ? 'https://localhost:5256/api' : 'https://api.thanhlaptrinh.online/api');
 
     // Debug log
     console.log('AuthService - API Base URL:', baseUrl);
@@ -24,25 +25,6 @@ app.service('AuthService', ['$http', '$q', 'APP_CONFIG', function ($http, $q, AP
                 email: loginData.email,
                 password: loginData.password
             },
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-            }
-        });
-    };
-
-    // Google Login function
-    this.loginGoogle = function (credential) {
-        console.log('AUTHSERVICE.LOGIN_GOOGLE CALLED!');
-        var loginUrl = baseUrl + '/auth/google-login';
-        console.log('Google Login URL:', loginUrl);
-
-        return $http({
-            method: 'POST',
-            url: loginUrl,
-            data: JSON.stringify(credential),
             headers: {
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*',

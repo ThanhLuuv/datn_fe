@@ -58,8 +58,9 @@
             console.log('Using fallback configuration');
             // Set fallback configuration based on detected environment
             var fallbackEnv = detectEnvironment();
+            // Use HTTPS locally so OAuth correlation cookies with SameSite=None are accepted
             var fallbackApiUrl = fallbackEnv === 'development' 
-                ? 'http://localhost:5256/api' 
+                ? 'https://localhost:5256/api' 
                 : 'https://api.thanhlaptrinh.online/api';
             
             window.ENV_CONFIG = {

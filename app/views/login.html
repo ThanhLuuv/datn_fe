@@ -65,12 +65,26 @@
                         <span class="spinner-border spinner-border-sm me-2"></span>
                         Đang đăng nhập...
                     </span>
-                    <div class="auth-footer">
-                        <p>
-                            Chưa có tài khoản?
-                            <a href="#!/register">Đăng ký ngay</a>
-                        </p>
-                    </div>
+                </button>
+
+                <div class="auth-divider">
+                    <span>Hoặc</span>
+                </div>
+
+                <button type="button" class="google-button" ng-click="startGoogleLogin()" ng-disabled="isGoogleLoading">
+                    <span ng-if="!isGoogleLoading">
+                        <img src="app/assets/icons/google.svg" alt="Google" />
+                        Đăng nhập với Google
+                    </span>
+                    <span ng-if="isGoogleLoading">
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                        Đang mở Google...
+                    </span>
+                </button>
+
+                <div class="auth-footer">
+                    <p>Chưa có tài khoản? <a href="#!/register">Đăng ký ngay</a></p>
+                </div>
             </form>
         </div>
     </div>
@@ -286,6 +300,61 @@
 
     .auth-button:disabled {
         opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .auth-divider {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        color: #94a3b8;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    .auth-divider::before,
+    .auth-divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: #e2e8f0;
+    }
+
+    .google-button {
+        width: 100%;
+        padding: 0.85rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 50px;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #0f172a;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-bottom: 1.5rem;
+    }
+
+    .google-button img {
+        width: 22px;
+        height: 22px;
+    }
+
+    .google-button:hover:not(:disabled) {
+        border-color: #f59e0b;
+        color: #f59e0b;
+        transform: translateY(-1px);
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    }
+
+    .google-button:disabled {
+        opacity: 0.7;
         cursor: not-allowed;
     }
 

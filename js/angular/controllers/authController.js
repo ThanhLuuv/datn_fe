@@ -1,20 +1,6 @@
 // Authentication Controllers
 
 // Login Controller
-
-// Global function to handle Google Credential Response
-window.handleCredentialResponse = function (response) {
-    console.log("Encoded JWT ID token: " + response.credential);
-
-    // Get the scope of the LoginController
-    var scope = angular.element(document.getElementById('g_id_onload')).scope();
-
-    // Call the loginWithGoogle function in the controller
-    scope.$apply(function () {
-        scope.loginWithGoogle(response.credential);
-    });
-};
-
 app.controller('LoginController', ['$scope', '$location', '$window', '$rootScope', '$timeout', 'AuthService', 'APP_CONFIG', function ($scope, $location, $window, $rootScope, $timeout, AuthService, APP_CONFIG) {
     $scope.title = 'Đăng nhập';
     $scope.loginData = {
@@ -23,11 +9,72 @@ app.controller('LoginController', ['$scope', '$location', '$window', '$rootScope
         rememberMe: false
     };
     $scope.isLoading = false;
+    $scope.isGoogleLoading = false;
     $scope.showError = false;
     $scope.showSuccess = false;
     $scope.errorMessage = '';
     $scope.successMessage = '';
     $scope.showPassword = false;
+
+    var isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    // Use HTTP for local backend (port 5256), HTTPS for production
+    var apiBaseUrl = APP_CONFIG.API_BASE_URL || (isLocalhost ? 'http://localhost:5256/api' : 'https://api.thanhlaptrinh.online/api');
+    var loginRedirect = window.location.origin + window.location.pathname + '#!/login';
+    var googleSignInUrl = apiBaseUrl + '/auth/google?redirect=' + encodeURIComponent(loginRedirect);
+
+    function resolveRoleId(roleName) {
+        switch ((roleName || '').toUpperCase()) {
+            case 'ADMIN': return 3;
+            case 'SALES_EMPLOYEE': return 2;
+            case 'DELIVERY_EMPLOYEE': return 4;
+            default: return 1;
+        }
+    }
+
+    function clearGoogleParams() {
+        ['token', 'email', 'role', 'fullName', 'avatar', 'expires'].forEach(function (key) {
+            $location.search(key, null);
+        });
+    }
+
+    function handleGoogleRedirect() {
+        var params = $location.search();
+        if (!params || !params.token) {
+            return;
+        }
+
+        var roleName = params.role || 'CUSTOMER';
+        var user = {
+            email: params.email || '',
+            role: roleName,
+            roleId: resolveRoleId(roleName),
+            fullName: params.fullName || params.email || '',
+            avatar: params.avatar || null
+        };
+
+        localStorage.setItem('token', params.token);
+        localStorage.setItem('user', JSON.stringify(user));
+
+        $rootScope.isAuthenticated = true;
+        $rootScope.currentUser = user;
+        $scope.loginData.email = user.email;
+        $scope.showSuccess = true;
+        $scope.successMessage = 'Đăng nhập Google thành công!';
+
+        clearGoogleParams();
+
+        $timeout(function () {
+            if (user.roleId === 3) {
+                $location.path('/admin');
+            } else if (user.roleId === 2 || user.roleId === 4) {
+                $location.path('/employee');
+            } else {
+                $location.path('/home');
+            }
+        }, 500);
+    }
+
+    handleGoogleRedirect();
 
     // Toggle password visibility
     $scope.togglePassword = function () {
@@ -58,10 +105,10 @@ app.controller('LoginController', ['$scope', '$location', '$window', '$rootScope
                             // Create user object with correct structure
                             var user = {
                                 email: response.data.data.email,
-                                roleId: response.data.data.role === 'ADMIN' ? 3 :
-                                    response.data.data.role === 'SALES_EMPLOYEE' ? 2 :
-                                        response.data.data.role === 'DELIVERY_EMPLOYEE' ? 4 : 1,
-                                role: response.data.data.role
+                                roleId: resolveRoleId(response.data.data.role),
+                                role: response.data.data.role,
+                                fullName: response.data.data.fullName || response.data.data.email,
+                                avatar: response.data.data.avatarUrl || null
                             };
                             localStorage.setItem('user', JSON.stringify(user));
 
@@ -118,53 +165,19 @@ app.controller('LoginController', ['$scope', '$location', '$window', '$rootScope
         }
     };
 
-    // Google Login function
-    $scope.loginWithGoogle = function (credential) {
-        $scope.isLoading = true;
+    $scope.startGoogleLogin = function () {
+        $scope.isGoogleLoading = true;
         $scope.showError = false;
         $scope.showSuccess = false;
 
-        AuthService.loginGoogle(credential)
-            .then(function (response) {
-                console.log('GOOGLE LOGIN SUCCESS RESPONSE:', response);
-                $scope.isLoading = false;
-                $scope.showSuccess = true;
-                $scope.successMessage = 'Đăng nhập Google thành công!';
-
-                // Store token and user info
-                if (response.data && response.data.data && response.data.data.token) {
-                    localStorage.setItem('token', response.data.data.token);
-
-                    // Create user object with correct structure
-                    var user = {
-                        email: response.data.data.email,
-                        roleId: response.data.data.role === 'ADMIN' ? 3 :
-                            response.data.data.role === 'SALES_EMPLOYEE' ? 2 :
-                                response.data.data.role === 'DELIVERY_EMPLOYEE' ? 4 : 1,
-                        role: response.data.data.role,
-                        fullName: response.data.data.fullName,
-                        avatar: response.data.data.avatar
-                    };
-                    localStorage.setItem('user', JSON.stringify(user));
-
-                    console.log('Login successful, user created:', user);
-
-                    // Update global auth state
-                    $rootScope.isAuthenticated = true;
-                    $rootScope.currentUser = user;
-
-                    // Redirect to home page
-                    $timeout(function () {
-                        $location.path('/home');
-                    }, 1000);
-                }
-            })
-            .catch(function (error) {
-                console.error('GOOGLE LOGIN ERROR:', error);
-                $scope.isLoading = false;
-                $scope.showError = true;
-                $scope.errorMessage = 'Đăng nhập Google thất bại. Vui lòng thử lại!';
-            });
+        try {
+            $window.location.href = googleSignInUrl;
+        } catch (error) {
+            console.error('GOOGLE LOGIN ERROR:', error);
+            $scope.isGoogleLoading = false;
+            $scope.showError = true;
+            $scope.errorMessage = 'Không thể chuyển hướng đến Google. Vui lòng thử lại!';
+        }
     };
 
     // Demo login functions

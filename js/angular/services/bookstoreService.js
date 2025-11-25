@@ -3,7 +3,8 @@ console.log('Loading BookstoreService...');
 app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', function($http, $q, APP_CONFIG, AuthService) {
     // Auto-detect API URL: use local backend for localhost, production otherwise
     var isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    var baseUrl = APP_CONFIG.API_BASE_URL || (isLocal ? 'http://localhost:5256/api' : 'https://api.thanhlaptrinh.online/api');
+    // Prefer HTTPS locally so OAuth redirects and cookies work correctly
+    var baseUrl = APP_CONFIG.API_BASE_URL || (isLocal ? 'https://localhost:5256/api' : 'https://api.thanhlaptrinh.online/api');
     
     // Helper function to get auth headers
     var getAuthHeaders = function() {
