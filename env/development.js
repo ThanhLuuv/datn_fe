@@ -50,12 +50,5 @@ window.ENV_CONFIG = {
         ENABLE_DEBUG_LOGS: true,
         ENABLE_API_LOGGING: true,
         ENABLE_PERFORMANCE_MONITORING: false
-    },
-
-    // Google AI Live Voice (client-side use only; do not commit real keys)
-    GOOGLE_AI: {
-        API_KEY: '',
-        MODEL: 'gemini-2.5-flash-native-audio-preview-09-2025',
-        VOICE_NAME: 'Zephyr'
     }
 };

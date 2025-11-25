@@ -12,92 +12,145 @@
                         </h5>
                     </div>
                     <nav class="admin-nav">
-                        <ul class="admin-nav-list" ng-if="!isDeliveryOnly">
-                            <li class="admin-nav-item">
-                                <a class="admin-nav-link active" href="#!/admin">
-                                    <i class="bi bi-speedometer2"></i>
-                                    <span>Dashboard</span>
-                                </a>
-                            </li>
-                            <li class="admin-nav-item">
-                                <a class="admin-nav-link" href="#!/admin/categories">
-                                    <i class="bi bi-tags"></i>
-                                    <span>Danh mục</span>
-                                </a>
-                            </li>
-                            <li class="admin-nav-item">
-                                <a class="admin-nav-link" href="#!/admin/books">
-                                    <i class="bi bi-book"></i>
-                                    <span>Quản lý sách</span>
-                                </a>
-                            </li>
-                            <li class="admin-nav-item">
-                                <a class="admin-nav-link" href="#!/admin/orders">
-                                    <i class="bi bi-cart-check"></i>
-                                    <span>Đơn hàng</span>
-                                </a>
-                            </li>
-                            <li class="admin-nav-item">
-                                <a class="admin-nav-link" href="#!/admin/purchase-orders">
-                                    <i class="bi bi-cart-plus"></i>
-                                    <span>Đơn đặt hàng</span>
-                                </a>
-                            </li>
-                            <li class="admin-nav-item">
-                                <a class="admin-nav-link" href="#!/admin/goods-receipts">
-                                    <i class="bi bi-box-seam"></i>
-                                    <span>Phiếu nhập</span>
-                                </a>
-                            </li>
-                            <li class="admin-nav-item">
-                                <a class="admin-nav-link" href="#!/admin/returns">
-                                    <i class="bi bi-arrow-counterclockwise"></i>
-                                    <span>Phiếu trả</span>
-                                </a>
-                            </li>
-                            <li class="admin-nav-item">
-                                <a class="admin-nav-link" href="#!/admin/employees">
-                                    <i class="bi bi-people"></i>
-                                    <span>Nhân viên & Phòng ban</span>
-                                </a>
-                            </li>
-                            <li class="admin-nav-item">
-                                <a class="admin-nav-link" href="#!/admin/users">
-                                    <i class="bi bi-people"></i>
-                                    <span>Người dùng</span>
-                                </a>
-                            </li>
-                            <li class="admin-nav-item">
-                                <a class="admin-nav-link" href="#!/admin/roles" admin-only>
-                                    <i class="bi bi-shield-lock"></i>
-                                    <span>Phân quyền</span>
-                                </a>
-                            </li>
-                            <li class="admin-nav-item">
-                                <a class="admin-nav-link" href="#!/admin/reports/revenue">
-                                    <i class="bi bi-graph-up"></i>
-                                    <span>Báo cáo doanh thu</span>
-                                </a>
-                            </li>
-                            <li class="admin-nav-item">
-                                <a class="admin-nav-link" href="#!/admin/reports/inventory">
-                                    <i class="bi bi-boxes"></i>
-                                    <span>Báo cáo tồn kho</span>
-                                </a>
-                            </li>
-                            <li class="admin-nav-item">
-                                <a class="admin-nav-link" href="#!/admin/promotions">
-                                    <i class="bi bi-gift"></i>
-                                    <span>Khuyến mãi</span>
-                                </a>
-                            </li>
-                            <li class="admin-nav-item">
-                                <a class="admin-nav-link" href="#!/admin/settings">
-                                    <i class="bi bi-gear"></i>
-                                    <span>Cài đặt</span>
-                                </a>
-                            </li>
-                        </ul>
+                        <div class="admin-nav-groups" ng-if="!isDeliveryOnly">
+                            <div class="admin-nav-group">
+                                <div class="admin-nav-group-label">
+                                    <span><i class="bi bi-speedometer"></i> Tổng quan</span>
+                                    <small>Hiển thị KPI chính</small>
+                                </div>
+                                <ul class="admin-nav-list">
+                                    <li class="admin-nav-item">
+                                        <a class="admin-nav-link active" href="#!/admin">
+                                            <i class="bi bi-speedometer2"></i>
+                                            <span>Dashboard</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div class="admin-nav-group">
+                                <div class="admin-nav-group-label">
+                                    <span><i class="bi bi-layers"></i> Danh mục & sản phẩm</span>
+                                    <small>Quản lý cấu trúc & hàng hóa</small>
+                                </div>
+                                <ul class="admin-nav-list">
+                                    <li class="admin-nav-item">
+                                        <a class="admin-nav-link" href="#!/admin/categories">
+                                            <i class="bi bi-tags"></i>
+                                            <span>Danh mục</span>
+                                        </a>
+                                    </li>
+                                    <li class="admin-nav-item">
+                                        <a class="admin-nav-link" href="#!/admin/books">
+                                            <i class="bi bi-book"></i>
+                                            <span>Quản lý sách</span>
+                                        </a>
+                                    </li>
+                                    <li class="admin-nav-item">
+                                        <a class="admin-nav-link" href="#!/admin/promotions">
+                                            <i class="bi bi-gift"></i>
+                                            <span>Khuyến mãi</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div class="admin-nav-group">
+                                <div class="admin-nav-group-label">
+                                    <span><i class="bi bi-cart"></i> Bán hàng & giao dịch</span>
+                                    <small>Theo dõi chu trình bán</small>
+                                </div>
+                                <ul class="admin-nav-list">
+                                    <li class="admin-nav-item">
+                                        <a class="admin-nav-link" href="#!/admin/orders">
+                                            <i class="bi bi-cart-check"></i>
+                                            <span>Đơn hàng</span>
+                                        </a>
+                                    </li>
+                                    <li class="admin-nav-item">
+                                        <a class="admin-nav-link" href="#!/admin/purchase-orders">
+                                            <i class="bi bi-cart-plus"></i>
+                                            <span>Đơn đặt hàng</span>
+                                        </a>
+                                    </li>
+                                    <li class="admin-nav-item">
+                                        <a class="admin-nav-link" href="#!/admin/returns">
+                                            <i class="bi bi-arrow-counterclockwise"></i>
+                                            <span>Phiếu trả</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div class="admin-nav-group">
+                                <div class="admin-nav-group-label">
+                                    <span><i class="bi bi-boxes"></i> Kho & báo cáo</span>
+                                    <small>Dữ liệu nhập kho & thống kê</small>
+                                </div>
+                                <ul class="admin-nav-list">
+                                    <li class="admin-nav-item">
+                                        <a class="admin-nav-link" href="#!/admin/goods-receipts">
+                                            <i class="bi bi-box-seam"></i>
+                                            <span>Phiếu nhập</span>
+                                        </a>
+                                    </li>
+                                    <li class="admin-nav-item">
+                                        <a class="admin-nav-link" href="#!/admin/reports/inventory">
+                                            <i class="bi bi-boxes"></i>
+                                            <span>Báo cáo tồn kho</span>
+                                        </a>
+                                    </li>
+                                    <li class="admin-nav-item">
+                                        <a class="admin-nav-link" href="#!/admin/reports/revenue">
+                                            <i class="bi bi-graph-up"></i>
+                                            <span>Báo cáo doanh thu</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div class="admin-nav-group">
+                                <div class="admin-nav-group-label">
+                                    <span><i class="bi bi-people"></i> Nhân sự & phân quyền</span>
+                                    <small>Tổ chức & vai trò</small>
+                                </div>
+                                <ul class="admin-nav-list">
+                                    <li class="admin-nav-item">
+                                        <a class="admin-nav-link" href="#!/admin/employees">
+                                            <i class="bi bi-people"></i>
+                                            <span>Nhân viên & Phòng ban</span>
+                                        </a>
+                                    </li>
+                                    <li class="admin-nav-item">
+                                        <a class="admin-nav-link" href="#!/admin/users">
+                                            <i class="bi bi-person-badge"></i>
+                                            <span>Người dùng</span>
+                                        </a>
+                                    </li>
+                                    <li class="admin-nav-item">
+                                        <a class="admin-nav-link" href="#!/admin/roles" admin-only>
+                                            <i class="bi bi-shield-lock"></i>
+                                            <span>Phân quyền</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div class="admin-nav-group">
+                                <div class="admin-nav-group-label">
+                                    <span><i class="bi bi-gear"></i> Thiết lập hệ thống</span>
+                                    <small>Cài đặt nâng cao</small>
+                                </div>
+                                <ul class="admin-nav-list">
+                                    <li class="admin-nav-item">
+                                        <a class="admin-nav-link" href="#!/admin/settings">
+                                            <i class="bi bi-gear"></i>
+                                            <span>Cài đặt</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                         <ul class="admin-nav-list" ng-if="isDeliveryOnly">
                             <li class="admin-nav-item">
                                 <a class="admin-nav-link active" href="#!/delivery/orders">
@@ -902,6 +955,13 @@
 .admin-nav-link:hover { color: white; background-color: rgba(255, 255, 255, 0.1); border-left-color: var(--primary-light); transform: translateX(5px); }
 .admin-nav-link.active { color: white; background-color: rgba(255, 255, 255, 0.15); border-left-color: white; font-weight: 600; }
 .admin-nav-link i { font-size: 1.1rem; width: 20px; text-align: center; }
+.admin-nav-groups { display: flex; flex-direction: column; gap: 0.75rem; }
+.admin-nav-group { border-radius: 16px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(4px); overflow: hidden; margin: 0 0.75rem; }
+.admin-nav-group-label { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1.5rem 0.25rem; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.08em; color: rgba(255, 255, 255, 0.7); }
+.admin-nav-group-label span { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; color: white; font-size: 0.8rem; letter-spacing: normal; text-transform: none; }
+.admin-nav-group-label small { font-weight: 400; color: rgba(255, 255, 255, 0.6); text-transform: none; letter-spacing: normal; }
+.admin-nav-group-label i { font-size: 1rem; }
+.admin-nav-group .admin-nav-list { padding: 0.5rem 0 0.75rem; }
 
 .admin-main-content { background-color: var(--gray-50); padding: 2rem; height: 100vh; overflow-y: auto; margin-left: 0; }
 
