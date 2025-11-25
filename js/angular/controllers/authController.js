@@ -1,7 +1,21 @@
 // Authentication Controllers
 
 // Login Controller
-app.controller('LoginController', ['$scope', '$location', '$window', '$rootScope', '$timeout', 'AuthService', 'APP_CONFIG', function($scope, $location, $window, $rootScope, $timeout, AuthService, APP_CONFIG) {
+
+// Global function to handle Google Credential Response
+window.handleCredentialResponse = function (response) {
+    console.log("Encoded JWT ID token: " + response.credential);
+
+    // Get the scope of the LoginController
+    var scope = angular.element(document.getElementById('g_id_onload')).scope();
+
+    // Call the loginWithGoogle function in the controller
+    scope.$apply(function () {
+        scope.loginWithGoogle(response.credential);
+    });
+};
+
+app.controller('LoginController', ['$scope', '$location', '$window', '$rootScope', '$timeout', 'AuthService', 'APP_CONFIG', function ($scope, $location, $window, $rootScope, $timeout, AuthService, APP_CONFIG) {
     $scope.title = 'Đăng nhập';
     $scope.loginData = {
         email: '',
@@ -16,12 +30,12 @@ app.controller('LoginController', ['$scope', '$location', '$window', '$rootScope
     $scope.showPassword = false;
 
     // Toggle password visibility
-    $scope.togglePassword = function() {
+    $scope.togglePassword = function () {
         $scope.showPassword = !$scope.showPassword;
     };
 
     // Login function
-    $scope.login = function() {
+    $scope.login = function () {
         try {
             console.log('LOGIN FUNCTION CALLED!');
             console.log('Form valid:', $scope.loginForm.$valid);
@@ -31,37 +45,37 @@ app.controller('LoginController', ['$scope', '$location', '$window', '$rootScope
                 $scope.showSuccess = false;
 
                 AuthService.login($scope.loginData)
-                    .then(function(response) {
+                    .then(function (response) {
                         console.log('LOGIN SUCCESS RESPONSE:', response);
                         $scope.isLoading = false;
                         $scope.showSuccess = true;
                         $scope.successMessage = 'Đăng nhập thành công!';
-                        
+
                         // Store token and user info
                         if (response.data && response.data.data && response.data.data.token) {
                             localStorage.setItem('token', response.data.data.token);
-                            
+
                             // Create user object with correct structure
                             var user = {
                                 email: response.data.data.email,
-                                roleId: response.data.data.role === 'ADMIN' ? 3 : 
-                                       response.data.data.role === 'SALES_EMPLOYEE' ? 2 :
-                                       response.data.data.role === 'DELIVERY_EMPLOYEE' ? 4 : 1,
+                                roleId: response.data.data.role === 'ADMIN' ? 3 :
+                                    response.data.data.role === 'SALES_EMPLOYEE' ? 2 :
+                                        response.data.data.role === 'DELIVERY_EMPLOYEE' ? 4 : 1,
                                 role: response.data.data.role
                             };
                             localStorage.setItem('user', JSON.stringify(user));
-                            
+
                             console.log('Login successful, user created:', user);
-                            
+
                             // Update global auth state
                             $rootScope.isAuthenticated = true;
                             $rootScope.currentUser = user;
-                            
+
                             console.log('Redirecting immediately...');
-                            
+
                             // Redirect based on role with timeout
                             try {
-                                $timeout(function() {
+                                $timeout(function () {
                                     if (user.roleId === 3) {
                                         console.log('Redirecting to admin page');
                                         console.log('Current location before:', $location.path());
@@ -81,10 +95,10 @@ app.controller('LoginController', ['$scope', '$location', '$window', '$rootScope
                             }
                         }
                     })
-                    .catch(function(error) {
+                    .catch(function (error) {
                         $scope.isLoading = false;
                         $scope.showError = true;
-                        
+
                         if (error.data && error.data.message) {
                             $scope.errorMessage = error.data.message;
                         } else if (error.status === 401) {
@@ -104,21 +118,70 @@ app.controller('LoginController', ['$scope', '$location', '$window', '$rootScope
         }
     };
 
+    // Google Login function
+    $scope.loginWithGoogle = function (credential) {
+        $scope.isLoading = true;
+        $scope.showError = false;
+        $scope.showSuccess = false;
+
+        AuthService.loginGoogle(credential)
+            .then(function (response) {
+                console.log('GOOGLE LOGIN SUCCESS RESPONSE:', response);
+                $scope.isLoading = false;
+                $scope.showSuccess = true;
+                $scope.successMessage = 'Đăng nhập Google thành công!';
+
+                // Store token and user info
+                if (response.data && response.data.data && response.data.data.token) {
+                    localStorage.setItem('token', response.data.data.token);
+
+                    // Create user object with correct structure
+                    var user = {
+                        email: response.data.data.email,
+                        roleId: response.data.data.role === 'ADMIN' ? 3 :
+                            response.data.data.role === 'SALES_EMPLOYEE' ? 2 :
+                                response.data.data.role === 'DELIVERY_EMPLOYEE' ? 4 : 1,
+                        role: response.data.data.role,
+                        fullName: response.data.data.fullName,
+                        avatar: response.data.data.avatar
+                    };
+                    localStorage.setItem('user', JSON.stringify(user));
+
+                    console.log('Login successful, user created:', user);
+
+                    // Update global auth state
+                    $rootScope.isAuthenticated = true;
+                    $rootScope.currentUser = user;
+
+                    // Redirect to home page
+                    $timeout(function () {
+                        $location.path('/home');
+                    }, 1000);
+                }
+            })
+            .catch(function (error) {
+                console.error('GOOGLE LOGIN ERROR:', error);
+                $scope.isLoading = false;
+                $scope.showError = true;
+                $scope.errorMessage = 'Đăng nhập Google thất bại. Vui lòng thử lại!';
+            });
+    };
+
     // Demo login functions
-    $scope.demoLogin = function(role) {
+    $scope.demoLogin = function (role) {
         var demoAccounts = {
             admin: { email: 'admin@bookstore.com', password: '123456' },
             employee: { email: 'staff@bookstore.com', password: '123456' },
             customer: { email: 'user@bookstore.com', password: '123456' }
         };
-        
+
         $scope.loginData = demoAccounts[role];
         $scope.login();
     };
 }]);
 
 // Register Controller
-app.controller('RegisterController', ['$scope', '$location', 'AuthService', 'APP_CONFIG', function($scope, $location, AuthService, APP_CONFIG) {
+app.controller('RegisterController', ['$scope', '$location', 'AuthService', 'APP_CONFIG', function ($scope, $location, AuthService, APP_CONFIG) {
     $scope.title = 'Đăng ký';
     $scope.registerData = {
         email: '',
@@ -136,17 +199,17 @@ app.controller('RegisterController', ['$scope', '$location', 'AuthService', 'APP
     $scope.showConfirmPassword = false;
 
     // Toggle password visibility
-    $scope.togglePassword = function() {
+    $scope.togglePassword = function () {
         $scope.showPassword = !$scope.showPassword;
     };
 
     // Toggle confirm password visibility
-    $scope.toggleConfirmPassword = function() {
+    $scope.toggleConfirmPassword = function () {
         $scope.showConfirmPassword = !$scope.showConfirmPassword;
     };
 
     // Custom validation for password match
-    $scope.$watch('registerData.confirmPassword', function() {
+    $scope.$watch('registerData.confirmPassword', function () {
         if ($scope.registerData.password && $scope.registerData.confirmPassword) {
             if ($scope.registerData.password !== $scope.registerData.confirmPassword) {
                 $scope.registerForm.confirmPassword.$setValidity('passwordMatch', false);
@@ -157,7 +220,7 @@ app.controller('RegisterController', ['$scope', '$location', 'AuthService', 'APP
     });
 
     // Register function
-    $scope.register = function() {
+    $scope.register = function () {
         if ($scope.registerForm.$valid && $scope.registerData.password === $scope.registerData.confirmPassword) {
             $scope.isLoading = true;
             $scope.showError = false;
@@ -172,11 +235,11 @@ app.controller('RegisterController', ['$scope', '$location', 'AuthService', 'APP
             };
 
             AuthService.register(registerPayload)
-                .then(function(response) {
+                .then(function (response) {
                     $scope.isLoading = false;
                     $scope.showSuccess = true;
                     $scope.successMessage = 'Đăng ký thành công! Bạn có thể đăng nhập ngay bây giờ.';
-                    
+
                     // Clear form
                     $scope.registerData = {
                         email: '',
@@ -187,16 +250,16 @@ app.controller('RegisterController', ['$scope', '$location', 'AuthService', 'APP
                     };
                     $scope.registerForm.$setPristine();
                     $scope.registerForm.$setUntouched();
-                    
+
                     // Redirect to login after 3 seconds
-                    setTimeout(function() {
+                    setTimeout(function () {
                         $location.path('/login');
                     }, 3000);
                 })
-                .catch(function(error) {
+                .catch(function (error) {
                     $scope.isLoading = false;
                     $scope.showError = true;
-                    
+
                     if (error.data && error.data.message) {
                         $scope.errorMessage = error.data.message;
                     } else if (error.status === 400) {
@@ -213,7 +276,7 @@ app.controller('RegisterController', ['$scope', '$location', 'AuthService', 'APP
     };
 
     // Reset form
-    $scope.resetForm = function() {
+    $scope.resetForm = function () {
         $scope.registerData = {
             email: '',
             password: '',
@@ -229,11 +292,11 @@ app.controller('RegisterController', ['$scope', '$location', 'AuthService', 'APP
 }]);
 
 // Logout Controller
-app.controller('LogoutController', ['$scope', '$location', 'AuthService', function($scope, $location, AuthService) {
+app.controller('LogoutController', ['$scope', '$location', 'AuthService', function ($scope, $location, AuthService) {
     // Clear stored data
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    
+
     // Redirect to login
     $location.path('/login');
 }]);

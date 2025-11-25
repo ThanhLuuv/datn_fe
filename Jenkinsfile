@@ -48,7 +48,7 @@ pipeline {
       steps {
         sh '''
           for i in {1..30}; do
-            if curl -fsS http://127.0.0.1:${HEALTH_PORT} > /dev/null; then
+            if curl -fsS http://103.221.223.103:${HEALTH_PORT} > /dev/null; then
               echo "Healthy on :${HEALTH_PORT}"; exit 0
             fi
             sleep 2
