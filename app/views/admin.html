@@ -1,1379 +1,1952 @@
 <!-- Admin Dashboard View -->
 <div class="admin-layout">
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-3 col-lg-2 d-md-block admin-sidebar">
-                <div class="admin-sidebar-content">
-                    <div class="admin-sidebar-header">
-                        <h5 class="admin-sidebar-title">
-                            <i class="bi bi-shield-check"></i>
-                            Quản trị hệ thống
-                        </h5>
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="col-md-3 col-lg-2 d-md-block admin-sidebar">
+        <div class="admin-sidebar-content">
+          <div class="admin-sidebar-header">
+            <h5 class="admin-sidebar-title">
+              <i class="bi bi-shield-check"></i>
+              Quản trị hệ thống
+            </h5>
+          </div>
+          <nav class="admin-nav"
+            ng-init="navState = { overview: true, products: false, sales: false, inventory: false, hr: false, settings: false }">
+            <div class="admin-nav-groups" ng-if="!isDeliveryOnly">
+              <div class="admin-nav-group">
+                <div class="admin-nav-group-label" ng-click="navState.overview = !navState.overview"
+                  style="cursor: pointer;">
+                  <div class="d-flex justify-content-between align-items-center w-100">
+                    <div>
+                      <span><i class="bi bi-speedometer"></i> Tổng quan</span>
+                      <small style="display:block; font-size: 0.75em; opacity: 0.8;">Hiển thị KPI chính</small>
                     </div>
-                    <nav class="admin-nav">
-                        <div class="admin-nav-groups" ng-if="!isDeliveryOnly">
-                            <div class="admin-nav-group">
-                                <div class="admin-nav-group-label">
-                                    <span><i class="bi bi-speedometer"></i> Tổng quan</span>
-                                    <small>Hiển thị KPI chính</small>
-                                </div>
-                                <ul class="admin-nav-list">
-                                    <li class="admin-nav-item">
-                                        <a class="admin-nav-link active" href="#!/admin">
-                                            <i class="bi bi-speedometer2"></i>
-                                            <span>Dashboard</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            <div class="admin-nav-group">
-                                <div class="admin-nav-group-label">
-                                    <span><i class="bi bi-layers"></i> Danh mục & sản phẩm</span>
-                                    <small>Quản lý cấu trúc & hàng hóa</small>
-                                </div>
-                                <ul class="admin-nav-list">
-                                    <li class="admin-nav-item">
-                                        <a class="admin-nav-link" href="#!/admin/categories">
-                                            <i class="bi bi-tags"></i>
-                                            <span>Danh mục</span>
-                                        </a>
-                                    </li>
-                                    <li class="admin-nav-item">
-                                        <a class="admin-nav-link" href="#!/admin/books">
-                                            <i class="bi bi-book"></i>
-                                            <span>Quản lý sách</span>
-                                        </a>
-                                    </li>
-                                    <li class="admin-nav-item">
-                                        <a class="admin-nav-link" href="#!/admin/promotions">
-                                            <i class="bi bi-gift"></i>
-                                            <span>Khuyến mãi</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            <div class="admin-nav-group">
-                                <div class="admin-nav-group-label">
-                                    <span><i class="bi bi-cart"></i> Bán hàng & giao dịch</span>
-                                    <small>Theo dõi chu trình bán</small>
-                                </div>
-                                <ul class="admin-nav-list">
-                                    <li class="admin-nav-item">
-                                        <a class="admin-nav-link" href="#!/admin/orders">
-                                            <i class="bi bi-cart-check"></i>
-                                            <span>Đơn hàng</span>
-                                        </a>
-                                    </li>
-                                    <li class="admin-nav-item">
-                                        <a class="admin-nav-link" href="#!/admin/purchase-orders">
-                                            <i class="bi bi-cart-plus"></i>
-                                            <span>Đơn đặt hàng</span>
-                                        </a>
-                                    </li>
-                                    <li class="admin-nav-item">
-                                        <a class="admin-nav-link" href="#!/admin/returns">
-                                            <i class="bi bi-arrow-counterclockwise"></i>
-                                            <span>Phiếu trả</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            <div class="admin-nav-group">
-                                <div class="admin-nav-group-label">
-                                    <span><i class="bi bi-boxes"></i> Kho & báo cáo</span>
-                                    <small>Dữ liệu nhập kho & thống kê</small>
-                                </div>
-                                <ul class="admin-nav-list">
-                                    <li class="admin-nav-item">
-                                        <a class="admin-nav-link" href="#!/admin/goods-receipts">
-                                            <i class="bi bi-box-seam"></i>
-                                            <span>Phiếu nhập</span>
-                                        </a>
-                                    </li>
-                                    <li class="admin-nav-item">
-                                        <a class="admin-nav-link" href="#!/admin/reports/inventory">
-                                            <i class="bi bi-boxes"></i>
-                                            <span>Báo cáo tồn kho</span>
-                                        </a>
-                                    </li>
-                                    <li class="admin-nav-item">
-                                        <a class="admin-nav-link" href="#!/admin/reports/revenue">
-                                            <i class="bi bi-graph-up"></i>
-                                            <span>Báo cáo doanh thu</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            <div class="admin-nav-group">
-                                <div class="admin-nav-group-label">
-                                    <span><i class="bi bi-people"></i> Nhân sự & phân quyền</span>
-                                    <small>Tổ chức & vai trò</small>
-                                </div>
-                                <ul class="admin-nav-list">
-                                    <li class="admin-nav-item">
-                                        <a class="admin-nav-link" href="#!/admin/employees">
-                                            <i class="bi bi-people"></i>
-                                            <span>Nhân viên & Phòng ban</span>
-                                        </a>
-                                    </li>
-                                    <li class="admin-nav-item">
-                                        <a class="admin-nav-link" href="#!/admin/users">
-                                            <i class="bi bi-person-badge"></i>
-                                            <span>Người dùng</span>
-                                        </a>
-                                    </li>
-                                    <li class="admin-nav-item">
-                                        <a class="admin-nav-link" href="#!/admin/roles" admin-only>
-                                            <i class="bi bi-shield-lock"></i>
-                                            <span>Phân quyền</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            <div class="admin-nav-group">
-                                <div class="admin-nav-group-label">
-                                    <span><i class="bi bi-gear"></i> Thiết lập hệ thống</span>
-                                    <small>Cài đặt nâng cao</small>
-                                </div>
-                                <ul class="admin-nav-list">
-                                    <li class="admin-nav-item">
-                                        <a class="admin-nav-link" href="#!/admin/settings">
-                                            <i class="bi bi-gear"></i>
-                                            <span>Cài đặt</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        <ul class="admin-nav-list" ng-if="isDeliveryOnly">
-                            <li class="admin-nav-item">
-                                <a class="admin-nav-link active" href="#!/delivery/orders">
-                                    <i class="bi bi-truck"></i>
-                                    <span>Đơn được phân công</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
+                    <i class="bi bi-chevron-right transition-transform" ng-class="{'rotate-90': navState.overview}"></i>
+                  </div>
                 </div>
-            </div>
-
-            <!-- Main content -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 admin-main-content" ng-class="{'no-scroll': showingDashboardReport || showingDashboardInventory || showingDashboardProfit}">
-            
-            <!-- Employees & Departments Subpage -->
-            <div ng-if="isEmployeesPage" ng-include="'app/views/admin-employees.html'"></div>
-            
-            <!-- Admin Dashboard Content (hidden on subpage) -->
-            <div ng-if="!isEmployeesPage" class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">Dashboard Admin</h1>
-                <div class="btn-toolbar mb-2 mb-md-0">
-                    <div class="btn-group me-2">
-                        <button type="button" class="btn btn-sm btn-outline-secondary">
-                            <i class="bi bi-download"></i> Export
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Stats Cards -->
-            <div ng-if="!isEmployeesPage" class="row mb-md">
-                <div class="col-xl-3 col-md-6 mb-md">
-                    <div class="card card-sm card-primary">
-                        <div class="card-body p-md">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-sm">
-                                        Tổng người dùng
-                                    </div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{stats.totalUsers}}</div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="bi bi-people icon-lg text-gray-300"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-xl-3 col-md-6 mb-md">
-                    <div class="card card-sm card-success">
-                        <div class="card-body p-md">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-sm">
-                                        Tổng sách
-                                    </div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{stats.totalBooks}}</div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="bi bi-book icon-lg text-gray-300"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-xl-3 col-md-6 mb-md">
-                    <div class="card card-sm card-info">
-                        <div class="card-body p-md">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-sm">
-                                        Đơn hàng hôm nay
-                                    </div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{stats.todayOrders}}</div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="bi bi-cart-check icon-lg text-gray-300"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-xl-3 col-md-6 mb-md">
-                    <div class="card card-sm card-warning">
-                        <div class="card-body p-md">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-sm">
-                                        Doanh thu tháng
-                                    </div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{stats.monthlyRevenue | currency:'VND '}}</div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="bi bi-currency-dollar icon-lg text-gray-300"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
-            <!-- Dashboard Reports: Báo cáo tổng quan -->
-            <div ng-if="!isEmployeesPage" class="row mb-4 dashboard-row">
-  <!-- Doanh thu -->
-  <div class="col-lg-6 mb-4">
-    <div class="card">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <span>
-          <i class="bi bi-graph-up"></i> Báo cáo doanh thu
-        </span>
-      </div>
-      <div class="card-body">
-        <!-- Summary revenue -->
-        <div class="mb-3" ng-if="revenueSummary">
-          <div class="alert alert-light border shadow-sm mb-0">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <strong>Tổng doanh thu:</strong>
-                <span class="text-primary fw-bold">{{revenueSummary.total | vnNumber:0}} VNĐ</span>
-                <div class="small text-muted fst-italic mt-1" ng-if="revenueSummary">
-                  Bằng chữ: {{moneyInWords(revenueSummary.total)}}
-                </div>
+                <ul class="admin-nav-list" ng-show="navState.overview">
+                  <li class="admin-nav-item">
+                    <a class="admin-nav-link active" href="#!/admin">
+                      <i class="bi bi-speedometer2"></i>
+                      <span>Dashboard</span>
+                    </a>
+                  </li>
+                </ul>
               </div>
-              <div class="text-muted small">
-                {{revenueSummary.fromDate | date:'dd/MM/yyyy'}} - {{revenueSummary.toDate | date:'dd/MM/yyyy'}}
+
+              <div class="admin-nav-group">
+                <div class="admin-nav-group-label" ng-click="navState.products = !navState.products"
+                  style="cursor: pointer;">
+                  <div class="d-flex justify-content-between align-items-center w-100">
+                    <div>
+                      <span><i class="bi bi-layers"></i> Danh mục & sản phẩm</span>
+                      <small style="display:block; font-size: 0.75em; opacity: 0.8;">Quản lý cấu trúc & hàng hóa</small>
+                    </div>
+                    <i class="bi bi-chevron-right transition-transform" ng-class="{'rotate-90': navState.products}"></i>
+                  </div>
+                </div>
+                <ul class="admin-nav-list" ng-show="navState.products">
+                  <li class="admin-nav-item">
+                    <a class="admin-nav-link" href="#!/admin/categories">
+                      <i class="bi bi-tags"></i>
+                      <span>Danh mục</span>
+                    </a>
+                  </li>
+                  <li class="admin-nav-item">
+                    <a class="admin-nav-link" href="#!/admin/books">
+                      <i class="bi bi-book"></i>
+                      <span>Quản lý sách</span>
+                    </a>
+                  </li>
+                  <li class="admin-nav-item">
+                    <a class="admin-nav-link" href="#!/admin/promotions">
+                      <i class="bi bi-gift"></i>
+                      <span>Khuyến mãi</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="admin-nav-group">
+                <div class="admin-nav-group-label" ng-click="navState.sales = !navState.sales" style="cursor: pointer;">
+                  <div class="d-flex justify-content-between align-items-center w-100">
+                    <div>
+                      <span><i class="bi bi-cart"></i> Bán hàng & giao dịch</span>
+                      <small style="display:block; font-size: 0.75em; opacity: 0.8;">Theo dõi chu trình bán</small>
+                    </div>
+                    <i class="bi bi-chevron-right transition-transform" ng-class="{'rotate-90': navState.sales}"></i>
+                  </div>
+                </div>
+                <ul class="admin-nav-list" ng-show="navState.sales">
+                  <li class="admin-nav-item">
+                    <a class="admin-nav-link" href="#!/admin/orders">
+                      <i class="bi bi-cart-check"></i>
+                      <span>Đơn hàng</span>
+                    </a>
+                  </li>
+
+                  <li class="admin-nav-item">
+                    <a class="admin-nav-link" href="#!/admin/returns">
+                      <i class="bi bi-arrow-counterclockwise"></i>
+                      <span>Phiếu trả</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="admin-nav-group">
+                <div class="admin-nav-group-label" ng-click="navState.inventory = !navState.inventory"
+                  style="cursor: pointer;">
+                  <div class="d-flex justify-content-between align-items-center w-100">
+                    <div>
+                      <span><i class="bi bi-boxes"></i> Kho</span>
+                      <small style="display:block; font-size: 0.75em; opacity: 0.8;">Quản lý kho & đặt hàng</small>
+                    </div>
+                    <i class="bi bi-chevron-right transition-transform"
+                      ng-class="{'rotate-90': navState.inventory}"></i>
+                  </div>
+                </div>
+                <ul class="admin-nav-list" ng-show="navState.inventory">
+                  <li class="admin-nav-item">
+                    <a class="admin-nav-link" href="#!/admin/purchase-orders">
+                      <i class="bi bi-cart-plus"></i>
+                      <span>Đơn đặt hàng</span>
+                    </a>
+                  </li>
+                  <li class="admin-nav-item">
+                    <a class="admin-nav-link" href="#!/admin/goods-receipts">
+                      <i class="bi bi-box-seam"></i>
+                      <span>Phiếu nhập</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="admin-nav-group">
+                <div class="admin-nav-group-label" ng-click="navState.hr = !navState.hr" style="cursor: pointer;">
+                  <div class="d-flex justify-content-between align-items-center w-100">
+                    <div>
+                      <span><i class="bi bi-people"></i> Nhân sự & phân quyền</span>
+                      <small style="display:block; font-size: 0.75em; opacity: 0.8;">Tổ chức & vai trò</small>
+                    </div>
+                    <i class="bi bi-chevron-right transition-transform" ng-class="{'rotate-90': navState.hr}"></i>
+                  </div>
+                </div>
+                <ul class="admin-nav-list" ng-show="navState.hr">
+                  <li class="admin-nav-item">
+                    <a class="admin-nav-link" href="#!/admin/employees">
+                      <i class="bi bi-people"></i>
+                      <span>Nhân viên & Phòng ban</span>
+                    </a>
+                  </li>
+                  <li class="admin-nav-item">
+                    <a class="admin-nav-link" href="#!/admin/users">
+                      <i class="bi bi-person-badge"></i>
+                      <span>Người dùng</span>
+                    </a>
+                  </li>
+                  <li class="admin-nav-item">
+                    <a class="admin-nav-link" href="#!/admin/roles" admin-only>
+                      <i class="bi bi-shield-lock"></i>
+                      <span>Phân quyền</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="admin-nav-group">
+                <div class="admin-nav-group-label" ng-click="navState.settings = !navState.settings"
+                  style="cursor: pointer;">
+                  <div class="d-flex justify-content-between align-items-center w-100">
+                    <div>
+                      <span><i class="bi bi-gear"></i> Thiết lập hệ thống</span>
+                      <small style="display:block; font-size: 0.75em; opacity: 0.8;">Cài đặt nâng cao</small>
+                    </div>
+                    <i class="bi bi-chevron-right transition-transform" ng-class="{'rotate-90': navState.settings}"></i>
+                  </div>
+                </div>
+                <ul class="admin-nav-list" ng-show="navState.settings">
+                  <li class="admin-nav-item">
+                    <a class="admin-nav-link" href="#!/admin/settings">
+                      <i class="bi bi-gear"></i>
+                      <span>Cài đặt</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="mt-3">
+                <a href="javascript:void(0)" ng-click="logout()"
+                  class="d-flex align-items-center text-danger text-decoration-none px-3 py-2">
+                  <i class="bi bi-box-arrow-right me-2"></i>
+                  <span>Đăng xuất</span>
+                </a>
               </div>
             </div>
-          </div>
-        </div>
-        <!-- Báo cáo doanh thu (sửa code html form) -->
-<form class="dashboard-flex-form mb-3" autocomplete="off" ng-submit="viewRevenueReport(true)">
-  <div>
-    <label class="form-label">Loại báo cáo:</label>
-    <select class="form-select" ng-model="revenueFilter.type">
-      <option value="daily">Ngày</option>
-      <option value="monthly">Tháng</option>
-      <option value="quarterly">Quý</option>
-    </select>
-  </div>
-  <div>
-    <label class="form-label">Từ ngày:</label>
-    <input type="date" class="form-control" ng-model="revenueFilter.fromDate">
-  </div>
-  <div>
-    <label class="form-label">Đến ngày:</label>
-    <input type="date" class="form-control" ng-model="revenueFilter.toDate">
-  </div>
-  <div>
-    <label class="form-label" style="opacity:0;">&nbsp;</label>
-    <button class="btn btn-primary w-100" type="submit" ng-disabled="loadingRevenue">
-      <i class="bi bi-search"></i> Xem báo cáo
-    </button>
-  </div>
-</form>
-        
-      </div>
-    </div>
-  </div>
-
-  <!-- Tồn kho -->
-  <div class="col-lg-6 mb-4">
-    <div class="card">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <span>
-          <i class="bi bi-boxes"></i> Báo cáo tồn kho
-        </span>
-      </div>
-      <div class="card-body">
-        <!-- Summary inventory -->
-        <div class="mb-3" ng-if="inventorySummary">
-          <div class="alert alert-light border shadow-sm mb-2">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <strong>Tổng trị giá tồn kho:</strong>
-                <span class="text-success fw-bold">{{inventorySummary.totalValue | vnNumber:0}} VNĐ</span>
-                <div class="small text-muted fst-italic mt-1" ng-if="inventorySummary">
-                  Bằng chữ: {{moneyInWords(inventorySummary.totalValue)}}
-                </div>
-              </div>
-              <div class="text-muted small">Tổng SL tồn: {{inventorySummary.totalQuantity | number}}</div>
-            </div>
-          </div>
-        </div>
-        <!-- Báo cáo tồn kho (sửa code html form) -->
-<form class="dashboard-flex-form mb-3" autocomplete="off" ng-submit="viewInventoryReport(true)">
-  <div>
-    <label class="form-label">Tính đến ngày:</label>
-    <input type="date" class="form-control" ng-model="inventoryFilter.toDate">
-  </div>
-  <div>
-    <label class="form-label" style="opacity:0;">&nbsp;</label>
-    <button class="btn btn-primary w-100" type="submit" ng-disabled="loadingInventory">
-      <i class="bi bi-search"></i> Xem báo cáo
-    </button>
-  </div>
-</form>
-        
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Profit report row -->
-<div ng-if="!isEmployeesPage" class="row mb-4 dashboard-row">
-  <div class="col-lg-6 mb-4">
-    <div class="card">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <span>
-          <i class="bi bi-cash-coin"></i> Báo cáo lợi nhuận
-        </span>
-      </div>
-      <div class="card-body">
-        <!-- Summary profit -->
-        <div class="mb-3" ng-if="profitSummary">
-          <div class="alert alert-light border shadow-sm mb-0">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <strong>Lợi nhuận:</strong>
-                <span class="fw-bold" ng-class="{'text-success': (profitSummary.profit||0) >= 0, 'text-danger': (profitSummary.profit||0) < 0}">{{profitSummary.profit | vnNumber:0}} VNĐ</span>
-                <div class="small text-muted fst-italic mt-1" ng-if="profitSummary">
-                  Bằng chữ: {{moneyInWords(profitSummary.profit)}}
-                </div>
-              </div>
-              <div class="text-muted small">{{profitSummary.fromDate | date:'dd/MM/yyyy'}} - {{profitSummary.toDate | date:'dd/MM/yyyy'}}</div>
-            </div>
-          </div>
-        </div>
-
-        <form class="dashboard-flex-form mb-3" autocomplete="off" ng-submit="viewProfitReport(true)">
-          <div>
-            <label class="form-label">Từ ngày:</label>
-            <input type="date" class="form-control" ng-model="profitFilter.fromDate">
-          </div>
-          <div>
-            <label class="form-label">Đến ngày:</label>
-            <input type="date" class="form-control" ng-model="profitFilter.toDate">
-          </div>
-          <div>
-            <label class="form-label" style="opacity:0;">&nbsp;</label>
-            <button class="btn btn-primary w-100" type="submit" ng-disabled="loadingProfit">
-              <i class="bi bi-search"></i> Xem báo cáo
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-  <div class="col-lg-6 mb-4">
-    <div class="card">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <span>
-          <i class="bi bi-pie-chart"></i> Tỷ lệ sách theo danh mục
-        </span>
-      </div>
-      <div class="card-body">
-        <div class="row align-items-center">
-          <div class="col-md-6 d-flex justify-content-center mb-3 mb-md-0">
-            <div class="pie-chart" ng-style="{'background': 'conic-gradient(' + (categoryPie.gradient||'transparent') + ')'}"></div>
-          </div>
-          <div class="col-md-6">
-            <ul class="pie-legend list-unstyled mb-0">
-              <li class="d-flex align-items-center mb-2" ng-repeat="it in categoryPie.items">
-                <span class="legend-dot" ng-style="{'background-color': it.color}"></span>
-                <span class="flex-grow-1">{{it.label}}</span>
-                <strong class="ms-2">{{it.percent | number:1}}%</strong>
+            <ul class="admin-nav-list" ng-if="isDeliveryOnly">
+              <li class="admin-nav-item">
+                <a class="admin-nav-link active" href="#!/delivery/orders">
+                  <i class="bi bi-truck"></i>
+                  <span>Đơn được phân công</span>
+                </a>
               </li>
-              <li ng-if="!categoryPie.items || categoryPie.items.length==0" class="text-muted">Chưa có dữ liệu.</li>
             </ul>
-          </div>
+          </nav>
         </div>
       </div>
-    </div>
-  </div>
-</div>
 
-<!-- AI Assistant row -->
-<div ng-if="!isEmployeesPage" class="row mb-4">
-  <div class="col-12">
-    <div class="card">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <span>
-          <i class="bi bi-robot"></i> Trợ lý AI cho quản lý nhập hàng
-        </span>
-        <button class="btn btn-sm btn-light" type="button" ng-click="runAdminAiAssistant()">
-          <span ng-if="!aiAssistantLoading"><i class="bi bi-play-circle"></i> Phân tích bằng AI</span>
-          <span ng-if="aiAssistantLoading">
-            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
-            Đang phân tích...
-          </span>
-        </button>
-      </div>
-      <div class="card-body">
-        <p class="text-muted small mb-3">
-          Trợ lý AI sẽ dựa trên dữ liệu bán hàng và đánh giá khách hàng trong khoảng thời gian đã chọn để gợi ý
-          <strong>mặt hàng bán chạy</strong>, <strong>thể loại nên ưu tiên nhập</strong> và các
-          <strong>cải thiện theo phản hồi khách</strong>.
-        </p>
+      <!-- Main content -->
+      <main class="col-md-9 ms-sm-auto col-lg-10 admin-main-content"
+        ng-class="{'no-scroll': showingDashboardReport || showingDashboardInventory || showingDashboardProfit}">
 
-        <div class="alert alert-danger py-2" ng-if="aiAssistantError">
-          {{aiAssistantError}}
+        <!-- Employees & Departments Subpage -->
+        <div ng-if="isEmployeesPage" ng-include="'app/views/admin-employees.html'"></div>
+
+        <!-- Admin Dashboard Content (hidden on subpage) -->
+        <div ng-if="!isEmployeesPage"
+          class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <h1 class="h2">Dashboard Admin</h1>
+          <div class="btn-toolbar mb-2 mb-md-0">
+            <div class="btn-group me-2">
+              <button type="button" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-download"></i> Export
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div ng-if="aiAssistant.overview || (aiAssistant.bookSuggestions && aiAssistant.bookSuggestions.length)">
-          <div class="mb-3" ng-if="aiAssistant.overview">
-            <h6 class="fw-semibold mb-2">1. Tổng quan từ AI</h6>
-            <p class="mb-0 text-muted" ng-bind="aiAssistant.overview"></p>
-          </div>
-
-          <div class="mb-3" ng-if="aiAssistant.recommendedCategories && aiAssistant.recommendedCategories.length">
-            <h6 class="fw-semibold mb-2">2. Thể loại nên ưu tiên nhập thêm</h6>
-            <div class="d-flex flex-wrap gap-2">
-              <span class="badge bg-warning text-dark" ng-repeat="cat in aiAssistant.recommendedCategories">
-                <i class="bi bi-bookmark-star me-1"></i>{{cat}}
-              </span>
+        <!-- Stats Cards -->
+        <div ng-if="!isEmployeesPage" class="row mb-md">
+          <div class="col-xl-3 col-md-6 mb-md">
+            <div class="card card-sm card-primary">
+              <div class="card-body p-md">
+                <div class="row no-gutters align-items-center">
+                  <div class="col mr-2">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-sm">
+                      Tổng người dùng
+                    </div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{stats.totalUsers}}</div>
+                  </div>
+                  <div class="col-auto">
+                    <i class="bi bi-people icon-lg text-gray-300"></i>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="mb-3" ng-if="aiAssistant.bookSuggestions && aiAssistant.bookSuggestions.length">
-            <h6 class="fw-semibold mb-2">3. Gợi ý sách cụ thể</h6>
-
-            <div class="mb-3" ng-if="hasExistingAiSuggestions()">
-              <div class="d-flex align-items-center mb-2">
-                <span class="badge bg-secondary me-2"><i class="bi bi-collection-check me-1"></i>Sách đã có</span>
-                <span class="text-muted small">Đã nằm trong hệ thống, nên rà tồn kho và kế hoạch nhập.</span>
-              </div>
-              <div class="table-responsive">
-                <table class="table table-sm align-middle">
-                  <thead class="table-light">
-                    <tr>
-                      <th style="width:4%">#</th>
-                      <th style="width:16%">ISBN</th>
-                      <th style="width:28%">Tên sách</th>
-                      <th style="width:16%">Thể loại</th>
-                      <th style="width:18%">Lý do</th>
-                      <th style="width:10%">Giá thị trường</th>
-                      <th style="width:8%">Nguồn</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr ng-repeat="s in aiAssistant.bookSuggestions | filter:isExistingAiSuggestion">
-                      <td>{{$index + 1}}</td>
-                      <td><code>{{s.isbn}}</code></td>
-                      <td>
-                        {{s.title}}
-                        <span class="badge bg-light text-dark ms-1">Đang có</span>
-                      </td>
-                      <td>{{s.category || '—'}}</td>
-                      <td>{{s.reason}}</td>
-                      <td>{{s.marketPrice || '—'}}</td>
-                      <td>
-                        <a ng-if="s.marketSourceUrl" ng-href="{{s.marketSourceUrl}}" target="_blank" rel="noopener">
-                          {{s.marketSourceName || 'Nguồn'}}
-                          <i class="bi bi-box-arrow-up-right ms-1"></i>
-                        </a>
-                        <span ng-if="!s.marketSourceUrl">{{s.marketSourceName || '—'}}</span>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+          <div class="col-xl-3 col-md-6 mb-md">
+            <div class="card card-sm card-success">
+              <div class="card-body p-md">
+                <div class="row no-gutters align-items-center">
+                  <div class="col mr-2">
+                    <div class="text-xs font-weight-bold text-success text-uppercase mb-sm">
+                      Tổng sách
+                    </div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{stats.totalBooks}}</div>
+                  </div>
+                  <div class="col-auto">
+                    <i class="bi bi-book icon-lg text-gray-300"></i>
+                  </div>
+                </div>
               </div>
             </div>
+          </div>
 
-            <div class="mb-3" ng-if="hasNewAiSuggestions()">
-              <div class="d-flex align-items-center mb-2">
-                <span class="badge bg-success-subtle text-success-emphasis me-2"><i class="bi bi-stars me-1"></i>Sách mới đề xuất</span>
-                <span class="text-muted small">Chưa có trong hệ thống, có thể nhập nhanh dựa trên dữ liệu AI.</span>
+          <div class="col-xl-3 col-md-6 mb-md">
+            <div class="card card-sm card-info">
+              <div class="card-body p-md">
+                <div class="row no-gutters align-items-center">
+                  <div class="col mr-2">
+                    <div class="text-xs font-weight-bold text-info text-uppercase mb-sm">
+                      Đơn hàng hôm nay
+                    </div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{stats.todayOrders}}</div>
+                  </div>
+                  <div class="col-auto">
+                    <i class="bi bi-cart-check icon-lg text-gray-300"></i>
+                  </div>
+                </div>
               </div>
-              <div class="table-responsive">
-                <table class="table table-sm align-middle">
-                  <thead class="table-light">
-                    <tr>
-                      <th style="width:4%">#</th>
-                      <th style="width:30%">Tên sách</th>
-                      <th style="width:16%">Thể loại</th>
-                      <th style="width:20%">Lý do</th>
-                      <th style="width:12%">Giá thị trường</th>
-                      <th style="width:10%">Nguồn</th>
-                      <th style="width:8%">Hành động</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr ng-repeat="s in aiAssistant.bookSuggestions | filter:isNewAiSuggestion" ng-class="{'table-success-subtle': !s._importedIsbn}">
-                      <td>{{$index + 1}}</td>
-                      <td>
-                        {{s.title}}
-                        <span class="badge bg-success ms-1">Sách mới</span>
-                        <div class="small text-muted" ng-if="s.suggestedIsbn">ISBN AI đề xuất: {{s.suggestedIsbn}}</div>
-                      </td>
-                      <td>{{s.category || '—'}}</td>
-                      <td>{{s.reason}}</td>
-                      <td>
-                        {{s.marketPrice || '—'}}
-                        <div class="text-muted small" ng-if="s.suggestedPrice">
-                          Giá bán áp dụng: {{s.suggestedPrice | vnNumber:0}} VNĐ
+            </div>
+          </div>
+
+          <div class="col-xl-3 col-md-6 mb-md">
+            <div class="card card-sm card-warning">
+              <div class="card-body p-md">
+                <div class="row no-gutters align-items-center">
+                  <div class="col mr-2">
+                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-sm">
+                      Doanh thu tháng
+                    </div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{stats.monthlyRevenue | currency:'VND '}}</div>
+                  </div>
+                  <div class="col-auto">
+                    <i class="bi bi-currency-dollar icon-lg text-gray-300"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- Dashboard Reports: Báo cáo tổng quan -->
+        <div ng-if="!isEmployeesPage" class="row mb-4 dashboard-row">
+          <!-- Doanh thu -->
+          <div class="col-lg-6 mb-4">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <span>
+                  <i class="bi bi-graph-up"></i> Báo cáo doanh thu
+                </span>
+              </div>
+              <div class="card-body">
+                <!-- Summary revenue -->
+                <div class="mb-3" ng-if="revenueSummary">
+                  <div class="alert alert-light border shadow-sm mb-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <strong>Tổng doanh thu:</strong>
+                        <span class="text-primary fw-bold">{{revenueSummary.total | vnNumber:0}} VNĐ</span>
+                        <div class="small text-muted fst-italic mt-1" ng-if="revenueSummary">
+                          Bằng chữ: {{moneyInWords(revenueSummary.total)}}
                         </div>
-                      </td>
-                      <td>
-                        <a ng-if="s.marketSourceUrl" ng-href="{{s.marketSourceUrl}}" target="_blank" rel="noopener">
-                          {{s.marketSourceName || 'Nguồn'}}
-                          <i class="bi bi-box-arrow-up-right ms-1"></i>
-                        </a>
-                        <span ng-if="!s.marketSourceUrl">{{s.marketSourceName || '—'}}</span>
-                      </td>
-                      <td>
-                        <button class="btn btn-sm btn-outline-primary w-100" type="button"
-                                ng-click="importSuggestionQuick(s)" ng-disabled="s._importedIsbn || s._importing">
-                          <span ng-if="s._importedIsbn"><i class="bi bi-check2-circle text-success"></i></span>
-                          <span ng-if="!s._importedIsbn && s._importing">
-                            <span class="spinner-border spinner-border-sm me-1"></span>
-                          </span>
-                          <span ng-if="s._importedIsbn">Đã tạo</span>
-                          <span ng-if="!s._importedIsbn && !s._importing"><i class="bi bi-plus-circle"></i> Tạo nhanh</span>
-                          <span ng-if="!s._importedIsbn && s._importing">Đang lưu...</span>
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                      </div>
+                      <div class="text-muted small">
+                        {{revenueSummary.fromDate | date:'dd/MM/yyyy'}} - {{revenueSummary.toDate | date:'dd/MM/yyyy'}}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Báo cáo doanh thu (sửa code html form) -->
+                <form class="dashboard-flex-form mb-3" autocomplete="off" ng-submit="viewRevenueReport(true)">
+                  <div>
+                    <label class="form-label">Loại báo cáo:</label>
+                    <select class="form-select" ng-model="revenueFilter.type">
+                      <option value="daily">Ngày</option>
+                      <option value="monthly">Tháng</option>
+                      <option value="quarterly">Quý</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="form-label">Từ ngày:</label>
+                    <input type="date" class="form-control" ng-model="revenueFilter.fromDate">
+                  </div>
+                  <div>
+                    <label class="form-label">Đến ngày:</label>
+                    <input type="date" class="form-control" ng-model="revenueFilter.toDate">
+                  </div>
+                  <div>
+                    <label class="form-label" style="opacity:0;">&nbsp;</label>
+                    <button class="btn btn-primary w-100" type="submit" ng-disabled="loadingRevenue">
+                      <i class="bi bi-search"></i> Xem báo cáo
+                    </button>
+                  </div>
+                </form>
+
               </div>
             </div>
+          </div>
 
-            <div class="alert alert-info mb-0" ng-if="!hasExistingAiSuggestions() && !hasNewAiSuggestions()">
-              AI chưa đề xuất thêm sách nào phù hợp cho giai đoạn đã chọn.
+          <!-- Tồn kho -->
+          <div class="col-lg-6 mb-4">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <span>
+                  <i class="bi bi-boxes"></i> Báo cáo tồn kho
+                </span>
+              </div>
+              <div class="card-body">
+                <!-- Summary inventory -->
+                <div class="mb-3" ng-if="inventorySummary">
+                  <div class="alert alert-light border shadow-sm mb-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <strong>Tổng trị giá tồn kho:</strong>
+                        <span class="text-success fw-bold">{{inventorySummary.totalValue | vnNumber:0}} VNĐ</span>
+                        <div class="small text-muted fst-italic mt-1" ng-if="inventorySummary">
+                          Bằng chữ: {{moneyInWords(inventorySummary.totalValue)}}
+                        </div>
+                      </div>
+                      <div class="text-muted small">Tổng SL tồn: {{inventorySummary.totalQuantity | number}}</div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Báo cáo tồn kho (sửa code html form) -->
+                <form class="dashboard-flex-form mb-3" autocomplete="off" ng-submit="viewInventoryReport(true)">
+                  <div>
+                    <label class="form-label">Tính đến ngày:</label>
+                    <input type="date" class="form-control" ng-model="inventoryFilter.toDate">
+                  </div>
+                  <div>
+                    <label class="form-label" style="opacity:0;">&nbsp;</label>
+                    <button class="btn btn-primary w-100" type="submit" ng-disabled="loadingInventory">
+                      <i class="bi bi-search"></i> Xem báo cáo
+                    </button>
+                  </div>
+                </form>
+
+              </div>
             </div>
           </div>
+        </div>
 
-          <div class="mb-0" ng-if="aiAssistant.customerFeedbackSummary">
-            <h6 class="fw-semibold mb-2">4. Tóm tắt phản hồi khách hàng & gợi ý cải thiện</h6>
-            <p class="mb-0 text-muted" ng-bind-html="renderAiSummaryHtml(aiAssistant.customerFeedbackSummary)"></p>
+        <!-- Profit report row -->
+        <div ng-if="!isEmployeesPage" class="row mb-4 dashboard-row">
+          <div class="col-lg-6 mb-4">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <span>
+                  <i class="bi bi-cash-coin"></i> Báo cáo lợi nhuận
+                </span>
+              </div>
+              <div class="card-body">
+                <!-- Summary profit -->
+                <div class="mb-3" ng-if="profitSummary">
+                  <div class="alert alert-light border shadow-sm mb-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <strong>Lợi nhuận:</strong>
+                        <span class="fw-bold"
+                          ng-class="{'text-success': (profitSummary.profit||0) >= 0, 'text-danger': (profitSummary.profit||0) < 0}">{{profitSummary.profit
+                          | vnNumber:0}} VNĐ</span>
+                        <div class="small text-muted fst-italic mt-1" ng-if="profitSummary">
+                          Bằng chữ: {{moneyInWords(profitSummary.profit)}}
+                        </div>
+                      </div>
+                      <div class="text-muted small">{{profitSummary.fromDate | date:'dd/MM/yyyy'}} -
+                        {{profitSummary.toDate | date:'dd/MM/yyyy'}}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <form class="dashboard-flex-form mb-3" autocomplete="off" ng-submit="viewProfitReport(true)">
+                  <div>
+                    <label class="form-label">Từ ngày:</label>
+                    <input type="date" class="form-control" ng-model="profitFilter.fromDate">
+                  </div>
+                  <div>
+                    <label class="form-label">Đến ngày:</label>
+                    <input type="date" class="form-control" ng-model="profitFilter.toDate">
+                  </div>
+                  <div>
+                    <label class="form-label" style="opacity:0;">&nbsp;</label>
+                    <button class="btn btn-primary w-100" type="submit" ng-disabled="loadingProfit">
+                      <i class="bi bi-search"></i> Xem báo cáo
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6 mb-4">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <span>
+                  <i class="bi bi-pie-chart"></i> Tỷ lệ sách theo danh mục
+                </span>
+              </div>
+              <div class="card-body">
+                <div class="row align-items-center">
+                  <div class="col-md-6 d-flex justify-content-center mb-3 mb-md-0">
+                    <div class="pie-chart"
+                      ng-style="{'background': 'conic-gradient(' + (categoryPie.gradient||'transparent') + ')'}"></div>
+                  </div>
+                  <div class="col-md-6">
+                    <ul class="pie-legend list-unstyled mb-0">
+                      <li class="d-flex align-items-center mb-2" ng-repeat="it in categoryPie.items">
+                        <span class="legend-dot" ng-style="{'background-color': it.color}"></span>
+                        <span class="flex-grow-1">{{it.label}}</span>
+                        <strong class="ms-2">{{it.percent | number:1}}%</strong>
+                      </li>
+                      <li ng-if="!categoryPie.items || categoryPie.items.length==0" class="text-muted">Chưa có dữ liệu.
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="text-muted small" ng-if="!aiAssistant.overview && (!aiAssistant.bookSuggestions || !aiAssistant.bookSuggestions.length) && !aiAssistantLoading">
-          Chưa có dữ liệu từ trợ lý AI. Hãy bấm <strong>Phân tích bằng AI</strong> để tạo báo cáo.
+        <!-- AI Assistant row -->
+        <div ng-if="!isEmployeesPage" class="row mb-4">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <span>
+                  <i class="bi bi-robot"></i> Trợ lý AI cho quản lý nhập hàng
+                </span>
+                <button class="btn btn-sm btn-light" type="button" ng-click="runAdminAiAssistant()">
+                  <span ng-if="!aiAssistantLoading"><i class="bi bi-play-circle"></i> Phân tích bằng AI</span>
+                  <span ng-if="aiAssistantLoading">
+                    <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                    Đang phân tích...
+                  </span>
+                </button>
+              </div>
+              <div class="card-body">
+                <p class="text-muted small mb-3">
+                  Trợ lý AI sẽ dựa trên dữ liệu bán hàng và đánh giá khách hàng trong khoảng thời gian đã chọn để gợi ý
+                  <strong>mặt hàng bán chạy</strong>, <strong>thể loại nên ưu tiên nhập</strong> và các
+                  <strong>cải thiện theo phản hồi khách</strong>.
+                </p>
+
+                <div class="alert alert-danger py-2" ng-if="aiAssistantError">
+                  {{aiAssistantError}}
+                </div>
+
+                <div
+                  ng-if="aiAssistant.overview || (aiAssistant.bookSuggestions && aiAssistant.bookSuggestions.length)">
+                  <div class="mb-3" ng-if="aiAssistant.overview">
+                    <h6 class="fw-semibold mb-2">1. Tổng quan từ AI</h6>
+                    <p class="mb-0 text-muted" ng-bind="aiAssistant.overview"></p>
+                  </div>
+
+                  <div class="mb-3"
+                    ng-if="aiAssistant.recommendedCategories && aiAssistant.recommendedCategories.length">
+                    <h6 class="fw-semibold mb-2">2. Thể loại nên ưu tiên nhập thêm</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                      <span class="badge bg-warning text-dark" ng-repeat="cat in aiAssistant.recommendedCategories">
+                        <i class="bi bi-bookmark-star me-1"></i>{{cat}}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="mb-3" ng-if="aiAssistant.bookSuggestions && aiAssistant.bookSuggestions.length">
+                    <h6 class="fw-semibold mb-2">3. Gợi ý sách cụ thể</h6>
+
+                    <div class="mb-3" ng-if="hasExistingAiSuggestions()">
+                      <div class="d-flex align-items-center mb-2">
+                        <span class="badge bg-secondary me-2"><i class="bi bi-collection-check me-1"></i>Sách đã
+                          có</span>
+                        <span class="text-muted small">Đã nằm trong hệ thống, nên rà tồn kho và kế hoạch nhập.</span>
+                      </div>
+                      <div class="table-responsive">
+                        <table class="table table-sm align-middle">
+                          <thead class="table-light">
+                            <tr>
+                              <th style="width:4%">#</th>
+                              <th style="width:16%">ISBN</th>
+                              <th style="width:28%">Tên sách</th>
+                              <th style="width:16%">Thể loại</th>
+                              <th style="width:18%">Lý do</th>
+                              <th style="width:10%">Giá thị trường</th>
+                              <th style="width:8%">Nguồn</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr ng-repeat="s in aiAssistant.bookSuggestions | filter:isExistingAiSuggestion">
+                              <td>{{$index + 1}}</td>
+                              <td><code>{{s.isbn}}</code></td>
+                              <td>
+                                {{s.title}}
+                                <span class="badge bg-light text-dark ms-1">Đang có</span>
+                              </td>
+                              <td>{{s.category || '—'}}</td>
+                              <td>{{s.reason}}</td>
+                              <td>{{s.marketPrice || '—'}}</td>
+                              <td>
+                                <a ng-if="s.marketSourceUrl" ng-href="{{s.marketSourceUrl}}" target="_blank"
+                                  rel="noopener">
+                                  {{s.marketSourceName || 'Nguồn'}}
+                                  <i class="bi bi-box-arrow-up-right ms-1"></i>
+                                </a>
+                                <span ng-if="!s.marketSourceUrl">{{s.marketSourceName || '—'}}</span>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    <div class="mb-3" ng-if="hasNewAiSuggestions()">
+                      <div class="d-flex align-items-center mb-2">
+                        <span class="badge bg-success-subtle text-success-emphasis me-2"><i
+                            class="bi bi-stars me-1"></i>Sách mới đề xuất</span>
+                        <span class="text-muted small">Chưa có trong hệ thống, có thể nhập nhanh dựa trên dữ liệu
+                          AI.</span>
+                      </div>
+                      <div class="table-responsive">
+                        <table class="table table-sm align-middle">
+                          <thead class="table-light">
+                            <tr>
+                              <th style="width:4%">#</th>
+                              <th style="width:30%">Tên sách</th>
+                              <th style="width:16%">Thể loại</th>
+                              <th style="width:20%">Lý do</th>
+                              <th style="width:12%">Giá thị trường</th>
+                              <th style="width:10%">Nguồn</th>
+                              <th style="width:8%">Hành động</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr ng-repeat="s in aiAssistant.bookSuggestions | filter:isNewAiSuggestion"
+                              ng-class="{'table-success-subtle': !s._importedIsbn}">
+                              <td>{{$index + 1}}</td>
+                              <td>
+                                {{s.title}}
+                                <span class="badge bg-success ms-1">Sách mới</span>
+                                <div class="small text-muted" ng-if="s.suggestedIsbn">ISBN AI đề xuất:
+                                  {{s.suggestedIsbn}}</div>
+                              </td>
+                              <td>{{s.category || '—'}}</td>
+                              <td>{{s.reason}}</td>
+                              <td>
+                                {{s.marketPrice || '—'}}
+                                <div class="text-muted small" ng-if="s.suggestedPrice">
+                                  Giá bán áp dụng: {{s.suggestedPrice | vnNumber:0}} VNĐ
+                                </div>
+                              </td>
+                              <td>
+                                <a ng-if="s.marketSourceUrl" ng-href="{{s.marketSourceUrl}}" target="_blank"
+                                  rel="noopener">
+                                  {{s.marketSourceName || 'Nguồn'}}
+                                  <i class="bi bi-box-arrow-up-right ms-1"></i>
+                                </a>
+                                <span ng-if="!s.marketSourceUrl">{{s.marketSourceName || '—'}}</span>
+                              </td>
+                              <td>
+                                <button class="btn btn-sm btn-outline-primary w-100" type="button"
+                                  ng-click="importSuggestionQuick(s)" ng-disabled="s._importedIsbn || s._importing">
+                                  <span ng-if="s._importedIsbn"><i class="bi bi-check2-circle text-success"></i></span>
+                                  <span ng-if="!s._importedIsbn && s._importing">
+                                    <span class="spinner-border spinner-border-sm me-1"></span>
+                                  </span>
+                                  <span ng-if="s._importedIsbn">Đã tạo</span>
+                                  <span ng-if="!s._importedIsbn && !s._importing"><i class="bi bi-plus-circle"></i> Tạo
+                                    nhanh</span>
+                                  <span ng-if="!s._importedIsbn && s._importing">Đang lưu...</span>
+                                </button>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    <div class="alert alert-info mb-0" ng-if="!hasExistingAiSuggestions() && !hasNewAiSuggestions()">
+                      AI chưa đề xuất thêm sách nào phù hợp cho giai đoạn đã chọn.
+                    </div>
+                  </div>
+
+                  <div class="mb-0" ng-if="aiAssistant.customerFeedbackSummary">
+                    <h6 class="fw-semibold mb-2">4. Tóm tắt phản hồi khách hàng & gợi ý cải thiện</h6>
+                    <p class="mb-0 text-muted" ng-bind-html="renderAiSummaryHtml(aiAssistant.customerFeedbackSummary)">
+                    </p>
+                  </div>
+                </div>
+
+                <div class="text-muted small"
+                  ng-if="!aiAssistant.overview && (!aiAssistant.bookSuggestions || !aiAssistant.bookSuggestions.length) && !aiAssistantLoading">
+                  Chưa có dữ liệu từ trợ lý AI. Hãy bấm <strong>Phân tích bằng AI</strong> để tạo báo cáo.
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
-</div>
 
 
-        
+
         <!-- Báo cáo doanh thu modal (đặt trong layout để dùng chung scope) -->
         <div class="dashboard-backdrop" ng-show="showingDashboardReport" ng-click="showingDashboardReport=false"></div>
         <div class="dashboard-report-modal" id="revenueReportModal" ng-show="showingDashboardReport">
-  <div class="modal-content" ng-click="$event.stopPropagation()">
-    <div class="modal-header">
-      <h5 class="modal-title"><i class="bi bi-bar-chart-line me-2"></i>Preview Báo Cáo Doanh Thu</h5>
-      <div class="d-flex align-items-center" style="gap:8px;">
-        <button type="button" class="btn btn-sm btn-light" ng-click="$event.stopPropagation(); exportRevenuePdf()">
-          <i class="bi bi-download"></i> Tải PDF
-        </button>
-        <button type="button" class="btn-close" ng-click="$event.stopPropagation(); showingDashboardReport=false"></button>
-      </div>
-    </div>
-    <div class="modal-body">
-      <div ng-if="revenueReportData">
-        <div class="report-header">
-          <div class="brand">
-            <div class="brand-name">BookStore</div>
-            <div class="brand-sub">Hệ thống quản trị báo cáo</div>
-          </div>
-          <div class="report-meta">
-            <div class="meta-item"><span>Thời gian:</span>
-              <strong>{{revenueFilter.fromDate | date:'dd/MM/yyyy'}} - {{revenueFilter.toDate | date:'dd/MM/yyyy'}}</strong>
+          <div class="modal-content" ng-click="$event.stopPropagation()">
+            <div class="modal-header">
+              <h5 class="modal-title"><i class="bi bi-bar-chart-line me-2"></i>Preview Báo Cáo Doanh Thu</h5>
+              <div class="d-flex align-items-center" style="gap:8px;">
+                <button type="button" class="btn btn-sm btn-light"
+                  ng-click="$event.stopPropagation(); exportRevenuePdf()">
+                  <i class="bi bi-download"></i> Tải PDF
+                </button>
+                <button type="button" class="btn-close"
+                  ng-click="$event.stopPropagation(); showingDashboardReport=false"></button>
+              </div>
             </div>
-            <div class="meta-item"><span>Ngày báo cáo:</span><strong>{{ now | date:'dd/MM/yyyy HH:mm' }}</strong></div>
-            <div class="meta-item"><span>Người lập:</span>
-              <strong>{{getReporterName(reportGeneratedBy) || getReporterName()}}</strong>
-              <span class="text-muted" ng-if="(reportGeneratedBy && reportGeneratedBy.email)">&lt;{{reportGeneratedBy.email}}&gt;</span>
-              <span class="text-muted" ng-if="!(reportGeneratedBy && reportGeneratedBy.email) && currentUser.email">&lt;{{currentUser.email}}&gt;</span>
+            <div class="modal-body">
+              <div ng-if="revenueReportData">
+                <div class="report-header">
+                  <div class="brand">
+                    <div class="brand-name">BookStore</div>
+                    <div class="brand-sub">Hệ thống quản trị báo cáo</div>
+                  </div>
+                  <div class="report-meta">
+                    <div class="meta-item"><span>Thời gian:</span>
+                      <strong>{{revenueFilter.fromDate | date:'dd/MM/yyyy'}} - {{revenueFilter.toDate |
+                        date:'dd/MM/yyyy'}}</strong>
+                    </div>
+                    <div class="meta-item"><span>Ngày báo cáo:</span><strong>{{ now | date:'dd/MM/yyyy HH:mm'
+                        }}</strong></div>
+                    <div class="meta-item"><span>Người lập:</span>
+                      <strong>{{getReporterName(reportGeneratedBy) || getReporterName()}}</strong>
+                      <span class="text-muted"
+                        ng-if="(reportGeneratedBy && reportGeneratedBy.email)">&lt;{{reportGeneratedBy.email}}&gt;</span>
+                      <span class="text-muted"
+                        ng-if="!(reportGeneratedBy && reportGeneratedBy.email) && currentUser.email">&lt;{{currentUser.email}}&gt;</span>
+                    </div>
+                  </div>
+                </div>
+                <h2 class="report-title">BÁO CÁO DOANH THU {{revenueFilter.type == 'daily' ? 'Ngày' : revenueFilter.type
+                  == 'monthly' ? 'Tháng' : 'Quý' | uppercase}}</h2>
+                <div class="mb-4">
+                  <table class="table table-bordered">
+                    <thead class="table-light">
+                      <tr>
+                        <th>{{getRevenueHeader()}}</th>
+                        <th>Doanh Thu (VND)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr ng-repeat="item in revenueReportData">
+                        <td ng-bind="item.label"></td>
+                        <td ng-bind="item.value | vnNumber:0"></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="h4 fw-bold text-end">Tổng doanh thu: <span class="text-danger">{{revenueReportTotal |
+                    vnNumber:0}} VNĐ</span></div>
+                <div class="text-muted fst-italic text-end mt-1"
+                  ng-if="revenueReportTotal !== null && revenueReportTotal !== undefined">
+                  Bằng chữ: {{moneyInWords(revenueReportTotal)}}
+                </div>
+                <div class="fw-bold mt-4 mb-1" style="text-align:right">Người phê duyệt</div>
+                <div class="fst-italic" style="text-align:right">(Ký và ghi rõ họ & tên)</div>
+              </div>
+              <div ng-if="!revenueReportData" class="text-center text-muted">Chưa có dữ liệu xem chi tiết.</div>
             </div>
           </div>
-        </div>
-        <h2 class="report-title">BÁO CÁO DOANH THU {{revenueFilter.type == 'daily' ? 'Ngày' : revenueFilter.type == 'monthly' ? 'Tháng' : 'Quý' | uppercase}}</h2>
-        <div class="mb-4">
-          <table class="table table-bordered">
-            <thead class="table-light">
-              <tr><th>{{getRevenueHeader()}}</th><th>Doanh Thu (VND)</th></tr>
-            </thead>
-            <tbody>
-              <tr ng-repeat="item in revenueReportData">
-                <td ng-bind="item.label"></td>
-                <td ng-bind="item.value | vnNumber:0"></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="h4 fw-bold text-end">Tổng doanh thu: <span class="text-danger">{{revenueReportTotal | vnNumber:0}} VNĐ</span></div>
-        <div class="text-muted fst-italic text-end mt-1" ng-if="revenueReportTotal !== null && revenueReportTotal !== undefined">
-          Bằng chữ: {{moneyInWords(revenueReportTotal)}}
-        </div>
-        <div class="fw-bold mt-4 mb-1" style="text-align:right">Người phê duyệt</div>
-        <div class="fst-italic" style="text-align:right">(Ký và ghi rõ họ & tên)</div>
-      </div>
-      <div ng-if="!revenueReportData" class="text-center text-muted">Chưa có dữ liệu xem chi tiết.</div>
-    </div>
-  </div>
         </div>
 
         <!-- Báo cáo tồn kho modal -->
-        <div class="inventory-backdrop" ng-show="showingDashboardInventory" ng-click="showingDashboardInventory=false"></div>
+        <div class="inventory-backdrop" ng-show="showingDashboardInventory" ng-click="showingDashboardInventory=false">
+        </div>
         <div class="inventory-report-modal" id="inventoryReportModal" ng-show="showingDashboardInventory">
-  <div class="modal-content" ng-click="$event.stopPropagation()">
-    <div class="modal-header">
-      <h5 class="modal-title"><i class="bi bi-archive me-2"></i> Báo Cáo Tồn Kho</h5>
-      <div class="d-flex align-items-center" style="gap:8px;">
-        <button type="button" class="btn btn-sm btn-light" ng-click="$event.stopPropagation(); exportInventoryPdf()">
-          <i class="bi bi-download"></i> Tải PDF
-        </button>
-        <button type="button" class="btn-close" ng-click="$event.stopPropagation(); showingDashboardInventory=false"></button>
-      </div>
-    </div>
-    <div class="modal-body">
-      <div ng-if="inventoryReportData">
-        <div class="report-header">
-          <div class="brand">
-            <div class="brand-name">BookStore</div>
-            <div class="brand-sub">Hệ thống quản trị báo cáo</div>
-          </div>
-          <div class="report-meta">
-            <div class="meta-item"><span>Tính đến ngày:</span><strong>{{inventoryFilter.toDate | date:'dd/MM/yyyy'}}</strong></div>
-            <div class="meta-item"><span>Ngày báo cáo:</span><strong>{{ now | date:'dd/MM/yyyy HH:mm' }}</strong></div>
-            <div class="meta-item"><span>Người lập:</span>
-              <strong>{{getReporterName(reportGeneratedByInventory) || getReporterName()}}</strong>
-              <span class="text-muted" ng-if="(reportGeneratedByInventory && reportGeneratedByInventory.email)">&lt;{{reportGeneratedByInventory.email}}&gt;</span>
-              <span class="text-muted" ng-if="!(reportGeneratedByInventory && reportGeneratedByInventory.email) && currentUser.email">&lt;{{currentUser.email}}&gt;</span>
+          <div class="modal-content" ng-click="$event.stopPropagation()">
+            <div class="modal-header">
+              <h5 class="modal-title"><i class="bi bi-archive me-2"></i> Báo Cáo Tồn Kho</h5>
+              <div class="d-flex align-items-center" style="gap:8px;">
+                <button type="button" class="btn btn-sm btn-light"
+                  ng-click="$event.stopPropagation(); exportInventoryPdf()">
+                  <i class="bi bi-download"></i> Tải PDF
+                </button>
+                <button type="button" class="btn-close"
+                  ng-click="$event.stopPropagation(); showingDashboardInventory=false"></button>
+              </div>
+            </div>
+            <div class="modal-body">
+              <div ng-if="inventoryReportData">
+                <div class="report-header">
+                  <div class="brand">
+                    <div class="brand-name">BookStore</div>
+                    <div class="brand-sub">Hệ thống quản trị báo cáo</div>
+                  </div>
+                  <div class="report-meta">
+                    <div class="meta-item"><span>Tính đến ngày:</span><strong>{{inventoryFilter.toDate |
+                        date:'dd/MM/yyyy'}}</strong></div>
+                    <div class="meta-item"><span>Ngày báo cáo:</span><strong>{{ now | date:'dd/MM/yyyy HH:mm'
+                        }}</strong></div>
+                    <div class="meta-item"><span>Người lập:</span>
+                      <strong>{{getReporterName(reportGeneratedByInventory) || getReporterName()}}</strong>
+                      <span class="text-muted"
+                        ng-if="(reportGeneratedByInventory && reportGeneratedByInventory.email)">&lt;{{reportGeneratedByInventory.email}}&gt;</span>
+                      <span class="text-muted"
+                        ng-if="!(reportGeneratedByInventory && reportGeneratedByInventory.email) && currentUser.email">&lt;{{currentUser.email}}&gt;</span>
+                    </div>
+                  </div>
+                </div>
+
+
+                <h2 class="report-title">BÁO CÁO TỒN KHO</h2>
+                <div>
+                  <table class="table table-bordered">
+                    <thead class="table-light">
+                      <tr>
+                        <th>STT</th>
+                        <th>ISBN</th>
+                        <th>Tên sách</th>
+                        <th class="text-end">SL tồn</th>
+                        <th class="text-end">Đơn giá TB</th>
+                        <th class="text-end">Trị giá</th>
+                      </tr>
+                    </thead>
+                    <tbody ng-repeat="grp in inventoryGroups">
+                      <tr class="table-secondary">
+                        <td colspan="6"><strong>{{grp.category}}</strong></td>
+                      </tr>
+                      <tr ng-repeat="item in grp.items">
+                        <td>{{$index+1}}</td>
+                        <td><code>{{item.isbn}}</code></td>
+                        <td>{{item.title}}</td>
+                        <td class="text-end">{{item.quantityOnHand | number}}</td>
+                        <td class="text-end">{{item.averagePrice | vnNumber:0}}</td>
+                        <td class="text-end">{{item.value | vnNumber:0}}</td>
+                      </tr>
+                      <tr>
+                        <td colspan="5" class="text-end"><strong>Tổng trị giá</strong></td>
+                        <td class="text-end"><strong>{{grp.subtotal | vnNumber:0}} VNĐ</strong></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="h4 fw-bold text-end mt-2">TỔNG TRỊ GIÁ TỒN KHO: <span
+                    class="text-dark">{{inventoryReportTotal | vnNumber:0}} VNĐ</span></div>
+                <div class="text-muted fst-italic text-end mt-1"
+                  ng-if="inventoryReportTotal !== null && inventoryReportTotal !== undefined">
+                  Bằng chữ: {{moneyInWords(inventoryReportTotal)}}
+                </div>
+                <div class="fw-bold mt-4 mb-1" style="text-align:right">Người phê duyệt</div>
+                <div class="fst-italic" style="text-align:right">(Ký và ghi rõ họ & tên)</div>
+              </div>
+              <div ng-if="!inventoryReportData" class="text-center text-muted">Chưa có dữ liệu xem chi tiết.</div>
             </div>
           </div>
-        </div>
-
-        
-        <h2 class="report-title">BÁO CÁO TỒN KHO</h2>
-        <div>
-          <table class="table table-bordered">
-            <thead class="table-light">
-              <tr>
-                <th>STT</th>
-                <th>ISBN</th>
-                <th>Tên sách</th>
-                <th class="text-end">SL tồn</th>
-                <th class="text-end">Đơn giá TB</th>
-                <th class="text-end">Trị giá</th>
-              </tr>
-            </thead>
-            <tbody ng-repeat="grp in inventoryGroups">
-              <tr class="table-secondary">
-                <td colspan="6"><strong>{{grp.category}}</strong></td>
-              </tr>
-              <tr ng-repeat="item in grp.items">
-                <td>{{$index+1}}</td>
-                <td><code>{{item.isbn}}</code></td>
-                <td>{{item.title}}</td>
-                <td class="text-end">{{item.quantityOnHand | number}}</td>
-                <td class="text-end">{{item.averagePrice | vnNumber:0}}</td>
-                <td class="text-end">{{item.value | vnNumber:0}}</td>
-              </tr>
-              <tr>
-                <td colspan="5" class="text-end"><strong>Tổng trị giá</strong></td>
-                <td class="text-end"><strong>{{grp.subtotal | vnNumber:0}} VNĐ</strong></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="h4 fw-bold text-end mt-2">TỔNG TRỊ GIÁ TỒN KHO: <span class="text-dark">{{inventoryReportTotal | vnNumber:0}} VNĐ</span></div>
-        <div class="text-muted fst-italic text-end mt-1" ng-if="inventoryReportTotal !== null && inventoryReportTotal !== undefined">
-          Bằng chữ: {{moneyInWords(inventoryReportTotal)}}
-        </div>
-        <div class="fw-bold mt-4 mb-1" style="text-align:right">Người phê duyệt</div>
-        <div class="fst-italic" style="text-align:right">(Ký và ghi rõ họ & tên)</div>
-      </div>
-      <div ng-if="!inventoryReportData" class="text-center text-muted">Chưa có dữ liệu xem chi tiết.</div>
-    </div>
-  </div>
         </div>
 
         <!-- Báo cáo lợi nhuận modal -->
         <div class="profit-backdrop" ng-show="showingDashboardProfit" ng-click="showingDashboardProfit=false"></div>
         <div class="profit-report-modal" id="profitReportModal" ng-show="showingDashboardProfit">
-  <div class="modal-content" ng-click="$event.stopPropagation()">
-    <div class="modal-header">
-      <h5 class="modal-title"><i class="bi bi-cash-coin me-2"></i> Báo Cáo Lợi Nhuận</h5>
-      <div class="d-flex align-items-center" style="gap:8px;">
-        <button type="button" class="btn btn-sm btn-light" ng-click="$event.stopPropagation(); exportProfitPdf()">
-          <i class="bi bi-download"></i> Tải PDF
-        </button>
-        <button type="button" class="btn-close" ng-click="$event.stopPropagation(); showingDashboardProfit=false"></button>
-      </div>
-    </div>
-    <div class="modal-body">
-      <div ng-if="loadingProfit" class="text-center py-4">
-        <div class="spinner-border text-primary" role="status"></div>
-        <div class="text-muted mt-2">Đang tải báo cáo...</div>
-      </div>
-      <div ng-if="!loadingProfit && profitReportData">
-        <div class="report-header">
-          <div class="brand">
-            <div class="brand-name">BookStore</div>
-            <div class="brand-sub">Hệ thống quản trị báo cáo</div>
-          </div>
-          <div class="report-meta">
-            <div class="meta-item"><span>Thời gian:</span><strong>{{profitFilter.fromDate | date:'dd/MM/yyyy'}} - {{profitFilter.toDate | date:'dd/MM/yyyy'}}</strong></div>
-            <div class="meta-item"><span>Ngày báo cáo:</span><strong>{{ now | date:'dd/MM/yyyy HH:mm' }}</strong></div>
-            <div class="meta-item"><span>Người lập:</span>
-              <strong>{{getReporterName(reportGeneratedByProfit) || getReporterName()}}</strong>
-              <span class="text-muted" ng-if="(reportGeneratedByProfit && reportGeneratedByProfit.email)">&lt;{{reportGeneratedByProfit.email}}&gt;</span>
-              <span class="text-muted" ng-if="!(reportGeneratedByProfit && reportGeneratedByProfit.email) && currentUser.email">&lt;{{currentUser.email}}&gt;</span>
+          <div class="modal-content" ng-click="$event.stopPropagation()">
+            <div class="modal-header">
+              <h5 class="modal-title"><i class="bi bi-cash-coin me-2"></i> Báo Cáo Lợi Nhuận</h5>
+              <div class="d-flex align-items-center" style="gap:8px;">
+                <button type="button" class="btn btn-sm btn-light"
+                  ng-click="$event.stopPropagation(); exportProfitPdf()">
+                  <i class="bi bi-download"></i> Tải PDF
+                </button>
+                <button type="button" class="btn-close"
+                  ng-click="$event.stopPropagation(); showingDashboardProfit=false"></button>
+              </div>
+            </div>
+            <div class="modal-body">
+              <div ng-if="loadingProfit" class="text-center py-4">
+                <div class="spinner-border text-primary" role="status"></div>
+                <div class="text-muted mt-2">Đang tải báo cáo...</div>
+              </div>
+              <div ng-if="!loadingProfit && profitReportData">
+                <div class="report-header">
+                  <div class="brand">
+                    <div class="brand-name">BookStore</div>
+                    <div class="brand-sub">Hệ thống quản trị báo cáo</div>
+                  </div>
+                  <div class="report-meta">
+                    <div class="meta-item"><span>Thời gian:</span><strong>{{profitFilter.fromDate | date:'dd/MM/yyyy'}}
+                        - {{profitFilter.toDate | date:'dd/MM/yyyy'}}</strong></div>
+                    <div class="meta-item"><span>Ngày báo cáo:</span><strong>{{ now | date:'dd/MM/yyyy HH:mm'
+                        }}</strong></div>
+                    <div class="meta-item"><span>Người lập:</span>
+                      <strong>{{getReporterName(reportGeneratedByProfit) || getReporterName()}}</strong>
+                      <span class="text-muted"
+                        ng-if="(reportGeneratedByProfit && reportGeneratedByProfit.email)">&lt;{{reportGeneratedByProfit.email}}&gt;</span>
+                      <span class="text-muted"
+                        ng-if="!(reportGeneratedByProfit && reportGeneratedByProfit.email) && currentUser.email">&lt;{{currentUser.email}}&gt;</span>
+                    </div>
+                  </div>
+                </div>
+                <h2 class="report-title">BÁO CÁO LỢI NHUẬN</h2>
+                <div class="mb-3">
+                  <table class="table table-bordered">
+                    <tbody>
+                      <tr>
+                        <th style="width:40%">Số đơn hàng (đã thanh toán)</th>
+                        <td class="text-end">{{profitReportData.ordersCount | number}}</td>
+                      </tr>
+                      <tr>
+                        <th>Doanh thu (thu tiền)</th>
+                        <td class="text-end">{{profitReportData.revenue | vnNumber:0}} VNĐ</td>
+                      </tr>
+                      <tr>
+                        <th>Giá vốn hàng bán (COGS)</th>
+                        <td class="text-end">{{profitReportData.cogs | vnNumber:0}} VNĐ</td>
+                      </tr>
+                      <tr>
+                        <th>Chi phí hoạt động</th>
+                        <td class="text-end">{{profitReportData.opex | vnNumber:0}} VNĐ</td>
+                      </tr>
+                      <tr class="table-light">
+                        <th>LỢI NHUẬN</th>
+                        <td class="text-end fw-bold"
+                          ng-class="{'text-success': (profitReportData.profit||0) >= 0, 'text-danger': (profitReportData.profit||0) < 0}">
+                          {{profitReportData.profit | vnNumber:0}} VNĐ</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="text-muted fst-italic text-end"
+                  ng-if="profitReportData && profitReportData.profit !== undefined && profitReportData.profit !== null">
+                  Bằng chữ: {{moneyInWords(profitReportData.profit)}}
+                </div>
+
+                <!-- Top Sold Items -->
+                <div class="mt-4 mb-4 profit-table-section"
+                  ng-if="profitReportData.topSoldItems && profitReportData.topSoldItems.length > 0"
+                  style="page-break-inside: avoid;">
+                  <h4 class="mb-3" style="page-break-after: avoid;">Sách bán chạy nhất</h4>
+                  <div class="table-responsive" style="page-break-inside: avoid;">
+                    <table class="table table-bordered table-sm profit-table"
+                      style="page-break-inside: avoid; border-collapse: collapse;">
+                      <thead class="table-light">
+                        <tr style="page-break-inside: avoid; page-break-after: avoid;">
+                          <th style="width: 5%">STT</th>
+                          <th style="width: 15%">ISBN</th>
+                          <th style="width: 30%">Tên sách</th>
+                          <th style="width: 10%" class="text-center">SL bán</th>
+                          <th style="width: 15%" class="text-end">Doanh thu</th>
+                          <th style="width: 15%" class="text-end">Giá vốn</th>
+                          <th style="width: 10%" class="text-end">Lợi nhuận</th>
+                        </tr>
+                      </thead>
+                      <tbody style="page-break-inside: avoid;">
+                        <tr ng-repeat="item in profitReportData.topSoldItems"
+                          style="page-break-inside: avoid; page-break-after: auto;">
+                          <td class="text-center" style="page-break-inside: avoid;">{{$index + 1}}</td>
+                          <td style="page-break-inside: avoid;"><code>{{item.isbn}}</code></td>
+                          <td style="page-break-inside: avoid;">{{item.title}}</td>
+                          <td class="text-center" style="page-break-inside: avoid;">{{item.qtySold | number}}</td>
+                          <td class="text-end" style="page-break-inside: avoid;">{{item.revenue | vnNumber:0}} ₫</td>
+                          <td class="text-end" style="page-break-inside: avoid;">{{item.cogs | vnNumber:0}} ₫</td>
+                          <td class="text-end fw-bold"
+                            ng-class="{'text-success': (item.profit||0) >= 0, 'text-danger': (item.profit||0) < 0}"
+                            style="page-break-inside: avoid;">
+                            {{item.profit | vnNumber:0}} ₫
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <!-- Top Margin Items -->
+                <div class="mt-4 mb-4 profit-table-section"
+                  ng-if="profitReportData.topMarginItems && profitReportData.topMarginItems.length > 0"
+                  style="page-break-inside: avoid;">
+                  <h4 class="mb-3" style="page-break-after: avoid;">Sách có tỷ suất lợi nhuận cao nhất</h4>
+                  <div class="table-responsive" style="page-break-inside: avoid;">
+                    <table class="table table-bordered table-sm profit-table"
+                      style="page-break-inside: avoid; border-collapse: collapse;">
+                      <thead class="table-light">
+                        <tr style="page-break-inside: avoid; page-break-after: avoid;">
+                          <th style="width: 5%">STT</th>
+                          <th style="width: 15%">ISBN</th>
+                          <th style="width: 30%">Tên sách</th>
+                          <th style="width: 10%" class="text-center">SL bán</th>
+                          <th style="width: 15%" class="text-end">Doanh thu</th>
+                          <th style="width: 15%" class="text-end">Giá vốn</th>
+                          <th style="width: 10%" class="text-end">Lợi nhuận</th>
+                          <th style="width: 10%" class="text-end">Tỷ suất (%)</th>
+                        </tr>
+                      </thead>
+                      <tbody style="page-break-inside: avoid;">
+                        <tr ng-repeat="item in profitReportData.topMarginItems"
+                          style="page-break-inside: avoid; page-break-after: auto;">
+                          <td class="text-center" style="page-break-inside: avoid;">{{$index + 1}}</td>
+                          <td style="page-break-inside: avoid;"><code>{{item.isbn}}</code></td>
+                          <td style="page-break-inside: avoid;">{{item.title}}</td>
+                          <td class="text-center" style="page-break-inside: avoid;">{{item.qtySold | number}}</td>
+                          <td class="text-end" style="page-break-inside: avoid;">{{item.revenue | vnNumber:0}} ₫</td>
+                          <td class="text-end" style="page-break-inside: avoid;">{{item.cogs | vnNumber:0}} ₫</td>
+                          <td class="text-end fw-bold"
+                            ng-class="{'text-success': (item.profit||0) >= 0, 'text-danger': (item.profit||0) < 0}"
+                            style="page-break-inside: avoid;">
+                            {{item.profit | vnNumber:0}} ₫
+                          </td>
+                          <td class="text-end fw-bold"
+                            ng-class="{'text-success': (item.marginPct||0) >= 0, 'text-danger': (item.marginPct||0) < 0}"
+                            style="page-break-inside: avoid;">
+                            {{item.marginPct | number:2}}%
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div class="fw-bold mt-4 mb-1" style="text-align:right">Người phê duyệt</div>
+                <div class="fst-italic" style="text-align:right">(Ký và ghi rõ họ & tên)</div>
+              </div>
+              <div ng-if="!loadingProfit && !profitReportData" class="text-center text-muted">Chưa có dữ liệu xem chi
+                tiết.</div>
             </div>
           </div>
         </div>
-        <h2 class="report-title">BÁO CÁO LỢI NHUẬN</h2>
-        <div class="mb-3">
-          <table class="table table-bordered">
-            <tbody>
-              <tr><th style="width:40%">Số đơn hàng (đã thanh toán)</th><td class="text-end">{{profitReportData.ordersCount | number}}</td></tr>
-              <tr><th>Doanh thu (thu tiền)</th><td class="text-end">{{profitReportData.revenue | vnNumber:0}} VNĐ</td></tr>
-              <tr><th>Giá vốn hàng bán (COGS)</th><td class="text-end">{{profitReportData.cogs | vnNumber:0}} VNĐ</td></tr>
-              <tr><th>Chi phí hoạt động</th><td class="text-end">{{profitReportData.opex | vnNumber:0}} VNĐ</td></tr>
-              <tr class="table-light"><th>LỢI NHUẬN</th><td class="text-end fw-bold" ng-class="{'text-success': (profitReportData.profit||0) >= 0, 'text-danger': (profitReportData.profit||0) < 0}">{{profitReportData.profit | vnNumber:0}} VNĐ</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="text-muted fst-italic text-end" ng-if="profitReportData && profitReportData.profit !== undefined && profitReportData.profit !== null">
-          Bằng chữ: {{moneyInWords(profitReportData.profit)}}
-        </div>
 
-        <!-- Top Sold Items -->
-        <div class="mt-4 mb-4 profit-table-section" ng-if="profitReportData.topSoldItems && profitReportData.topSoldItems.length > 0" style="page-break-inside: avoid;">
-          <h4 class="mb-3" style="page-break-after: avoid;">Sách bán chạy nhất</h4>
-          <div class="table-responsive" style="page-break-inside: avoid;">
-            <table class="table table-bordered table-sm profit-table" style="page-break-inside: avoid; border-collapse: collapse;">
-              <thead class="table-light">
-                <tr style="page-break-inside: avoid; page-break-after: avoid;">
-                  <th style="width: 5%">STT</th>
-                  <th style="width: 15%">ISBN</th>
-                  <th style="width: 30%">Tên sách</th>
-                  <th style="width: 10%" class="text-center">SL bán</th>
-                  <th style="width: 15%" class="text-end">Doanh thu</th>
-                  <th style="width: 15%" class="text-end">Giá vốn</th>
-                  <th style="width: 10%" class="text-end">Lợi nhuận</th>
-                </tr>
-              </thead>
-              <tbody style="page-break-inside: avoid;">
-                <tr ng-repeat="item in profitReportData.topSoldItems" style="page-break-inside: avoid; page-break-after: auto;">
-                  <td class="text-center" style="page-break-inside: avoid;">{{$index + 1}}</td>
-                  <td style="page-break-inside: avoid;"><code>{{item.isbn}}</code></td>
-                  <td style="page-break-inside: avoid;">{{item.title}}</td>
-                  <td class="text-center" style="page-break-inside: avoid;">{{item.qtySold | number}}</td>
-                  <td class="text-end" style="page-break-inside: avoid;">{{item.revenue | vnNumber:0}} ₫</td>
-                  <td class="text-end" style="page-break-inside: avoid;">{{item.cogs | vnNumber:0}} ₫</td>
-                  <td class="text-end fw-bold" ng-class="{'text-success': (item.profit||0) >= 0, 'text-danger': (item.profit||0) < 0}" style="page-break-inside: avoid;">
-                    {{item.profit | vnNumber:0}} ₫
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Top Margin Items -->
-        <div class="mt-4 mb-4 profit-table-section" ng-if="profitReportData.topMarginItems && profitReportData.topMarginItems.length > 0" style="page-break-inside: avoid;">
-          <h4 class="mb-3" style="page-break-after: avoid;">Sách có tỷ suất lợi nhuận cao nhất</h4>
-          <div class="table-responsive" style="page-break-inside: avoid;">
-            <table class="table table-bordered table-sm profit-table" style="page-break-inside: avoid; border-collapse: collapse;">
-              <thead class="table-light">
-                <tr style="page-break-inside: avoid; page-break-after: avoid;">
-                  <th style="width: 5%">STT</th>
-                  <th style="width: 15%">ISBN</th>
-                  <th style="width: 30%">Tên sách</th>
-                  <th style="width: 10%" class="text-center">SL bán</th>
-                  <th style="width: 15%" class="text-end">Doanh thu</th>
-                  <th style="width: 15%" class="text-end">Giá vốn</th>
-                  <th style="width: 10%" class="text-end">Lợi nhuận</th>
-                  <th style="width: 10%" class="text-end">Tỷ suất (%)</th>
-                </tr>
-              </thead>
-              <tbody style="page-break-inside: avoid;">
-                <tr ng-repeat="item in profitReportData.topMarginItems" style="page-break-inside: avoid; page-break-after: auto;">
-                  <td class="text-center" style="page-break-inside: avoid;">{{$index + 1}}</td>
-                  <td style="page-break-inside: avoid;"><code>{{item.isbn}}</code></td>
-                  <td style="page-break-inside: avoid;">{{item.title}}</td>
-                  <td class="text-center" style="page-break-inside: avoid;">{{item.qtySold | number}}</td>
-                  <td class="text-end" style="page-break-inside: avoid;">{{item.revenue | vnNumber:0}} ₫</td>
-                  <td class="text-end" style="page-break-inside: avoid;">{{item.cogs | vnNumber:0}} ₫</td>
-                  <td class="text-end fw-bold" ng-class="{'text-success': (item.profit||0) >= 0, 'text-danger': (item.profit||0) < 0}" style="page-break-inside: avoid;">
-                    {{item.profit | vnNumber:0}} ₫
-                  </td>
-                  <td class="text-end fw-bold" ng-class="{'text-success': (item.marginPct||0) >= 0, 'text-danger': (item.marginPct||0) < 0}" style="page-break-inside: avoid;">
-                    {{item.marginPct | number:2}}%
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div class="fw-bold mt-4 mb-1" style="text-align:right">Người phê duyệt</div>
-        <div class="fst-italic" style="text-align:right">(Ký và ghi rõ họ & tên)</div>
-      </div>
-      <div ng-if="!loadingProfit && !profitReportData" class="text-center text-muted">Chưa có dữ liệu xem chi tiết.</div>
+      </main>
     </div>
   </div>
-        </div>
 
-        </main>
-    </div>
-</div>
-
-<!-- Floating AI chat widget (placed outside layout to avoid clipping) -->
-<div class="ai-chat-fab" ng-if="aiChatEnabled && !aiChatOpen" ng-click="toggleAiChat($event)" title="Trợ lý AI">
+  <!-- Floating AI chat widget (placed outside layout to avoid clipping) -->
+  <div class="ai-chat-fab" ng-if="aiChatEnabled && !aiChatOpen" ng-click="toggleAiChat($event)" title="Trợ lý AI">
     <i class="bi bi-robot"></i>
-</div>
+  </div>
 
-<div class="ai-chat-panel" ng-if="aiChatEnabled" ng-class="{'open': aiChatOpen}">
+  <div class="ai-chat-panel" ng-if="aiChatEnabled" ng-class="{'open': aiChatOpen}">
     <div class="ai-chat-header">
-        <div>
-            <div class="fw-semibold">Trợ lý AI Admin</div>
-            <div class="small text-muted">Hỏi về doanh thu, tồn kho, đơn hàng...</div>
-        </div>
-        <button type="button" class="btn-close btn-close-white" ng-click="toggleAiChat($event)"></button>
+      <div>
+        <div class="fw-semibold">Trợ lý AI Admin</div>
+        <div class="small text-muted">Hỏi về doanh thu, tồn kho, đơn hàng...</div>
+      </div>
+      <button type="button" class="btn-close btn-close-white" ng-click="toggleAiChat($event)"></button>
     </div>
     <div class="ai-chat-voice-bar" ng-if="aiVoice.supported">
-        <button class="btn btn-sm ai-voice-btn" type="button" ng-click="toggleVoiceSession()" ng-class="aiVoice.status">
-            <i class="bi" ng-class="getVoiceIconClass()"></i>
-            <span ng-if="aiVoice.status === 'listening' || aiVoice.status === 'speaking'">Đang live voice</span>
-            <span ng-if="aiVoice.status === 'connecting'">Đang kết nối</span>
-            <span ng-if="aiVoice.status === 'idle'">Bật live voice</span>
-            <span ng-if="aiVoice.status === 'error'">Thử lại</span>
-        </button>
-        <div class="ai-voice-status" ng-class="aiVoice.status">{{getVoiceStatusText()}}</div>
+      <button class="btn btn-sm ai-voice-btn" type="button" ng-click="toggleVoiceSession()" ng-class="aiVoice.status">
+        <i class="bi" ng-class="getVoiceIconClass()"></i>
+        <span ng-if="aiVoice.status === 'listening' || aiVoice.status === 'speaking'">Đang live voice</span>
+        <span ng-if="aiVoice.status === 'connecting'">Đang kết nối</span>
+        <span ng-if="aiVoice.status === 'idle'">Bật live voice</span>
+        <span ng-if="aiVoice.status === 'error'">Thử lại</span>
+      </button>
+      <div class="ai-voice-status" ng-class="aiVoice.status">{{getVoiceStatusText()}}</div>
     </div>
     <div class="alert alert-warning m-0 rounded-0 ai-voice-warning" ng-if="!aiVoice.supported">
-        Thiết bị của bạn không hỗ trợ voice live. Hãy dùng trình duyệt khác.
+      Thiết bị của bạn không hỗ trợ voice live. Hãy dùng trình duyệt khác.
     </div>
     <div class="ai-chat-body">
-        <div class="ai-chat-message system">
-            <div class="ai-chat-bubble">
-                Xin chào! Tôi có thể giúp bạn với số liệu doanh thu, tồn kho, đơn hàng và báo cáo gần đây.
-            </div>
+      <div class="ai-chat-message system">
+        <div class="ai-chat-bubble">
+          Xin chào! Tôi có thể giúp bạn với số liệu doanh thu, tồn kho, đơn hàng và báo cáo gần đây.
         </div>
-        <div class="ai-chat-message" ng-repeat="m in aiChatMessages track by $index" ng-class="{'user': m.role === 'user', 'assistant': m.role !== 'user'}">
-            <div class="ai-chat-bubble" ng-if="!m.html" ng-bind="m.text"></div>
-            <div class="ai-chat-bubble" ng-if="m.html" ng-bind-html="m.html"></div>
-        </div>
-        <div class="ai-chat-typing" ng-if="aiChatLoadingLive">
-            <span class="dot"></span>
-            <span class="dot"></span>
-            <span class="dot"></span>
-        </div>
+      </div>
+      <div class="ai-chat-message" ng-repeat="m in aiChatMessages track by $index"
+        ng-class="{'user': m.role === 'user', 'assistant': m.role !== 'user'}">
+        <div class="ai-chat-bubble" ng-if="!m.html" ng-bind="m.text"></div>
+        <div class="ai-chat-bubble" ng-if="m.html" ng-bind-html="m.html"></div>
+      </div>
+      <div class="ai-chat-typing" ng-if="aiChatLoadingLive">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
     </div>
     <div class="ai-chat-meta" ng-if="aiChatMetadata.sources.length">
-        <small class="text-muted">Nguồn dữ liệu: {{aiChatMetadata.sources.join(', ')}}</small>
+      <small class="text-muted">Nguồn dữ liệu: {{aiChatMetadata.sources.join(', ')}}</small>
     </div>
     <div class="ai-chat-footer">
-        <textarea class="form-control" rows="1" placeholder="Nhập câu hỏi..." ng-model="aiChatInput" ng-keydown="handleAiChatKey($event)"></textarea>
-        <button class="btn btn-primary ms-2" type="button" ng-click="sendAiChat()" ng-disabled="aiChatLoadingLive || !(aiChatInput && aiChatInput.trim())">
-            <span ng-if="!aiChatLoadingLive"><i class="bi bi-send-fill"></i></span>
-            <span ng-if="aiChatLoadingLive" class="spinner-border spinner-border-sm"></span>
-        </button>
+      <textarea class="form-control" rows="1" placeholder="Nhập câu hỏi..." ng-model="aiChatInput"
+        ng-keydown="handleAiChatKey($event)"></textarea>
+      <button class="btn btn-primary ms-2" type="button" ng-click="sendAiChat()"
+        ng-disabled="aiChatLoadingLive || !(aiChatInput && aiChatInput.trim())">
+        <span ng-if="!aiChatLoadingLive"><i class="bi bi-send-fill"></i></span>
+        <span ng-if="aiChatLoadingLive" class="spinner-border spinner-border-sm"></span>
+      </button>
     </div>
-</div>
+  </div>
 
 
-<!-- Original Admin Layout Styles (restored) -->
-<style>
-/* Admin Layout Styles */
-.admin-layout {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-    background-color: var(--gray-50);
-    min-height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    overflow: hidden;
-}
+  <!-- Original Admin Layout Styles (restored) -->
+  <style>
+    /* Admin Layout Styles */
+    .admin-layout {
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+      background-color: var(--gray-50);
+      min-height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      overflow: hidden;
+    }
 
-.admin-sidebar {
-    background: linear-gradient(180deg, var(--primary-color), var(--primary-dark));
-    height: 100vh;
-    padding: 0;
-    box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1000;
-}
+    .admin-sidebar {
+      background: linear-gradient(180deg, var(--primary-color), var(--primary-dark));
+      height: 100vh;
+      padding: 0;
+      box-shadow: 4px 0 20px rgba(30, 58, 138, 0.15);
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+    }
 
-.admin-sidebar-content { padding: 2rem 0; height: 100vh; overflow-y: auto; }
-.admin-sidebar-header { padding: 0 1.5rem 2rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 1rem; }
-.admin-sidebar-title { color: white; font-weight: 700; font-size: 1.1rem; margin: 0; display: flex; align-items: center; gap: 0.5rem; }
-.admin-nav-list { list-style: none; padding: 0; margin: 0; }
-.admin-nav-item { margin: 0.25rem 0; }
-.admin-nav-link { display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.5rem; color: rgba(255, 255, 255, 0.8); text-decoration: none; font-weight: 500; transition: all 0.3s ease; border-left: 3px solid transparent; position: relative; }
-.admin-nav-link:hover { color: white; background-color: rgba(255, 255, 255, 0.1); border-left-color: var(--primary-light); transform: translateX(5px); }
-.admin-nav-link.active { color: white; background-color: rgba(255, 255, 255, 0.15); border-left-color: white; font-weight: 600; }
-.admin-nav-link i { font-size: 1.1rem; width: 20px; text-align: center; }
-.admin-nav-groups { display: flex; flex-direction: column; gap: 0.75rem; }
-.admin-nav-group { border-radius: 16px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(4px); overflow: hidden; margin: 0 0.75rem; }
-.admin-nav-group-label { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1.5rem 0.25rem; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.08em; color: rgba(255, 255, 255, 0.7); }
-.admin-nav-group-label span { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; color: white; font-size: 0.8rem; letter-spacing: normal; text-transform: none; }
-.admin-nav-group-label small { font-weight: 400; color: rgba(255, 255, 255, 0.6); text-transform: none; letter-spacing: normal; }
-.admin-nav-group-label i { font-size: 1rem; }
-.admin-nav-group .admin-nav-list { padding: 0.5rem 0 0.75rem; }
+    .admin-sidebar-content {
+      padding: 2rem 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
 
-.admin-main-content { background-color: var(--gray-50); padding: 2rem; height: 100vh; overflow-y: auto; margin-left: 0; }
+    .admin-sidebar-header {
+      padding: 0 1.5rem 2rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 1rem;
+    }
 
-/* Card Enhancements */
-.card { border: none; border-radius: 16px; box-shadow: 0 4px 20px rgba(30, 58, 138, 0.08); transition: all 0.3s ease; }
-.card:hover { transform: translateY(-5px); box-shadow: 0 12px 40px rgba(30, 58, 138, 0.15); }
-.card-header { background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); color: white; border-radius: 16px 16px 0 0 !important; border: none; padding: 1.5rem; font-weight: 600; }
+    .admin-sidebar-title {
+      color: white;
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .admin-sidebar { position: fixed; top: 0; left: -100%; width: 280px; transition: left 0.3s ease; z-index: 1050; height: 100vh; }
-    .admin-sidebar.show { left: 0; }
-    .admin-main-content { margin-left: 0; padding: 1rem; }
-}
+    .admin-nav-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
 
-/* Scrollbar */
-.admin-sidebar-content::-webkit-scrollbar { width: 4px; }
-.admin-sidebar-content::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.1); }
-.admin-sidebar-content::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 2px; }
-.admin-sidebar-content::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.5); }
+    .admin-nav-item {
+      margin: 0.25rem 0;
+    }
 
-/* Fix modal z-index + layout overrides */
-.modal { z-index: 5000 !important; pointer-events: auto; }
-.modal-backdrop { z-index: 4990 !important; opacity: 0.35 !important; background-color: #000 !important; }
-.modal, .modal-backdrop { position: fixed !important; top: 0; left: 0; right: 0; bottom: 0; }
-.modal-dialog, .modal-content { position: relative; z-index: 5001 !important; }
+    .admin-nav-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border-left: 3px solid transparent;
+      position: relative;
+    }
 
-.dashboard-input-group {
-  align-items: end !important;
-  gap: 10px 12px;
-}
-.dashboard-input-group label.form-label {
-  display: flex;
-  align-items: center;
-  height: 44px;
-  font-weight: 500;
-  color: #222;
-  margin-bottom: 0 !important;
-  padding-bottom: 0 !important;
-}
-.dashboard-input-group .form-select,
-.dashboard-input-group .form-control,
-.dashboard-input-group .btn {
-  height: 44px !important;
-  min-height: 44px !important;
-  border-radius: 8px !important;
-  box-shadow: none !important;
-  font-size: 15px;
-}
-.dashboard-input-group .form-select {
-  max-width: 120px !important;
-  min-width: 100px !important;
-}
-.dashboard-input-group .btn {
-  padding: 0 18px;
-  font-weight: 500;
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-}
-.dashboard-input-group .col-md-4, .dashboard-input-group .col-md-3, .dashboard-input-group .col-md-2, .dashboard-input-group .col-md-8, .dashboard-input-group .col-md-12, .dashboard-input-group .col-lg-9, .dashboard-input-group .col-lg-3, .dashboard-input-group .d-grid {
-  display: flex;
-  flex-direction: column;
-  justify-content: end;
-}
+    .admin-nav-link:hover {
+      color: white;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-left-color: var(--primary-light);
+      transform: translateX(5px);
+    }
 
-.dashboard-flex-form {
-  display: flex;
-  align-items: flex-end;
-  gap: 16px;
-  flex-wrap: nowrap;
-}
-.dashboard-flex-form label {
-  font-size: 15px;
-  height: 20px;
-  font-weight: 500;
-  padding-left: 2px;
-  margin-bottom: 2px;
-  color: #222;
-}
-.dashboard-flex-form .form-select {
-  width: 110px;
-  min-width: 110px;
-  max-width: 130px;
-  height: 44px !important;
-  line-height: 44px !important;
-  border-radius: 8px !important;
-  padding: 0 10px;
-}
-.dashboard-flex-form .form-control {
-  width: 150px;
-  min-width: 120px;
-  max-width: 170px;
-  height: 44px !important;
-  line-height: 44px !important;
-  border-radius: 8px !important;
-  font-size: 15px;
-}
-.dashboard-flex-form .btn {
-  height: 44px !important;
-  min-width: 120px;
-  font-size: 15px;
-  font-weight: 500;
-  border-radius: 8px !important;
-  padding: 0 24px;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: none !important;
-}
-.dashboard-flex-form > div {
-  display: flex; flex-direction: column; justify-content: flex-end;
-}
+    .admin-nav-link.active {
+      color: white;
+      background-color: rgba(255, 255, 255, 0.15);
+      border-left-color: white;
+      font-weight: 600;
+    }
 
-/* Report modal header styles */
-.report-header { display:flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-.report-header .brand { display:flex; flex-direction: column; }
-.report-header .brand-name { font-size: 28px; font-weight: 800; color:#8d6e3b; letter-spacing: .5px; }
-.report-header .brand-sub { color:#6b7280; font-size: 12px; margin-top: 2px; }
-.report-header .report-meta { font-size: 13px; color:#374151; }
-.report-header .report-meta .meta-item { display:flex; gap:8px; justify-content:flex-end; }
-.report-header .report-meta .meta-item span { color:#6b7280; min-width: 110px; text-align: right; }
-.report-title { text-align:center; color:#132a42; font-weight: 700; margin: 6px 0 14px 0; }
+    .admin-nav-link i {
+      font-size: 1.1rem;
+      width: 20px;
+      text-align: center;
+    }
 
-/* Custom dashboard modal/backdrop */
-.pie-chart { width: 220px; height: 220px; border-radius: 50%; box-shadow: inset 0 0 0 14px #fff, 0 6px 18px rgba(0,0,0,.08); }
-.pie-legend .legend-dot { display:inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 8px; }
-.pie-legend li { font-size: 14px; color: #374151; }
-.dashboard-backdrop {
-  position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 8998;
-}
-.dashboard-report-modal {
-  position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
-  width: 83vw; max-width: 1150px; min-width: 460px; max-height: 90vh;
-  background: #fff; border-radius: 18px; box-shadow: 0 10px 50px #2227; overflow: hidden; padding: 0;
-  z-index: 9000;
-}
-.dashboard-report-modal .modal-content { border: none; border-radius: 18px; box-shadow: none; }
-.dashboard-report-modal .modal-header { border-bottom: 1px solid #f1f3f6; padding: 16px 22px; }
-.dashboard-report-modal .modal-body { padding: 22px; overflow: auto; max-height: calc(90vh - 70px); }
+    .admin-nav-groups {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
 
-/* Dedicated styles to avoid modal conflicts */
-.inventory-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 8996; }
-.inventory-report-modal { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 83vw; max-width: 1150px; min-width: 460px; max-height: 90vh; background:#fff; border-radius: 18px; box-shadow: 0 10px 50px #2227; overflow: hidden; padding:0; z-index: 8997; }
-.inventory-report-modal .modal-content { border:none; border-radius:18px; box-shadow:none; }
-.inventory-report-modal .modal-header { border-bottom:1px solid #f1f3f6; padding:16px 22px; }
-.inventory-report-modal .modal-body { padding:22px; overflow:auto; max-height: calc(90vh - 70px); }
+    .admin-nav-group {
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(4px);
+      overflow: hidden;
+      margin: 0 0.75rem;
+    }
 
-.profit-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 10010; }
-.profit-report-modal { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 83vw; max-width: 1150px; min-width: 460px; max-height: 90vh; background:#fff; border-radius:18px; box-shadow:0 10px 50px #2227; overflow:hidden; padding:0; z-index: 10011; }
-.profit-report-modal .modal-content { border:none; border-radius:18px; box-shadow:none; }
-.profit-report-modal .modal-header { border-bottom:1px solid #f1f3f6; padding:16px 22px; }
-.profit-report-modal .modal-body { padding:22px; overflow:auto; max-height: calc(90vh - 70px); }
-/* Print styles to prevent page breaks in tables */
-@media print {
-  .profit-report-modal .profit-table-section { page-break-inside: avoid !important; break-inside: avoid !important; }
-  .profit-report-modal .profit-table { page-break-inside: avoid !important; break-inside: avoid !important; }
-  .profit-report-modal .table { page-break-inside: avoid !important; break-inside: avoid !important; }
-  .profit-report-modal .table thead { display: table-header-group !important; }
-  .profit-report-modal .table tbody { display: table-row-group !important; page-break-inside: avoid !important; break-inside: avoid !important; }
-  .profit-report-modal .table tr { page-break-inside: avoid !important; page-break-after: auto !important; break-inside: avoid !important; }
-  .profit-report-modal .table td, .profit-report-modal .table th { page-break-inside: avoid !important; break-inside: avoid !important; }
-  .profit-report-modal .table-responsive { page-break-inside: avoid !important; break-inside: avoid !important; }
-  .profit-report-modal .table-responsive table { page-break-inside: avoid !important; break-inside: avoid !important; }
-  /* Prevent breaking sections */
-  .profit-report-modal .mt-4 { page-break-inside: avoid !important; break-inside: avoid !important; }
-  .profit-report-modal h4 { page-break-after: avoid !important; break-after: avoid !important; }
-}
+    .admin-nav-group-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1.5rem 0.25rem;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      color: rgba(255, 255, 255, 0.7);
+    }
 
-/* Disable inner scrolling when custom dashboard modals are shown (avoid double scrollbars) */
-.no-scroll { overflow: hidden !important; }
+    .admin-nav-group-label span {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      color: white;
+      font-size: 0.8rem;
+      letter-spacing: normal;
+      text-transform: none;
+    }
 
-@media (max-width: 850px) {
-  .dashboard-flex-form { flex-wrap: wrap; }
-  .dashboard-flex-form .form-select,
-  .dashboard-flex-form .form-control,
-  .dashboard-flex-form .btn {
-    width: 100%; max-width: unset;
-  }
-  .dashboard-flex-form > div { width: 100%; }
-}
+    .admin-nav-group-label small {
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.6);
+      text-transform: none;
+      letter-spacing: normal;
+    }
 
-.dashboard-row > [class*='col-'] {
-  display: flex;
-}
+    .admin-nav-group-label i {
+      font-size: 1rem;
+    }
 
-.dashboard-row .card {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
+    .admin-nav-group .admin-nav-list {
+      padding: 0.5rem 0 0.75rem;
+    }
 
-.dashboard-row .card-body {
-  flex: 1;
-}
+    .admin-main-content {
+      background-color: var(--gray-50);
+      padding: 2rem;
+      height: 100vh;
+      overflow-y: auto;
+      margin-left: 0;
+    }
 
-.dashboard-row .pie-chart {
-  width: 220px;
-  height: 220px;
-  max-width: 100%;
-  margin: 0 auto;
-}
+    /* Card Enhancements */
+    .card {
+      border: none;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(30, 58, 138, 0.08);
+      transition: all 0.3s ease;
+    }
 
-.dashboard-row .pie-legend {
-  margin-bottom: 0;
-}
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 40px rgba(30, 58, 138, 0.15);
+    }
 
-@media (max-width: 992px) {
-  .dashboard-row > [class*='col-'] {
-    display: block;
-  }
+    .card-header {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: white;
+      border-radius: 16px 16px 0 0 !important;
+      border: none;
+      padding: 1.5rem;
+      font-weight: 600;
+    }
 
-  .dashboard-row .card {
-    height: auto;
-  }
+    /* Responsive */
+    @media (max-width: 768px) {
+      .admin-sidebar {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 280px;
+        transition: left 0.3s ease;
+        z-index: 1050;
+        height: 100vh;
+      }
 
-  .dashboard-row .pie-chart {
-    margin-bottom: 1rem;
-  }
-}
+      .admin-sidebar.show {
+        left: 0;
+      }
 
-.ai-chat-fab {
-  position: fixed;
-  right: 24px;
-  bottom: 24px;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #4f46e5, #0ea5e9);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 18px 35px rgba(15, 23, 42, 0.35);
-  cursor: pointer;
-  z-index: 12000;
-}
-.ai-chat-fab i {
-  font-size: 24px;
-}
+      .admin-main-content {
+        margin-left: 0;
+        padding: 1rem;
+      }
+    }
 
-.ai-chat-panel {
-  position: fixed;
-  right: 24px;
-  bottom: 96px;
-  width: 360px;
-  max-height: 520px;
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 25px 60px rgba(15, 23, 42, 0.45);
-  display: none;
-  flex-direction: column;
-  overflow: hidden;
-  z-index: 12000;
-}
-.ai-chat-panel.open {
-  display: flex;
-}
-.ai-chat-voice-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 10px 14px;
-  background: #eef2ff;
-  border-bottom: 1px solid #e0e7ff;
-}
-.ai-voice-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #fff;
-  color: #1d4ed8;
-  border-color: #c7d2fe;
-}
-.ai-voice-btn.listening,
-.ai-voice-btn.speaking,
-.ai-voice-btn.connecting {
-  background: #1d4ed8;
-  color: #fff;
-  border-color: #1d4ed8;
-}
-.ai-voice-btn.error {
-  background: #fef2f2;
-  color: #b91c1c;
-  border-color: #fecaca;
-}
-.ai-voice-status {
-  font-size: 12px;
-  color: #475569;
-  flex: 1;
-  text-align: right;
-}
-.ai-voice-status.speaking { color: #0ea5e9; }
-.ai-voice-status.listening { color: #0f766e; }
-.ai-voice-status.error { color: #dc2626; }
-.ai-voice-warning {
-  font-size: 12px;
-  padding: 6px 14px;
-}
-.ai-chat-header {
-  background: linear-gradient(135deg, #111827, #1d4ed8);
-  color: #fff;
-  padding: 14px 18px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.ai-chat-body {
-  background: #f3f4f6;
-  padding: 12px 14px;
-  overflow-y: auto;
-  flex: 1;
-}
-.ai-chat-footer {
-  padding: 10px 12px;
-  display: flex;
-  align-items: center;
-  border-top: 1px solid #e5e7eb;
-  background: #fff;
-}
-.ai-chat-footer textarea {
-  resize: none;
-  border-radius: 12px;
-  min-height: 44px;
-}
-.ai-chat-footer textarea:focus {
-  box-shadow: none;
-}
-.ai-chat-footer .btn {
-  border-radius: 50%;
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.ai-chat-message {
-  margin-bottom: 8px;
-  display: flex;
-}
-.ai-chat-message.user {
-  justify-content: flex-end;
-}
-.ai-chat-message.assistant,
-.ai-chat-message.system {
-  justify-content: flex-start;
-}
-.ai-chat-bubble {
-  max-width: 80%;
-  padding: 10px 12px;
-  border-radius: 14px;
-  font-size: 14px;
-  line-height: 1.45;
-}
-.ai-chat-message.user .ai-chat-bubble {
-  background: #4f46e5;
-  color: #fff;
-  border-bottom-right-radius: 4px;
-}
-.ai-chat-message.assistant .ai-chat-bubble {
-  background: #fff;
-  color: #111827;
-  border-bottom-left-radius: 4px;
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.15);
-}
-.ai-chat-message.system .ai-chat-bubble {
-  background: #e5e7eb;
-  color: #374151;
-  font-size: 13px;
-  border-radius: 10px;
-}
-.ai-chat-meta {
-  padding: 4px 16px;
-  background: #fff;
-  border-top: 1px solid #e5e7eb;
-}
-.ai-chat-typing {
-  display: flex;
-  gap: 4px;
-  margin: 6px 0;
-}
-.ai-chat-typing .dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #9ca3af;
-  animation: aiChatPulse 1s infinite ease-in-out;
-}
-.ai-chat-typing .dot:nth-child(2) {
-  animation-delay: 0.15s;
-}
-.ai-chat-typing .dot:nth-child(3) {
-  animation-delay: 0.3s;
-}
-@keyframes aiChatPulse {
-  0%, 60%, 100% {
-    transform: translateY(0);
-    opacity: 0.5;
-  }
-  30% {
-    transform: translateY(-4px);
-    opacity: 1;
-  }
-}
+    /* Scrollbar */
+    .admin-sidebar-content::-webkit-scrollbar {
+      width: 4px;
+    }
 
-</style>
+    .admin-sidebar-content::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+    }
 
-<!-- Toasts -->
-<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000;">
-    <div class="toast align-items-center text-white bg-{{t.variant}} border-0 mb-2 show" role="alert" aria-live="assertive" aria-atomic="true" ng-repeat="t in toasts">
-        <div class="d-flex">
-            <div class="toast-body">{{t.message}}</div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" ng-click="toasts.splice($index,1)"></button>
-        </div>
+    .admin-sidebar-content::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 2px;
+    }
+
+    .admin-sidebar-content::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Fix modal z-index + layout overrides */
+    .modal {
+      z-index: 5000 !important;
+      pointer-events: auto;
+    }
+
+    .modal-backdrop {
+      z-index: 4990 !important;
+      opacity: 0.35 !important;
+      background-color: #000 !important;
+    }
+
+    .modal,
+    .modal-backdrop {
+      position: fixed !important;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+
+    .modal-dialog,
+    .modal-content {
+      position: relative;
+      z-index: 5001 !important;
+    }
+
+    .dashboard-input-group {
+      align-items: end !important;
+      gap: 10px 12px;
+    }
+
+    .dashboard-input-group label.form-label {
+      display: flex;
+      align-items: center;
+      height: 44px;
+      font-weight: 500;
+      color: #222;
+      margin-bottom: 0 !important;
+      padding-bottom: 0 !important;
+    }
+
+    .dashboard-input-group .form-select,
+    .dashboard-input-group .form-control,
+    .dashboard-input-group .btn {
+      height: 44px !important;
+      min-height: 44px !important;
+      border-radius: 8px !important;
+      box-shadow: none !important;
+      font-size: 15px;
+    }
+
+    .dashboard-input-group .form-select {
+      max-width: 120px !important;
+      min-width: 100px !important;
+    }
+
+    .dashboard-input-group .btn {
+      padding: 0 18px;
+      font-weight: 500;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dashboard-input-group .col-md-4,
+    .dashboard-input-group .col-md-3,
+    .dashboard-input-group .col-md-2,
+    .dashboard-input-group .col-md-8,
+    .dashboard-input-group .col-md-12,
+    .dashboard-input-group .col-lg-9,
+    .dashboard-input-group .col-lg-3,
+    .dashboard-input-group .d-grid {
+      display: flex;
+      flex-direction: column;
+      justify-content: end;
+    }
+
+    .dashboard-flex-form {
+      display: flex;
+      align-items: flex-end;
+      gap: 16px;
+      flex-wrap: nowrap;
+    }
+
+    .dashboard-flex-form label {
+      font-size: 15px;
+      height: 20px;
+      font-weight: 500;
+      padding-left: 2px;
+      margin-bottom: 2px;
+      color: #222;
+    }
+
+    .dashboard-flex-form .form-select {
+      width: 110px;
+      min-width: 110px;
+      max-width: 130px;
+      height: 44px !important;
+      line-height: 44px !important;
+      border-radius: 8px !important;
+      padding: 0 10px;
+    }
+
+    .dashboard-flex-form .form-control {
+      width: 150px;
+      min-width: 120px;
+      max-width: 170px;
+      height: 44px !important;
+      line-height: 44px !important;
+      border-radius: 8px !important;
+      font-size: 15px;
+    }
+
+    .dashboard-flex-form .btn {
+      height: 44px !important;
+      min-width: 120px;
+      font-size: 15px;
+      font-weight: 500;
+      border-radius: 8px !important;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: none !important;
+    }
+
+    .dashboard-flex-form>div {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    /* Report modal header styles */
+    .report-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .report-header .brand {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .report-header .brand-name {
+      font-size: 28px;
+      font-weight: 800;
+      color: #8d6e3b;
+      letter-spacing: .5px;
+    }
+
+    .report-header .brand-sub {
+      color: #6b7280;
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .report-header .report-meta {
+      font-size: 13px;
+      color: #374151;
+    }
+
+    .report-header .report-meta .meta-item {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .report-header .report-meta .meta-item span {
+      color: #6b7280;
+      min-width: 110px;
+      text-align: right;
+    }
+
+    .report-title {
+      text-align: center;
+      color: #132a42;
+      font-weight: 700;
+      margin: 6px 0 14px 0;
+    }
+
+    /* Custom dashboard modal/backdrop */
+    .pie-chart {
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      box-shadow: inset 0 0 0 14px #fff, 0 6px 18px rgba(0, 0, 0, .08);
+    }
+
+    .pie-legend .legend-dot {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      margin-right: 8px;
+    }
+
+    .pie-legend li {
+      font-size: 14px;
+      color: #374151;
+    }
+
+    .dashboard-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .45);
+      z-index: 8998;
+    }
+
+    .dashboard-report-modal {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 83vw;
+      max-width: 1150px;
+      min-width: 460px;
+      max-height: 90vh;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 10px 50px #2227;
+      overflow: hidden;
+      padding: 0;
+      z-index: 9000;
+    }
+
+    .dashboard-report-modal .modal-content {
+      border: none;
+      border-radius: 18px;
+      box-shadow: none;
+    }
+
+    .dashboard-report-modal .modal-header {
+      border-bottom: 1px solid #f1f3f6;
+      padding: 16px 22px;
+    }
+
+    .dashboard-report-modal .modal-body {
+      padding: 22px;
+      overflow: auto;
+      max-height: calc(90vh - 70px);
+    }
+
+    /* Dedicated styles to avoid modal conflicts */
+    .inventory-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .45);
+      z-index: 8996;
+    }
+
+    .inventory-report-modal {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 83vw;
+      max-width: 1150px;
+      min-width: 460px;
+      max-height: 90vh;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 10px 50px #2227;
+      overflow: hidden;
+      padding: 0;
+      z-index: 8997;
+    }
+
+    .inventory-report-modal .modal-content {
+      border: none;
+      border-radius: 18px;
+      box-shadow: none;
+    }
+
+    .inventory-report-modal .modal-header {
+      border-bottom: 1px solid #f1f3f6;
+      padding: 16px 22px;
+    }
+
+    .inventory-report-modal .modal-body {
+      padding: 22px;
+      overflow: auto;
+      max-height: calc(90vh - 70px);
+    }
+
+    .profit-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .45);
+      z-index: 10010;
+    }
+
+    .profit-report-modal {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 83vw;
+      max-width: 1150px;
+      min-width: 460px;
+      max-height: 90vh;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 10px 50px #2227;
+      overflow: hidden;
+      padding: 0;
+      z-index: 10011;
+    }
+
+    .profit-report-modal .modal-content {
+      border: none;
+      border-radius: 18px;
+      box-shadow: none;
+    }
+
+    .profit-report-modal .modal-header {
+      border-bottom: 1px solid #f1f3f6;
+      padding: 16px 22px;
+    }
+
+    .profit-report-modal .modal-body {
+      padding: 22px;
+      overflow: auto;
+      max-height: calc(90vh - 70px);
+    }
+
+    /* Print styles to prevent page breaks in tables */
+    @media print {
+      .profit-report-modal .profit-table-section {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+
+      .profit-report-modal .profit-table {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+
+      .profit-report-modal .table {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+
+      .profit-report-modal .table thead {
+        display: table-header-group !important;
+      }
+
+      .profit-report-modal .table tbody {
+        display: table-row-group !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+
+      .profit-report-modal .table tr {
+        page-break-inside: avoid !important;
+        page-break-after: auto !important;
+        break-inside: avoid !important;
+      }
+
+      .profit-report-modal .table td,
+      .profit-report-modal .table th {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+
+      .profit-report-modal .table-responsive {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+
+      .profit-report-modal .table-responsive table {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+
+      /* Prevent breaking sections */
+      .profit-report-modal .mt-4 {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+
+      .profit-report-modal h4 {
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+      }
+    }
+
+    /* Disable inner scrolling when custom dashboard modals are shown (avoid double scrollbars) */
+    .no-scroll {
+      overflow: hidden !important;
+    }
+
+    @media (max-width: 850px) {
+      .dashboard-flex-form {
+        flex-wrap: wrap;
+      }
+
+      .dashboard-flex-form .form-select,
+      .dashboard-flex-form .form-control,
+      .dashboard-flex-form .btn {
+        width: 100%;
+        max-width: unset;
+      }
+
+      .dashboard-flex-form>div {
+        width: 100%;
+      }
+    }
+
+    .dashboard-row>[class*='col-'] {
+      display: flex;
+    }
+
+    .dashboard-row .card {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .dashboard-row .card-body {
+      flex: 1;
+    }
+
+    .dashboard-row .pie-chart {
+      width: 220px;
+      height: 220px;
+      max-width: 100%;
+      margin: 0 auto;
+    }
+
+    .dashboard-row .pie-legend {
+      margin-bottom: 0;
+    }
+
+    @media (max-width: 992px) {
+      .dashboard-row>[class*='col-'] {
+        display: block;
+      }
+
+      .dashboard-row .card {
+        height: auto;
+      }
+
+      .dashboard-row .pie-chart {
+        margin-bottom: 1rem;
+      }
+    }
+
+    .ai-chat-fab {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4f46e5, #0ea5e9);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 18px 35px rgba(15, 23, 42, 0.35);
+      cursor: pointer;
+      z-index: 12000;
+    }
+
+    .ai-chat-fab i {
+      font-size: 24px;
+    }
+
+    .ai-chat-panel {
+      position: fixed;
+      right: 24px;
+      bottom: 96px;
+      width: 360px;
+      max-height: 520px;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 25px 60px rgba(15, 23, 42, 0.45);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 12000;
+    }
+
+    .ai-chat-panel.open {
+      display: flex;
+    }
+
+    .ai-chat-voice-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 14px;
+      background: #eef2ff;
+      border-bottom: 1px solid #e0e7ff;
+    }
+
+    .ai-voice-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff;
+      color: #1d4ed8;
+      border-color: #c7d2fe;
+    }
+
+    .ai-voice-btn.listening,
+    .ai-voice-btn.speaking,
+    .ai-voice-btn.connecting {
+      background: #1d4ed8;
+      color: #fff;
+      border-color: #1d4ed8;
+    }
+
+    .ai-voice-btn.error {
+      background: #fef2f2;
+      color: #b91c1c;
+      border-color: #fecaca;
+    }
+
+    .ai-voice-status {
+      font-size: 12px;
+      color: #475569;
+      flex: 1;
+      text-align: right;
+    }
+
+    .ai-voice-status.speaking {
+      color: #0ea5e9;
+    }
+
+    .ai-voice-status.listening {
+      color: #0f766e;
+    }
+
+    .ai-voice-status.error {
+      color: #dc2626;
+    }
+
+    .ai-voice-warning {
+      font-size: 12px;
+      padding: 6px 14px;
+    }
+
+    .ai-chat-header {
+      background: linear-gradient(135deg, #111827, #1d4ed8);
+      color: #fff;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .ai-chat-body {
+      background: #f3f4f6;
+      padding: 12px 14px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .ai-chat-footer {
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      border-top: 1px solid #e5e7eb;
+      background: #fff;
+    }
+
+    .ai-chat-footer textarea {
+      resize: none;
+      border-radius: 12px;
+      min-height: 44px;
+    }
+
+    .ai-chat-footer textarea:focus {
+      box-shadow: none;
+    }
+
+    .ai-chat-footer .btn {
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ai-chat-message {
+      margin-bottom: 8px;
+      display: flex;
+    }
+
+    .ai-chat-message.user {
+      justify-content: flex-end;
+    }
+
+    .ai-chat-message.assistant,
+    .ai-chat-message.system {
+      justify-content: flex-start;
+    }
+
+    .ai-chat-bubble {
+      max-width: 80%;
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .ai-chat-message.user .ai-chat-bubble {
+      background: #4f46e5;
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+
+    .ai-chat-message.assistant .ai-chat-bubble {
+      background: #fff;
+      color: #111827;
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 1px 4px rgba(15, 23, 42, 0.15);
+    }
+
+    .ai-chat-message.system .ai-chat-bubble {
+      background: #e5e7eb;
+      color: #374151;
+      font-size: 13px;
+      border-radius: 10px;
+    }
+
+    .ai-chat-meta {
+      padding: 4px 16px;
+      background: #fff;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .ai-chat-typing {
+      display: flex;
+      gap: 4px;
+      margin: 6px 0;
+    }
+
+    .ai-chat-typing .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #9ca3af;
+      animation: aiChatPulse 1s infinite ease-in-out;
+    }
+
+    .ai-chat-typing .dot:nth-child(2) {
+      animation-delay: 0.15s;
+    }
+
+    .ai-chat-typing .dot:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+
+    @keyframes aiChatPulse {
+
+      0%,
+      60%,
+      100% {
+        transform: translateY(0);
+        opacity: 0.5;
+      }
+
+      30% {
+        transform: translateY(-4px);
+        opacity: 1;
+      }
+    }
+  </style>
+  <style>
+    /* Sidebar Collapsible Styles */
+    .transition-transform {
+      transition: transform 0.2s ease-in-out;
+    }
+
+    .rotate-90 {
+      transform: rotate(90deg);
+    }
+
+    .admin-nav-group-label:hover {
+      background-color: rgba(0, 0, 0, 0.03);
+      border-radius: 4px;
+    }
+  </style>
+
+  <!-- Toasts -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000;">
+    <div class="toast align-items-center text-white bg-{{t.variant}} border-0 mb-2 show" role="alert"
+      aria-live="assertive" aria-atomic="true" ng-repeat="t in toasts">
+      <div class="d-flex">
+        <div class="toast-body">{{t.message}}</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" ng-click="toasts.splice($index,1)"></button>
+      </div>
     </div>
-    </div>
-
+  </div>

@@ -59,11 +59,13 @@
                 </a>
             </div>
             <div class="categories-grid">
-                <div class="category-item" ng-repeat="category in categories | limitTo:6" ng-click="openCategory(category)" style="cursor:pointer">
+                <div class="category-item" ng-repeat="category in categories | limitTo:6"
+                    ng-click="openCategory(category)" style="cursor:pointer">
                     <div class="icon">
                         <i class="bi bi-book"></i>
                     </div>
-                    <h4>{{(category.name || category.categoryName)}} <span class="text-muted">({{category.bookCount || 0}})</span></h4>
+                    <h4>{{(category.name || category.categoryName)}} <span class="text-muted">({{category.bookCount ||
+                            0}})</span></h4>
                 </div>
             </div>
         </section>
@@ -93,14 +95,9 @@
                 </a>
             </div>
             <div class="books-grid" ng-if="!loading">
-                <book-card 
-                    ng-repeat="book in bestSellers | limitTo:5" 
-                    ng-if="book.status"
-                    book="book"
-                    on-add-to-cart="addToCart(book)"
-                    is-authenticated="isAuthenticated()"
-                    get-final-price="getFinalPrice(book)"
-                    has-promo="hasPromo(book)"
+                <book-card ng-repeat="book in bestSellers | limitTo:5" ng-if="book.status" book="book"
+                    on-add-to-cart="addToCart(book)" is-authenticated="isAuthenticated()"
+                    get-final-price="getFinalPrice(book)" has-promo="hasPromo(book)"
                     calculate-discount-percent="calculateDiscountPercent(book)"
                     show-badge="{{book.totalSold > 0 ? 'hot' : (hasPromo(book) ? 'sale' : '')}}"
                     show-discount-tag="{{hasPromo(book) ? 'true' : 'false'}}">
@@ -128,16 +125,10 @@
                 </a>
             </div>
             <div class="books-grid" ng-if="!loading">
-                <book-card 
-                    ng-repeat="book in promotionBooks | limitTo:5" 
-                    ng-if="book.status"
-                    book="book"
-                    on-add-to-cart="addToCart(book)"
-                    is-authenticated="isAuthenticated()"
-                    get-final-price="getFinalPrice(book)"
-                    has-promo="hasPromo(book)"
-                    calculate-discount-percent="calculateDiscountPercent(book)"
-                    show-badge="sale"
+                <book-card ng-repeat="book in promotionBooks | limitTo:5" ng-if="book.status" book="book"
+                    on-add-to-cart="addToCart(book)" is-authenticated="isAuthenticated()"
+                    get-final-price="getFinalPrice(book)" has-promo="hasPromo(book)"
+                    calculate-discount-percent="calculateDiscountPercent(book)" show-badge="sale"
                     show-discount-tag="true">
                 </book-card>
             </div>
@@ -163,16 +154,10 @@
                 </a>
             </div>
             <div class="books-grid" ng-if="!loading">
-                <book-card 
-                    ng-repeat="book in newBooks | limitTo:5" 
-                    ng-if="book.status"
-                    book="book"
-                    on-add-to-cart="addToCart(book)"
-                    is-authenticated="isAuthenticated()"
-                    get-final-price="getFinalPrice(book)"
-                    has-promo="hasPromo(book)"
-                    calculate-discount-percent="calculateDiscountPercent(book)"
-                    show-badge="new">
+                <book-card ng-repeat="book in newBooks | limitTo:5" ng-if="book.status" book="book"
+                    on-add-to-cart="addToCart(book)" is-authenticated="isAuthenticated()"
+                    get-final-price="getFinalPrice(book)" has-promo="hasPromo(book)"
+                    calculate-discount-percent="calculateDiscountPercent(book)" show-badge="new">
                 </book-card>
             </div>
             <div class="books-grid" ng-if="loading">
@@ -192,11 +177,8 @@
                 <h2>Đăng Ký Nhận Tin</h2>
                 <p>Nhận thông tin về sách mới, khuyến mãi đặc biệt và ưu đãi độc quyền</p>
                 <form class="newsletter-form" ng-submit="subscribeNewsletter()">
-                    <input type="email" 
-                           ng-model="newsletterEmail" 
-                           placeholder="Nhập email của bạn" 
-                           required
-                           class="form-control">
+                    <input type="email" ng-model="newsletterEmail" placeholder="Nhập email của bạn" required
+                        class="form-control">
                     <button type="submit" class="btn-subscribe">
                         <i class="bi bi-envelope me-2"></i>Đăng ký
                     </button>
@@ -211,7 +193,8 @@
     <div class="footer-content">
         <div class="footer-section">
             <h3>Về BookStore</h3>
-            <p>BookStore là nền tảng mua sách trực tuyến hàng đầu, mang đến cho bạn hơn 100,000+ đầu sách với chất lượng tốt nhất và giá cả hợp lý.</p>
+            <p>BookStore là nền tảng mua sách trực tuyến hàng đầu, mang đến cho bạn hơn 100,000+ đầu sách với chất lượng
+                tốt nhất và giá cả hợp lý.</p>
             <div class="social-links">
                 <a href="#" class="social-icon" title="Facebook">
                     <i class="bi bi-facebook"></i>
@@ -263,784 +246,800 @@
 </footer>
 
 <style>
-/* Modern Homepage Styles */
-.bookstore-homepage-modern {
-    font-family: 'Inter', 'Segoe UI', sans-serif;
-    line-height: 1.6;
-    color: #1a1a1a;
-    background-color: #ffffff;
-}
-
-/* Hero Banner */
-.hero-banner {
-    position: relative;
-    height: 500px;
-    overflow: hidden;
-}
-
-.hero-banner::before {
-    content: '';
-    position: absolute;
-    top: -10px;
-    left: -10px;
-    right: -10px;
-    bottom: -10px;
-    background-image: url('app/assets/images/banner-books.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    filter: blur(10px);
-    z-index: 0;
-}
-
-.hero-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(15, 23, 42, 0.75) 100%);
-    z-index: 1;
-}
-
-.hero-content {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 2rem;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    position: relative;
-    z-index: 2;
-}
-
-.hero-text {
-    max-width: 600px;
-    color: white;
-}
-
-.hero-text h1 {
-    font-size: 3.5rem;
-    font-weight: 800;
-    line-height: 1.1;
-    margin-bottom: 1.5rem;
-}
-
-.hero-text p {
-    font-size: 1.3rem;
-    margin-bottom: 2rem;
-    opacity: 0.95;
-}
-
-.hero-btn {
-    display: inline-block;
-    padding: 1.2rem 3rem;
-    background: white;
-    color: #667eea;
-    text-decoration: none;
-    border-radius: 50px;
-    font-weight: 700;
-    font-size: 1.1rem;
-    transition: all 0.3s;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-}
-
-.hero-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-    color: #667eea;
-}
-
-
-/* Promo Banners */
-.promo-section {
-    max-width: 1400px;
-    margin: -80px auto 4rem;
-    padding: 0 2rem;
-    position: relative;
-    z-index: 2;
-}
-
-.promo-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-}
-
-.promo-card {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 15px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-    transition: all 0.3s;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-}
-
-.promo-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 5px;
-    background: #f59e0b;
-}
-
-.promo-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-}
-
-.promo-icon {
-    font-size: 2rem;
-    margin-bottom: 0.75rem;
-    color: #f59e0b;
-}
-
-.promo-card h3 {
-    font-size: 1.1rem;
-    margin-bottom: 0.4rem;
-    color: #0f172a;
-    font-weight: 700;
-}
-
-.promo-card p {
-    color: #64748b;
-    font-size: 0.85rem;
-    margin: 0;
-    line-height: 1.4;
-}
-
-/* Categories */
-.categories-section {
-    max-width: 1400px;
-    margin: 4rem auto;
-    padding: 0 2rem;
-}
-
-.section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2.5rem;
-}
-
-.section-title {
-    font-size: 2.5rem;
-    font-weight: 800;
-    color: #0f172a;
-    margin: 0;
-}
-
-.view-all {
-    color: #f59e0b;
-    text-decoration: none;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: gap 0.3s;
-}
-
-.view-all:hover {
-    gap: 1rem;
-    color: #d97706;
-}
-
-.categories-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 1.5rem;
-}
-
-.category-item {
-    background: #f8fafc;
-    padding: 2rem 1rem;
-    border-radius: 15px;
-    text-align: center;
-    transition: all 0.3s;
-    cursor: pointer;
-    border: 2px solid transparent;
-}
-
-.category-item:hover {
-    background: white;
-    border-color: #f59e0b;
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-}
-
-.category-item .icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    color: #f59e0b;
-}
-
-.category-item h4 {
-    color: #0f172a;
-    font-size: 1rem;
-    font-weight: 600;
-    margin: 0;
-}
-
-/* Banner Promotion */
-.banner-promo {
-    max-width: 1400px;
-    margin: 4rem auto;
-    padding: 0 2rem;
-}
-
-.banner-large {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-    border-radius: 25px;
-    padding: 4rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: white;
-    position: relative;
-    overflow: hidden;
-}
-
-.banner-large::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -10%;
-    width: 500px;
-    height: 500px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 50%;
-}
-
-.banner-text {
-    position: relative;
-    z-index: 1;
-}
-
-.banner-text h2 {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    font-weight: 800;
-}
-
-.banner-text p {
-    font-size: 1.3rem;
-    margin-bottom: 2rem;
-    opacity: 0.95;
-}
-
-.banner-btn {
-    display: inline-block;
-    padding: 1rem 2.5rem;
-    background: white;
-    color: #f59e0b;
-    text-decoration: none;
-    border-radius: 50px;
-    font-weight: 700;
-    transition: all 0.3s;
-}
-
-.banner-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    color: #f59e0b;
-}
-
-.banner-image {
-    position: relative;
-    z-index: 1;
-}
-
-/* Books Section */
-.books-section {
-    max-width: 1400px;
-    margin: 4rem auto;
-    padding: 0 2rem;
-}
-
-.books-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 2rem;
-    align-items: stretch;
-}
-
-.book-card {
-    background: white;
-    border-radius: 15px;
-    overflow: hidden;
-    transition: all 0.4s;
-    cursor: pointer;
-    border: 1px solid #f1f5f9;
-    position: relative;
-    height: 100%;
-    min-height: 600px;
-    display: flex;
-    flex-direction: column;
-}
-
-.book-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 50px rgba(0,0,0,0.15);
-    border-color: #f59e0b;
-}
-
-.book-image {
-    width: 100%;
-    height: 350px;
-    min-height: 350px;
-    background: #f8fafc;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-    flex-shrink: 0;
-}
-
-.book-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.book-image::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 100px;
-    background: linear-gradient(to top, rgba(0,0,0,0.1), transparent);
-}
-
-.badge {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    padding: 0.5rem 1rem;
-    color: white;
-    font-size: 0.75rem;
-    font-weight: 700;
-    border-radius: 25px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    z-index: 1;
-}
-
-.badge-sale {
-    background: #ef4444;
-}
-
-.badge-new {
-    background: #10b981;
-}
-
-.badge-hot {
-    background: #f59e0b;
-}
-
-.book-info {
-    padding: 1.5rem;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.book-title {
-    font-size: 1.1rem;
-    color: #0f172a;
-    margin-bottom: 0.5rem;
-    font-weight: 700;
-    min-height: 3rem;
-    line-height: 1.3;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.book-title a {
-    color: #0f172a;
-    text-decoration: none;
-}
-
-.book-title a:hover {
-    color: #f59e0b;
-}
-
-.book-author {
-    color: #64748b;
-    font-size: 0.9rem;
-    margin-bottom: 0.5rem;
-    min-height: 1.5rem;
-}
-
-.book-meta {
-    color: #64748b;
-    font-size: 0.85rem;
-    margin-bottom: 1rem;
-}
-
-.book-meta small {
-    color: #94a3b8;
-}
-
-.rating {
-    display: flex;
-    gap: 0.3rem;
-    margin-bottom: 1rem;
-}
-
-.star {
-    color: #fbbf24;
-    font-size: 0.9rem;
-}
-
-.book-price {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.3rem;
-    margin-bottom: 1rem;
-    text-align: left;
-}
-
-.price-row {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    flex-wrap: wrap;
-}
-
-.price-current {
-    font-size: 1.5rem;
-    color: #ef4444;
-    font-weight: 800;
-}
-
-.price-old {
-    text-decoration: line-through;
-    color: #94a3b8;
-    font-size: 1rem;
-}
-
-.discount-tag {
-    background: #fee2e2;
-    color: #ef4444;
-    padding: 0.2rem 0.5rem;
-    border-radius: 5px;
-    font-size: 0.75rem;
-    font-weight: 700;
-}
-
-.add-to-cart-icon {
-    position: absolute;
-    bottom: 15px;
-    right: 15px;
-    width: 50px;
-    height: 50px;
-    background: #0f172a;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 1.2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    z-index: 10;
-}
-
-.add-to-cart-icon:hover:not(:disabled) {
-    background: #f59e0b;
-    transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
-}
-
-.add-to-cart-icon:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.add-to-cart-icon:active:not(:disabled) {
-    transform: scale(0.95);
-}
-
-/* Newsletter */
-.newsletter {
-    background: #0f172a;
-    color: white;
-    padding: 4rem 0;
-    margin: 4rem 0;
-}
-
-.newsletter-content {
-    max-width: 800px;
-    margin: 0 auto;
-    text-align: center;
-    padding: 0 2rem;
-}
-
-.newsletter h2 {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-    font-weight: 800;
-}
-
-.newsletter p {
-    font-size: 1.1rem;
-    margin-bottom: 2rem;
-    opacity: 0.9;
-}
-
-.newsletter-form {
-    display: flex;
-    gap: 1rem;
-    max-width: 500px;
-    margin: 0 auto;
-}
-
-.newsletter-form input {
-    flex: 1;
-    padding: 1rem 1.5rem !important;
-    border: none;
-    border-radius: 50px;
-    font-size: 1rem;
-    outline: none;
-    height: 56px !important;
-    line-height: 1.5 !important;
-    box-sizing: border-box !important;
-}
-
-.newsletter-form input:focus {
-    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.3);
-}
-
-.btn-subscribe {
-    padding: 1rem 2.5rem !important;
-    background: #f59e0b;
-    color: white;
-    border: none;
-    border-radius: 50px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s;
-    font-size: 1rem;
-    height: 56px !important;
-    line-height: 1.5 !important;
-    box-sizing: border-box !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-}
-
-.btn-subscribe:hover {
-    background: #d97706;
-    transform: scale(1.05);
-}
-
-/* Footer */
-.site-footer {
-    background: #f8fafc;
-    padding: 4rem 0 2rem;
-    margin-top: 4rem;
-}
-
-.footer-content {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 2rem;
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;
-    gap: 3rem;
-    margin-bottom: 3rem;
-}
-
-.footer-section h3 {
-    color: #0f172a;
-    margin-bottom: 1.5rem;
-    font-size: 1.2rem;
-    font-weight: 700;
-}
-
-.footer-section p {
-    color: #64748b;
-    line-height: 1.8;
-    margin-bottom: 1rem;
-}
-
-.footer-section ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.footer-section ul li {
-    margin-bottom: 0.8rem;
-    color: #64748b;
-    display: flex;
-    align-items: center;
-}
-
-.footer-section ul li i {
-    color: #f59e0b;
-    margin-right: 0.5rem;
-}
-
-.footer-section a {
-    color: #64748b;
-    text-decoration: none;
-    transition: color 0.3s;
-}
-
-.footer-section a:hover {
-    color: #f59e0b;
-}
-
-.social-links {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
-}
-
-.social-icon {
-    width: 40px;
-    height: 40px;
-    background: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    transition: all 0.3s;
-    cursor: pointer;
-    color: #64748b;
-    text-decoration: none;
-}
-
-.social-icon:hover {
-    background: #f59e0b;
-    color: white;
-    transform: translateY(-3px);
-}
-
-.footer-bottom {
-    text-align: center;
-    padding-top: 2rem;
-    border-top: 1px solid #e5e7eb;
-    color: #64748b;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding-left: 2rem;
-    padding-right: 2rem;
-}
-
-/* Loading & Placeholder */
-.content-loading {
-    text-align: center;
-    padding: 4rem 0;
-}
-
-.loading-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.book-placeholder {
-    background: white;
-    border-radius: 15px;
-    overflow: hidden;
-    border: 1px solid #f1f5f9;
-}
-
-.placeholder-image {
-    width: 100%;
-    height: 350px;
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-    background-size: 200% 100%;
-    animation: loading 1.5s infinite;
-}
-
-.placeholder-content {
-    padding: 1.5rem;
-}
-
-.placeholder-title {
-    height: 20px;
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-    background-size: 200% 100%;
-    animation: loading 1.5s infinite;
-    border-radius: 4px;
-    margin-bottom: 1rem;
-}
-
-.placeholder-price {
-    height: 24px;
-    width: 100px;
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-    background-size: 200% 100%;
-    animation: loading 1.5s infinite;
-    border-radius: 4px;
-}
-
-@keyframes loading {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-}
-
-/* Responsive */
-@media (max-width: 1200px) {
-    .books-grid {
-        grid-template-columns: repeat(4, 1fr);
+    /* Modern Homepage Styles */
+    .bookstore-homepage-modern {
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        line-height: 1.6;
+        color: #1a1a1a;
+        background-color: #ffffff;
     }
-    .categories-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
-}
 
-@media (max-width: 768px) {
+    /* Hero Banner */
     .hero-banner {
-        height: 400px;
+        position: relative;
+        height: 500px;
+        overflow: hidden;
     }
+
+    .hero-banner::before {
+        content: '';
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        right: -10px;
+        bottom: -10px;
+        background-image: url('app/assets/images/banner-books.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        filter: blur(10px);
+        z-index: 0;
+    }
+
+    .hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(15, 23, 42, 0.75) 100%);
+        z-index: 1;
+    }
+
+    .hero-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero-text {
+        max-width: 600px;
+        color: white;
+    }
+
     .hero-text h1 {
-        font-size: 2rem;
+        font-size: 3.5rem;
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 1.5rem;
     }
-    .hero-image {
-        display: none;
+
+    .hero-text p {
+        font-size: 1.3rem;
+        margin-bottom: 2rem;
+        opacity: 0.95;
     }
+
+    .hero-btn {
+        display: inline-block;
+        padding: 1.2rem 3rem;
+        background: white;
+        color: #667eea;
+        text-decoration: none;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        transition: all 0.3s;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .hero-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        color: #667eea;
+    }
+
+
+    /* Promo Banners */
+    .promo-section {
+        max-width: 1400px;
+        margin: -80px auto 4rem;
+        padding: 0 2rem;
+        position: relative;
+        z-index: 2;
+    }
+
     .promo-grid {
-        grid-template-columns: 1fr;
-    }
-    .books-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    .categories-grid {
+        display: grid;
         grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
     }
-    .section-title {
-        font-size: 1.8rem;
+
+    .promo-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
     }
-    .banner-text h2 {
+
+    .promo-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: #f59e0b;
+    }
+
+    .promo-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    }
+
+    .promo-icon {
         font-size: 2rem;
+        margin-bottom: 0.75rem;
+        color: #f59e0b;
     }
-    .footer-content {
-        grid-template-columns: 1fr;
+
+    .promo-card h3 {
+        font-size: 1.1rem;
+        margin-bottom: 0.4rem;
+        color: #0f172a;
+        font-weight: 700;
     }
-    .newsletter-form {
+
+    .promo-card p {
+        color: #64748b;
+        font-size: 0.85rem;
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    /* Categories */
+    .categories-section {
+        max-width: 1400px;
+        margin: 4rem auto;
+        padding: 0 2rem;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .section-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+    }
+
+    .view-all {
+        color: #f59e0b;
+        text-decoration: none;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: gap 0.3s;
+    }
+
+    .view-all:hover {
+        gap: 1rem;
+        color: #d97706;
+    }
+
+    .categories-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 1.5rem;
+    }
+
+    .category-item {
+        background: #f8fafc;
+        padding: 2rem 1rem;
+        border-radius: 15px;
+        text-align: center;
+        transition: all 0.3s;
+        cursor: pointer;
+        border: 2px solid transparent;
+    }
+
+    .category-item:hover {
+        background: white;
+        border-color: #f59e0b;
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .category-item .icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #f59e0b;
+    }
+
+    .category-item h4 {
+        color: #0f172a;
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    /* Banner Promotion */
+    .banner-promo {
+        max-width: 1400px;
+        margin: 4rem auto;
+        padding: 0 2rem;
+    }
+
+    .banner-large {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        border-radius: 25px;
+        padding: 4rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .banner-large::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 500px;
+        height: 500px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .banner-text {
+        position: relative;
+        z-index: 1;
+    }
+
+    .banner-text h2 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        font-weight: 800;
+    }
+
+    .banner-text p {
+        font-size: 1.3rem;
+        margin-bottom: 2rem;
+        opacity: 0.95;
+    }
+
+    .banner-btn {
+        display: inline-block;
+        padding: 1rem 2.5rem;
+        background: white;
+        color: #f59e0b;
+        text-decoration: none;
+        border-radius: 50px;
+        font-weight: 700;
+        transition: all 0.3s;
+    }
+
+    .banner-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        color: #f59e0b;
+    }
+
+    .banner-image {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Books Section */
+    .books-section {
+        max-width: 1400px;
+        margin: 4rem auto;
+        padding: 0 2rem;
+    }
+
+    .books-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 2rem;
+        align-items: stretch;
+    }
+
+    .book-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        transition: all 0.4s;
+        cursor: pointer;
+        border: 1px solid #f1f5f9;
+        position: relative;
+        height: 100%;
+        min-height: 600px;
+        display: flex;
         flex-direction: column;
     }
-    .newsletter-form input,
-    .btn-subscribe {
-        width: 100%;
-        border-radius: 15px;
+
+    .book-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+        border-color: #f59e0b;
     }
-}
+
+    .book-image {
+        width: 100%;
+        height: 350px;
+        min-height: 350px;
+        background: #f8fafc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .book-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .book-image::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 100px;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.1), transparent);
+    }
+
+    .badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        padding: 0.5rem 1rem;
+        color: white;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border-radius: 25px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        z-index: 1;
+    }
+
+    .badge-sale {
+        background: #ef4444;
+    }
+
+    .badge-new {
+        background: #10b981;
+    }
+
+    .badge-hot {
+        background: #f59e0b;
+    }
+
+    .book-info {
+        padding: 1.5rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .book-title {
+        font-size: 1.1rem;
+        color: #0f172a;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+        min-height: 3rem;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .book-title a {
+        color: #0f172a;
+        text-decoration: none;
+    }
+
+    .book-title a:hover {
+        color: #f59e0b;
+    }
+
+    .book-author {
+        color: #64748b;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        min-height: 1.5rem;
+    }
+
+    .book-meta {
+        color: #64748b;
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+    }
+
+    .book-meta small {
+        color: #94a3b8;
+    }
+
+    .rating {
+        display: flex;
+        gap: 0.3rem;
+        margin-bottom: 1rem;
+    }
+
+    .star {
+        color: #fbbf24;
+        font-size: 0.9rem;
+    }
+
+    .book-price {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.3rem;
+        margin-bottom: 1rem;
+        text-align: left;
+    }
+
+    .price-row {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+    }
+
+    .price-current {
+        font-size: 1.5rem;
+        color: #ef4444;
+        font-weight: 800;
+    }
+
+    .price-old {
+        text-decoration: line-through;
+        color: #94a3b8;
+        font-size: 1rem;
+    }
+
+    .discount-tag {
+        background: #fee2e2;
+        color: #ef4444;
+        padding: 0.2rem 0.5rem;
+        border-radius: 5px;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    .add-to-cart-icon {
+        position: absolute;
+        bottom: 15px;
+        right: 15px;
+        width: 50px;
+        height: 50px;
+        background: #0f172a;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 10;
+    }
+
+    .add-to-cart-icon:hover:not(:disabled) {
+        background: #f59e0b;
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+    }
+
+    .add-to-cart-icon:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .add-to-cart-icon:active:not(:disabled) {
+        transform: scale(0.95);
+    }
+
+    /* Newsletter */
+    .newsletter {
+        background: #0f172a;
+        color: white;
+        padding: 4rem 0;
+        margin: 4rem 0;
+    }
+
+    .newsletter-content {
+        max-width: 800px;
+        margin: 0 auto;
+        text-align: center;
+        padding: 0 2rem;
+    }
+
+    .newsletter h2 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        font-weight: 800;
+    }
+
+    .newsletter p {
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+        opacity: 0.9;
+    }
+
+    .newsletter-form {
+        display: flex;
+        gap: 1rem;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .newsletter-form input {
+        flex: 1;
+        padding: 1rem 1.5rem !important;
+        border: none;
+        border-radius: 50px;
+        font-size: 1rem;
+        outline: none;
+        height: 56px !important;
+        line-height: 1.5 !important;
+        box-sizing: border-box !important;
+    }
+
+    .newsletter-form input:focus {
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-subscribe {
+        padding: 1rem 2.5rem !important;
+        background: #f59e0b;
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 1rem;
+        height: 56px !important;
+        line-height: 1.5 !important;
+        box-sizing: border-box !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .btn-subscribe:hover {
+        background: #d97706;
+        transform: scale(1.05);
+    }
+
+    /* Footer */
+    .site-footer {
+        background: #f8fafc;
+        padding: 4rem 0 2rem;
+        margin-top: 4rem;
+    }
+
+    .footer-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: 3rem;
+        margin-bottom: 3rem;
+    }
+
+    .footer-section h3 {
+        color: #0f172a;
+        margin-bottom: 1.5rem;
+        font-size: 1.2rem;
+        font-weight: 700;
+    }
+
+    .footer-section p {
+        color: #64748b;
+        line-height: 1.8;
+        margin-bottom: 1rem;
+    }
+
+    .footer-section ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .footer-section ul li {
+        margin-bottom: 0.8rem;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+    }
+
+    .footer-section ul li i {
+        color: #f59e0b;
+        margin-right: 0.5rem;
+    }
+
+    .footer-section a {
+        color: #64748b;
+        text-decoration: none;
+        transition: color 0.3s;
+    }
+
+    .footer-section a:hover {
+        color: #f59e0b;
+    }
+
+    .social-links {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .social-icon {
+        width: 40px;
+        height: 40px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        transition: all 0.3s;
+        cursor: pointer;
+        color: #64748b;
+        text-decoration: none;
+    }
+
+    .social-icon:hover {
+        background: #f59e0b;
+        color: white;
+        transform: translateY(-3px);
+    }
+
+    .footer-bottom {
+        text-align: center;
+        padding-top: 2rem;
+        border-top: 1px solid #e5e7eb;
+        color: #64748b;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+
+    /* Loading & Placeholder */
+    .content-loading {
+        text-align: center;
+        padding: 4rem 0;
+    }
+
+    .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .book-placeholder {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        border: 1px solid #f1f5f9;
+    }
+
+    .placeholder-image {
+        width: 100%;
+        height: 350px;
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+    }
+
+    .placeholder-content {
+        padding: 1.5rem;
+    }
+
+    .placeholder-title {
+        height: 20px;
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+    }
+
+    .placeholder-price {
+        height: 24px;
+        width: 100px;
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+        border-radius: 4px;
+    }
+
+    @keyframes loading {
+        0% {
+            background-position: 200% 0;
+        }
+
+        100% {
+            background-position: -200% 0;
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+        .books-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .categories-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .hero-banner {
+            height: 400px;
+        }
+
+        .hero-text h1 {
+            font-size: 2rem;
+        }
+
+        .hero-image {
+            display: none;
+        }
+
+        .promo-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .books-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .categories-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+        }
+
+        .banner-text h2 {
+            font-size: 2rem;
+        }
+
+        .footer-content {
+            grid-template-columns: 1fr;
+        }
+
+        .newsletter-form {
+            flex-direction: column;
+        }
+
+        .newsletter-form input,
+        .btn-subscribe {
+            width: 100%;
+            border-radius: 15px;
+        }
+    }
 </style>
