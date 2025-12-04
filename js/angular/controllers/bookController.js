@@ -14,12 +14,7 @@ app.controller('BooksController', ['$scope', 'BookstoreService', 'AuthService', 
 	$scope.pageSize = 12;
 	$scope.totalPages = 0;
 
-	// AI recommendation state
-	$scope.aiPrompt = '';
-	$scope.aiSummary = null;
-	$scope.aiLoading = false;
-	$scope.aiError = null;
-	$scope.isAiMode = false;
+	// (Đã bỏ tính năng gợi ý sách bằng AI trên trang books)
 
 	// Toasts for admin books
 	$scope.toasts = [];
@@ -127,64 +122,7 @@ app.controller('BooksController', ['$scope', 'BookstoreService', 'AuthService', 
 		$scope.loadBooks();
 	};
 
-	// Ask AI for recommendations
-	$scope.askAiRecommendations = function() {
-		if (!$scope.aiPrompt || !$scope.aiPrompt.trim()) {
-			$scope.addToast('warning', 'Vui lòng nhập yêu cầu để hệ thống gợi ý sách bằng AI.');
-			return;
-		}
-
-		$scope.aiLoading = true;
-		$scope.aiError = null;
-		$scope.isAiMode = true;
-		$scope.loading = false; // dùng riêng cờ aiLoading
-
-		BookstoreService.aiRecommendBooks($scope.aiPrompt, $scope.pageSize)
-			.then(function(response) {
-				var data = response && response.data ? response.data : null;
-				var books = [];
-				var summary = null;
-
-				if (data && data.success && data.data) {
-					if (Array.isArray(data.data.books)) {
-						books = data.data.books;
-					} else if (Array.isArray(data.data)) {
-						books = data.data;
-					}
-					summary = data.data.summary || null;
-				} else if (data && Array.isArray(data)) {
-					books = data;
-				}
-
-				$scope.books = books;
-				$scope.aiSummary = summary;
-				$scope.currentPage = 1;
-				$scope.totalPages = 1;
-
-				if (!books || books.length === 0) {
-					$scope.addToast('info', 'AI không tìm thấy cuốn sách nào phù hợp với yêu cầu. Vui lòng thử mô tả khác.');
-				} else {
-					$scope.addToast('success', 'Đã gợi ý ' + books.length + ' sách phù hợp bằng AI.');
-				}
-			})
-			.catch(function(error) {
-				console.error('AI recommendation error:', error);
-				$scope.aiError = (error && error.data && error.data.message) || 'Không thể gọi trợ lý AI. Vui lòng thử lại sau.';
-				$scope.addToast('danger', $scope.aiError);
-			})
-			.finally(function() {
-				$scope.aiLoading = false;
-			});
-	};
-
-	$scope.resetAiMode = function() {
-		$scope.isAiMode = false;
-		$scope.aiSummary = null;
-		$scope.aiError = null;
-		$scope.aiPrompt = '';
-		$scope.currentPage = 1;
-		$scope.loadBooks();
-	};
+	// (Đã bỏ hàm askAiRecommendations/resetAiMode vì không còn dùng)
 
 	// Add to cart function
 	$scope.addToCart = function(book) {

@@ -391,7 +391,8 @@
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #0f172a 0%, #1e40af 100%);
+            /* Bỏ gradient, dùng màu đơn giản */
+            background: #0f172a;
             color: white;
             border: none;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -409,7 +410,7 @@
         }
 
         .ai-chat-toggle.active {
-            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+            background: #dc2626;
         }
 
         .ai-chat-window {
@@ -443,7 +444,8 @@
         }
 
         .ai-chat-header {
-            background: linear-gradient(135deg, #0f172a 0%, #1e40af 100%);
+            /* Bỏ gradient, dùng màu đơn */
+            background: #0f172a;
             color: white;
             padding: 0.875rem 1rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -503,8 +505,13 @@
             gap: 0.5rem;
         }
 
+        /* Tăng khoảng cách giữa các message (answer trước và câu hỏi mới sau) */
+        .ai-chat-message + .ai-chat-message {
+            margin-top: 0.75rem;
+        }
+
         .ai-chat-question {
-            background: #e0e7ff;
+            background: #e5e7eb;
             padding: 0.75rem 1rem;
             border-radius: 12px 12px 4px 12px;
             font-size: 0.9rem;
@@ -515,7 +522,7 @@
         }
 
         .ai-chat-answer {
-            background: white;
+            background: #ffffff;
             padding: 0.75rem 1rem;
             border-radius: 12px 12px 12px 4px;
             font-size: 0.9rem;
@@ -523,6 +530,7 @@
             max-width: 90%;
             word-wrap: break-word;
             align-self: flex-start;
+            margin-top: 0.6rem; /* khoảng cách rõ ràng giữa câu hỏi và câu trả lời */
         }
 
         .ai-chat-answer strong {
@@ -1024,6 +1032,7 @@
     <script defer src="/js/angular/controllers/adminEmployeesController.js?v=1.6"></script>
     <script defer src="/js/angular/controllers/rolesController.js?v=1.6"></script>
     <script defer src="/js/angular/controllers/orderController.js?v=1.6"></script>
+    <script defer src="/js/angular/controllers/ordersTextToSqlAiController.js?v=1.6"></script>
     <script defer src="/js/angular/controllers/returnController.js?v=1.6"></script>
     <script defer src="/js/angular/controllers/promotionController.js?v=1.6"></script>
     <script defer src="/js/angular/controllers/deliveryOrdersController.js?v=1.6"></script>

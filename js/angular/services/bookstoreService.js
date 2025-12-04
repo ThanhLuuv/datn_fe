@@ -310,26 +310,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
 
     // ==================== AI ASSISTANT APIs ====================
 
-    // Gợi ý sách bằng AI (GPT-4o) cho khách hàng
-    this.aiRecommendBooks = function(prompt, maxResults) {
-        if (!prompt || !String(prompt).trim()) {
-            return $q.reject('Prompt is required');
-        }
-
-        var payload = {
-            prompt: String(prompt).trim(),
-            maxResults: maxResults || 12
-        };
-
-        return $http({
-            method: 'POST',
-            url: baseUrl + '/ai/recommend-books',
-            data: payload,
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-    };
+    // (Đã bỏ API gợi ý sách bằng AI cho khách hàng trên trang books)
 
     // Trợ lý AI cho admin: gợi ý mặt hàng, thể loại, cải thiện theo dữ liệu bán chạy + đánh giá
     this.adminAiAssistant = function(params) {
@@ -419,6 +400,24 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         return $http({
             method: 'POST',
             url: baseUrl + '/ai/search/reindex',
+            data: body,
+            headers: getAuthHeaders()
+        });
+    };
+
+    // ==================== AI TEXT-TO-SQL ====================
+    this.aiTextToSql = function(payload) {
+        payload = payload || {};
+        var body = {
+            question: (payload.question || '').trim(),
+            maxRows: payload.maxRows || 50,
+            recentMessages: Array.isArray(payload.recentMessages) && payload.recentMessages.length
+                ? payload.recentMessages
+                : null
+        };
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/ai/text-to-sql',
             data: body,
             headers: getAuthHeaders()
         });
