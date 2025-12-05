@@ -563,9 +563,11 @@
                           <thead class="table-light">
                           <tr>
                               <th style="width:4%">#</th>
-                              <th style="width:32%">Tên sách</th>
-                              <th style="width:18%">Thể loại</th>
-                              <th style="width:38%">Lý do</th>
+                              <th style="width:30%">Tên sách</th>
+                              <th style="width:16%">Thể loại</th>
+                              <th style="width:22%">Lý do</th>
+                              <th style="width:12%">Giá thị trường</th>
+                              <th style="width:8%">Nguồn</th>
                               <th style="width:8%">Hành động</th>
                             </tr>
                           </thead>
@@ -581,6 +583,20 @@
                               </td>
                               <td>{{s.category || '—'}}</td>
                               <td>{{s.reason}}</td>
+                              <td>
+                                {{s.marketPrice || '—'}}
+                                <div class="text-muted small" ng-if="s.suggestedPrice">
+                                  Giá bán áp dụng: {{s.suggestedPrice | vnNumber:0}} VNĐ
+                                </div>
+                              </td>
+                              <td>
+                                <a ng-if="s.marketSourceUrl" ng-href="{{s.marketSourceUrl}}" target="_blank"
+                                  rel="noopener">
+                                  {{s.marketSourceName || 'Nguồn'}}
+                                  <i class="bi bi-box-arrow-up-right ms-1"></i>
+                                </a>
+                                <span ng-if="!s.marketSourceUrl">{{s.marketSourceName || '—'}}</span>
+                              </td>
                               <td>
                                 <button class="btn btn-sm btn-outline-primary w-100" type="button"
                                   ng-click="importSuggestionQuick(s)" ng-disabled="s._importedIsbn || s._importing">
