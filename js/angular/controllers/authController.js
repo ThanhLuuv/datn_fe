@@ -64,9 +64,11 @@ app.controller('LoginController', ['$scope', '$location', '$window', '$rootScope
         clearGoogleParams();
 
         $timeout(function () {
-            if (user.roleId === 3) {
+            if (user.roleId === 3 || user.roleId === 2) {
+                // ADMIN (3) và SALES_EMPLOYEE (2) đều vào trang admin
                 $location.path('/admin');
-            } else if (user.roleId === 2 || user.roleId === 4) {
+            } else if (user.roleId === 4) {
+                // DELIVERY_EMPLOYEE (4) vào trang employee
                 $location.path('/employee');
             } else {
                 $location.path('/home');
@@ -123,13 +125,15 @@ app.controller('LoginController', ['$scope', '$location', '$window', '$rootScope
                             // Redirect based on role with timeout
                             try {
                                 $timeout(function () {
-                                    if (user.roleId === 3) {
+                                    if (user.roleId === 3 || user.roleId === 2) {
+                                        // ADMIN (3) và SALES_EMPLOYEE (2) đều vào trang admin
                                         console.log('Redirecting to admin page');
                                         console.log('Current location before:', $location.path());
                                         $location.path('/admin');
                                         console.log('Current location after:', $location.path());
                                         console.log('Full URL:', $location.url());
-                                    } else if (user.roleId === 2 || user.roleId === 4) {
+                                    } else if (user.roleId === 4) {
+                                        // DELIVERY_EMPLOYEE (4) vào trang employee
                                         console.log('Redirecting to employee page');
                                         $location.path('/employee');
                                     } else {

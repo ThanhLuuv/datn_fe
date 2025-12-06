@@ -18,6 +18,15 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
         $scope.isEmployeesPage = ($location.path() === '/admin/employees');
     });
     $scope.isDeliveryOnly = AuthService.isDeliveryEmployee() && !AuthService.isAdmin();
+    
+    // Expose permission check methods to scope for use in views
+    $scope.canManageEmployees = function() {
+        return AuthService.canManageEmployees();
+    };
+    $scope.canManageRoles = function() {
+        return AuthService.canManageRoles();
+    };
+    
     $scope.stats = {
         totalUsers: 0,
         totalBooks: 0,

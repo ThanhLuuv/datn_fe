@@ -127,6 +127,16 @@ app.service('AuthService', ['$http', '$q', 'APP_CONFIG', function ($http, $q, AP
         return this.isAdmin();
     };
 
+    // Check if user can manage roles and permissions (admin only)
+    this.canManageRoles = function () {
+        return this.isAdmin();
+    };
+
+    // Check if user can manage employees (admin only)
+    this.canManageEmployees = function () {
+        return this.isAdmin();
+    };
+
     // Check if user can manage purchase orders (sales employee and admin)
     this.canManagePurchaseOrders = function () {
         return this.isSalesEmployee() || this.isAdmin();

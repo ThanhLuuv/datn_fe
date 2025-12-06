@@ -1,4 +1,10 @@
-app.controller('AdminEmployeesController', ['$scope', 'BookstoreService', 'AuthService', function($scope, BookstoreService, AuthService) {
+app.controller('AdminEmployeesController', ['$scope', 'BookstoreService', 'AuthService', '$location', function($scope, BookstoreService, AuthService, $location) {
+    // Check if user is admin (only admin can manage employees)
+    if (!AuthService.isAdmin()) {
+        $location.path('/home');
+        return;
+    }
+    
     $scope.title = 'Quản lý nhân viên & phòng ban';
     $scope.BookstoreService = BookstoreService;
 
