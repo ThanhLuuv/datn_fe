@@ -434,6 +434,18 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
+    // Tra cứu giá thị trường cho một danh sách tên sách (API riêng)
+    this.adminMarketPriceLookup = function(payload) {
+        payload = payload || {};
+        var body = { titles: Array.isArray(payload.titles) ? payload.titles.slice(0,10) : [] };
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/ai/market-price',
+            data: body,
+            headers: getAuthHeaders()
+        });
+    };
+
     // ==================== ROLE & PERMISSION APIs ====================
     // Get roles
     this.getRoles = function() {

@@ -642,6 +642,41 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
             });
     };
 
+    // Kiểm tra giá thị trường cho một gợi ý sách (gọi API riêng, không tự chạy trong assistant)
+    $scope.checkMarketPrice = function(suggestion) {
+        if (!suggestion || !suggestion.title) return;
+        if (suggestion._checking) return;
+        suggestion._checking = true;
+
+        BookstoreService.adminMarketPriceLookup({ titles: [ suggestion.title ] })
+            .then(function(res) {
+                var data = res && res.data && res.data.data;
+                if (!data || !Array.isArray(data.items) || data.items.length === 0) {
+                    $scope.addToast('info', 'Không tìm thấy giá thị trường cho "' + (suggestion.title||'') + '".');
+                    return;
+                }
+                var item = data.items[0] || {};
+                suggestion.marketPrice = item.marketPrice || suggestion.marketPrice || '';
+                suggestion.marketSourceName = item.sourceName || suggestion.marketSourceName || '';
+                suggestion.marketSourceUrl = item.sourceUrl || suggestion.marketSourceUrl || '';
+                // If price returned, try to set suggestedPrice if not present
+                if (!suggestion.suggestedPrice && suggestion.marketPrice) {
+                    var parsed = parsePriceToNumber(suggestion.marketPrice);
+                    if (parsed != null) suggestion.suggestedPrice = parsed;
+                }
+                $scope.addToast('success', 'Đã tra cứu giá thị trường cho sách.');
+            })
+            .catch(function(err){
+                console.error('Market price lookup failed', err);
+                var message = (err && err.data && err.data.message) || 'Không thể tra cứu giá thị trường.';
+                $scope.addToast('danger', message);
+            })
+            .finally(function(){
+                suggestion._checking = false;
+                $scope.$applyAsync();
+            });
+    };
+
     $scope.toggleAiChat = function($event) {
         if ($event) { $event.stopPropagation(); }
         $scope.aiChatOpen = !$scope.aiChatOpen;
