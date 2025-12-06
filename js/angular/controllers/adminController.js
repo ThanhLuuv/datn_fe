@@ -673,6 +673,8 @@ app.controller('AdminController', ['$scope', 'AuthService', 'APP_CONFIG', '$loca
             })
             .finally(function(){
                 suggestion._checking = false;
+                // Mark that this suggestion has been checked (even if no data returned)
+                suggestion._checked = true;
                 $scope.$applyAsync();
             });
     };
