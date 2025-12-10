@@ -1,323 +1,365 @@
 <div class="container-fluid py-4" ng-controller="AdminPromotionsController">
 	<div class="row">
-	  <div class="col-12">
-		<div class="d-flex justify-content-between align-items-center mb-4">
-		  <div class="d-flex align-items-center">
-			<a href="#!/admin" class="btn btn-outline-secondary me-3">
-			  <i class="bi bi-arrow-left"></i> Quay lại
-			</a>
-			<h2 class="mb-0"><i class="bi bi-gift"></i> Quản lý khuyến mãi</h2>
-		  </div>
-		</div>
-  
-		<div class="row g-2 mb-3">
-		  <div class="col-md-3">
-			<input type="text" class="form-control" placeholder="Tên khuyến mãi" ng-model="filters.Name">
-		  </div>
-		  <div class="col-md-2">
-			<select class="form-select" ng-model="filters.Status">
-			  <option value="all">Tất cả</option>
-			  <option value="active">Đang diễn ra</option>
-			  <option value="upcoming">Sắp diễn ra</option>
-			  <option value="expired">Hết hạn</option>
-			</select>
-		  </div>
-		  <div class="col-md-2">
-			<input type="number" min="0" max="100" class="form-control" placeholder="Min %" ng-model="filters.MinDiscountPct">
-		  </div>
-		  <div class="col-md-2">
-			<input type="number" min="0" max="100" class="form-control" placeholder="Max %" ng-model="filters.MaxDiscountPct">
-		  </div>
-		  <div class="col-md-3 text-end">
-			<button class="btn btn-primary me-2" ng-click="search()">Tìm kiếm</button>
-			<button class="btn btn-success" ng-click="showAddForm()">Thêm khuyến mãi</button>
-		  </div>
-		</div>
-  
-		<div class="card" ng-if="!loading">
-		  <div class="card-body p-0">
-			<div class="table-responsive">
-			  <table class="table table-hover mb-0">
-				<thead class="table-light">
-				  <tr>
-					<th>ID</th>
-					<th>Tên</th>
-					<th>%</th>
-					<th>Bắt đầu</th>
-					<th>Kết thúc</th>
-					<th>Người tạo</th>
-					<th class="text-end">Thao tác</th>
-				  </tr>
-				</thead>
-				<tbody>
-				  <tr ng-repeat="p in promotions">
-					<td>{{p.promotionId || p.id}}</td>
-					<td>{{p.name}}</td>
-					<td>{{p.discountPct}}%</td>
-					<td>{{p.startDate | date:'yyyy-MM-dd'}}</td>
-					<td>{{p.endDate | date:'yyyy-MM-dd'}}</td>
-					<td>{{p.issuedByName}}</td>
-					<td class="text-end">
-					  <div class="btn-group btn-group-sm">
-						<button class="btn btn-outline-info"
-								ng-click="viewPromotionBooks(p)"
-								title="Xem sách"
-								data-bs-toggle="modal"
-								data-bs-target="#promotionBooksModal">
-						  <i class="bi bi-book"></i>
-						</button>
-						<button class="btn btn-edit-hover" ng-click="showEditForm(p)" title="Chỉnh sửa">
-						  <i class="bi bi-pencil"></i>
-						</button>
-						<button class="btn btn-outline-danger" ng-click="deletePromotion(p)" title="Xóa">
-						  <i class="bi bi-trash"></i>
-						</button>
-					  </div>
-					</td>
-				  </tr>
-				  <tr ng-if="!loading && promotions.length === 0">
-					<td colspan="7" class="text-center py-3">Không có dữ liệu</td>
-				  </tr>
-				</tbody>
-			  </table>
+		<div class="col-12">
+			<div class="d-flex justify-content-between align-items-center mb-4">
+				<div class="d-flex align-items-center">
+					<a href="#!/admin" class="btn btn-outline-secondary me-3">
+						<i class="bi bi-arrow-left"></i> Quay lại
+					</a>
+					<h2 class="mb-0"><i class="bi bi-gift"></i> Quản lý khuyến mãi</h2>
+				</div>
 			</div>
-		  </div>
+
+			<div class="row g-2 mb-3">
+				<div class="col-md-3">
+					<input type="text" class="form-control" placeholder="Tên khuyến mãi" ng-model="filters.Name">
+				</div>
+				<div class="col-md-2">
+					<select class="form-select" ng-model="filters.Status">
+						<option value="all">Tất cả</option>
+						<option value="active">Đang diễn ra</option>
+						<option value="upcoming">Sắp diễn ra</option>
+						<option value="expired">Hết hạn</option>
+					</select>
+				</div>
+				<div class="col-md-2">
+					<input type="number" min="0" max="100" class="form-control" placeholder="Min %"
+						ng-model="filters.MinDiscountPct">
+				</div>
+				<div class="col-md-2">
+					<input type="number" min="0" max="100" class="form-control" placeholder="Max %"
+						ng-model="filters.MaxDiscountPct">
+				</div>
+				<div class="col-md-3 text-end">
+					<button class="btn btn-primary me-2" ng-click="search()">Tìm kiếm</button>
+					<button class="btn btn-success" ng-click="showAddForm()">Thêm khuyến mãi</button>
+				</div>
+			</div>
+
+			<div class="card" ng-if="!loading">
+				<div class="card-body p-0">
+					<div class="table-responsive">
+						<table class="table table-hover mb-0">
+							<thead class="table-light">
+								<tr>
+									<th>ID</th>
+									<th>Tên</th>
+									<th>%</th>
+									<th>Bắt đầu</th>
+									<th>Kết thúc</th>
+									<th>Người tạo</th>
+									<th class="text-end">Thao tác</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr ng-repeat="p in promotions">
+									<td>{{p.promotionId || p.id}}</td>
+									<td>{{p.name}}</td>
+									<td>{{p.discountPct}}%</td>
+									<td>{{p.startDate | date:'yyyy-MM-dd'}}</td>
+									<td>{{p.endDate | date:'yyyy-MM-dd'}}</td>
+									<td>{{p.issuedByName}}</td>
+									<td class="text-end">
+										<div class="btn-group btn-group-sm">
+											<button class="btn btn-outline-info" ng-click="viewPromotionBooks(p)"
+												title="Xem sách" data-bs-toggle="modal"
+												data-bs-target="#promotionBooksModal">
+												<i class="bi bi-book"></i>
+											</button>
+											<button class="btn btn-edit-hover" ng-click="showEditForm(p)"
+												title="Chỉnh sửa">
+												<i class="bi bi-pencil"></i>
+											</button>
+											<button class="btn btn-outline-danger" ng-click="deletePromotion(p)"
+												title="Xóa">
+												<i class="bi bi-trash"></i>
+											</button>
+										</div>
+									</td>
+								</tr>
+								<tr ng-if="!loading && promotions.length === 0">
+									<td colspan="7" class="text-center py-3">Không có dữ liệu</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+
+			<empty-state show="!loading && promotions.length === 0" title="Chưa có khuyến mãi nào"
+				message="Hệ thống chưa có khuyến mãi để hiển thị">
+			</empty-state>
+
+			<pagination current-page="currentPage" total-pages="totalPages" on-page-change="onPageChange(page)">
+			</pagination>
 		</div>
-  
-		<empty-state
-		  show="!loading && promotions.length === 0"
-		  title="Chưa có khuyến mãi nào"
-		  message="Hệ thống chưa có khuyến mãi để hiển thị">
-		</empty-state>
-  
-		<pagination
-		  current-page="currentPage"
-		  total-pages="totalPages"
-		  on-page-change="onPageChange(page)">
-		</pagination>
-	  </div>
 	</div>
-  
+
 	<!-- Modal: Create/Edit Promotion -->
 	<div class="modal fade" id="promotionModal" tabindex="-1">
-	  <div class="modal-dialog" style="max-width: 640px;">
-		<div class="modal-content">
-		  <div class="modal-header">
-			<h5 class="modal-title">{{_originalPromotion ? 'Sửa khuyến mãi' : 'Thêm khuyến mãi'}}</h5>
-			<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-		  </div>
-		  <form ng-if="editingPromotion" ng-submit="submitForm()">
-			<div class="modal-body">
-			  <div class="mb-2">
-				<label class="form-label">Tên khuyến mãi</label>
-				<input class="form-control" placeholder="VD: Sale Tháng 10" ng-model="formData.name" required />
-				<div class="text-danger small mt-1" ng-if="formErrors.name">{{formErrors.name}}</div>
-			  </div>
-			  <div class="mb-2">
-				<label class="form-label">Mô tả <span class="text-muted" style="font-weight: normal;">(tùy chọn)</span></label>
-				<textarea class="form-control" placeholder="Mô tả ngắn về chương trình" ng-model="formData.description"></textarea>
-			  </div>
-			  <div class="mb-2">
-				<label class="form-label">Mức giảm (%)</label>
-				<input type="number" min="1" max="100" step="1" class="form-control" placeholder="1 - 100" ng-model="formData.discountPct" ng-change="validateDiscountPct()" ng-pattern="/^\d+$/" required />
-				<div class="text-danger small mt-1" ng-if="formErrors.discountPct">{{formErrors.discountPct}}</div>
-			  </div>
-			  <div class="row g-2">
-				<div class="col">
-				  <label class="form-label">Bắt đầu</label>
-				  <input type="date" class="form-control" ng-model="formData.startDate" ng-model-options="{ timezone: 'UTC', debounce: 100 }" required />
-				  <div class="text-danger small mt-1" ng-if="formErrors.startDate">{{formErrors.startDate}}</div>
+		<div class="modal-dialog" style="max-width: 640px;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">{{_originalPromotion ? 'Sửa khuyến mãi' : 'Thêm khuyến mãi'}}</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 				</div>
-				<div class="col">
-				  <label class="form-label">Kết thúc</label>
-				  <input type="date" class="form-control" ng-model="formData.endDate" ng-model-options="{ timezone: 'UTC', debounce: 100 }" required />
-				  <div class="text-danger small mt-1" ng-if="formErrors.endDate">{{formErrors.endDate}}</div>
-				</div>
-			  </div>
-			  <div class="text-danger small mt-1" ng-if="formErrors.dateRange">{{formErrors.dateRange}}</div>
-  
-			  <div class="mb-2">
-				<label class="form-label">Sách áp dụng</label>
-				<div class="d-flex justify-content-between align-items-center">
-				  <div class="d-flex align-items-center gap-2">
-					<button type="button" class="btn btn-outline-primary btn-sm" ng-click="openBookPicker()">
-					  <i class="bi bi-search"></i> Chọn sách
-					</button>
-				  </div>
-				  <div class="text-muted">Đã chọn: {{(formData.bookIsbns||[]).length}}</div>
-				</div>
-				<div class="small text-muted mt-1">Nhấn "Chọn sách" để tìm và thêm sách vào khuyến mãi.</div>
-				<div class="text-danger small mt-1" ng-if="formErrors.bookIsbns">{{formErrors.bookIsbns}}</div>
-  
-				<!-- Preview list shows both in Add & Edit -->
-				<div class="table-responsive mt-2" ng-if="(formData.bookIsbns && formData.bookIsbns.length > 0) || (editingPromotion && editingPromotion.books && editingPromotion.books.length > 0)">
-				  <div class="d-flex justify-content-between align-items-center mb-2">
-					<h6 class="mb-0"><i class="bi bi-book"></i> Danh sách sách trong khuyến mãi</h6>
-					<small class="text-muted">{{(editingPromotion && editingPromotion.books) ? editingPromotion.books.length : (formData.bookIsbns ? formData.bookIsbns.length : 0)}} sách</small>
-				  </div>
-				  <table class="table table-sm table-striped mb-0">
-					<thead class="table-light">
-					  <tr>
-						<th>ISBN</th>
-						<th>Tên sách</th>
-						<th>NXB</th>
-						<th>Danh mục</th>
-						<th class="text-end">Giá gốc</th>
-						<th class="text-end">Giá KM</th>
-						<th class="text-end">Thao tác</th>
-					  </tr>
-					</thead>
-					<tbody>
-					  <tr ng-repeat="b in (editingPromotion && editingPromotion.books) || [] track by b.isbn">
-						<td class="text-nowrap"><code>{{b.isbn}}</code></td>
-						<td class="text-truncate" style="max-width: 250px;" title="{{b.title}}">{{b.title}}</td>
-						<td class="text-truncate" style="max-width: 150px;" title="{{b.publisherName}}">{{b.publisherName}}</td>
-						<td>{{b.categoryName}}</td>
-						<td class="text-end">{{b.unitPrice | currency:'':0}} ₫</td>
-						<td class="text-end text-success"><strong>{{b.discountedPrice | currency:'':0}} ₫</strong></td>
-						<td class="text-end">
-						  <button type="button" class="btn btn-sm btn-outline-danger" ng-click="removeBookFromPromotion(b.isbn)" title="Xóa sách này"><i class="bi bi-trash"></i></button>
-						</td>
-					  </tr>
-					</tbody>
-				  </table>
-				</div>
-  
-			  </div>
+				<form ng-if="editingPromotion" ng-submit="submitForm()">
+					<div class="modal-body">
+						<div class="mb-2">
+							<label class="form-label">Tên khuyến mãi</label>
+							<input class="form-control" placeholder="VD: Sale Tháng 10" ng-model="formData.name"
+								required />
+							<div class="text-danger small mt-1" ng-if="formErrors.name">{{formErrors.name}}</div>
+						</div>
+						<div class="mb-2">
+							<label class="form-label">Mô tả <span class="text-muted" style="font-weight: normal;">(tùy
+									chọn)</span></label>
+							<textarea class="form-control" placeholder="Mô tả ngắn về chương trình"
+								ng-model="formData.description"></textarea>
+						</div>
+						<div class="mb-2">
+							<label class="form-label">Mức giảm (%)</label>
+							<input type="number" min="1" max="100" step="1" class="form-control" placeholder="1 - 100"
+								ng-model="formData.discountPct" ng-change="validateDiscountPct()" ng-pattern="/^\d+$/"
+								required />
+							<div class="text-danger small mt-1" ng-if="formErrors.discountPct">
+								{{formErrors.discountPct}}</div>
+						</div>
+						<div class="row g-2">
+							<div class="col">
+								<label class="form-label">Bắt đầu</label>
+								<input type="date" class="form-control" ng-model="formData.startDate"
+									ng-model-options="{ timezone: 'UTC', debounce: 100 }" required />
+								<div class="text-danger small mt-1" ng-if="formErrors.startDate">
+									{{formErrors.startDate}}</div>
+							</div>
+							<div class="col">
+								<label class="form-label">Kết thúc</label>
+								<input type="date" class="form-control" ng-model="formData.endDate"
+									ng-model-options="{ timezone: 'UTC', debounce: 100 }" required />
+								<div class="text-danger small mt-1" ng-if="formErrors.endDate">{{formErrors.endDate}}
+								</div>
+							</div>
+						</div>
+						<div class="text-danger small mt-1" ng-if="formErrors.dateRange">{{formErrors.dateRange}}</div>
+
+						<div class="mb-2">
+							<label class="form-label">Sách áp dụng</label>
+							<div class="d-flex justify-content-between align-items-center">
+								<div class="d-flex align-items-center gap-2">
+									<button type="button" class="btn btn-outline-primary btn-sm"
+										ng-click="openBookPicker()">
+										<i class="bi bi-search"></i> Chọn sách
+									</button>
+								</div>
+								<div class="text-muted">Đã chọn: {{(formData.bookIsbns||[]).length}}</div>
+							</div>
+							<div class="small text-muted mt-1">Nhấn "Chọn sách" để tìm và thêm sách vào khuyến mãi.
+							</div>
+							<div class="text-danger small mt-1" ng-if="formErrors.bookIsbns">{{formErrors.bookIsbns}}
+							</div>
+
+							<!-- Preview list shows both in Add & Edit -->
+							<div class="table-responsive mt-2"
+								ng-if="(formData.bookIsbns && formData.bookIsbns.length > 0) || (editingPromotion && editingPromotion.books && editingPromotion.books.length > 0)">
+								<div class="d-flex justify-content-between align-items-center mb-2">
+									<h6 class="mb-0"><i class="bi bi-book"></i> Danh sách sách trong khuyến mãi</h6>
+									<small class="text-muted">{{(editingPromotion && editingPromotion.books) ?
+										editingPromotion.books.length : (formData.bookIsbns ? formData.bookIsbns.length
+										: 0)}} sách</small>
+								</div>
+								<table class="table table-sm table-striped mb-0">
+									<thead class="table-light">
+										<tr>
+											<th>ISBN</th>
+											<th>Tên sách</th>
+											<th>NXB</th>
+											<th>Danh mục</th>
+											<th class="text-end">Giá gốc</th>
+											<th class="text-end">Giá KM</th>
+											<th class="text-end">Thao tác</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr
+											ng-repeat="b in (editingPromotion && editingPromotion.books) || [] track by b.isbn">
+											<td class="text-nowrap"><code>{{b.isbn}}</code></td>
+											<td class="text-truncate" style="max-width: 250px;" title="{{b.title}}">
+												{{b.title}}</td>
+											<td class="text-truncate" style="max-width: 150px;"
+												title="{{b.publisherName}}">{{b.publisherName}}</td>
+											<td>{{b.categoryName}}</td>
+											<td class="text-end">{{b.unitPrice | currency:'':0}} ₫</td>
+											<td class="text-end text-success"><strong>{{b.discountedPrice |
+													currency:'':0}} ₫</strong></td>
+											<td class="text-end">
+												<button type="button" class="btn btn-sm btn-outline-danger"
+													ng-click="removeBookFromPromotion(b.isbn)" title="Xóa sách này"><i
+														class="bi bi-trash"></i></button>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+							ng-click="closeForm()">Đóng</button>
+						<button type="submit" class="btn btn-primary" ng-disabled="isSubmitting">
+							<span ng-if="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
+							Lưu
+						</button>
+					</div>
+				</form>
 			</div>
-			<div class="modal-footer">
-			  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" ng-click="closeForm()">Đóng</button>
-			  <button type="submit" class="btn btn-primary" ng-disabled="isSubmitting">
-				<span ng-if="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
-				Lưu
-			  </button>
-			</div>
-		  </form>
 		</div>
-	  </div>
 	</div>
-  
+
 	<!-- Books of Promotion Modal -->
 	<div class="modal fade" id="promotionBooksModal" tabindex="-1">
-	  <div class="modal-dialog modal-lg">
-		<div class="modal-content">
-		  <div class="modal-header">
-			<h5 class="modal-title"><i class="bi bi-book"></i> Sách trong khuyến mãi</h5>
-			<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-		  </div>
-		  <div class="modal-body" ng-if="$root.selectedPromotion">
-			<div class="mb-2"><strong>{{$root.selectedPromotion.name}}</strong> — {{$root.selectedPromotion.discountPct}}%</div>
-			<div class="table-responsive">
-			  <table class="table table-sm table-striped align-middle">
-				<thead class="table-light">
-				  <tr>
-					<th>ISBN</th>
-					<th>Tên sách</th>
-					<th>NXB</th>
-					<th>Danh mục</th>
-					<th class="text-end">Giá gốc</th>
-					<th class="text-end">Giá KM</th>
-				  </tr>
-				</thead>
-				<tbody>
-				  <tr ng-repeat="b in ($root.selectedPromotion.books || [])">
-					<td class="text-nowrap"><code>{{b.isbn}}</code></td>
-					<td class="text-truncate" style="max-width: 280px">{{b.title}}</td>
-					<td>{{b.publisherName}}</td>
-					<td>{{b.categoryName}}</td>
-					<td class="text-end">{{b.unitPrice | currency}}</td>
-					<td class="text-end text-success"><strong>{{b.discountedPrice | currency}}</strong></td>
-				  </tr>
-				</tbody>
-			  </table>
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title"><i class="bi bi-book"></i> Sách trong khuyến mãi</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body" ng-if="$root.selectedPromotion">
+					<div class="mb-2"><strong>{{$root.selectedPromotion.name}}</strong> —
+						{{$root.selectedPromotion.discountPct}}%</div>
+					<div class="table-responsive">
+						<table class="table table-sm table-striped align-middle">
+							<thead class="table-light">
+								<tr>
+									<th>ISBN</th>
+									<th>Tên sách</th>
+									<th>NXB</th>
+									<th>Danh mục</th>
+									<th class="text-end">Giá gốc</th>
+									<th class="text-end">Giá KM</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr ng-repeat="b in ($root.selectedPromotion.books || [])">
+									<td class="text-nowrap"><code>{{b.isbn}}</code></td>
+									<td class="text-truncate" style="max-width: 280px">{{b.title}}</td>
+									<td>{{b.publisherName}}</td>
+									<td>{{b.categoryName}}</td>
+									<td class="text-end">{{b.unitPrice | currency}}</td>
+									<td class="text-end text-success"><strong>{{b.discountedPrice | currency}}</strong>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+				</div>
 			</div>
-		  </div>
-		  <div class="modal-footer">
-			<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-		  </div>
 		</div>
-	  </div>
 	</div>
-  
+
 	<!-- Book Picker Modal -->
 	<div class="modal fade" id="bookPickerModal" tabindex="-1">
-	  <div class="modal-dialog modal-lg">
-		<div class="modal-content">
-		  <div class="modal-header">
-			<h5 class="modal-title"><i class="bi bi-book"></i> Chọn sách</h5>
-			<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-		  </div>
-		  <div class="modal-body">
-			<div class="row g-2 mb-2">
-			  <div class="col">
-				<input class="form-control" placeholder="Tìm theo tên/ISBN" ng-model="bookPicker.searchTerm" ng-keypress="$event.which===13 && loadBooksForPicker()">
-			  </div>
-			  <div class="col-auto text-end d-flex gap-2">
-				<button class="btn btn-outline-secondary" type="button" ng-if="!isAllBooksSelectedInPicker()" ng-click="selectAllBooksInPicker()"><i class="bi bi-check2-square"></i> Chọn tất cả</button>
-				<button class="btn btn-outline-secondary" type="button" ng-if="isAllBooksSelectedInPicker()" ng-click="clearAllBooksInPicker()"><i class="bi bi-x-square"></i> Bỏ chọn</button>
-				<button class="btn btn-primary" type="button" ng-click="loadBooksForPicker()"><i class="bi bi-search"></i></button>
-			  </div>
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title"><i class="bi bi-book"></i> Chọn sách</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body">
+					<div class="row g-2 mb-2">
+						<div class="col">
+							<input class="form-control" placeholder="Tìm theo tên/ISBN" ng-model="bookPicker.searchTerm"
+								ng-keypress="$event.which===13 && loadBooksForPicker()">
+						</div>
+						<div class="col-auto text-end d-flex gap-2">
+							<button class="btn btn-outline-secondary" type="button"
+								ng-if="!isAllBooksSelectedInPicker()" ng-click="selectAllBooksInPicker()"><i
+									class="bi bi-check2-square"></i> Chọn tất cả</button>
+							<button class="btn btn-outline-secondary" type="button" ng-if="isAllBooksSelectedInPicker()"
+								ng-click="clearAllBooksInPicker()"><i class="bi bi-x-square"></i> Bỏ chọn</button>
+							<button class="btn btn-primary" type="button" ng-click="loadBooksForPicker()"><i
+									class="bi bi-search"></i></button>
+						</div>
+					</div>
+					<div ng-if="bookPicker.loading" class="text-center py-4">
+						<div class="spinner-border text-primary"></div>
+					</div>
+					<div class="table-responsive" ng-if="!bookPicker.loading">
+						<table class="table table-sm table-hover align-middle">
+							<thead class="table-light">
+								<tr>
+									<th style="width:38px;"></th>
+									<th>ISBN</th>
+									<th>Tiêu đề</th>
+									<th class="text-end" style="width: 120px;">Giá</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr ng-repeat="b in bookPicker.books">
+									<td>
+										<input type="checkbox" ng-checked="bookPicker.selected[b.isbn]"
+											ng-click="togglePickBook(b.isbn)">
+									</td>
+									<td class="text-nowrap"><code>{{b.isbn}}</code></td>
+									<td class="text-truncate" style="max-width: 340px">{{b.title}}</td>
+									<td class="text-end">{{(b.currentPrice || b.unitPrice) | numberFormatted}} ₫</td>
+								</tr>
+								<tr ng-if="!bookPicker.loading && (!bookPicker.books || bookPicker.books.length===0)">
+									<td colspan="4" class="text-center py-3 text-muted">Không tìm thấy sách</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<pagination current-page="bookPicker.currentPage" total-pages="bookPicker.totalPages"
+						on-page-change="onBookPickerPageChange(page)"></pagination>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+					<button type="button" class="btn btn-success" ng-click="confirmAddPickedBooks()">Thêm vào khuyến
+						mãi</button>
+				</div>
 			</div>
-			<div ng-if="bookPicker.loading" class="text-center py-4">
-			  <div class="spinner-border text-primary"></div>
-			</div>
-			<div class="table-responsive" ng-if="!bookPicker.loading">
-			  <table class="table table-sm table-hover align-middle">
-				<thead class="table-light">
-				  <tr>
-					<th style="width:38px;"></th>
-					<th>ISBN</th>
-					<th>Tiêu đề</th>
-					<th class="text-end" style="width: 120px;">Giá</th>
-				  </tr>
-				</thead>
-				<tbody>
-				  <tr ng-repeat="b in bookPicker.books">
-					<td>
-					  <input type="checkbox" ng-checked="bookPicker.selected[b.isbn]" ng-click="togglePickBook(b.isbn)">
-					</td>
-					<td class="text-nowrap"><code>{{b.isbn}}</code></td>
-					<td class="text-truncate" style="max-width: 340px">{{b.title}}</td>
-					<td class="text-end">{{(b.currentPrice || b.unitPrice) | numberFormatted}} ₫</td>
-				  </tr>
-				  <tr ng-if="!bookPicker.loading && (!bookPicker.books || bookPicker.books.length===0)">
-					<td colspan="4" class="text-center py-3 text-muted">Không tìm thấy sách</td>
-				  </tr>
-				</tbody>
-			  </table>
-			</div>
-			<pagination current-page="bookPicker.currentPage" total-pages="bookPicker.totalPages" on-page-change="onBookPickerPageChange(page)"></pagination>
-		  </div>
-		  <div class="modal-footer">
-			<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-			<button type="button" class="btn btn-success" ng-click="confirmAddPickedBooks()">Thêm vào khuyến mãi</button>
-		  </div>
 		</div>
-	  </div>
 	</div>
-  
+
 	<style>
-	  .btn-edit-hover {
-		background-color: #fff !important;
-		color: #0d6efd !important;
-		border: 1px solid #dee2e6 !important;
-	  }
-	  .btn-edit-hover .bi { color: inherit !important; }
-	  .btn-edit-hover:hover {
-		background-color: #0d6efd !important;
-		color: #fff !important;
-		border-color: #0d6efd !important;
-	  }
-	  .btn-edit-hover:hover .bi { color: #fff !important; }
+		.btn-edit-hover {
+			background-color: #fff !important;
+			color: #0d6efd !important;
+			border: 1px solid #dee2e6 !important;
+		}
+
+		.btn-edit-hover .bi {
+			color: inherit !important;
+		}
+
+		.btn-edit-hover:hover {
+			background-color: #0d6efd !important;
+			color: #fff !important;
+			border-color: #0d6efd !important;
+		}
+
+		.btn-edit-hover:hover .bi {
+			color: #fff !important;
+		}
 	</style>
-  
+
 	<!-- Toasts -->
 	<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000;">
-	  <div class="toast align-items-center text-white bg-{{t.variant}} border-0 mb-2 show" role="alert" aria-live="assertive" aria-atomic="true" ng-repeat="t in toasts">
-		<div class="d-flex">
-		  <div class="toast-body">{{t.message}}</div>
+		<div class="toast align-items-center text-white bg-{{t.variant}} border-0 mb-2 show" role="alert"
+			aria-live="assertive" aria-atomic="true" ng-repeat="t in toasts">
+			<div class="d-flex">
+				<div class="toast-body">{{t.message}}</div>
+			</div>
 		</div>
-	  </div>
 	</div>
-  </div>
-  
+	<!-- Confirm Delete Modal -->
+	<confirm-dialog show="showDeleteConfirm" title="Xác nhận xóa khuyến mãi" message="{{deleteMessage}}"
+		on-confirm="confirmDeletePromotion()">
+	</confirm-dialog>
+
+</div>

@@ -131,9 +131,9 @@ app.controller('HomeController', ['$scope', '$http', '$location', 'DataService',
             .then(function (res) {
                 $scope.bestSellers = (res.data && res.data.data) ? res.data.data : [];
 
-                // Filter to only show active books with stock > 1
+                // Filter to only show active books with stock > 0
                 $scope.bestSellers = $scope.bestSellers.filter(function (book) {
-                    return book.status === true && (book.stock || 0) > 1;
+                    return book.status === true && (book.stock || 0) > 0;
                 });
 
                 // Initialize tooltips after data is loaded
@@ -157,9 +157,9 @@ app.controller('HomeController', ['$scope', '$http', '$location', 'DataService',
             .then(function (res) {
                 $scope.newBooks = (res.data && res.data.data) ? res.data.data : [];
 
-                // Filter to only show active books with stock > 1
+                // Filter to only show active books with stock > 0
                 $scope.newBooks = $scope.newBooks.filter(function (book) {
-                    return book.status === true && (book.stock || 0) > 1;
+                    return book.status === true && (book.stock || 0) > 0;
                 });
 
                 // Initialize tooltips after data is loaded
@@ -183,9 +183,9 @@ app.controller('HomeController', ['$scope', '$http', '$location', 'DataService',
             .then(function (res) {
                 $scope.promotionBooks = (res.data && res.data.data) ? res.data.data : [];
 
-                // Filter to only show active books with stock > 1
+                // Filter to only show active books with stock > 0
                 $scope.promotionBooks = $scope.promotionBooks.filter(function (book) {
-                    return book.status === true && (book.stock || 0) > 1;
+                    return book.status === true && (book.stock || 0) > 0;
                 });
 
                 // Initialize tooltips after data is loaded

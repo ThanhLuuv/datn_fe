@@ -1,7 +1,7 @@
 // Purchase Order Controllers
 
 // Admin Purchase Orders Controller
-app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', 'AuthService', '$location', '$sce', function($scope, BookstoreService, AuthService, $location, $sce) {
+app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', 'AuthService', '$location', '$sce', function ($scope, BookstoreService, AuthService, $location, $sce) {
     // Check if user has admin or teacher access
     if (!AuthService.isAdminOrTeacher()) {
         console.log('Access denied: User does not have admin or teacher role');
@@ -27,12 +27,12 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
 
     // Toasts
     $scope.toasts = [];
-    $scope.addToast = function(variant, message) {
+    $scope.addToast = function (variant, message) {
         var id = Date.now() + Math.random();
         $scope.toasts.push({ id: id, variant: variant, message: message });
-        setTimeout(function(){
-            $scope.$apply(function(){
-                $scope.toasts = $scope.toasts.filter(function(t){ return t.id !== id; });
+        setTimeout(function () {
+            $scope.$apply(function () {
+                $scope.toasts = $scope.toasts.filter(function (t) { return t.id !== id; });
             });
         }, 4000);
     };
@@ -48,14 +48,14 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
     };
     $scope.editingOrder = null;
     $scope.showForm = false;
-    
+
     // Publishers data
     $scope.publishers = [];
 
     // Load publishers
-    $scope.loadPublishers = function() {
+    $scope.loadPublishers = function () {
         BookstoreService.getPublishers({})
-            .then(function(response) {
+            .then(function (response) {
                 if (response.data && response.data.success && response.data.data && Array.isArray(response.data.data.publishers)) {
                     $scope.publishers = response.data.data.publishers;
                 } else if (response.data && Array.isArray(response.data.data)) {
@@ -66,14 +66,14 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
                     $scope.publishers = [];
                 }
             })
-            .catch(function(error) {
+            .catch(function (error) {
                 console.error('Error loading publishers:', error);
                 $scope.publishers = [];
             });
     };
 
     // Điều hướng sang trang Phiếu nhập, kèm theo chọn sẵn PO
-    $scope.goToGoodsReceipt = function(order) {
+    $scope.goToGoodsReceipt = function (order) {
         if (!order) return;
         var isApproved = (order.statusId === 3) || (order.statusName && String(order.statusName).toLowerCase() === 'approved');
         if (!isApproved) {
@@ -91,7 +91,7 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
         window.location.href = '#!/admin/goods-receipts';
     };
     // View purchase order details in modal
-    $scope.viewPurchaseOrder = function(order) {
+    $scope.viewPurchaseOrder = function (order) {
         if (!order) return;
         $scope.selectedPurchaseOrder = order;
         var modalEl = document.getElementById('purchaseOrderDetailModal');
@@ -102,10 +102,10 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
     };
 
     // Load purchase orders
-    $scope.loadPurchaseOrders = function() {
+    $scope.loadPurchaseOrders = function () {
         $scope.loading = true;
         $scope.error = null;
-        
+
         BookstoreService.getPurchaseOrders({
             pageNumber: $scope.currentPage,
             pageSize: $scope.pageSize,
@@ -114,7 +114,7 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
             fromDate: $scope.filters.fromDate,
             toDate: $scope.filters.toDate
         })
-            .then(function(response) {
+            .then(function (response) {
                 // Normalize API response to expected shape
                 var payload = response && response.data ? response.data : null;
                 var list = [];
@@ -125,7 +125,7 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
                     if (payload.data && Array.isArray(payload.data.purchaseOrders)) {
                         list = payload.data.purchaseOrders;
                         totalPages = payload.data.totalPages || 0;
-                    // Legacy formats
+                        // Legacy formats
                     } else if (Array.isArray(payload.data)) {
                         list = payload.data;
                         totalPages = payload.totalPages || 0;
@@ -139,7 +139,7 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
                 $scope.totalPages = totalPages;
                 $scope.loading = false;
             })
-            .catch(function(error) {
+            .catch(function (error) {
                 $scope.error = 'Không thể tải danh sách đơn đặt hàng. Vui lòng thử lại.';
                 $scope.loading = false;
                 console.error('Error loading purchase orders:', error);
@@ -148,19 +148,19 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
     };
 
     // Search purchase orders
-    $scope.search = function() {
+    $scope.search = function () {
         $scope.currentPage = 1;
         $scope.loadPurchaseOrders();
     };
 
     // Page change
-    $scope.onPageChange = function(page) {
+    $scope.onPageChange = function (page) {
         $scope.currentPage = page;
         $scope.loadPurchaseOrders();
     };
 
     // Open create modal
-    $scope.openCreateModal = function() {
+    $scope.openCreateModal = function () {
         $scope.isEditMode = false;
         $scope.purchaseOrderData = {
             poId: '',
@@ -176,14 +176,64 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
         $scope.availableBooks = [];
         $scope.loadAvailableBooks();
         $scope.loadPublishers();
-        
+
+        // Show modal
+        var modal = new bootstrap.Modal(document.getElementById('purchaseOrderModal'));
+        modal.show();
+    };
+
+    // Open edit modal
+    $scope.openEditModal = function (order) {
+        if (!order) return;
+        $scope.isEditMode = true;
+
+        // Close detail modal if open
+        var detailModalEl = document.getElementById('purchaseOrderDetailModal');
+        var detailModal = bootstrap.Modal.getInstance(detailModalEl);
+        if (detailModal) {
+            detailModal.hide();
+        }
+
+        // Initialize data
+        $scope.purchaseOrderData = {
+            poId: order.poId || order.id,
+            publisherId: String(order.publisherId), // Ensure string for select matching
+            publisherName: order.publisherName,
+            orderedAt: order.orderedAt,
+            createdByName: order.createdByName,
+            totalQuantity: order.totalQuantity,
+            totalAmount: order.totalAmount,
+            note: order.note,
+            lines: []
+        };
+
+        // Map lines
+        if (order.lines && Array.isArray(order.lines)) {
+            $scope.purchaseOrderData.lines = order.lines.map(function (l) {
+                return {
+                    isbn: l.isbn,
+                    qtyOrdered: l.qtyOrdered,
+                    unitPrice: l.unitPrice,
+                    lineTotal: l.lineTotal
+                };
+            });
+        }
+
+        // Load publishers (if not loaded) and available books
+        if (!$scope.publishers || $scope.publishers.length === 0) {
+            $scope.loadPublishers();
+        }
+
+        // Load available books for this publisher
+        $scope.loadAvailableBooks();
+
         // Show modal
         var modal = new bootstrap.Modal(document.getElementById('purchaseOrderModal'));
         modal.show();
     };
 
     // Show add form
-    $scope.showAddForm = function() {
+    $scope.showAddForm = function () {
         $scope.editingOrder = null;
         $scope.formData = {
             publisher: '',
@@ -197,7 +247,7 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
     };
 
     // Show edit form
-    $scope.showEditForm = function(order) {
+    $scope.showEditForm = function (order) {
         $scope.editingOrder = order;
         $scope.formData = {
             publisher: order.publisher,
@@ -211,7 +261,7 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
     };
 
     // Hide form
-    $scope.hideForm = function() {
+    $scope.hideForm = function () {
         $scope.showForm = false;
         $scope.editingOrder = null;
         $scope.formData = {
@@ -225,7 +275,7 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
     };
 
     // Save purchase order
-    $scope.savePurchaseOrder = function() {
+    $scope.savePurchaseOrder = function () {
         if (!$scope.formData.publisher.trim()) {
             $scope.error = 'Tên nhà xuất bản không được để trống.';
             return;
@@ -244,21 +294,21 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
         }
 
         promise
-            .then(function(response) {
+            .then(function (response) {
                 $scope.loading = false;
                 $scope.success = $scope.editingOrder ? 'Cập nhật đơn đặt hàng thành công!' : 'Tạo đơn đặt hàng thành công!';
                 $scope.hideForm();
                 $scope.loadPurchaseOrders();
                 $scope.addToast('success', $scope.success);
-                
+
                 // Hide success message after 3 seconds
-                setTimeout(function() {
-                    $scope.$apply(function() {
+                setTimeout(function () {
+                    $scope.$apply(function () {
                         $scope.success = null;
                     });
                 }, 3000);
             })
-            .catch(function(error) {
+            .catch(function (error) {
                 $scope.loading = false;
                 $scope.error = error.data?.message || 'Có lỗi xảy ra khi lưu đơn đặt hàng.';
                 console.error('Error saving purchase order:', error);
@@ -267,7 +317,8 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
     };
 
     // Delete purchase order
-    $scope.deletePurchaseOrder = function(order) {
+    // Delete purchase order
+    $scope.deletePurchaseOrder = function (order) {
         // Chỉ cho phép xóa nếu trạng thái là Pending (1)
         var isPending = order && ((order.statusId === 1) || (order.statusName && String(order.statusName).toLowerCase() === 'pending'));
         if (!isPending) {
@@ -280,30 +331,40 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
             );
             return;
         }
-        
+
+        // Use poId, fallback to id if necessary
+        var poId = order.poId || order.id;
+
         $scope.showPoConfirmModal(
             'Xác nhận xóa đơn',
-            'Bạn có chắc chắn muốn xóa đơn đặt hàng <strong>PO-' + (order.poId || order.id) + '</strong>?<br><small class="text-muted">Hành động này không thể hoàn tác.</small>',
+            'Bạn có chắc chắn muốn xóa đơn đặt hàng <strong>PO-' + poId + '</strong>?<br><small class="text-muted">Hành động này không thể hoàn tác.</small>',
             'danger',
-            function(selectedOrder) {
+            function () {
+                // Use 'order' and 'poId' from closure to avoid any parameter passing issues
+                console.log('Deleting Purchase Order:', order);
+                if (!poId) {
+                    $scope.addToast('danger', 'Lỗi: Không tìm thấy ID đơn hàng');
+                    return;
+                }
+
                 $scope.loading = true;
                 $scope.error = null;
 
-                BookstoreService.deletePurchaseOrder(selectedOrder.id)
-                    .then(function(response) {
+                BookstoreService.deletePurchaseOrder(poId)
+                    .then(function (response) {
                         $scope.loading = false;
                         $scope.success = 'Xóa đơn đặt hàng thành công!';
                         $scope.loadPurchaseOrders();
                         $scope.addToast('success', $scope.success);
-                        
+
                         // Hide success message after 3 seconds
-                        setTimeout(function() {
-                            $scope.$apply(function() {
+                        setTimeout(function () {
+                            $scope.$apply(function () {
                                 $scope.success = null;
                             });
                         }, 3000);
                     })
-                    .catch(function(error) {
+                    .catch(function (error) {
                         $scope.loading = false;
                         $scope.error = error.data?.message || 'Có lỗi xảy ra khi xóa đơn đặt hàng.';
                         console.error('Error deleting purchase order:', error);
@@ -325,7 +386,7 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
     };
 
     // Show purchase order confirmation modal
-    $scope.showPoConfirmModal = function(title, message, type, onConfirm, order) {
+    $scope.showPoConfirmModal = function (title, message, type, onConfirm, order) {
         $scope.poConfirmModal = {
             show: true,
             title: title,
@@ -334,14 +395,14 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
             onConfirm: onConfirm,
             order: order
         };
-        
+
         // Get or create modal instance with proper options
         var modalEl = document.getElementById('poConfirmModal');
         if (!modalEl) {
             console.error('Modal element poConfirmModal not found');
             return;
         }
-        
+
         try {
             var modal = bootstrap.Modal.getOrCreateInstance(modalEl, {
                 backdrop: true,
@@ -361,11 +422,11 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
     };
 
     // Hide purchase order confirmation modal
-    $scope.hidePoConfirmModal = function() {
+    $scope.hidePoConfirmModal = function () {
         $scope.poConfirmModal.show = false;
         var modalEl = document.getElementById('poConfirmModal');
         if (!modalEl) return;
-        
+
         try {
             var modal = bootstrap.Modal.getInstance(modalEl);
             if (modal) {
@@ -374,8 +435,8 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
                 // Fallback: manual hide
                 modalEl.classList.remove('show');
                 modalEl.style.display = 'none';
-                document.querySelectorAll('.modal-backdrop').forEach(function(b) {
-                    try { b.remove(); } catch(e) {}
+                document.querySelectorAll('.modal-backdrop').forEach(function (b) {
+                    try { b.remove(); } catch (e) { }
                 });
             }
         } catch (e) {
@@ -384,7 +445,7 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
     };
 
     // Confirm purchase order action
-    $scope.confirmPoAction = function() {
+    $scope.confirmPoAction = function () {
         if ($scope.poConfirmModal.onConfirm) {
             $scope.poConfirmModal.onConfirm($scope.poConfirmModal.order);
         }
@@ -392,7 +453,7 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
     };
 
     // Gửi đơn đặt hàng: chuyển từ Pending (1) → Shipped (2)
-    $scope.sendPurchaseOrder = function(order) {
+    $scope.sendPurchaseOrder = function (order) {
         if (!order) return;
         var isPending = (order.statusId === 1) || (order.statusName && String(order.statusName).toLowerCase() === 'pending');
         if (!isPending) {
@@ -410,10 +471,10 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
             'Xác nhận gửi đơn',
             'Bạn có chắc chắn muốn gửi đơn đặt hàng <strong>PO-' + (order.poId || order.id) + '</strong> cho nhà xuất bản?',
             'info',
-            function(selectedOrder) {
+            function (selectedOrder) {
                 $scope.loading = true;
                 BookstoreService.changePurchaseOrderStatus(selectedOrder.poId || selectedOrder.id, 2, 'Send to publisher')
-                    .then(function() {
+                    .then(function () {
                         $scope.loading = false;
                         $scope.success = 'Đã gửi đơn đặt hàng thành công!';
                         $scope.loadPurchaseOrders();
@@ -421,11 +482,11 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
                         // Close detail modal if open
                         var detailModal = bootstrap.Modal.getInstance(document.getElementById('purchaseOrderDetailModal'));
                         if (detailModal) { detailModal.hide(); }
-                        setTimeout(function() {
-                            $scope.$apply(function() { $scope.success = null; });
+                        setTimeout(function () {
+                            $scope.$apply(function () { $scope.success = null; });
                         }, 3000);
                     })
-                    .catch(function(error) {
+                    .catch(function (error) {
                         $scope.loading = false;
                         $scope.error = error.data?.message || 'Gửi đơn thất bại.';
                         console.error('Error sending PO:', error);
@@ -437,7 +498,7 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
     };
 
     // Xác nhận đơn: chuyển từ Shipped (2) → Approved (3)
-    $scope.approvePurchaseOrder = function(order) {
+    $scope.approvePurchaseOrder = function (order) {
         if (!order) return;
         var isShipped = (order.statusId === 2) || (order.statusName && String(order.statusName).toLowerCase() === 'shipped');
         if (!isShipped) {
@@ -455,19 +516,19 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
             'Xác nhận đơn đặt hàng',
             'Bạn có chắc chắn muốn xác nhận đơn đặt hàng <strong>PO-' + (order.poId || order.id) + '</strong>?',
             'info',
-            function(selectedOrder) {
+            function (selectedOrder) {
                 $scope.loading = true;
                 BookstoreService.changePurchaseOrderStatus(selectedOrder.poId || selectedOrder.id, 3, 'Approve order')
-                    .then(function() {
+                    .then(function () {
                         $scope.loading = false;
                         $scope.success = 'Đã xác nhận đơn đặt hàng!';
                         $scope.loadPurchaseOrders();
                         $scope.addToast('success', $scope.success);
-                        setTimeout(function() {
-                            $scope.$apply(function() { $scope.success = null; });
+                        setTimeout(function () {
+                            $scope.$apply(function () { $scope.success = null; });
                         }, 3000);
                     })
-                    .catch(function(error) {
+                    .catch(function (error) {
                         $scope.loading = false;
                         $scope.error = error.data?.message || 'Xác nhận đơn thất bại.';
                         console.error('Error approve PO:', error);
@@ -479,8 +540,8 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
     };
 
     // Get status display name
-    $scope.getStatusDisplayName = function(status) {
-        switch(status) {
+    $scope.getStatusDisplayName = function (status) {
+        switch (status) {
             case 'PENDING': return 'Chờ xử lý';
             case 'APPROVED': return 'Đã duyệt';
             case 'REJECTED': return 'Từ chối';
@@ -490,8 +551,8 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
     };
 
     // Get status class
-    $scope.getStatusClass = function(status) {
-        switch(status) {
+    $scope.getStatusClass = function (status) {
+        switch (status) {
             case 'PENDING': return 'warning';
             case 'APPROVED': return 'info';
             case 'REJECTED': return 'danger';
@@ -501,14 +562,14 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
     };
 
     // Load available books for modal
-    $scope.loadAvailableBooks = function() {
+    $scope.loadAvailableBooks = function () {
         // If publisher is selected, load books by publisher
         if ($scope.purchaseOrderData.publisherId) {
             $scope.loadBooksByPublisher($scope.purchaseOrderData.publisherId);
         } else {
             // Load all books if no publisher selected
             BookstoreService.getBooks(1, 1000, '', '', '')
-                .then(function(response) {
+                .then(function (response) {
                     if (response.data && Array.isArray(response.data.data)) {
                         $scope.availableBooks = response.data.data;
                     } else if (response.data && Array.isArray(response.data)) {
@@ -517,7 +578,7 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
                         $scope.availableBooks = [];
                     }
                 })
-                .catch(function(error) {
+                .catch(function (error) {
                     console.error('Error loading books:', error);
                     $scope.availableBooks = [];
                 });
@@ -525,14 +586,14 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
     };
 
     // Load books by publisher
-    $scope.loadBooksByPublisher = function(publisherId) {
+    $scope.loadBooksByPublisher = function (publisherId) {
         if (!publisherId) {
             $scope.availableBooks = [];
             return;
         }
-        
+
         BookstoreService.getBooksByPublisher(publisherId, {})
-            .then(function(response) {
+            .then(function (response) {
                 if (response.data && response.data.success && response.data.data && Array.isArray(response.data.data.books)) {
                     $scope.availableBooks = response.data.data.books;
                 } else if (response.data && Array.isArray(response.data.data)) {
@@ -543,14 +604,14 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
                     $scope.availableBooks = [];
                 }
             })
-            .catch(function(error) {
+            .catch(function (error) {
                 console.error('Error loading books by publisher:', error);
                 $scope.availableBooks = [];
             });
     };
 
     // Add line to purchase order
-    $scope.addLine = function() {
+    $scope.addLine = function () {
         $scope.purchaseOrderData.lines.push({
             isbn: '',
             qtyOrdered: 1,
@@ -560,30 +621,30 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
     };
 
     // Remove line from purchase order
-    $scope.removeLine = function(index) {
+    $scope.removeLine = function (index) {
         $scope.purchaseOrderData.lines.splice(index, 1);
         $scope.updateTotal();
     };
 
     // Update line total
-    $scope.updateLineTotal = function(index) {
+    $scope.updateLineTotal = function (index) {
         var line = $scope.purchaseOrderData.lines[index];
         if (!line) return;
-        
+
         // Đảm bảo qtyOrdered và unitPrice là số hợp lệ
         var qty = parseFloat(line.qtyOrdered) || 0;
         // Parse unitPrice - remove dots (thousands separator) if present
         var priceStr = String(line.unitPrice || '').replace(/\./g, '').replace(',', '.');
         var price = parseFloat(priceStr) || 0;
-        
+
         line.lineTotal = qty * price;
         $scope.updateTotal();
     };
 
     // Update book details when ISBN changes
-    $scope.updateLineBook = function(index) {
+    $scope.updateLineBook = function (index) {
         var line = $scope.purchaseOrderData.lines[index];
-        var book = $scope.availableBooks.find(function(b) {
+        var book = $scope.availableBooks.find(function (b) {
             return b.isbn === line.isbn;
         });
         if (book) {
@@ -593,31 +654,31 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
     };
 
     // Check if a book (ISBN) is already selected in another line
-    $scope.isBookSelected = function(isbn, currentIndex) {
+    $scope.isBookSelected = function (isbn, currentIndex) {
         if (!isbn || !$scope.purchaseOrderData || !$scope.purchaseOrderData.lines) {
             return false;
         }
-        return $scope.purchaseOrderData.lines.some(function(l, idx) {
+        return $scope.purchaseOrderData.lines.some(function (l, idx) {
             return idx !== currentIndex && l && l.isbn === isbn;
         });
     };
 
     // Get available books for a specific line (hide books already selected on other lines, but keep current selection visible)
-    $scope.getAvailableBooksForLine = function(lineIndex) {
+    $scope.getAvailableBooksForLine = function (lineIndex) {
         if (!$scope.availableBooks || !$scope.purchaseOrderData || !$scope.purchaseOrderData.lines) {
             return $scope.availableBooks || [];
         }
         var currentLine = $scope.purchaseOrderData.lines[lineIndex] || {};
         var selectedOtherIsbns = $scope.purchaseOrderData.lines
-            .map(function(l, idx) { return idx !== lineIndex ? (l && l.isbn) : null; })
-            .filter(function(isbn) { return !!isbn; });
-        return $scope.availableBooks.filter(function(book) {
+            .map(function (l, idx) { return idx !== lineIndex ? (l && l.isbn) : null; })
+            .filter(function (isbn) { return !!isbn; });
+        return $scope.availableBooks.filter(function (book) {
             return selectedOtherIsbns.indexOf(book.isbn) === -1 || book.isbn === currentLine.isbn;
         });
     };
 
     // Load books when publisher changes
-    $scope.onPublisherChange = function() {
+    $scope.onPublisherChange = function () {
         $scope.loadBooksByPublisher($scope.purchaseOrderData.publisherId);
         // Clear all existing lines when publisher changes
         $scope.purchaseOrderData.lines = [];
@@ -625,28 +686,28 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
     };
 
     // Update total
-    $scope.updateTotal = function() {
+    $scope.updateTotal = function () {
         if (!$scope.purchaseOrderData || !$scope.purchaseOrderData.lines) return;
-        
+
         $scope.purchaseOrderData.totalQuantity = 0;
         $scope.purchaseOrderData.totalAmount = 0;
-        
-        $scope.purchaseOrderData.lines.forEach(function(line) {
+
+        $scope.purchaseOrderData.lines.forEach(function (line) {
             var qty = parseFloat(line.qtyOrdered) || 0;
             // Parse lineTotal - remove dots (thousands separator) if present
             var lineTotalStr = String(line.lineTotal || '').replace(/\./g, '').replace(',', '.');
             var lineTotal = parseFloat(lineTotalStr) || 0;
-            
+
             $scope.purchaseOrderData.totalQuantity += qty;
             $scope.purchaseOrderData.totalAmount += lineTotal;
         });
     };
 
     // Get total quantity for display
-    $scope.getTotalQuantity = function() {
+    $scope.getTotalQuantity = function () {
         var total = 0;
         if ($scope.purchaseOrderData && $scope.purchaseOrderData.lines) {
-            $scope.purchaseOrderData.lines.forEach(function(line) {
+            $scope.purchaseOrderData.lines.forEach(function (line) {
                 if (line.qtyOrdered) {
                     total += parseInt(line.qtyOrdered) || 0;
                 }
@@ -656,10 +717,10 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
     };
 
     // Get total amount for display
-    $scope.getTotalAmount = function() {
+    $scope.getTotalAmount = function () {
         var total = 0;
         if ($scope.purchaseOrderData && $scope.purchaseOrderData.lines) {
-            $scope.purchaseOrderData.lines.forEach(function(line) {
+            $scope.purchaseOrderData.lines.forEach(function (line) {
                 if (line.qtyOrdered && line.unitPrice) {
                     var qty = parseInt(line.qtyOrdered) || 0;
                     // Parse unitPrice - remove dots (thousands separator) if present
@@ -673,7 +734,7 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
     };
 
     // Save purchase order (modal)
-    $scope.savePurchaseOrder = function() {
+    $scope.savePurchaseOrder = function () {
         if ($scope.purchaseOrderData.lines.length === 0) {
             $scope.showPoConfirmModal(
                 'Thiếu thông tin',
@@ -699,13 +760,13 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
         // Resolve publisherName from selected publisherId if available
         var selectedPublisher = null;
         if (Array.isArray($scope.publishers) && $scope.publishers.length > 0) {
-            selectedPublisher = $scope.publishers.find(function(p) { return String(p.publisherId) === String($scope.purchaseOrderData.publisherId); });
+            selectedPublisher = $scope.publishers.find(function (p) { return String(p.publisherId) === String($scope.purchaseOrderData.publisherId); });
         }
         var publisherName = selectedPublisher ? (selectedPublisher.name || selectedPublisher.publisherName) : ($scope.purchaseOrderData.publisherName || '');
 
         $scope.isSaving = true;
         $scope.error = null;
-        
+
         // Prepare data for API
         var orderData = {
             publisherId: $scope.purchaseOrderData.publisherId,
@@ -719,26 +780,26 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
         };
 
         BookstoreService.createPurchaseOrder(orderData)
-            .then(function(response) {
+            .then(function (response) {
                 $scope.isSaving = false;
                 $scope.success = 'Tạo đơn đặt hàng thành công!';
                 $scope.loadPurchaseOrders();
                 $scope.addToast('success', $scope.success);
-                
+
                 // Hide modal
                 var modal = bootstrap.Modal.getInstance(document.getElementById('purchaseOrderModal'));
                 if (modal) {
                     modal.hide();
                 }
-                
+
                 // Clear success message after 3 seconds
-                setTimeout(function() {
-                    $scope.$apply(function() {
+                setTimeout(function () {
+                    $scope.$apply(function () {
                         $scope.success = null;
                     });
                 }, 3000);
             })
-            .catch(function(error) {
+            .catch(function (error) {
                 $scope.isSaving = false;
                 $scope.error = error.data?.message || 'Có lỗi xảy ra khi tạo đơn đặt hàng.';
                 console.error('Error creating purchase order:', error);
@@ -747,20 +808,20 @@ app.controller('AdminPurchaseOrdersController', ['$scope', 'BookstoreService', '
     };
 
     // Search purchase orders (từ search-box hoặc nút Lọc)
-    $scope.searchPurchaseOrders = function() {
+    $scope.searchPurchaseOrders = function () {
         $scope.currentPage = 1;
         $scope.loadPurchaseOrders();
     };
 
     // Clear chỉ ô tìm kiếm
-    $scope.clearSearch = function() {
+    $scope.clearSearch = function () {
         $scope.searchTerm = '';
         $scope.currentPage = 1;
         $scope.loadPurchaseOrders();
     };
 
     // Reset toàn bộ bộ lọc (từ khóa + NXB + ngày)
-    $scope.resetFilters = function() {
+    $scope.resetFilters = function () {
         $scope.searchTerm = '';
         $scope.filters = {
             publisherId: '',

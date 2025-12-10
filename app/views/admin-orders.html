@@ -23,7 +23,8 @@
 			<!-- Search Filters -->
 			<div class="row g-2 mb-3" ng-if="!loading">
 				<div class="col-md-2">
-					<input class="form-control" placeholder="Từ khóa" ng-model="filters.keyword" ng-keyup="$event.keyCode === 13 && search()" />
+					<input class="form-control" placeholder="Từ khóa" ng-model="filters.keyword"
+						ng-keyup="$event.keyCode === 13 && search()" />
 				</div>
 				<div class="col-md-2">
 					<select class="form-select" ng-model="filters.status">
@@ -83,8 +84,7 @@
 									<td>{{o.customerName}}</td>
 									<td>{{o.placedAt | date:'yyyy-MM-dd HH:mm'}}</td>
 									<td>
-										<span class="badge"
-											ng-class="{
+										<span class="badge" ng-class="{
 												'bg-warning': o.status === 'PendingConfirmation' || o.status === 0,
 												'bg-primary': o.status === 'Confirmed' || o.status === 1,
 												'bg-success': o.status === 'Delivered' || o.status === 2,
@@ -95,16 +95,14 @@
 										</span>
 									</td>
 									<td>
-										<span class="badge"
-											ng-class="{
-												'bg-danger': o.invoice && o.invoice.paymentStatus === 'PENDING',
+										<span class="badge" ng-class="{
+												'bg-warning text-dark': (o.invoice && o.invoice.paymentStatus === 'PENDING') || (o.invoice && !o.invoice.paymentStatus) || !o.invoice,
 												'bg-success': o.invoice && o.invoice.paymentStatus === 'PAID',
-												'bg-warning': o.invoice && o.invoice.paymentStatus === 'FAILED',
-												'bg-info': o.invoice && o.invoice.paymentStatus === 'REFUNDED',
-												'bg-danger': o.invoice && !o.invoice.paymentStatus,
-												'bg-secondary': !o.invoice
+												'bg-danger': o.invoice && o.invoice.paymentStatus === 'FAILED',
+												'bg-info text-dark': o.invoice && o.invoice.paymentStatus === 'REFUNDED'
 											}">
-											<span ng-if="o.invoice && o.invoice.paymentStatus === 'PENDING'">
+											<span
+												ng-if="(o.invoice && (o.invoice.paymentStatus === 'PENDING' || !o.invoice.paymentStatus)) || !o.invoice">
 												<i class="bi bi-clock"></i> Chưa thanh toán
 											</span>
 											<span ng-if="o.invoice && o.invoice.paymentStatus === 'PAID'">
@@ -116,37 +114,39 @@
 											<span ng-if="o.invoice && o.invoice.paymentStatus === 'REFUNDED'">
 												<i class="bi bi-arrow-counterclockwise"></i> Hoàn tiền
 											</span>
-											<span ng-if="o.invoice && !o.invoice.paymentStatus">
-												<i class="bi bi-clock"></i> Chưa thanh toán
-											</span>
-											<span ng-if="!o.invoice">
-												<i class="bi bi-question-circle"></i> Chưa có hóa đơn
-											</span>
 										</span>
 									</td>
 									<td class="text-end">{{o.totalAmount | numberFormatted}} ₫</td>
 									<td class="text-end">
 										<div class="btn-group btn-group-sm">
 											<!-- Nút xem chi tiết - luôn hiển thị -->
-											<button class="btn btn-outline-secondary" ng-click="viewOrder(o)" title="Chi tiết" data-bs-toggle="modal" data-bs-target="#orderDetailModal">
+											<button class="btn btn-outline-secondary" ng-click="viewOrder(o)"
+												title="Chi tiết" data-bs-toggle="modal"
+												data-bs-target="#orderDetailModal">
 												<i class="bi bi-eye"></i>
 											</button>
-											
+
 											<!-- Nút xem hóa đơn - chỉ hiển thị khi đã thanh toán -->
-											<button class="btn btn-outline-info" ng-click="viewInvoice(o)" title="Xem hóa đơn" ng-if="o.invoice && o.invoice.paymentStatus === 'PAID'">
+											<button class="btn btn-outline-info" ng-click="viewInvoice(o)"
+												title="Xem hóa đơn"
+												ng-if="o.invoice && o.invoice.paymentStatus === 'PAID'">
 												<i class="bi bi-receipt"></i>
 											</button>
-											
+
 											<!-- Trạng thái 0 (Chờ xác nhận): Phân công, Hủy -->
-											<button class="btn btn-outline-primary" ng-click="assignDelivery(o)" ng-if="getOrderStatus(o)==='PendingConfirmation'" title="Phân công giao hàng">
+											<button class="btn btn-outline-primary" ng-click="assignDelivery(o)"
+												ng-if="getOrderStatus(o)==='PendingConfirmation'"
+												title="Phân công giao hàng">
 												<i class="bi bi-truck"></i>
 											</button>
-											<button class="btn btn-outline-danger" ng-click="cancelOrder(o)" ng-if="getOrderStatus(o)==='PendingConfirmation'" title="Hủy đơn">
+											<button class="btn btn-outline-danger" ng-click="cancelOrder(o)"
+												ng-if="getOrderStatus(o)==='PendingConfirmation'" title="Hủy đơn">
 												<i class="bi bi-x-circle"></i>
 											</button>
-											
+
 											<!-- Trạng thái 1 (Đã xác nhận): Xác nhận đã giao -->
-											<button class="btn btn-outline-success" ng-click="confirmDelivered(o)" ng-if="getOrderStatus(o)==='Confirmed'" title="Xác nhận đã giao">
+											<button class="btn btn-outline-success" ng-click="confirmDelivered(o)"
+												ng-if="getOrderStatus(o)==='Confirmed'" title="Xác nhận đã giao">
 												<i class="bi bi-bag-check"></i>
 											</button>
 										</div>
@@ -162,73 +162,68 @@
 			</div>
 
 			<!-- Empty State -->
-			<empty-state 
-				show="!loading && orders.length === 0" 
-				title="Chưa có đơn hàng nào"
+			<empty-state show="!loading && orders.length === 0" title="Chưa có đơn hàng nào"
 				message="Hệ thống chưa có đơn hàng nào để hiển thị">
 			</empty-state>
 
 			<!-- Pagination -->
-			<pagination 
-				current-page="currentPage" 
-				total-pages="totalPages" 
-				on-page-change="onPageChange(page)">
+			<pagination current-page="currentPage" total-pages="totalPages" on-page-change="onPageChange(page)">
 			</pagination>
-			</div>
 		</div>
 	</div>
+</div>
 
-	<!-- Order detail modal (Bootstrap) -->
-	<div class="modal fade" id="orderDetailModal" tabindex="-1">
-		<div class="modal-dialog modal-xl">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title">
-						<i class="bi bi-bag"></i> Chi tiết đơn hàng
-					</h5>
-					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-				</div>
-				<div class="modal-body" ng-if="$root.selectedOrder">
-					<div class="row g-3 mb-3">
-						<div class="col-12">
-							<div class="card shadow-sm border-0">
-								<div class="card-body py-3">
-									<h6 class="text-uppercase text-muted small mb-3">Thông tin đơn hàng</h6>
-									<div class="row small g-3">
-										<div class="col-md-3">
-											<div class="text-muted">Mã đơn</div>
-											<div><code>OD-{{$root.selectedOrder.orderId || $root.selectedOrder.id}}</code></div>
+<!-- Order detail modal (Bootstrap) -->
+<div class="modal fade" id="orderDetailModal" tabindex="-1">
+	<div class="modal-dialog modal-xl">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">
+					<i class="bi bi-bag"></i> Chi tiết đơn hàng
+				</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body" ng-if="$root.selectedOrder">
+				<div class="row g-3 mb-3">
+					<div class="col-12">
+						<div class="card shadow-sm border-0">
+							<div class="card-body py-3">
+								<h6 class="text-uppercase text-muted small mb-3">Thông tin đơn hàng</h6>
+								<div class="row small g-3">
+									<div class="col-md-3">
+										<div class="text-muted">Mã đơn</div>
+										<div><code>OD-{{$root.selectedOrder.orderId || $root.selectedOrder.id}}</code>
 										</div>
-										<div class="col-md-3">
-											<div class="text-muted">Khách hàng</div>
-											<div class="fw-semibold text-truncate">{{$root.selectedOrder.customerName}}</div>
+									</div>
+									<div class="col-md-3">
+										<div class="text-muted">Khách hàng</div>
+										<div class="fw-semibold text-truncate">{{$root.selectedOrder.customerName}}
 										</div>
-										<div class="col-md-3">
-											<div class="text-muted">Ngày đặt</div>
-											<div>{{$root.selectedOrder.placedAt | date:'yyyy-MM-dd HH:mm'}}</div>
-										</div>
-										<div class="col-md-3">
-											<div class="text-muted">Trạng thái</div>
-											<div>
-												<span class="badge"
-													ng-class="{
+									</div>
+									<div class="col-md-3">
+										<div class="text-muted">Ngày đặt</div>
+										<div>{{$root.selectedOrder.placedAt | date:'yyyy-MM-dd HH:mm'}}</div>
+									</div>
+									<div class="col-md-3">
+										<div class="text-muted">Trạng thái</div>
+										<div>
+											<span class="badge" ng-class="{
 																'bg-warning': $root.selectedOrder.status === 'PendingConfirmation' || $root.selectedOrder.status === 0,
 																'bg-primary': $root.selectedOrder.status === 'Confirmed' || $root.selectedOrder.status === 1,
 																'bg-success': $root.selectedOrder.status === 'Delivered' || $root.selectedOrder.status === 2,
 																'bg-danger': $root.selectedOrder.status === 'Cancelled' || $root.selectedOrder.status === 3,
 																'bg-secondary': !$root.selectedOrder.status
 													}">
-															{{getOrderStatusText($root.selectedOrder.status)}}
-												</span>
-											</div>
+												{{getOrderStatusText($root.selectedOrder.status)}}
+											</span>
 										</div>
 									</div>
-									<div class="row small g-3 mt-1">
-										<div class="col-md-3">
-											<div class="text-muted">Thanh toán</div>
-											<div>
-												<span class="badge"
-													ng-class="{
+								</div>
+								<div class="row small g-3 mt-1">
+									<div class="col-md-3">
+										<div class="text-muted">Thanh toán</div>
+										<div>
+											<span class="badge" ng-class="{
 														'bg-danger': $root.selectedOrder.invoice && $root.selectedOrder.invoice.paymentStatus === 'PENDING',
 														'bg-success': $root.selectedOrder.invoice && $root.selectedOrder.invoice.paymentStatus === 'PAID',
 														'bg-warning': $root.selectedOrder.invoice && $root.selectedOrder.invoice.paymentStatus === 'FAILED',
@@ -236,154 +231,191 @@
 														'bg-danger': $root.selectedOrder.invoice && !$root.selectedOrder.invoice.paymentStatus,
 														'bg-secondary': !$root.selectedOrder.invoice
 													}">
-													<span ng-if="$root.selectedOrder.invoice && $root.selectedOrder.invoice.paymentStatus === 'PENDING'">
-														<i class="bi bi-clock"></i> Chưa thanh toán
-													</span>
-													<span ng-if="$root.selectedOrder.invoice && $root.selectedOrder.invoice.paymentStatus === 'PAID'">
-														<i class="bi bi-check-circle"></i> Đã thanh toán
-													</span>
-													<span ng-if="$root.selectedOrder.invoice && $root.selectedOrder.invoice.paymentStatus === 'FAILED'">
-														<i class="bi bi-x-circle"></i> Thất bại
-													</span>
-													<span ng-if="$root.selectedOrder.invoice && $root.selectedOrder.invoice.paymentStatus === 'REFUNDED'">
-														<i class="bi bi-arrow-counterclockwise"></i> Hoàn tiền
-													</span>
-													<span ng-if="$root.selectedOrder.invoice && !$root.selectedOrder.invoice.paymentStatus">
-														<i class="bi bi-clock"></i> Chưa thanh toán
-													</span>
-													<span ng-if="!$root.selectedOrder.invoice">
-														<i class="bi bi-question-circle"></i> Chưa có hóa đơn
-													</span>
+												<span
+													ng-if="$root.selectedOrder.invoice && $root.selectedOrder.invoice.paymentStatus === 'PENDING'">
+													<i class="bi bi-clock"></i> Chưa thanh toán
 												</span>
-											</div>
+												<span
+													ng-if="$root.selectedOrder.invoice && $root.selectedOrder.invoice.paymentStatus === 'PAID'">
+													<i class="bi bi-check-circle"></i> Đã thanh toán
+												</span>
+												<span
+													ng-if="$root.selectedOrder.invoice && $root.selectedOrder.invoice.paymentStatus === 'FAILED'">
+													<i class="bi bi-x-circle"></i> Thất bại
+												</span>
+												<span
+													ng-if="$root.selectedOrder.invoice && $root.selectedOrder.invoice.paymentStatus === 'REFUNDED'">
+													<i class="bi bi-arrow-counterclockwise"></i> Hoàn tiền
+												</span>
+												<span
+													ng-if="$root.selectedOrder.invoice && !$root.selectedOrder.invoice.paymentStatus">
+													<i class="bi bi-clock"></i> Chưa thanh toán
+												</span>
+												<span ng-if="!$root.selectedOrder.invoice">
+													<i class="bi bi-question-circle"></i> Chưa có hóa đơn
+												</span>
+											</span>
 										</div>
-										<div class="col-md-3">
-											<div class="text-muted">Người nhận</div>
-											<div>{{$root.selectedOrder.receiverName}} - {{$root.selectedOrder.receiverPhone}}</div>
-										</div>
-										<div class="col-md-4">
-											<div class="text-muted">Địa chỉ giao</div>
-											<div class="text-truncate">{{$root.selectedOrder.shippingAddress}}</div>
-										</div>
-										<div class="col-md-2">
-											<div class="text-muted">Tổng tiền</div>
-											<div class="h6 text-success mb-0">{{$root.selectedOrder.totalAmount | numberFormatted}} ₫</div>
-										</div>
+									</div>
+									<div class="col-md-3">
+										<div class="text-muted">Người nhận</div>
+										<div>{{$root.selectedOrder.receiverName}} -
+											{{$root.selectedOrder.receiverPhone}}</div>
+									</div>
+									<div class="col-md-4">
+										<div class="text-muted">Địa chỉ giao</div>
+										<div class="text-truncate">{{$root.selectedOrder.shippingAddress}}</div>
+									</div>
+									<div class="col-md-2">
+										<div class="text-muted">Tổng tiền</div>
+										<div class="h6 text-success mb-0">{{$root.selectedOrder.totalAmount |
+											numberFormatted}} ₫</div>
 									</div>
 								</div>
 							</div>
 						</div>
 					</div>
-
-					<div class="border-top pt-3">
-						<div class="d-flex justify-content-between align-items-center mb-2">
-							<h6 class="mb-0">Sản phẩm trong đơn</h6>
-									<span class="text-muted small">{{($root.selectedOrder.lines || []).length}} dòng</span>
-						</div>
-						<div class="table-responsive">
-							<table class="table table-sm table-striped align-middle">
-								<thead class="table-light">
-									<tr>
-										<th style="width: 15%">ISBN</th>
-										<th>Tên sách</th>
-										<th class="text-end" style="width: 12%">SL</th>
-										<th class="text-end" style="width: 15%">Đơn giá</th>
-										<th class="text-end" style="width: 18%">Thành tiền</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr ng-repeat="l in ($root.selectedOrder.lines || [])">
-										<td class="text-nowrap"><code>{{l.isbn}}</code></td>
-										<td class="text-truncate" style="max-width: 340px">{{l.bookTitle}}</td>
-										<td class="text-end"><span class="badge bg-primary">{{l.quantity || l.qty}}</span></td>
-										<td class="text-end">{{l.unitPrice | numberFormatted}} ₫</td>
-										<td class="text-end"><strong>{{( (l.quantity || l.qty) * l.unitPrice) | numberFormatted}} ₫</strong></td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
-						<div class="d-flex justify-content-end mt-2">
-							<div class="text-end">
-								<div class="small text-muted">Tổng tiền</div>
-										<div class="h5 text-success mb-0">{{$root.selectedOrder.totalAmount | numberFormatted}} ₫</div>
-							</div>
-						</div>
-					</div>
 				</div>
-				<div class="px-3 pb-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2" ng-if="getOrderStatus($root.selectedOrder)==='PendingConfirmation'">
-                        <h6 class="mb-0"><i class="bi bi-people"></i> Phân công giao hàng</h6>
-                        <div class="d-flex align-items-center gap-2">
-                            <div>
-                                <input type="datetime-local" class="form-control form-control-sm" ng-class="{'is-invalid': dateInvalid}" style="width: 220px" ng-model="deliveryDateInput" ng-change="updateDeliveryDateValidity()" min="{{deliveryDateMin}}" required placeholder="Ngày giao" />
-                                <div class="invalid-feedback d-block" ng-show="dateInvalid">Vui lòng chọn thời điểm giao hợp lệ (không ở quá khứ).</div>
-                            </div>
-                            <button class="btn btn-sm btn-outline-info" ng-click="resetDeliveryDate()" title="Reset ngày giao">
-                                <i class="bi bi-arrow-clockwise"></i>
-                            </button>
-                        <button class="btn btn-sm btn-outline-secondary" ng-click="refreshDeliveryCandidates($root.selectedOrder.orderId || $root.selectedOrder.id)" ng-disabled="candidatesLoading">
-                            <span ng-if="!candidatesLoading"><i class="bi bi-arrow-clockwise"></i> Làm mới</span>
-                            <span ng-if="candidatesLoading"><span class="spinner-border spinner-border-sm me-1"></span>Đang tải</span>
-                        </button>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mb-2" ng-if="getOrderStatus($root.selectedOrder)==='Confirmed' || getOrderStatus($root.selectedOrder)==='Delivered'">
-                        <h6 class="mb-0"><i class="bi bi-person-badge"></i> Nhân viên giao hàng</h6>
-                    </div>
-                    <div class="table-responsive" ng-if="getOrderStatus($root.selectedOrder)==='PendingConfirmation'">
-						<table class="table table-sm table-hover align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Nhân viên</th>
-                                    <th>Khu vực</th>
-                                    <th class="text-center">Khớp khu vực</th>
-                                    <th class="text-end">Đang giao</th>
-                                    <th class="text-end">Thao tác</th>
-                                </tr>
-                            </thead>
+
+				<div class="border-top pt-3">
+					<div class="d-flex justify-content-between align-items-center mb-2">
+						<h6 class="mb-0">Sản phẩm trong đơn</h6>
+						<span class="text-muted small">{{($root.selectedOrder.lines || []).length}} dòng</span>
+					</div>
+					<div class="table-responsive">
+						<table class="table table-sm table-striped align-middle">
+							<thead class="table-light">
+								<tr>
+									<th style="width: 15%">ISBN</th>
+									<th>Tên sách</th>
+									<th class="text-end" style="width: 12%">SL</th>
+									<th class="text-end" style="width: 15%">Đơn giá</th>
+									<th class="text-end" style="width: 18%">Thành tiền</th>
+								</tr>
+							</thead>
 							<tbody>
-								<tr ng-if="candidatesLoading">
-								<td colspan="5" class="text-center py-3">
-										<div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-										<span class="ms-2 text-muted small">Đang tải gợi ý...</span>
+								<tr ng-repeat="l in ($root.selectedOrder.lines || [])">
+									<td class="text-nowrap"><code>{{l.isbn}}</code></td>
+									<td class="text-truncate" style="max-width: 340px">{{l.bookTitle}}</td>
+									<td class="text-end"><span class="badge bg-primary">{{l.quantity || l.qty}}</span>
 									</td>
-								</tr>
-                                <tr ng-repeat="c in deliveryCandidates">
-                                    <td>
-                                        <div class="fw-semibold">{{c.fullName}} <small class="text-muted">(#{{c.employeeId || c.id}})</small></div>
-                                        <div class="small text-muted">{{c.phone || '—'}} · {{c.email || '—'}}</div>
-                                    </td>
-									<td>{{c.areaName || '—'}}</td>
-                                    <td class="text-center">
-                                        <span class="badge" ng-class="{ 'bg-success': c.isAreaMatched, 'bg-secondary': !c.isAreaMatched }">{{c.isAreaMatched ? 'Khớp' : 'Không'}}</span>
-                                    </td>
-                                    <td class="text-end">{{(c.activeAssignedOrders != null) ? c.activeAssignedOrders : ((c.activeAssigned != null) ? c.activeAssigned : 0)}}</td>
-                                    <td class="text-end">
-                                        <button class="btn btn-sm btn-outline-primary" ng-click="assignDeliveryCandidate($root.selectedOrder, c)" ng-disabled="dateInvalid || !deliveryDateInput"><i class="bi bi-truck"></i> Phân công</button>
-									</td>
-								</tr>
-							<tr ng-if="!candidatesLoading && deliveryCandidates.length === 0">
-								<td colspan="5" class="text-center text-muted py-2">Chưa có gợi ý.</td>
+									<td class="text-end">{{l.unitPrice | numberFormatted}} ₫</td>
+									<td class="text-end"><strong>{{( (l.quantity || l.qty) * l.unitPrice) |
+											numberFormatted}} ₫</strong></td>
 								</tr>
 							</tbody>
 						</table>
 					</div>
-                    <div class="table-responsive" ng-if="getOrderStatus($root.selectedOrder)==='Confirmed' || getOrderStatus($root.selectedOrder)==='Delivered'">
-                        <table class="table table-sm align-middle">
-                            <tbody>
-                                <tr>
-                                    <td style="width:60%">
-                                        <div class="fw-semibold">{{$root.selectedOrder.deliveredByName || $root.selectedOrder.deliveryEmployeeName || 'Chưa rõ'}}</div>
-                                        <div class="small text-muted">ID: {{$root.selectedOrder.deliveredBy || $root.selectedOrder.deliveryEmployeeId || '—'}}</div>
-                                    </td>
-                                    <td class="text-end" style="width:40%">
-                                        <div class="small text-muted">Ngày giao dự kiến</div>
-                                        <div>{{($root.selectedOrder.deliveryDate || $root.selectedOrder.deliveryAt) | date:'yyyy-MM-dd HH:mm'}}</div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+					<div class="d-flex justify-content-end mt-2">
+						<div class="text-end">
+							<div class="small text-muted">Tổng tiền</div>
+							<div class="h5 text-success mb-0">{{$root.selectedOrder.totalAmount | numberFormatted}} ₫
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="px-3 pb-3">
+				<div class="d-flex justify-content-between align-items-center mb-2"
+					ng-if="getOrderStatus($root.selectedOrder)==='PendingConfirmation'">
+					<h6 class="mb-0"><i class="bi bi-people"></i> Phân công giao hàng</h6>
+					<div class="d-flex align-items-center gap-2">
+						<div>
+							<input type="datetime-local" class="form-control form-control-sm"
+								ng-class="{'is-invalid': dateInvalid}" style="width: 220px" ng-model="deliveryDateInput"
+								ng-change="updateDeliveryDateValidity()" min="{{deliveryDateMin}}" required
+								placeholder="Ngày giao" />
+							<div class="invalid-feedback d-block" ng-show="dateInvalid">Vui lòng chọn thời điểm giao hợp
+								lệ (không ở quá khứ).</div>
+						</div>
+						<button class="btn btn-sm btn-outline-info" ng-click="resetDeliveryDate()"
+							title="Reset ngày giao">
+							<i class="bi bi-arrow-clockwise"></i>
+						</button>
+						<button class="btn btn-sm btn-outline-secondary"
+							ng-click="refreshDeliveryCandidates($root.selectedOrder.orderId || $root.selectedOrder.id)"
+							ng-disabled="candidatesLoading">
+							<span ng-if="!candidatesLoading"><i class="bi bi-arrow-clockwise"></i> Làm mới</span>
+							<span ng-if="candidatesLoading"><span
+									class="spinner-border spinner-border-sm me-1"></span>Đang tải</span>
+						</button>
+					</div>
+				</div>
+				<div class="d-flex justify-content-between align-items-center mb-2"
+					ng-if="getOrderStatus($root.selectedOrder)==='Confirmed' || getOrderStatus($root.selectedOrder)==='Delivered'">
+					<h6 class="mb-0"><i class="bi bi-person-badge"></i> Nhân viên giao hàng</h6>
+				</div>
+				<div class="table-responsive" ng-if="getOrderStatus($root.selectedOrder)==='PendingConfirmation'">
+					<table class="table table-sm table-hover align-middle">
+						<thead class="table-light">
+							<tr>
+								<th>Nhân viên</th>
+								<th>Khu vực</th>
+								<th class="text-center">Khớp khu vực</th>
+								<th class="text-end">Đang giao</th>
+								<th class="text-end">Thao tác</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-if="candidatesLoading">
+								<td colspan="5" class="text-center py-3">
+									<div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+									<span class="ms-2 text-muted small">Đang tải gợi ý...</span>
+								</td>
+							</tr>
+							<tr ng-repeat="c in deliveryCandidates">
+								<td>
+									<div class="fw-semibold">{{c.fullName}} <small class="text-muted">(#{{c.employeeId
+											|| c.id}})</small></div>
+									<div class="small text-muted">{{c.phone || '—'}} · {{c.email || '—'}}</div>
+								</td>
+								<td>{{c.areaName || '—'}}</td>
+								<td class="text-center">
+									<span class="badge"
+										ng-class="{ 'bg-success': c.isAreaMatched, 'bg-secondary': !c.isAreaMatched }">{{c.isAreaMatched
+										? 'Khớp' : 'Không'}}</span>
+								</td>
+								<td class="text-end">{{(c.activeAssignedOrders != null) ? c.activeAssignedOrders :
+									((c.activeAssigned != null) ? c.activeAssigned : 0)}}</td>
+								<td class="text-end">
+									<button class="btn btn-sm btn-outline-primary"
+										ng-click="assignDeliveryCandidate($root.selectedOrder, c); c.isAssigning = true"
+										ng-disabled="dateInvalid || !deliveryDateInput || c.isAssigning || submittingDelivery">
+										<span ng-if="!c.isAssigning && !submittingDelivery"><i class="bi bi-truck"></i>
+											Phân
+											công</span>
+										<span ng-if="c.isAssigning || submittingDelivery"><span
+												class="spinner-border spinner-border-sm me-1"></span> Đang xử
+											lý...</span>
+									</button>
+								</td>
+							</tr>
+							<tr ng-if="!candidatesLoading && deliveryCandidates.length === 0">
+								<td colspan="5" class="text-center text-muted py-2">Chưa có gợi ý.</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="table-responsive"
+					ng-if="getOrderStatus($root.selectedOrder)==='Confirmed' || getOrderStatus($root.selectedOrder)==='Delivered'">
+					<table class="table table-sm align-middle">
+						<tbody>
+							<tr>
+								<td style="width:60%">
+									<div class="fw-semibold">{{$root.selectedOrder.deliveredByName ||
+										$root.selectedOrder.deliveryEmployeeName || 'Chưa rõ'}}</div>
+									<div class="small text-muted">ID: {{$root.selectedOrder.deliveredBy ||
+										$root.selectedOrder.deliveryEmployeeId || '—'}}</div>
+								</td>
+								<td class="text-end" style="width:40%">
+									<div class="small text-muted">Ngày giao dự kiến</div>
+									<div>{{($root.selectedOrder.deliveryDate || $root.selectedOrder.deliveryAt) |
+										date:'yyyy-MM-dd HH:mm'}}</div>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
 				</div>
@@ -403,10 +435,12 @@
 						<button class="btn btn-outline-primary btn-sm" ng-click="printInvoice()" title="In hóa đơn">
 							<i class="bi bi-printer"></i> In
 						</button>
-						<button class="btn btn-outline-success btn-sm" ng-click="downloadInvoice()" title="Tải xuống PDF">
+						<button class="btn btn-outline-success btn-sm" ng-click="downloadInvoice()"
+							title="Tải xuống PDF">
 							<i class="bi bi-download"></i> PDF
 						</button>
-						<button type="button" class="btn-close" ng-click="closeInvoiceModal()" aria-label="Close"></button>
+						<button type="button" class="btn-close" ng-click="closeInvoiceModal()"
+							aria-label="Close"></button>
 					</div>
 				</div>
 				<div class="modal-body p-0" id="invoiceContent">
@@ -417,7 +451,7 @@
 								<div class="col-6">
 									<h2 class="company-name">BOOKSTORE SYSTEM</h2>
 									<div class="company-info">
-										<p><strong>Địa chỉ:</strong> 123 Đường ABC, Quận XYZ, TP.HCM</p>
+										<p><strong>Địa chỉ:</strong> 97 Man Thiện, Thủ Đức, Tp HCM</p>
 										<p><strong>Điện thoại:</strong> (028) 1234-5678</p>
 										<p><strong>Email:</strong> info@bookstore.com</p>
 										<p><strong>Website:</strong> www.bookstore.com</p>
@@ -426,9 +460,12 @@
 								<div class="col-6 text-end">
 									<h1 class="invoice-title">HÓA ĐƠN BÁN HÀNG</h1>
 									<div class="invoice-meta">
-										<p><strong>Số hóa đơn:</strong> {{$root.selectedInvoice.invoiceNumber || 'HD-' + ($root.selectedInvoice.id || 'N/A')}}</p>
-										<p><strong>Ngày xuất:</strong> {{$root.selectedInvoice.createdAt | date:'dd/MM/yyyy HH:mm'}}</p>
-										<p><strong>Mã đơn hàng:</strong> OD-{{$root.selectedOrder.orderId || $root.selectedOrder.id}}</p>
+										<p><strong>Số hóa đơn:</strong> {{$root.selectedInvoice.invoiceNumber || 'HD-' +
+											($root.selectedInvoice.id || 'N/A')}}</p>
+										<p><strong>Ngày xuất:</strong> {{$root.selectedInvoice.createdAt |
+											date:'dd/MM/yyyy HH:mm'}}</p>
+										<p><strong>Mã đơn hàng:</strong> OD-{{$root.selectedOrder.orderId ||
+											$root.selectedOrder.id}}</p>
 									</div>
 								</div>
 							</div>
@@ -447,21 +484,25 @@
 								<div class="col-6">
 									<h4>Thông tin thanh toán</h4>
 									<div class="payment-info">
-										<p><strong>Phương thức:</strong> {{$root.selectedInvoice.paymentMethod || 'Chuyển khoản'}}</p>
-										<p><strong>Trạng thái:</strong> 
+										<p><strong>Phương thức:</strong> {{$root.selectedInvoice.paymentMethod ||
+											'Chuyển khoản'}}</p>
+										<p><strong>Trạng thái:</strong>
 											<span class="badge" ng-class="{
 												'bg-danger': $root.selectedInvoice.paymentStatus === 'PENDING',
 												'bg-success': $root.selectedInvoice.paymentStatus === 'PAID',
 												'bg-warning': $root.selectedInvoice.paymentStatus === 'FAILED',
 												'bg-info': $root.selectedInvoice.paymentStatus === 'REFUNDED'
 											}">
-												{{$root.selectedInvoice.paymentStatus === 'PENDING' ? 'Chưa thanh toán' : 
-												  $root.selectedInvoice.paymentStatus === 'PAID' ? 'Đã thanh toán' :
-												  $root.selectedInvoice.paymentStatus === 'FAILED' ? 'Thất bại' :
-												  $root.selectedInvoice.paymentStatus === 'REFUNDED' ? 'Đã hoàn tiền' : 'Chưa xác định'}}
+												{{$root.selectedInvoice.paymentStatus === 'PENDING' ? 'Chưa thanh toán'
+												:
+												$root.selectedInvoice.paymentStatus === 'PAID' ? 'Đã thanh toán' :
+												$root.selectedInvoice.paymentStatus === 'FAILED' ? 'Thất bại' :
+												$root.selectedInvoice.paymentStatus === 'REFUNDED' ? 'Đã hoàn tiền' :
+												'Chưa xác định'}}
 											</span>
 										</p>
-										<p ng-if="$root.selectedInvoice.paymentDate"><strong>Ngày thanh toán:</strong> {{$root.selectedInvoice.paymentDate | date:'dd/MM/yyyy HH:mm'}}</p>
+										<p ng-if="$root.selectedInvoice.paymentDate"><strong>Ngày thanh toán:</strong>
+											{{$root.selectedInvoice.paymentDate | date:'dd/MM/yyyy HH:mm'}}</p>
 									</div>
 								</div>
 							</div>
@@ -486,7 +527,8 @@
 											<td>{{item.bookTitle}}</td>
 											<td class="text-center">{{item.quantity || item.qty}}</td>
 											<td class="text-end">{{item.unitPrice | numberFormatted}} ₫</td>
-											<td class="text-end"><strong>{{((item.quantity || item.qty) * item.unitPrice) | numberFormatted}} ₫</strong></td>
+											<td class="text-end"><strong>{{((item.quantity || item.qty) *
+													item.unitPrice) | numberFormatted}} ₫</strong></td>
 										</tr>
 									</tbody>
 								</table>
@@ -499,7 +541,8 @@
 										<table class="table table-sm">
 											<tr>
 												<td><strong>Tạm tính:</strong></td>
-												<td class="text-end">{{$root.selectedOrder.totalAmount | numberFormatted}} ₫</td>
+												<td class="text-end">{{$root.selectedOrder.totalAmount |
+													numberFormatted}} ₫</td>
 											</tr>
 											<tr>
 												<td><strong>Phí vận chuyển:</strong></td>
@@ -511,7 +554,8 @@
 											</tr>
 											<tr class="total-row">
 												<td><strong>TỔNG CỘNG:</strong></td>
-												<td class="text-end"><strong>{{$root.selectedOrder.totalAmount | numberFormatted}} ₫</strong></td>
+												<td class="text-end"><strong>{{$root.selectedOrder.totalAmount |
+														numberFormatted}} ₫</strong></td>
 											</tr>
 										</table>
 									</div>
@@ -542,14 +586,16 @@
 	</div>
 
 	<!-- Admin Order Confirm Delivered Modal -->
-	<div class="modal fade" id="adminOrderConfirmDeliveredModal" tabindex="-1" aria-labelledby="adminOrderConfirmDeliveredModalLabel" aria-hidden="true">
+	<div class="modal fade" id="adminOrderConfirmDeliveredModal" tabindex="-1"
+		aria-labelledby="adminOrderConfirmDeliveredModalLabel" aria-hidden="true">
 		<div class="modal-dialog modal-dialog-centered">
 			<div class="modal-content">
 				<div class="modal-header bg-success text-white">
 					<h5 class="modal-title" id="adminOrderConfirmDeliveredModalLabel">
 						<i class="bi bi-check-circle me-2"></i>Xác nhận hoàn thành đơn hàng
 					</h5>
-					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+						aria-label="Close"></button>
 				</div>
 				<div class="modal-body">
 					<p class="text-muted mb-3">Bạn có chắc chắn muốn xác nhận đơn hàng này đã được giao thành công?</p>
@@ -557,11 +603,7 @@
 						<label for="adminOrderDeliveryNote" class="form-label">
 							<strong>Ghi chú giao hàng</strong> <span class="text-muted">(tùy chọn)</span>
 						</label>
-						<textarea 
-							class="form-control" 
-							id="adminOrderDeliveryNote" 
-							rows="3" 
-							ng-model="deliveryNote" 
+						<textarea class="form-control" id="adminOrderDeliveryNote" rows="3" ng-model="deliveryNote"
 							placeholder="Nhập ghi chú về việc giao hàng (ví dụ: Khách hàng đã nhận hàng, hàng được giao đúng hẹn...)"></textarea>
 						<small class="text-muted">Nếu để trống, hệ thống sẽ tự động ghi "Đã giao"</small>
 					</div>
@@ -570,7 +612,8 @@
 					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
 						<i class="bi bi-x-circle me-1"></i>Hủy
 					</button>
-					<button type="button" class="btn btn-success" ng-click="submitConfirmDelivered(); $event.stopPropagation()" ng-disabled="submittingDelivery">
+					<button type="button" class="btn btn-success"
+						ng-click="submitConfirmDelivered(); $event.stopPropagation()" ng-disabled="submittingDelivery">
 						<span ng-if="!submittingDelivery">
 							<i class="bi bi-check-circle me-1"></i>Xác nhận đã giao
 						</span>
@@ -585,7 +628,8 @@
 
 	<!-- Toasts -->
 	<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000;">
-		<div class="toast align-items-center text-white bg-{{t.variant}} border-0 mb-2 show" role="alert" aria-live="assertive" aria-atomic="true" ng-repeat="t in toasts">
+		<div class="toast align-items-center text-white bg-{{t.variant}} border-0 mb-2 show" role="alert"
+			aria-live="assertive" aria-atomic="true" ng-repeat="t in toasts">
 			<div class="d-flex">
 				<div class="toast-body">{{t.message}}</div>
 			</div>
@@ -594,361 +638,379 @@
 </div>
 
 <style>
-/* Invoice Styles */
-.invoice-container {
-    background: white;
-    padding: 30px;
-    font-family: 'Times New Roman', serif;
-    line-height: 1.4;
-    border-top: 3px dashed #e74c3c; /* dashed header line similar to sample */
-}
-
-.invoice-header {
-    border-bottom: 2px solid #333;
-    padding-bottom: 16px;
-    margin-bottom: 24px;
-}
-
-.company-name {
-    font-size: 28px;
-    font-weight: bold;
-    color: #2c3e50;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.company-info p {
-	margin: 5px 0;
-	font-size: 14px;
-	color: #555;
-}
-
-.invoice-title {
-    font-size: 34px;
-    font-weight: bold;
-    color: #e74c3c;
-    margin-bottom: 12px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-}
-
-.invoice-meta p {
-	margin: 8px 0;
-	font-size: 14px;
-	color: #333;
-}
-
-.invoice-body h4 {
-    font-size: 18px;
-    font-weight: bold;
-    color: #2c3e50;
-    margin-bottom: 12px;
-    border-bottom: 2px solid #3498db;
-    padding-bottom: 4px;
-}
-
-.customer-info p, .payment-info p {
-	margin: 8px 0;
-	font-size: 14px;
-	color: #555;
-}
-
-.invoice-table {
-    margin: 16px 0;
-    border-collapse: collapse;
-    border: 2px dashed #7f8c8d; /* dashed frame like sample grid */
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.invoice-table th {
-    background-color: #f2f3f5;
-    color: #2c3e50;
-    font-weight: 700;
-    padding: 10px 8px;
-    font-size: 14px;
-    border: 1px solid #bdc3c7;
-}
-
-.invoice-table td {
-    padding: 10px 8px;
-    border: 1px solid #dfe3e6;
-    font-size: 14px;
-}
-
-.invoice-table tbody tr:nth-child(even) {
-	background-color: #f8f9fa;
-}
-
-.invoice-table tbody tr:hover {
-	background-color: #e8f4f8;
-}
-
-.invoice-summary {
-    margin-top: 20px;
-}
-
-.invoice-summary table {
-	border-collapse: collapse;
-	width: 100%;
-}
-
-.invoice-summary td {
-	padding: 8px 12px;
-	border: 1px solid #bdc3c7;
-	font-size: 14px;
-}
-
-.total-row {
-    background-color: #3498db !important;
-    color: white !important;
-    font-size: 16px !important;
-}
-
-.total-row td {
-	border-color: #2980b9 !important;
-}
-
-.invoice-footer {
-    margin-top: 24px;
-    padding-top: 16px;
-    border-top: 2px solid #bdc3c7;
-}
-
-/* Thank you note similar to sample */
-.invoice-container::after {
-    content: 'Thank you';
-    display: block;
-    text-align: center;
-    font-style: italic;
-    color: #2c3e50;
-    margin-top: 12px;
-}
-
-.invoice-footer p {
-	margin: 10px 0;
-	font-size: 14px;
-	color: #555;
-}
-
-/* Print Styles */
-@media print {
+	/* Invoice Styles */
 	.invoice-container {
-		padding: 0;
-		margin: 0;
-		box-shadow: none;
+		background: white;
+		padding: 30px;
+		font-family: 'Times New Roman', serif;
+		line-height: 1.4;
+		border-top: 3px dashed #e74c3c;
+		/* dashed header line similar to sample */
 	}
-	
-	.modal-header, .modal-footer {
-		display: none !important;
+
+	.invoice-header {
+		border-bottom: 2px solid #333;
+		padding-bottom: 16px;
+		margin-bottom: 24px;
 	}
-	
-	.modal-body {
-		padding: 0 !important;
-	}
-	
-	.invoice-container {
-		font-size: 12px;
-	}
-	
-	.invoice-title {
-		font-size: 24px;
-	}
-	
+
 	.company-name {
-		font-size: 20px;
+		font-size: 28px;
+		font-weight: bold;
+		color: #2c3e50;
+		margin-bottom: 10px;
+		text-transform: uppercase;
+		letter-spacing: 1px;
 	}
-}
 
-/* Badge styles for payment status */
-.badge.bg-danger { background-color: #dc3545 !important; }
-.badge.bg-success { background-color: #198754 !important; }
-.badge.bg-warning { background-color: #ffc107 !important; color: #000 !important; }
-.badge.bg-info { background-color: #0dcaf0 !important; color: #000 !important; }
+	.company-info p {
+		margin: 5px 0;
+		font-size: 14px;
+		color: #555;
+	}
 
-/* Confirm Delivered Modal Styles */
-#adminOrderConfirmDeliveredModal .modal-header {
-	border-bottom: none;
-	padding: 1.25rem 1.5rem;
-}
+	.invoice-title {
+		font-size: 34px;
+		font-weight: bold;
+		color: #e74c3c;
+		margin-bottom: 12px;
+		text-transform: uppercase;
+		letter-spacing: 2px;
+	}
 
-#adminOrderConfirmDeliveredModal .modal-content {
-	border: none;
-	border-radius: 12px;
-	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-}
+	.invoice-meta p {
+		margin: 8px 0;
+		font-size: 14px;
+		color: #333;
+	}
 
-#adminOrderConfirmDeliveredModal .modal-body {
-	padding: 1.5rem;
-}
+	.invoice-body h4 {
+		font-size: 18px;
+		font-weight: bold;
+		color: #2c3e50;
+		margin-bottom: 12px;
+		border-bottom: 2px solid #3498db;
+		padding-bottom: 4px;
+	}
 
-#adminOrderConfirmDeliveredModal .modal-footer {
-	border-top: 1px solid #e9ecef;
-	padding: 1rem 1.5rem;
-}
+	.customer-info p,
+	.payment-info p {
+		margin: 8px 0;
+		font-size: 14px;
+		color: #555;
+	}
 
-#adminOrderConfirmDeliveredModal .alert-info {
-	background-color: #e7f3ff;
-	border-color: #b3d9ff;
-	color: #004085;
-	border-radius: 8px;
-}
+	.invoice-table {
+		margin: 16px 0;
+		border-collapse: collapse;
+		border: 2px dashed #7f8c8d;
+		/* dashed frame like sample grid */
+		border-radius: 10px;
+		overflow: hidden;
+	}
 
-#adminOrderConfirmDeliveredModal .form-control:focus {
-	border-color: #198754;
-	box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
-}
+	.invoice-table th {
+		background-color: #f2f3f5;
+		color: #2c3e50;
+		font-weight: 700;
+		padding: 10px 8px;
+		font-size: 14px;
+		border: 1px solid #bdc3c7;
+	}
 
-#adminOrderConfirmDeliveredModal .btn-success {
-	background-color: #198754;
-	border-color: #198754;
-	font-weight: 500;
-	padding: 0.5rem 1.5rem;
-}
+	.invoice-table td {
+		padding: 10px 8px;
+		border: 1px solid #dfe3e6;
+		font-size: 14px;
+	}
 
-#adminOrderConfirmDeliveredModal .btn-success:hover {
-	background-color: #157347;
-	border-color: #146c43;
-}
+	.invoice-table tbody tr:nth-child(even) {
+		background-color: #f8f9fa;
+	}
 
-/* Confirmation Modal Styles */
-#confirmModal .modal-header {
-	border-bottom: none;
-	padding: 1.25rem 1.5rem;
-}
+	.invoice-table tbody tr:hover {
+		background-color: #e8f4f8;
+	}
 
-#confirmModal .modal-content {
-	border: none;
-	border-radius: 12px;
-	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-}
+	.invoice-summary {
+		margin-top: 20px;
+	}
 
-#confirmModal .modal-body {
-	padding: 1.5rem;
-}
+	.invoice-summary table {
+		border-collapse: collapse;
+		width: 100%;
+	}
 
-#confirmModal .modal-footer {
-	border-top: 1px solid #e9ecef;
-	padding: 1rem 1.5rem;
-}
+	.invoice-summary td {
+		padding: 8px 12px;
+		border: 1px solid #bdc3c7;
+		font-size: 14px;
+	}
 
-#confirmModal .form-control:focus {
-	border-color: var(--primary-color);
-	box-shadow: 0 0 0 0.25rem rgba(30, 58, 138, 0.25);
-}
+	.total-row {
+		background-color: #3498db !important;
+		color: white !important;
+		font-size: 16px !important;
+	}
+
+	.total-row td {
+		border-color: #2980b9 !important;
+	}
+
+	.invoice-footer {
+		margin-top: 24px;
+		padding-top: 16px;
+		border-top: 2px solid #bdc3c7;
+	}
+
+	/* Thank you note similar to sample */
+	.invoice-container::after {
+		content: 'Thank you';
+		display: block;
+		text-align: center;
+		font-style: italic;
+		color: #2c3e50;
+		margin-top: 12px;
+	}
+
+	.invoice-footer p {
+		margin: 10px 0;
+		font-size: 14px;
+		color: #555;
+	}
+
+	/* Print Styles */
+	@media print {
+		.invoice-container {
+			padding: 0;
+			margin: 0;
+			box-shadow: none;
+		}
+
+		.modal-header,
+		.modal-footer {
+			display: none !important;
+		}
+
+		.modal-body {
+			padding: 0 !important;
+		}
+
+		.invoice-container {
+			font-size: 12px;
+		}
+
+		.invoice-title {
+			font-size: 24px;
+		}
+
+		.company-name {
+			font-size: 20px;
+		}
+	}
+
+	/* Badge styles for payment status */
+	.badge.bg-danger {
+		background-color: #dc3545 !important;
+	}
+
+	.badge.bg-success {
+		background-color: #198754 !important;
+	}
+
+	.badge.bg-warning {
+		background-color: #ffc107 !important;
+		color: #000 !important;
+	}
+
+	.badge.bg-info {
+		background-color: #0dcaf0 !important;
+		color: #000 !important;
+	}
+
+	/* Confirm Delivered Modal Styles */
+	#adminOrderConfirmDeliveredModal .modal-header {
+		border-bottom: none;
+		padding: 1.25rem 1.5rem;
+	}
+
+	#adminOrderConfirmDeliveredModal .modal-content {
+		border: none;
+		border-radius: 12px;
+		box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+	}
+
+	#adminOrderConfirmDeliveredModal .modal-body {
+		padding: 1.5rem;
+	}
+
+	#adminOrderConfirmDeliveredModal .modal-footer {
+		border-top: 1px solid #e9ecef;
+		padding: 1rem 1.5rem;
+	}
+
+	#adminOrderConfirmDeliveredModal .alert-info {
+		background-color: #e7f3ff;
+		border-color: #b3d9ff;
+		color: #004085;
+		border-radius: 8px;
+	}
+
+	#adminOrderConfirmDeliveredModal .form-control:focus {
+		border-color: #198754;
+		box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
+	}
+
+	#adminOrderConfirmDeliveredModal .btn-success {
+		background-color: #198754;
+		border-color: #198754;
+		font-weight: 500;
+		padding: 0.5rem 1.5rem;
+	}
+
+	#adminOrderConfirmDeliveredModal .btn-success:hover {
+		background-color: #157347;
+		border-color: #146c43;
+	}
+
+	/* Confirmation Modal Styles */
+	#confirmModal .modal-header {
+		border-bottom: none;
+		padding: 1.25rem 1.5rem;
+	}
+
+	#confirmModal .modal-content {
+		border: none;
+		border-radius: 12px;
+		box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+	}
+
+	#confirmModal .modal-body {
+		padding: 1.5rem;
+	}
+
+	#confirmModal .modal-footer {
+		border-top: 1px solid #e9ecef;
+		padding: 1rem 1.5rem;
+	}
+
+	#confirmModal .form-control:focus {
+		border-color: var(--primary-color);
+		box-shadow: 0 0 0 0.25rem rgba(30, 58, 138, 0.25);
+	}
 </style>
 
 <!-- Confirmation Modal -->
 <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header" ng-class="{
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header" ng-class="{
                 'bg-info text-white': confirmModal.type === 'info',
                 'bg-warning text-dark': confirmModal.type === 'warning',
                 'bg-danger text-white': confirmModal.type === 'danger'
             }">
-                <h5 class="modal-title" id="confirmModalLabel">
-                    <i class="bi" ng-class="{
+				<h5 class="modal-title" id="confirmModalLabel">
+					<i class="bi" ng-class="{
                         'bi-info-circle': confirmModal.type === 'info',
                         'bi-exclamation-triangle': confirmModal.type === 'warning',
                         'bi-exclamation-circle': confirmModal.type === 'danger'
                     }"></i>
-                    {{confirmModal.title}}
-                </h5>
-                <button type="button" class="btn-close" ng-class="{'btn-close-white': confirmModal.type !== 'warning'}" data-bs-dismiss="modal" aria-label="Close" ng-click="hideConfirmModal()"></button>
-            </div>
-            <div class="modal-body">
-                <p class="mb-3" ng-bind-html="confirmModal.message"></p>
-                
-                <!-- Additional fields for cancel order -->
-                <div ng-if="confirmModal.type === 'danger' && confirmModal.order">
-                    <div class="mb-3">
-                        <label for="cancelReason" class="form-label">
-                            <strong>Lý do hủy</strong> <span class="text-danger">*</span>
-                        </label>
-                        <input type="text" class="form-control" id="cancelReason" ng-model="confirmModal.cancelReason" placeholder="Nhập lý do hủy đơn" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="cancelNote" class="form-label">
-                            <strong>Ghi chú</strong> <span class="text-muted">(tùy chọn)</span>
-                        </label>
-                        <textarea class="form-control" id="cancelNote" ng-model="confirmModal.cancelNote" rows="2" placeholder="Nhập ghi chú bổ sung"></textarea>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" ng-click="hideConfirmModal()">
-                    <i class="bi bi-x-circle me-1"></i>Hủy
-                </button>
-                <button type="button" class="btn" ng-class="{
+					{{confirmModal.title}}
+				</h5>
+				<button type="button" class="btn-close" ng-class="{'btn-close-white': confirmModal.type !== 'warning'}"
+					data-bs-dismiss="modal" aria-label="Close" ng-click="hideConfirmModal()"></button>
+			</div>
+			<div class="modal-body">
+				<p class="mb-3" ng-bind-html="confirmModal.message"></p>
+
+				<!-- Additional fields for cancel order -->
+				<div ng-if="confirmModal.type === 'danger' && confirmModal.order">
+					<div class="mb-3">
+						<label for="cancelReason" class="form-label">
+							<strong>Lý do hủy</strong> <span class="text-danger">*</span>
+						</label>
+						<input type="text" class="form-control" id="cancelReason" ng-model="confirmModal.cancelReason"
+							placeholder="Nhập lý do hủy đơn" required>
+					</div>
+					<div class="mb-3">
+						<label for="cancelNote" class="form-label">
+							<strong>Ghi chú</strong> <span class="text-muted">(tùy chọn)</span>
+						</label>
+						<textarea class="form-control" id="cancelNote" ng-model="confirmModal.cancelNote" rows="2"
+							placeholder="Nhập ghi chú bổ sung"></textarea>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal" ng-click="hideConfirmModal()">
+					<i class="bi bi-x-circle me-1"></i>Hủy
+				</button>
+				<button type="button" class="btn" ng-class="{
                     'btn-info': confirmModal.type === 'info',
                     'btn-warning': confirmModal.type === 'warning',
                     'btn-danger': confirmModal.type === 'danger'
-                }" ng-click="confirmAction()" ng-disabled="confirmModal.type === 'danger' && !confirmModal.cancelReason">
-                    <i class="bi bi-check-circle me-1"></i>Xác nhận
-                </button>
-            </div>
-        </div>
-    </div>
+                }" ng-click="confirmAction()"
+					ng-disabled="confirmModal.type === 'danger' && !confirmModal.cancelReason">
+					<i class="bi bi-check-circle me-1"></i>Xác nhận
+				</button>
+			</div>
+		</div>
+	</div>
 </div>
 
 <!-- Trợ lý quản lý đơn hàng - Chỉ ở trang đơn hàng -->
 <div ng-controller="OrdersTextToSqlAiController" class="ai-chat-widget">
-    <!-- Chat Toggle Button -->
-    <button class="ai-chat-toggle" ng-click="toggleAiChat()" ng-class="{'active': aiChatOpen}">
-        <i class="bi" ng-class="aiChatOpen ? 'bi-x-lg' : 'bi-chat-dots'"></i>
-    </button>
+	<!-- Chat Toggle Button -->
+	<button class="ai-chat-toggle" ng-click="toggleAiChat()" ng-class="{'active': aiChatOpen}">
+		<i class="bi" ng-class="aiChatOpen ? 'bi-x-lg' : 'bi-chat-dots'"></i>
+	</button>
 
-    <!-- Chat Window -->
-    <div class="ai-chat-window" ng-show="aiChatOpen">
-        <div class="ai-chat-header">
-            <div class="d-flex justify-content-between align-items-center w-100">
-                <div class="d-flex align-items-center">
-                    <i class="bi bi-chat-dots me-2"></i>
-                    <strong>Trợ lý quản lý đơn hàng</strong>
-                </div>
-            </div>
-        </div>
-        <div class="ai-chat-body">
-            <div class="ai-chat-messages" id="aiChatMessages">
-                <div ng-if="!sqlAi.history || sqlAi.history.length === 0" class="ai-chat-welcome">
-                    <p>Xin chào! Tôi là Trợ lý quản lý đơn hàng.</p>
-                    <p class="text-muted small">
-                        Ví dụ: "Đơn hàng gần nhất khách hàng là ai?", "Trong 7 ngày gần nhất có bao nhiêu đơn bị hủy?"
-                    </p>
-                </div>
-                <div ng-if="sqlAi.history && sqlAi.history.length > 0">
-                    <div ng-repeat="item in sqlAi.history" class="ai-chat-message">
-                        <div class="ai-chat-question">
-                            {{item.question}}
-                        </div>
-                        <div class="ai-chat-answer">
-                            <div ng-if="item.loading">
-                                <span class="spinner-border spinner-border-sm me-2"></span>
-                                <em>Đang suy nghĩ...</em>
-                            </div>
-                            <div ng-if="!item.loading" ng-bind-html="renderSqlAiAnswerText(item.answer)"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="ai-chat-footer">
-            <form ng-submit="handleAiChatSubmit($event)">
-                <div class="d-flex gap-2">
-                    <input type="text"
-                           class="form-control"
-                           placeholder="Nhập câu hỏi về đơn hàng..."
-                           ng-model="sqlAi.question"
-                           ng-disabled="sqlAi.loading" />
-                    <button type="submit"
-                            class="btn btn-primary"
-                            ng-disabled="sqlAi.loading || !(sqlAi.question && sqlAi.question.trim())">
-                        <i class="bi bi-send-fill"></i>
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
+	<!-- Chat Window -->
+	<div class="ai-chat-window" ng-show="aiChatOpen">
+		<div class="ai-chat-header">
+			<div class="d-flex justify-content-between align-items-center w-100">
+				<div class="d-flex align-items-center">
+					<i class="bi bi-chat-dots me-2"></i>
+					<strong>Trợ lý quản lý đơn hàng</strong>
+				</div>
+			</div>
+		</div>
+		<div class="ai-chat-body">
+			<div class="ai-chat-messages" id="aiChatMessages">
+				<div ng-if="!sqlAi.history || sqlAi.history.length === 0" class="ai-chat-welcome">
+					<p>Xin chào! Tôi là Trợ lý quản lý đơn hàng.</p>
+					<p class="text-muted small">
+						Ví dụ: "Đơn hàng gần nhất khách hàng là ai?", "Trong 7 ngày gần nhất có bao nhiêu đơn bị
+						hủy?"
+					</p>
+				</div>
+				<div ng-if="sqlAi.history && sqlAi.history.length > 0">
+					<div ng-repeat="item in sqlAi.history" class="ai-chat-message">
+						<div class="ai-chat-question">
+							{{item.question}}
+						</div>
+						<div class="ai-chat-answer">
+							<div ng-if="item.loading">
+								<span class="spinner-border spinner-border-sm me-2"></span>
+								<em>Đang suy nghĩ...</em>
+							</div>
+							<div ng-if="!item.loading" ng-bind-html="renderSqlAiAnswerText(item.answer)"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="ai-chat-footer">
+			<form ng-submit="handleAiChatSubmit($event)">
+				<div class="d-flex gap-2">
+					<input type="text" class="form-control" placeholder="Nhập câu hỏi về đơn hàng..."
+						ng-model="sqlAi.question" ng-disabled="sqlAi.loading" />
+					<button type="submit" class="btn btn-primary"
+						ng-disabled="sqlAi.loading || !(sqlAi.question && sqlAi.question.trim())">
+						<i class="bi bi-send-fill"></i>
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
 </div>

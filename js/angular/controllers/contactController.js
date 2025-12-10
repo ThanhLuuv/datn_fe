@@ -1,5 +1,5 @@
 // Contact Controller
-app.controller('ContactController', ['$scope', '$http', function($scope, $http) {
+app.controller('ContactController', ['$scope', '$http', function ($scope, $http) {
     $scope.title = 'Liên hệ';
     $scope.contactForm = {
         name: '',
@@ -12,20 +12,20 @@ app.controller('ContactController', ['$scope', '$http', function($scope, $http) 
 
     // Contact information
     $scope.contactInfo = {
-        address: '123 Đường ABC, Quận XYZ, TP.HCM',
+        address: '97 Man Thiện, Thủ Đức, Tp HCM',
         phone: '+84 123 456 789',
         email: 'contact@example.com',
         hours: 'Thứ 2 - Thứ 6: 8:00 - 17:00'
     };
 
     // Submit contact form
-    $scope.submitForm = function() {
+    $scope.submitForm = function () {
         if ($scope.contactForm.$valid) {
             $scope.sending = true;
-            
+
             // Simulate API call
-            setTimeout(function() {
-                $scope.$apply(function() {
+            setTimeout(function () {
+                $scope.$apply(function () {
                     $scope.sending = false;
                     $scope.submitted = true;
                     $scope.contactForm = {
@@ -40,7 +40,7 @@ app.controller('ContactController', ['$scope', '$http', function($scope, $http) 
     };
 
     // Reset form
-    $scope.resetForm = function() {
+    $scope.resetForm = function () {
         $scope.contactForm = {
             name: '',
             email: '',

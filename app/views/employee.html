@@ -1,175 +1,183 @@
 <!-- Employee Dashboard View -->
 <div class="container-fluid employee-dashboard">
-        <!-- Main content -->
+    <!-- Main content -->
     <main>
-            <!-- Header với thông tin nhân viên giao hàng -->
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-2 mb-2 border-bottom" style="padding-left: 1rem; padding-right: 1rem;">
-                <div>
-                    <h1 class="h2 mb-1">Quản lý đơn hàng giao</h1>
-                    <div class="text-muted small">
-                        Xin chào, <strong>{{ (currentUser.fullName || (currentUser.firstName + ' ' + currentUser.lastName) || currentUser.email || 'Nhân viên giao hàng') }}</strong>
-                        <span ng-if="currentUser.phone"> · {{currentUser.phone}}</span>
-                    </div>
+        <!-- Header với thông tin nhân viên giao hàng -->
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-2 mb-2 border-bottom"
+            style="padding-left: 1rem; padding-right: 1rem;">
+            <div>
+                <h1 class="h2 mb-1">Quản lý đơn hàng giao</h1>
+                <div class="text-muted small">
+                    Xin chào, <strong>{{ (currentUser.fullName || (currentUser.firstName + ' ' + currentUser.lastName)
+                        || currentUser.email || 'Nhân viên giao hàng') }}</strong>
+                    <span ng-if="currentUser.phone"> · {{currentUser.phone}}</span>
                 </div>
+            </div>
+            <div class="d-flex align-items-center gap-3">
                 <div class="text-end small text-muted" ng-if="currentUser">
                     <div><i class="bi bi-person-badge me-1"></i>ID: {{currentUser.userId || currentUser.id}}</div>
                     <div ng-if="currentUser.email"><i class="bi bi-envelope me-1"></i>{{currentUser.email}}</div>
                 </div>
+                <button class="btn btn-sm btn-outline-danger d-flex align-items-center" ng-click="logout()">
+                    <i class="bi bi-box-arrow-right me-1"></i> Đăng xuất
+                </button>
             </div>
+        </div>
 
-            <!-- Stats Cards -->
-            <div class="row mb-3">
-                <div class="col-xl-4 col-md-6 mb-3">
-                    <div class="card border-left-primary shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                        Đơn hàng chờ xử lý
-                                    </div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{stats.pendingOrders}}</div>
+        <!-- Stats Cards -->
+        <div class="row mb-3">
+            <div class="col-xl-4 col-md-6 mb-3">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    Đơn hàng chờ xử lý
                                 </div>
-                                <div class="col-auto">
-                                    <i class="bi bi-clock fa-2x text-gray-300"></i>
-                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{stats.pendingOrders}}</div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-xl-4 col-md-6 mb-3">
-                    <div class="card border-left-success shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                        Đơn hàng hôm nay
-                                    </div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{stats.todayOrders}}</div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="bi bi-cart-check fa-2x text-gray-300"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-xl-4 col-md-6 mb-3">
-                    <div class="card border-left-info shadow h-100 py-2">
-                        <div class="card-body">
-                            <div class="row no-gutters align-items-center">
-                                <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                        Đơn hàng cần giao
-                                    </div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{stats.shippingOrders}}</div>
-                                </div>
-                                <div class="col-auto">
-                                    <i class="bi bi-truck fa-2x text-gray-300"></i>
-                                </div>
+                            <div class="col-auto">
+                                <i class="bi bi-clock fa-2x text-gray-300"></i>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Orders Management -->
-            <div class="row">
-                <div class="col-12">
-                    <div class="card shadow mb-3">
-                        <div class="card-header py-2 d-flex justify-content-between align-items-center">
-                            <h6 class="m-0 font-weight-bold text-primary">Danh sách đơn hàng</h6>
-                            <!-- Tabs -->
-                            <div class="btn-group" role="group" aria-label="Order status tabs">
-                                <button type="button" 
-                                        class="btn btn-sm" 
-                                        ng-class="selectedTab === 'all' ? 'btn-primary' : 'btn-outline-primary'"
-                                        ng-click="setTab('all')">
-                                    <i class="bi bi-list-ul me-1"></i>Tất cả
-                                </button>
-                                <button type="button" 
-                                        class="btn btn-sm" 
-                                        ng-class="selectedTab === 'confirmed' ? 'btn-success' : 'btn-outline-success'"
-                                        ng-click="setTab('confirmed')">
-                                    <i class="bi bi-truck me-1"></i>Đang giao
-                                </button>
-                                <button type="button" 
-                                        class="btn btn-sm" 
-                                        ng-class="selectedTab === 'delivered' ? 'btn-success' : 'btn-outline-success'"
-                                        ng-click="setTab('delivered')">
-                                    <i class="bi bi-check-circle me-1"></i>Đã giao
-                                </button>
+            <div class="col-xl-4 col-md-6 mb-3">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    Đơn hàng hôm nay
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{stats.todayOrders}}</div>
                             </div>
-                        </div>
-                        <div class="card-body">
-                            <!-- Empty state -->
-                            <div class="text-center py-5" ng-if="!loading && filteredOrders.length === 0">
-                                <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
-                                <p class="text-muted mt-3">Không có đơn hàng nào trong mục này</p>
-                            </div>
-                            
-                            <div class="table-responsive" ng-if="!loading && filteredOrders.length > 0">
-                                <table class="table table-hover table-bordered mb-0" width="100%" cellspacing="0">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th style="width: 10%;" class="text-center">Mã đơn hàng</th>
-                                            <th style="width: 15%;">Khách hàng</th>
-                                            <th style="width: 12%;" class="text-center">Ngày đặt</th>
-                                            <th style="width: 12%;" class="text-end">Tổng tiền</th>
-                                            <th style="width: 12%;" class="text-center">Trạng thái</th>
-                                            <th style="width: 39%;" class="text-center">Thao tác</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr ng-repeat="order in filteredOrders">
-                                            <td class="text-center align-middle">
-                                                <code class="text-primary fw-bold">OD-{{order.orderId}}</code>
-                                            </td>
-                                            <td class="align-middle">
-                                                <span class="fw-medium">{{order.customer}}</span>
-                                            </td>
-                                            <td class="text-center align-middle">
-                                                <span>{{order.orderDate | date:'dd/MM/yyyy'}}</span>
-                                            </td>
-                                            <td class="text-end align-middle">
-                                                <span class="fw-bold text-danger">{{order.total | number:0}} <small>VNĐ</small></span>
-                                            </td>
-                                            <td class="text-center align-middle">
-                                                <!-- Ưu tiên dùng deliveryStatus, fallback sang status -->
-                                                <span class="badge rounded-pill px-3 py-2"
-                                                      ng-class="getDeliveryStatusClass(order.deliveryStatus || order.status)"
-                                                      ng-if="order.deliveryStatus !== null && order.deliveryStatus !== undefined || order.status !== null && order.status !== undefined">
-                                                    {{getDeliveryStatusText(order.deliveryStatus || order.status)}}
-                                                </span>
-                                                <span class="badge bg-secondary rounded-pill px-3 py-2"
-                                                      ng-if="(order.deliveryStatus === null || order.deliveryStatus === undefined) && (order.status === null || order.status === undefined)">
-                                                    Chưa xác định
-                                                </span>
-                                            </td>
-                                            <td class="align-middle">
-                                                <div class="d-flex flex-wrap gap-2 justify-content-center">
-                                                    <button class="btn btn-sm btn-primary" ng-click="viewOrderDetail(order)" data-bs-toggle="modal" data-bs-target="#orderDetailModal">
-                                                        <i class="bi bi-eye"></i> Xem chi tiết
-                                                    </button>
-                                                    <button class="btn btn-sm btn-success" ng-click="confirmDelivery(order)" ng-if="(order.deliveryStatus === 'Confirmed' || order.deliveryStatus === 1) || (order.status === 'Confirmed' || order.status === 1)">
-                                                        <i class="bi bi-check-circle"></i> Xác nhận đã giao
-                                                    </button>
-                                                    <button class="btn btn-sm btn-danger" ng-click="cancelOrder(order)" ng-if="(order.deliveryStatus === 'Confirmed' || order.deliveryStatus === 1) || (order.status === 'Confirmed' || order.status === 1)">
-                                                        <i class="bi bi-x-circle"></i> Hủy đơn
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            <div class="col-auto">
+                                <i class="bi bi-cart-check fa-2x text-gray-300"></i>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <div class="col-xl-4 col-md-6 mb-3">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                    Đơn hàng cần giao
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{stats.shippingOrders}}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="bi bi-truck fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Management -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow mb-3">
+                    <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 font-weight-bold text-primary">Danh sách đơn hàng</h6>
+                        <!-- Tabs -->
+                        <div class="btn-group" role="group" aria-label="Order status tabs">
+                            <button type="button" class="btn btn-sm"
+                                ng-class="selectedTab === 'all' ? 'btn-primary' : 'btn-outline-primary'"
+                                ng-click="setTab('all')">
+                                <i class="bi bi-list-ul me-1"></i>Tất cả
+                            </button>
+                            <button type="button" class="btn btn-sm"
+                                ng-class="selectedTab === 'confirmed' ? 'btn-success' : 'btn-outline-success'"
+                                ng-click="setTab('confirmed')">
+                                <i class="bi bi-truck me-1"></i>Đang giao
+                            </button>
+                            <button type="button" class="btn btn-sm"
+                                ng-class="selectedTab === 'delivered' ? 'btn-success' : 'btn-outline-success'"
+                                ng-click="setTab('delivered')">
+                                <i class="bi bi-check-circle me-1"></i>Đã giao
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- Empty state -->
+                        <div class="text-center py-5" ng-if="!loading && filteredOrders.length === 0">
+                            <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+                            <p class="text-muted mt-3">Không có đơn hàng nào trong mục này</p>
+                        </div>
+
+                        <div class="table-responsive" ng-if="!loading && filteredOrders.length > 0">
+                            <table class="table table-hover table-bordered mb-0" width="100%" cellspacing="0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 10%;" class="text-center">Mã đơn hàng</th>
+                                        <th style="width: 15%;">Khách hàng</th>
+                                        <th style="width: 12%;" class="text-center">Ngày đặt</th>
+                                        <th style="width: 12%;" class="text-end">Tổng tiền</th>
+                                        <th style="width: 12%;" class="text-center">Trạng thái</th>
+                                        <th style="width: 39%;" class="text-center">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="order in filteredOrders">
+                                        <td class="text-center align-middle" data-label="Mã đơn hàng">
+                                            <code class="text-primary fw-bold">OD-{{order.orderId}}</code>
+                                        </td>
+                                        <td class="align-middle" data-label="Khách hàng">
+                                            <span class="fw-medium">{{order.customer}}</span>
+                                        </td>
+                                        <td class="text-center align-middle" data-label="Ngày đặt">
+                                            <span>{{order.orderDate | date:'dd/MM/yyyy'}}</span>
+                                        </td>
+                                        <td class="text-end align-middle" data-label="Tổng tiền">
+                                            <span class="fw-bold text-danger">{{order.total | number:0}}
+                                                <small>VNĐ</small></span>
+                                        </td>
+                                        <td class="text-center align-middle" data-label="Trạng thái">
+                                            <!-- Ưu tiên dùng deliveryStatus, fallback sang status -->
+                                            <span class="badge rounded-pill px-3 py-2"
+                                                ng-class="getDeliveryStatusClass(order.deliveryStatus || order.status)"
+                                                ng-if="order.deliveryStatus !== null && order.deliveryStatus !== undefined || order.status !== null && order.status !== undefined">
+                                                {{getDeliveryStatusText(order.deliveryStatus || order.status)}}
+                                            </span>
+                                            <span class="badge bg-secondary rounded-pill px-3 py-2"
+                                                ng-if="(order.deliveryStatus === null || order.deliveryStatus === undefined) && (order.status === null || order.status === undefined)">
+                                                Chưa xác định
+                                            </span>
+                                        </td>
+                                        <td class="align-middle" data-label="Thao tác">
+                                            <div class="d-flex flex-wrap gap-2 justify-content-center">
+                                                <button class="btn btn-sm btn-primary" ng-click="viewOrderDetail(order)"
+                                                    data-bs-toggle="modal" data-bs-target="#orderDetailModal">
+                                                    <i class="bi bi-eye"></i> Xem
+                                                </button>
+                                                <button class="btn btn-sm btn-success" ng-click="confirmDelivery(order)"
+                                                    ng-if="(order.deliveryStatus === 'Confirmed' || order.deliveryStatus === 1) || (order.status === 'Confirmed' || order.status === 1)">
+                                                    <i class="bi bi-check-circle"></i> Giao
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" ng-click="cancelOrder(order)"
+                                                    ng-if="(order.deliveryStatus === 'Confirmed' || order.deliveryStatus === 1) || (order.status === 'Confirmed' || order.status === 1)">
+                                                    <i class="bi bi-x-circle"></i> Hủy
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
-                </div>
+</div>
 
 <!-- Order Detail Modal -->
 <div class="modal fade" id="orderDetailModal" tabindex="-1" aria-labelledby="orderDetailModalLabel" aria-hidden="true">
@@ -206,7 +214,9 @@
                             <tr>
                                 <td><strong>Trạng thái:</strong></td>
                                 <td>
-                                    <span class="badge" ng-class="getDeliveryStatusClass(selectedOrder.deliveryStatus || selectedOrder.status)" style="font-size: 0.9rem; padding: 0.5rem 0.75rem;">
+                                    <span class="badge"
+                                        ng-class="getDeliveryStatusClass(selectedOrder.deliveryStatus || selectedOrder.status)"
+                                        style="font-size: 0.9rem; padding: 0.5rem 0.75rem;">
                                         {{getDeliveryStatusText(selectedOrder.deliveryStatus || selectedOrder.status)}}
                                     </span>
                                 </td>
@@ -232,9 +242,11 @@
                                 <td><strong>Địa chỉ:</strong></td>
                                 <td>{{selectedOrder.shippingAddress || 'Chưa cập nhật'}}</td>
                             </tr>
-                            <tr ng-if="selectedOrder.deliveryStatus === 'Cancelled' || selectedOrder.deliveryStatus === 3 || selectedOrder.status === 'Cancelled' || selectedOrder.status === 3">
+                            <tr
+                                ng-if="selectedOrder.deliveryStatus === 'Cancelled' || selectedOrder.deliveryStatus === 3 || selectedOrder.status === 'Cancelled' || selectedOrder.status === 3">
                                 <td><strong>Lý do hủy:</strong></td>
-                                <td class="text-danger fw-bold">{{selectedOrder.cancelReason || 'Không có thông tin'}}</td>
+                                <td class="text-danger fw-bold">{{selectedOrder.cancelReason || 'Không có thông tin'}}
+                                </td>
                             </tr>
                         </table>
                     </div>
@@ -262,8 +274,8 @@
                                             <div>
                                                 <strong>{{item.bookTitle}}</strong><br>
                                                 <small class="text-muted">ISBN: {{item.isbn}}</small>
-                            </div>
-                        </div>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td class="text-center">{{item.qty}}</td>
                                     <td class="text-end">{{item.unitPrice | number:0}} VNĐ</td>
@@ -278,20 +290,24 @@
                             </tfoot>
                         </table>
                     </div>
-                        </div>
-                                </div>
+                </div>
+            </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-success" ng-click="confirmDelivery(selectedOrder)" ng-if="(selectedOrder.deliveryStatus === 'Confirmed' || selectedOrder.deliveryStatus === 1) || (selectedOrder.status === 'Confirmed' || selectedOrder.status === 1)" data-bs-dismiss="modal">
+                <button type="button" class="btn btn-success" ng-click="confirmDelivery(selectedOrder)"
+                    ng-if="(selectedOrder.deliveryStatus === 'Confirmed' || selectedOrder.deliveryStatus === 1) || (selectedOrder.status === 'Confirmed' || selectedOrder.status === 1)"
+                    data-bs-dismiss="modal">
                     <i class="bi bi-check-circle"></i> Xác nhận đã giao
                 </button>
-                <button type="button" class="btn btn-danger" ng-click="cancelOrder(selectedOrder)" ng-if="(selectedOrder.deliveryStatus === 'Confirmed' || selectedOrder.deliveryStatus === 1) || (selectedOrder.status === 'Confirmed' || selectedOrder.status === 1)" data-bs-dismiss="modal">
+                <button type="button" class="btn btn-danger" ng-click="cancelOrder(selectedOrder)"
+                    ng-if="(selectedOrder.deliveryStatus === 'Confirmed' || selectedOrder.deliveryStatus === 1) || (selectedOrder.status === 'Confirmed' || selectedOrder.status === 1)"
+                    data-bs-dismiss="modal">
                     <i class="bi bi-x-circle"></i> Hủy đơn hàng
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Cancel Order Modal -->
 <div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-labelledby="cancelOrderModalLabel" aria-hidden="true">
@@ -306,32 +322,26 @@
             <div class="modal-body">
                 <div class="alert alert-warning">
                     <i class="bi bi-exclamation-triangle"></i>
-                    <strong>Chú ý:</strong> Hành động này không thể hoàn tác. Đơn hàng sẽ được chuyển sang trạng thái "Đã hủy".
+                    <strong>Chú ý:</strong> Hành động này không thể hoàn tác. Đơn hàng sẽ được chuyển sang trạng thái
+                    "Đã hủy".
                 </div>
-                
+
                 <form>
                     <div class="mb-2">
                         <label for="cancelReason" class="form-label">
                             <strong>Lý do hủy đơn hàng <span class="text-danger">*</span></strong>
                         </label>
-                        <textarea class="form-control" 
-                                  id="cancelReason" 
-                                  rows="3" 
-                                  ng-model="cancelOrderData.reason"
-                                  placeholder="Vui lòng nhập lý do hủy đơn hàng..."
-                                  required></textarea>
+                        <textarea class="form-control" id="cancelReason" rows="3" ng-model="cancelOrderData.reason"
+                            placeholder="Vui lòng nhập lý do hủy đơn hàng..." required></textarea>
                         <div class="form-text">Tối đa 500 ký tự</div>
                     </div>
-                    
+
                     <div class="mb-2">
                         <label for="cancelNote" class="form-label">
                             <strong>Ghi chú bổ sung</strong>
                         </label>
-                        <textarea class="form-control" 
-                                  id="cancelNote" 
-                                  rows="2" 
-                                  ng-model="cancelOrderData.note"
-                                  placeholder="Ghi chú bổ sung (tùy chọn)..."></textarea>
+                        <textarea class="form-control" id="cancelNote" rows="2" ng-model="cancelOrderData.note"
+                            placeholder="Ghi chú bổ sung (tùy chọn)..."></textarea>
                     </div>
                 </form>
             </div>
@@ -348,193 +358,363 @@
 </div>
 
 <style>
-.employee-dashboard {
-    padding: 0 !important;
-    margin-top: 0 !important;
-}
-.employee-dashboard main {
-    padding: 0 !important;
-    margin-top: 0 !important;
-}
-.border-left-primary {
-    border-left: 0.25rem solid #4e73df !important;
-}
-
-.border-left-success {
-    border-left: 0.25rem solid #1cc88a !important;
-}
-
-.border-left-info {
-    border-left: 0.25rem solid #36b9cc !important;
-}
-
-.border-left-warning {
-    border-left: 0.25rem solid #f6c23e !important;
-}
-
-.text-xs {
-    font-size: 0.7rem;
-}
-
-.text-gray-800 {
-    color: #5a5c69 !important;
-}
-
-.text-gray-300 {
-    color: #dddfeb !important;
-}
-
-/* Tabs styling */
-.card-header .btn-group {
-    flex-wrap: nowrap;
-}
-
-.card-header .btn-group .btn {
-    border-radius: 0;
-    font-weight: 600;
-    padding: 0.5rem 1rem;
-    transition: all 0.3s;
-}
-
-.card-header .btn-group .btn:first-child {
-    border-top-left-radius: 0.375rem;
-    border-bottom-left-radius: 0.375rem;
-}
-
-.card-header .btn-group .btn:last-child {
-    border-top-right-radius: 0.375rem;
-    border-bottom-right-radius: 0.375rem;
-}
-
-.card-header .btn-group .btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-/* Table styling improvements */
-.table th {
-    font-weight: 600;
-    font-size: 0.875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-bottom: 2px solid #dee2e6;
-}
-
-.table tbody tr {
-    transition: background-color 0.2s ease;
-}
-
-.table tbody tr:hover {
-    background-color: #f8f9fa;
-}
-
-.table tbody td {
-    vertical-align: middle;
-    padding: 1rem 0.75rem;
-}
-
-/* Modal chi tiết đơn hàng - tăng width và tránh text wrap */
-#orderDetailModal .modal-dialog.modal-xl {
-    max-width: 1200px;
-}
-
-#orderDetailModal .table td:first-child {
-    white-space: nowrap;
-    width: 35%;
-    min-width: 150px;
-}
-
-#orderDetailModal .table td:last-child {
-    white-space: normal;
-    word-break: break-word;
-    width: 65%;
-}
-
-/* Đảm bảo label không bị wrap */
-#orderDetailModal .table td strong {
-    white-space: nowrap;
-}
-
-/* Status badge improvements - chỉ áp dụng cho trang nhân viên */
-.employee-dashboard .badge {
-    position: static; /* Ghi đè lại position:absolute ở trang home/search */
-    top: auto;
-    right: auto;
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.3px;
-    white-space: nowrap;
-}
-
-.employee-dashboard .badge.bg-primary {
-    background-color: #0d6efd !important;
-}
-
-.employee-dashboard .badge.bg-success {
-    background-color: #198754 !important;
-}
-
-.employee-dashboard .badge.bg-danger {
-    background-color: #dc3545 !important;
-}
-
-.employee-dashboard .badge.bg-warning {
-    background-color: #ffc107 !important;
-    color: #000 !important;
-}
-
-.employee-dashboard .badge.bg-secondary {
-    background-color: #6c757d !important;
-}
-
-/* Action buttons styling */
-.btn-sm {
-    font-size: 0.8rem;
-    padding: 0.375rem 0.75rem;
-    white-space: nowrap;
-}
-
-.btn-sm i {
-    margin-right: 0.25rem;
-}
-
-/* Responsive tabs */
-@media (max-width: 768px) {
-    .card-header {
-        flex-direction: column;
-        gap: 1rem;
+    .employee-dashboard {
+        padding: 0 !important;
+        margin-top: 0 !important;
     }
-    
-    .card-header .btn-group {
-        width: 100%;
+
+    .employee-dashboard main {
+        padding: 0 !important;
+        margin-top: 0 !important;
     }
-    
-    .card-header .btn-group .btn {
-        flex: 1;
+
+    .border-left-primary {
+        border-left: 0.25rem solid #4e73df !important;
     }
-    
-    .table-responsive {
-        font-size: 0.85rem;
+
+    .border-left-success {
+        border-left: 0.25rem solid #1cc88a !important;
     }
-    
-    .table th,
-    .table td {
-        padding: 0.5rem;
+
+    .border-left-info {
+        border-left: 0.25rem solid #36b9cc !important;
     }
-    
-    .btn-sm {
+
+    .border-left-warning {
+        border-left: 0.25rem solid #f6c23e !important;
+    }
+
+    .text-xs {
         font-size: 0.7rem;
-        padding: 0.25rem 0.5rem;
     }
-    
-    .btn-sm i {
-        margin-right: 0;
-    }
-    
-    .btn-sm span,
-    .btn-sm .d-none-mobile {
-        display: none;
-    }
-}
-</style>
 
+    .text-gray-800 {
+        color: #5a5c69 !important;
+    }
+
+    .text-gray-300 {
+        color: #dddfeb !important;
+    }
+
+    /* Tabs styling */
+    .card-header .btn-group {
+        flex-wrap: nowrap;
+    }
+
+    .card-header .btn-group .btn {
+        border-radius: 0;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        transition: all 0.3s;
+    }
+
+    .card-header .btn-group .btn:first-child {
+        border-top-left-radius: 0.375rem;
+        border-bottom-left-radius: 0.375rem;
+    }
+
+    .card-header .btn-group .btn:last-child {
+        border-top-right-radius: 0.375rem;
+        border-bottom-right-radius: 0.375rem;
+    }
+
+    .card-header .btn-group .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Table styling improvements */
+    .table th {
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .table tbody td {
+        vertical-align: middle;
+        padding: 1rem 0.75rem;
+    }
+
+    /* Modal chi tiết đơn hàng - tăng width và tránh text wrap */
+    #orderDetailModal .modal-dialog.modal-xl {
+        max-width: 1200px;
+    }
+
+    #orderDetailModal .table td:first-child {
+        white-space: nowrap;
+        width: 35%;
+        min-width: 150px;
+    }
+
+    #orderDetailModal .table td:last-child {
+        white-space: normal;
+        word-break: break-word;
+        width: 65%;
+    }
+
+    /* Đảm bảo label không bị wrap */
+    #orderDetailModal .table td strong {
+        white-space: nowrap;
+    }
+
+    /* Status badge improvements - chỉ áp dụng cho trang nhân viên */
+    .employee-dashboard .badge {
+        position: static;
+        /* Ghi đè lại position:absolute ở trang home/search */
+        top: auto;
+        right: auto;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+    }
+
+    .employee-dashboard .badge.bg-primary {
+        background-color: #0d6efd !important;
+    }
+
+    .employee-dashboard .badge.bg-success {
+        background-color: #198754 !important;
+    }
+
+    .employee-dashboard .badge.bg-danger {
+        background-color: #dc3545 !important;
+    }
+
+    .employee-dashboard .badge.bg-warning {
+        background-color: #ffc107 !important;
+        color: #000 !important;
+    }
+
+    .employee-dashboard .badge.bg-secondary {
+        background-color: #6c757d !important;
+    }
+
+    /* Action buttons styling */
+    .btn-sm {
+        font-size: 0.8rem;
+        padding: 0.375rem 0.75rem;
+        white-space: nowrap;
+    }
+
+    .btn-sm i {
+        margin-right: 0.25rem;
+    }
+
+    /* Responsive tabs and Mobile Card View */
+    @media (max-width: 768px) {
+        .card-header {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .card-header .btn-group {
+            width: 100%;
+        }
+
+        .card-header .btn-group .btn {
+            flex: 1;
+        }
+
+        /* Header adjustments - stack and align */
+        .d-flex.justify-content-between.flex-wrap {
+            flex-direction: column;
+            align-items: flex-start !important;
+            border-bottom: 2px solid #eee !important;
+            padding-bottom: 1rem !important;
+        }
+
+        .d-flex.justify-content-between.flex-wrap>div {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+
+        .d-flex.justify-content-between.flex-wrap>div:last-child {
+            margin-bottom: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* --- MOBILE CARD VIEW FOR TABLE --- */
+        .table-responsive {
+            overflow: visible;
+            /* Prevent scrollbar in card view */
+        }
+
+        /* Force table elements to display as block */
+        .table,
+        .table thead,
+        .table tbody,
+        .table th,
+        .table td,
+        .table tr {
+            display: block;
+        }
+
+        /* Hide table headers specifically */
+        .table thead tr {
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+        }
+
+        .table tr {
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            background: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            padding: 0.5rem 0;
+        }
+
+        .table td {
+            /* Behave like a "row" */
+            border: none;
+            border-bottom: 1px solid #f0f0f0;
+            position: relative;
+            padding: 0.75rem 0.75rem 0.75rem 40% !important;
+            text-align: right;
+            min-height: 45px;
+            display: flex;
+            /* alignment */
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .table td:before {
+            /* Now like a table header */
+            position: absolute;
+            /* Top/left values mimic padding */
+            top: 50%;
+            transform: translateY(-50%);
+            left: 12px;
+            width: 35%;
+            padding-right: 10px;
+            white-space: nowrap;
+            text-align: left;
+            font-weight: 700;
+            color: #4e73df;
+            /* Primary color labels */
+            font-size: 0.85rem;
+            content: attr(data-label);
+        }
+
+        /* Remove label for action buttons row */
+        .table td[data-label="Thao tác"]:before {
+            display: none;
+        }
+
+        .table td[data-label="Thao tác"] {
+            padding-left: 0.75rem !important;
+            padding-right: 0.75rem !important;
+            justify-content: center;
+            border-bottom: none;
+        }
+
+        .table td:last-child {
+            border-bottom: 0;
+        }
+
+        /* Increase tap targets */
+        .btn-sm {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        /* Specific modal table adjustments (modal shouldn't use card view necessarily, 
+           or if it does, it needs to be cleaner. Let's keep modal basic but scrollable) */
+        #orderDetailModal .table,
+        #orderDetailModal .table tbody,
+        #orderDetailModal .table tr,
+        #orderDetailModal .table td {
+            display: table-row;
+            /* Reset basic table for modal inner table if possible */
+        }
+
+        /* Oh wait, the above global rule '.table tr' affects modal too. 
+           We need to scope the card view to the MAIN order table only. */
+    }
+
+    /* SCOPED MOBILE CARD VIEW - Main Order Table Only */
+    @media (max-width: 768px) {
+
+        /* Only apply card view to the main table, not modal tables */
+        .table-responsive>.table:not(.table-sm) {
+            display: block;
+        }
+
+        .table-responsive>.table:not(.table-sm) thead {
+            display: none;
+        }
+
+        .table-responsive>.table:not(.table-sm) tbody,
+        .table-responsive>.table:not(.table-sm) tr,
+        .table-responsive>.table:not(.table-sm) td {
+            display: block;
+        }
+
+        .table-responsive>.table:not(.table-sm) tr {
+            margin-bottom: 1rem;
+            border: 1px solid #e3e6f0;
+            border-radius: 0.35rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+
+        .table-responsive>.table:not(.table-sm) td {
+            padding-left: 45% !important;
+            text-align: right;
+            position: relative;
+            border-top: none;
+            border-bottom: 1px solid #e3e6f0;
+            min-height: 3rem;
+        }
+
+        .table-responsive>.table:not(.table-sm) td:before {
+            content: attr(data-label);
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-weight: bold;
+            color: #4e73df;
+            width: 40%;
+            text-align: left;
+        }
+
+        /* Actions row center */
+        .table-responsive>.table:not(.table-sm) td[data-label="Thao tác"] {
+            padding-left: 1rem !important;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+
+        .table-responsive>.table:not(.table-sm) td[data-label="Thao tác"]:before {
+            display: none;
+        }
+
+        /* Modal specific mobile tweaks */
+        #orderDetailModal .table td {
+            display: table-cell;
+        }
+
+        #orderDetailModal .table td:first-child {
+            width: auto;
+            white-space: normal;
+        }
+
+    }
+</style>

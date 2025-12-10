@@ -23,12 +23,8 @@
             </div>
 
             <!-- Search Box -->
-            <search-box 
-                ng-if="!loading"
-                placeholder="Tìm kiếm đơn đặt hàng..." 
-                search-term="searchTerm" 
-                on-search="searchPurchaseOrders()"
-                on-clear="clearSearch()">
+            <search-box ng-if="!loading" placeholder="Tìm kiếm đơn đặt hàng..." search-term="searchTerm"
+                on-search="searchPurchaseOrders()" on-clear="clearSearch()">
             </search-box>
 
             <!-- Bộ lọc nâng cao -->
@@ -63,16 +59,11 @@
             </div>
 
             <!-- Error State -->
-            <error-state 
-                show="showError" 
-                message="errorMessage" 
-                dismissible="true">
+            <error-state show="showError" message="errorMessage" dismissible="true">
             </error-state>
 
             <!-- Success Message -->
-            <success-message 
-                show="showSuccess" 
-                message="successMessage">
+            <success-message show="showSuccess" message="successMessage">
             </success-message>
 
             <!-- Purchase Orders Table -->
@@ -114,8 +105,7 @@
                                         <strong class="text-success">{{po.totalAmount | numberFormatted}} ₫</strong>
                                     </td>
                                     <td>
-                                        <span class="badge"
-                                              ng-class="{
+                                        <span class="badge" ng-class="{
                                                 'bg-warning': (po.statusName | lowercase) === 'pending',
                                                 'bg-primary': (po.statusName | lowercase) === 'shipped',
                                                 'bg-info': (po.statusName | lowercase) === 'approved',
@@ -132,26 +122,39 @@
                                     </td>
                                     <td>
                                         <div class="btn-group btn-group-sm">
-                                            <a class="btn btn-download-po" ng-if="po.orderFileUrl" ng-href="{{po.orderFileUrl}}" target="_blank" download title="Tải file đơn đặt hàng">
+                                            <a class="btn btn-download-po" ng-if="po.orderFileUrl"
+                                                ng-href="{{po.orderFileUrl}}" target="_blank" download
+                                                title="Tải file đơn đặt hàng">
                                                 <i class="bi bi-download"></i>
                                             </a>
-                                            <button class="btn btn-outline-info" ng-click="viewPurchaseOrder(po)" title="Xem chi tiết">
+                                            <button class="btn btn-outline-info" ng-click="viewPurchaseOrder(po)"
+                                                title="Xem chi tiết">
                                                 <i class="bi bi-eye"></i>
                                             </button>
-                                            <button class="btn btn-outline-warning" ng-click="openEditModal(po)" title="Chỉnh sửa" ng-if="(po.statusName | lowercase) === 'pending' || po.statusId === 1">
+                                            <button class="btn btn-outline-warning" ng-click="openEditModal(po)"
+                                                title="Chỉnh sửa"
+                                                ng-if="(po.statusName | lowercase) === 'pending' || po.statusId === 1">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
-                                            <button class="btn btn-light btn-send-hover" ng-click="sendPurchaseOrder(po)" title="Gửi NXB" ng-if="(po.statusName | lowercase) === 'pending' || po.statusId === 1">
+                                            <button class="btn btn-light btn-send-hover"
+                                                ng-click="sendPurchaseOrder(po)" title="Gửi NXB"
+                                                ng-if="(po.statusName | lowercase) === 'pending' || po.statusId === 1">
                                                 <i class="bi bi-send"></i>
                                             </button>
-                                            <button class="btn btn-outline-success" ng-click="approvePurchaseOrder(po)" title="Xác nhận" ng-if="(po.statusName | lowercase) === 'shipped' || po.statusId === 2">
+                                            <button class="btn btn-outline-success" ng-click="approvePurchaseOrder(po)"
+                                                title="Xác nhận"
+                                                ng-if="(po.statusName | lowercase) === 'shipped' || po.statusId === 2">
                                                 <i class="bi bi-check2-circle"></i>
                                             </button>
-                                            <button class="btn btn-light btn-receive-hover" ng-click="goToGoodsReceipt(po)" title="Nhập hàng" ng-if="(po.statusName | lowercase) === 'approved' || po.statusId === 3">
+                                            <button class="btn btn-light btn-receive-hover"
+                                                ng-click="goToGoodsReceipt(po)" title="Nhập hàng"
+                                                ng-if="(po.statusName | lowercase) === 'approved' || po.statusId === 3">
                                                 <i class="bi bi-box-seam"></i>
                                             </button>
                                             <!-- Chỉ hiển thị nút xóa khi trạng thái Pending -->
-                                            <button class="btn btn-outline-danger" ng-click="confirmDelete(po)" title="Xóa" ng-if="(po.statusName | lowercase) === 'pending' || po.statusId === 1">
+                                            <button class="btn btn-outline-danger" ng-click="deletePurchaseOrder(po)"
+                                                title="Xóa"
+                                                ng-if="(po.statusName | lowercase) === 'pending' || po.statusId === 1">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </div>
@@ -164,19 +167,13 @@
             </div>
 
             <!-- Empty State -->
-            <empty-state 
-                show="!loading && !showError && purchaseOrders.length === 0" 
-                title="Chưa có đơn đặt hàng nào"
-                message="Hệ thống chưa có đơn đặt hàng nào để hiển thị"
-                action-text="Tạo đơn đặt hàng đầu tiên"
+            <empty-state show="!loading && !showError && purchaseOrders.length === 0" title="Chưa có đơn đặt hàng nào"
+                message="Hệ thống chưa có đơn đặt hàng nào để hiển thị" action-text="Tạo đơn đặt hàng đầu tiên"
                 action="openCreateModal()">
             </empty-state>
 
             <!-- Pagination -->
-            <pagination 
-                current-page="currentPage" 
-                total-pages="totalPages" 
-                on-page-change="goToPage(page)">
+            <pagination current-page="currentPage" total-pages="totalPages" on-page-change="goToPage(page)">
             </pagination>
         </div>
     </div>
@@ -184,13 +181,15 @@
 
 <!-- Toasts -->
 <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000;">
-    <div class="toast align-items-center text-white bg-{{t.variant}} border-0 mb-2 show" role="alert" aria-live="assertive" aria-atomic="true" ng-repeat="t in toasts">
+    <div class="toast align-items-center text-white bg-{{t.variant}} border-0 mb-2 show" role="alert"
+        aria-live="assertive" aria-atomic="true" ng-repeat="t in toasts">
         <div class="d-flex">
             <div class="toast-body">{{t.message}}</div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" ng-click="toasts.splice($index,1)"></button>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                ng-click="toasts.splice($index,1)"></button>
         </div>
     </div>
-    </div>
+</div>
 
 <!-- Create/Edit Purchase Order Modal -->
 <div class="modal fade" id="purchaseOrderModal" tabindex="-1">
@@ -207,18 +206,23 @@
                     <div class="row">
                         <div class="col-lg-8">
                             <div class="mb-3">
-                                <label for="poPublisher" class="form-label">Nhà xuất bản <span class="text-danger">*</span></label>
-                                <select class="form-select" id="poPublisher" name="publisher" ng-model="purchaseOrderData.publisherId" ng-change="onPublisherChange()" required>
+                                <label for="poPublisher" class="form-label">Nhà xuất bản <span
+                                        class="text-danger">*</span></label>
+                                <select class="form-select" id="poPublisher" name="publisher"
+                                    ng-model="purchaseOrderData.publisherId" ng-change="onPublisherChange()" required>
                                     <option value="">Chọn nhà xuất bản</option>
                                     <option ng-repeat="publisher in publishers" value="{{publisher.publisherId}}">
                                         {{publisher.name}}
                                     </option>
                                 </select>
-                                <div class="invalid-feedback d-block" ng-if="purchaseOrderForm.publisher.$touched && purchaseOrderForm.publisher.$error.required">Vui lòng chọn nhà xuất bản.</div>
+                                <div class="invalid-feedback d-block"
+                                    ng-if="purchaseOrderForm.publisher.$touched && purchaseOrderForm.publisher.$error.required">
+                                    Vui lòng chọn nhà xuất bản.</div>
                             </div>
                             <div class="mb-3">
                                 <label for="poNote" class="form-label">Ghi chú</label>
-                                <textarea class="form-control" id="poNote" ng-model="purchaseOrderData.note" rows="3" auto-resize></textarea>
+                                <textarea class="form-control" id="poNote" ng-model="purchaseOrderData.note" rows="3"
+                                    auto-resize></textarea>
                             </div>
                         </div>
                         <div class="col-lg-4">
@@ -234,14 +238,15 @@
                                         </div>
                                         <div class="d-flex justify-content-between align-items-center">
                                             <span class="text-muted">Tổng tiền:</span>
-                                            <strong class="text-success fs-4">{{getTotalAmount() | numberFormatted}} ₫</strong>
+                                            <strong class="text-success fs-4">{{getTotalAmount() | numberFormatted}}
+                                                ₫</strong>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Purchase Order Lines -->
                     <div class="row">
                         <div class="col-12">
@@ -260,27 +265,39 @@
                                     <tbody>
                                         <tr ng-repeat="line in purchaseOrderData.lines track by $index">
                                             <td>
-                                                <select class="form-select form-select-sm" ng-model="line.isbn" ng-change="updateLineBook($index)" required>
+                                                <select class="form-select form-select-sm" ng-model="line.isbn"
+                                                    ng-change="updateLineBook($index)" required>
                                                     <option value="">Chọn sách</option>
-                                                    <option ng-repeat="book in getAvailableBooksForLine($index)" value="{{book.isbn}}">
+                                                    <option ng-repeat="book in getAvailableBooksForLine($index)"
+                                                        value="{{book.isbn}}">
                                                         {{book.title}} - {{book.isbn}}
                                                     </option>
                                                 </select>
-                                                <div class="text-danger small mt-1" ng-if="!line.isbn">Vui lòng chọn sách.</div>
+                                                <div class="text-danger small mt-1" ng-if="!line.isbn">Vui lòng chọn
+                                                    sách.</div>
                                             </td>
                                             <td>
-                                                <input type="number" class="form-control form-control-sm" ng-model="line.qtyOrdered" min="1" required ng-change="updateLineTotal($index)" number-input>
-                                                <div class="text-danger small mt-1" ng-if="!line.qtyOrdered || line.qtyOrdered < 1">Số lượng phải ≥ 1.</div>
+                                                <input type="number" class="form-control form-control-sm"
+                                                    ng-model="line.qtyOrdered" min="1" required
+                                                    ng-change="updateLineTotal($index)" number-input>
+                                                <div class="text-danger small mt-1"
+                                                    ng-if="!line.qtyOrdered || line.qtyOrdered < 1">Số lượng phải ≥ 1.
+                                                </div>
                                             </td>
                                             <td>
-                                                <input type="text" class="form-control form-control-sm" ng-model="line.unitPrice" currency-input ng-change="updateLineTotal($index)" placeholder="0">
-                                                <div class="text-danger small mt-1" ng-if="line.unitPrice == null || line.unitPrice < 0">Đơn giá phải ≥ 0.</div>
+                                                <input type="text" class="form-control form-control-sm"
+                                                    ng-model="line.unitPrice" currency-input
+                                                    ng-change="updateLineTotal($index)" placeholder="0">
+                                                <div class="text-danger small mt-1"
+                                                    ng-if="line.unitPrice == null || line.unitPrice < 0">Đơn giá phải ≥
+                                                    0.</div>
                                             </td>
                                             <td>
                                                 <strong>{{line.lineTotal | numberFormatted}} ₫</strong>
                                             </td>
                                             <td>
-                                                <button type="button" class="btn btn-sm btn-outline-danger" ng-click="removeLine($index)">
+                                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                                    ng-click="removeLine($index)">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
                                             </td>
@@ -296,7 +313,8 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-primary" ng-disabled="purchaseOrderForm.$invalid || isSaving || purchaseOrderData.lines.length === 0">
+                    <button type="submit" class="btn btn-primary"
+                        ng-disabled="purchaseOrderForm.$invalid || isSaving || purchaseOrderData.lines.length === 0">
                         <span ng-if="isSaving" class="spinner-border spinner-border-sm me-2"></span>
                         {{isEditMode ? 'Cập nhật' : 'Tạo mới'}}
                     </button>
@@ -329,13 +347,13 @@
                                     </div>
                                     <div class="col-md-4">
                                         <div class="text-muted">Nhà xuất bản</div>
-                                        <div class="fw-semibold text-truncate">{{selectedPurchaseOrder.publisherName}}</div>
+                                        <div class="fw-semibold text-truncate">{{selectedPurchaseOrder.publisherName}}
+                                        </div>
                                     </div>
                                     <div class="col-md-4">
                                         <div class="text-muted">Trạng thái</div>
                                         <div>
-                                            <span class="badge"
-                                                  ng-class="{
+                                            <span class="badge" ng-class="{
                                                     'bg-warning': (selectedPurchaseOrder.statusName | lowercase) === 'pending',
                                                     'bg-primary': (selectedPurchaseOrder.statusName | lowercase) === 'shipped',
                                                     'bg-info': (selectedPurchaseOrder.statusName | lowercase) === 'approved',
@@ -401,16 +419,19 @@
                         </div>
                         <div class="text-end ms-4">
                             <div class="small text-muted">Tổng tiền</div>
-                            <div class="h5 text-success mb-0">{{selectedPurchaseOrder.totalAmount | numberFormatted}} ₫</div>
+                            <div class="h5 text-success mb-0">{{selectedPurchaseOrder.totalAmount | numberFormatted}} ₫
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-warning" ng-click="openEditModal(selectedPurchaseOrder)" ng-if="(selectedPurchaseOrder.statusName | lowercase) === 'pending' || selectedPurchaseOrder.statusId === 1">
+                <button type="button" class="btn btn-warning" ng-click="openEditModal(selectedPurchaseOrder)"
+                    ng-if="(selectedPurchaseOrder.statusName | lowercase) === 'pending' || selectedPurchaseOrder.statusId === 1">
                     <i class="bi bi-pencil"></i> Chỉnh sửa
                 </button>
-                <button type="button" class="btn btn-primary" ng-click="sendPurchaseOrder(selectedPurchaseOrder)" ng-if="(selectedPurchaseOrder.statusName | lowercase) === 'pending' || selectedPurchaseOrder.statusId === 1">
+                <button type="button" class="btn btn-primary" ng-click="sendPurchaseOrder(selectedPurchaseOrder)"
+                    ng-if="(selectedPurchaseOrder.statusName | lowercase) === 'pending' || selectedPurchaseOrder.statusId === 1">
                     <i class="bi bi-send"></i> Gửi NXB
                 </button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
@@ -420,9 +441,7 @@
 </div>
 
 <!-- Confirm Delete Modal -->
-<confirm-dialog 
-    show="showDeleteConfirm" 
-    title="Xác nhận xóa đơn đặt hàng"
+<confirm-dialog show="showDeleteConfirm" title="Xác nhận xóa đơn đặt hàng"
     message="Bạn có chắc chắn muốn xóa đơn đặt hàng PO-{{purchaseOrderToDelete.poId}}? Hành động này không thể hoàn tác."
     on-confirm="deletePurchaseOrder()">
 </confirm-dialog>
@@ -435,17 +454,21 @@
         color: #000 !important;
         border-color: #dee2e6 !important;
     }
+
     .btn-send-hover .bi,
     .btn-receive-hover .bi {
         color: inherit !important;
     }
+
     .btn-send-hover:hover,
     .btn-receive-hover:hover {
-        background-color: #6c757d !important; /* Bootstrap secondary */
+        background-color: #6c757d !important;
+        /* Bootstrap secondary */
         color: #fff !important;
         border-color: #6c757d !important;
         text-decoration: none;
     }
+
     .btn-send-hover:hover .bi,
     .btn-receive-hover:hover .bi {
         color: #fff !important;
@@ -458,8 +481,10 @@
         background-color: transparent !important;
         color: #6c757d;
     }
+
     .btn-download-po:hover {
-        background-color: rgba(25, 135, 84, 0.15) !important; /* Bootstrap success rgba */
+        background-color: rgba(25, 135, 84, 0.15) !important;
+        /* Bootstrap success rgba */
         color: #198754 !important;
     }
 </style>
@@ -481,13 +506,16 @@
                     }"></i>
                     {{poConfirmModal.title}}
                 </h5>
-                <button type="button" class="btn-close" ng-class="{'btn-close-white': poConfirmModal.type !== 'warning'}" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close"
+                    ng-class="{'btn-close-white': poConfirmModal.type !== 'warning'}" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <p class="mb-0" ng-bind-html="poConfirmModal.message"></p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" ng-click="hidePoConfirmModal()">Hủy</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                    ng-click="hidePoConfirmModal()">Hủy</button>
                 <button type="button" class="btn" ng-class="{
                     'btn-info': poConfirmModal.type === 'info',
                     'btn-warning': poConfirmModal.type === 'warning',

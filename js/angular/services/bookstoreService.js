@@ -1,13 +1,13 @@
 // Bookstore Service - Quản lý tất cả API calls cho hệ thống bookstore
 console.log('Loading BookstoreService...');
-app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', function($http, $q, APP_CONFIG, AuthService) {
+app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', function ($http, $q, APP_CONFIG, AuthService) {
     // Auto-detect API URL: use local backend for localhost, production otherwise
     var isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     // Prefer HTTPS locally so OAuth redirects and cookies work correctly
     var baseUrl = APP_CONFIG.API_BASE_URL || (isLocal ? 'https://localhost:5256/api' : 'https://api.thanhlaptrinh.online/api');
-    
+
     // Helper function to get auth headers
-    var getAuthHeaders = function() {
+    var getAuthHeaders = function () {
         var token = AuthService.getToken();
         return {
             'Content-Type': 'application/json',
@@ -16,7 +16,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Helper function to get auth headers for file upload
-    var getFileUploadHeaders = function() {
+    var getFileUploadHeaders = function () {
         var token = AuthService.getToken();
         return {
             'Authorization': 'Bearer ' + token
@@ -24,15 +24,15 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // ==================== CATEGORY APIs ====================
-    
+
     // Lấy danh sách danh mục
-    this.getCategories = function(params) {
+    this.getCategories = function (params) {
         var queryParams = {
             pageNumber: params.pageNumber || 1,
             pageSize: params.pageSize || 10,
             searchTerm: params.searchTerm || ''
         };
-        
+
         return $http({
             method: 'GET',
             url: baseUrl + '/category',
@@ -42,9 +42,9 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // ==================== AREA APIs ====================
-    
+
     // Lấy danh sách khu vực
-    this.getAreas = function() {
+    this.getAreas = function () {
         return $http({
             method: 'GET',
             url: baseUrl + '/area',
@@ -55,7 +55,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Lấy thông tin khu vực theo ID
-    this.getAreaById = function(areaId) {
+    this.getAreaById = function (areaId) {
         return $http({
             method: 'GET',
             url: baseUrl + '/area/' + areaId,
@@ -66,15 +66,15 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // ==================== PUBLISHER APIs ====================
-    
+
     // Lấy danh sách nhà xuất bản
-    this.getPublishers = function(params) {
+    this.getPublishers = function (params) {
         var queryParams = {
             pageNumber: params.pageNumber || 1,
             pageSize: params.pageSize || 10,
             searchTerm: params.searchTerm || ''
         };
-        
+
         return $http({
             method: 'GET',
             url: baseUrl + '/publisher',
@@ -84,7 +84,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Lấy thông tin nhà xuất bản theo ID
-    this.getPublisherById = function(id) {
+    this.getPublisherById = function (id) {
         return $http({
             method: 'GET',
             url: baseUrl + '/publisher/' + id,
@@ -93,7 +93,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Tạo nhà xuất bản mới
-    this.createPublisher = function(payload) {
+    this.createPublisher = function (payload) {
         return $http({
             method: 'POST',
             url: baseUrl + '/publisher',
@@ -103,7 +103,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Cập nhật nhà xuất bản
-    this.updatePublisher = function(id, payload) {
+    this.updatePublisher = function (id, payload) {
         return $http({
             method: 'PUT',
             url: baseUrl + '/publisher/' + id,
@@ -113,7 +113,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Xóa nhà xuất bản
-    this.deletePublisher = function(id) {
+    this.deletePublisher = function (id) {
         return $http({
             method: 'DELETE',
             url: baseUrl + '/publisher/' + id,
@@ -122,13 +122,13 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Lấy danh sách sách theo nhà xuất bản
-    this.getBooksByPublisher = function(publisherId, params) {
+    this.getBooksByPublisher = function (publisherId, params) {
         var queryParams = {
             pageNumber: params.pageNumber || 1,
             pageSize: params.pageSize || 10,
             searchTerm: params.searchTerm || ''
         };
-        
+
         return $http({
             method: 'GET',
             url: baseUrl + '/book/by-publisher/' + publisherId,
@@ -138,7 +138,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Lấy danh mục theo ID
-    this.getCategoryById = function(id) {
+    this.getCategoryById = function (id) {
         return $http({
             method: 'GET',
             url: baseUrl + '/category/' + id,
@@ -147,7 +147,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Tạo danh mục mới
-    this.createCategory = function(categoryData) {
+    this.createCategory = function (categoryData) {
         return $http({
             method: 'POST',
             url: baseUrl + '/category',
@@ -157,7 +157,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Cập nhật danh mục
-    this.updateCategory = function(id, categoryData) {
+    this.updateCategory = function (id, categoryData) {
         return $http({
             method: 'PUT',
             url: baseUrl + '/category/' + id,
@@ -167,7 +167,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Xóa danh mục
-    this.deleteCategory = function(id) {
+    this.deleteCategory = function (id) {
         return $http({
             method: 'DELETE',
             url: baseUrl + '/category/' + id,
@@ -176,9 +176,9 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // ==================== BOOK APIs ====================
-    
+
     // Lấy danh sách sách
-    this.getBooks = function(params) {
+    this.getBooks = function (params) {
         params = params || {};
         // Only include filters when provided; avoid sending empty strings that may confuse backend
         var queryParams = {
@@ -202,9 +202,15 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
                 queryParams.publisherId = pubId;
             }
         }
-        
+        if (params.includeOutOfStock === true) {
+            queryParams.includeOutOfStock = true;
+        }
+        if (params.includeInactive === true) {
+            queryParams.includeInactive = true;
+        }
+
         console.log('[BookstoreService] getBooks params:', queryParams);
-        
+
         return $http({
             method: 'GET',
             url: baseUrl + '/book',
@@ -214,7 +220,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Lấy sách theo danh mục (Public API for storefront/home)
-    this.getBooksByCategory = function(categoryId, params) {
+    this.getBooksByCategory = function (categoryId, params) {
         params = params || {};
         var queryParams = {
             pageNumber: params.pageNumber || 1,
@@ -231,7 +237,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
 
     // ==================== REPORT APIs ====================
     // Tỷ lệ sách theo danh mục
-    this.getBooksByCategoryShare = function() {
+    this.getBooksByCategoryShare = function () {
         return $http({
             method: 'GET',
             url: baseUrl + '/report/books-by-category',
@@ -239,7 +245,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
     // Báo cáo doanh thu theo khoảng thời gian
-    this.getRevenueReport = function(params) {
+    this.getRevenueReport = function (params) {
         var queryParams = {
             fromDate: params && params.fromDate ? params.fromDate : '',
             toDate: params && params.toDate ? params.toDate : ''
@@ -253,7 +259,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Báo cáo tồn kho theo ngày
-    this.getInventoryReport = function(date) {
+    this.getInventoryReport = function (date) {
         var queryParams = {
             date: date || ''
         };
@@ -266,7 +272,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Báo cáo lợi nhuận (fromDate,toDate)
-    this.getProfitReport = function(params) {
+    this.getProfitReport = function (params) {
         params = params || {};
         var queryParams = {
             fromDate: params.fromDate || '',
@@ -280,40 +286,40 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
-	// Báo cáo doanh thu theo tháng
-	this.getRevenueReportMonthly = function(params) {
-		var queryParams = {
-			fromDate: params && params.fromDate ? params.fromDate : '',
-			toDate: params && params.toDate ? params.toDate : ''
-		};
-		return $http({
-			method: 'GET',
-			url: baseUrl + '/report/revenue-monthly',
-			headers: getAuthHeaders(),
-			params: queryParams
-		});
-	};
+    // Báo cáo doanh thu theo tháng
+    this.getRevenueReportMonthly = function (params) {
+        var queryParams = {
+            fromDate: params && params.fromDate ? params.fromDate : '',
+            toDate: params && params.toDate ? params.toDate : ''
+        };
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/report/revenue-monthly',
+            headers: getAuthHeaders(),
+            params: queryParams
+        });
+    };
 
-	// Báo cáo doanh thu theo quý
-	this.getRevenueReportQuarterly = function(params) {
-		var queryParams = {
-			fromDate: params && params.fromDate ? params.fromDate : '',
-			toDate: params && params.toDate ? params.toDate : ''
-		};
-		return $http({
-			method: 'GET',
-			url: baseUrl + '/report/revenue-quarterly',
-			headers: getAuthHeaders(),
-			params: queryParams
-		});
-	};
+    // Báo cáo doanh thu theo quý
+    this.getRevenueReportQuarterly = function (params) {
+        var queryParams = {
+            fromDate: params && params.fromDate ? params.fromDate : '',
+            toDate: params && params.toDate ? params.toDate : ''
+        };
+        return $http({
+            method: 'GET',
+            url: baseUrl + '/report/revenue-quarterly',
+            headers: getAuthHeaders(),
+            params: queryParams
+        });
+    };
 
     // ==================== AI ASSISTANT APIs ====================
 
     // (Đã bỏ API gợi ý sách bằng AI cho khách hàng trên trang books)
 
     // Trợ lý AI cho admin: gợi ý mặt hàng, thể loại, cải thiện theo dữ liệu bán chạy + đánh giá
-    this.adminAiAssistant = function(params) {
+    this.adminAiAssistant = function (params) {
         params = params || {};
         var payload = {
             fromDate: params.fromDate || null,
@@ -330,7 +336,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Chatbox AI realtime cho admin (text-based)
-    this.adminAiChat = function(payload) {
+    this.adminAiChat = function (payload) {
         payload = payload || {};
         var body = {
             messages: Array.isArray(payload.messages) ? payload.messages : [],
@@ -350,7 +356,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Voice AI (audio upload -> backend -> Gemini)
-    this.adminAiVoice = function(payload) {
+    this.adminAiVoice = function (payload) {
         payload = payload || {};
         var body = {
             audioBase64: payload.audioBase64 || '',
@@ -370,7 +376,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
-    this.adminAiSearch = function(payload) {
+    this.adminAiSearch = function (payload) {
         payload = payload || {};
         var body = {
             query: (payload.query || '').trim(),
@@ -387,7 +393,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
-    this.adminAiReindexSearch = function(payload) {
+    this.adminAiReindexSearch = function (payload) {
         payload = payload || {};
         var body = {
             refTypes: Array.isArray(payload.refTypes) && payload.refTypes.length ? payload.refTypes : null,
@@ -406,7 +412,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // ==================== AI TEXT-TO-SQL ====================
-    this.aiTextToSql = function(payload) {
+    this.aiTextToSql = function (payload) {
         payload = payload || {};
         var body = {
             question: (payload.question || '').trim(),
@@ -424,7 +430,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Nhập nhanh sách từ gợi ý AI
-    this.adminAiImportBook = function(payload) {
+    this.adminAiImportBook = function (payload) {
         payload = payload || {};
         return $http({
             method: 'POST',
@@ -435,9 +441,9 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Tra cứu giá thị trường cho một danh sách tên sách (API riêng)
-    this.adminMarketPriceLookup = function(payload) {
+    this.adminMarketPriceLookup = function (payload) {
         payload = payload || {};
-        var body = { titles: Array.isArray(payload.titles) ? payload.titles.slice(0,10) : [] };
+        var body = { titles: Array.isArray(payload.titles) ? payload.titles.slice(0, 10) : [] };
         return $http({
             method: 'POST',
             url: baseUrl + '/ai/market-price',
@@ -448,7 +454,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
 
     // ==================== ROLE & PERMISSION APIs ====================
     // Get roles
-    this.getRoles = function() {
+    this.getRoles = function () {
         return $http({
             method: 'GET',
             url: baseUrl + '/role',
@@ -457,7 +463,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // ==================== ADMIN DASHBOARD APIs ====================
-    this.getAdminDashboardSummary = function() {
+    this.getAdminDashboardSummary = function () {
         return $http({
             method: 'GET',
             url: baseUrl + '/admin/dashboard/summary',
@@ -465,7 +471,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
-    this.getAdminRecentActivities = function() {
+    this.getAdminRecentActivities = function () {
         return $http({
             method: 'GET',
             url: baseUrl + '/admin/dashboard/recent-activities',
@@ -474,7 +480,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // New: total users
-    this.getAdminTotalUsers = function() {
+    this.getAdminTotalUsers = function () {
         return $http({
             method: 'GET',
             url: baseUrl + '/admin/dashboard/total-users',
@@ -483,7 +489,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // New: total orders today (UTC)
-    this.getAdminOrdersToday = function() {
+    this.getAdminOrdersToday = function () {
         return $http({
             method: 'GET',
             url: baseUrl + '/admin/dashboard/orders-today',
@@ -492,7 +498,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Get all permissions
-    this.getAllPermissions = function() {
+    this.getAllPermissions = function () {
         return $http({
             method: 'GET',
             url: baseUrl + '/role/permissions',
@@ -501,7 +507,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Get permissions by role
-    this.getRolePermissions = function(roleId) {
+    this.getRolePermissions = function (roleId) {
         return $http({
             method: 'GET',
             url: baseUrl + '/role/' + roleId + '/permissions',
@@ -510,7 +516,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Assign permission to role
-    this.assignPermissionToRole = function(roleId, permissionId) {
+    this.assignPermissionToRole = function (roleId, permissionId) {
         return $http({
             method: 'POST',
             url: baseUrl + '/role/assign',
@@ -520,7 +526,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Remove permission from role
-    this.removePermissionFromRole = function(roleId, permissionId) {
+    this.removePermissionFromRole = function (roleId, permissionId) {
         return $http({
             method: 'POST',
             url: baseUrl + '/role/remove',
@@ -530,7 +536,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Lấy sách theo ISBN
-    this.getBookByIsbn = function(isbn) {
+    this.getBookByIsbn = function (isbn) {
         return $http({
             method: 'GET',
             url: baseUrl + '/book/' + isbn,
@@ -539,7 +545,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Lấy danh sách tác giả
-    this.getAuthors = function() {
+    this.getAuthors = function () {
         return $http({
             method: 'GET',
             url: baseUrl + '/book/authors',
@@ -548,7 +554,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Tạo tác giả mới
-    this.createAuthor = function(authorData) {
+    this.createAuthor = function (authorData) {
         return $http({
             method: 'POST',
             url: baseUrl + '/book/authors',
@@ -558,10 +564,10 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Tạo sách mới
-    this.createBook = function(bookData) {
+    this.createBook = function (bookData) {
         // Always use FormData for multipart form data
         var formData = new FormData();
-        
+
         // Ensure all required fields are properly formatted
         formData.append('isbn', String(bookData.isbn || ''));
         formData.append('title', String(bookData.title || ''));
@@ -571,40 +577,40 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         formData.append('publishYear', String(Number(bookData.publishYear) || new Date().getFullYear()));
         formData.append('pageCount', String(Number(bookData.pageCount) || 1));
         formData.append('stock', String(Number(bookData.stock) || 0));
-        
+
         // Add authors as comma-separated string (authorIds)
         if (bookData.authors && bookData.authors.length > 0) {
-            var authorIds = bookData.authors.map(function(author) {
+            var authorIds = bookData.authors.map(function (author) {
                 return author.authorId;
             }).join(',');
             formData.append('authorIds', authorIds);
         }
-        
+
         // Add image file if exists
         console.log('=== DEBUG IMAGE FILE ===');
         console.log('bookData.imageFile:', bookData.imageFile);
         console.log('bookData.imageFile type:', typeof bookData.imageFile);
         console.log('bookData.imageFile instanceof File:', bookData.imageFile instanceof File);
-        
+
         if (bookData.imageFile) {
             formData.append('imageFile', bookData.imageFile);
             console.log('✅ Image file added to FormData');
         } else {
             console.log('❌ No image file to add');
         }
-        
+
         // Debug: Log form data
         console.log('=== SENDING FORMDATA TO /api/book ===');
         console.log('FormData contents:');
         for (var pair of formData.entries()) {
             console.log(pair[0] + ': ' + (pair[1] instanceof File ? '[FILE: ' + pair[1].name + ']' : pair[1]));
         }
-        
+
         // Log detailed FormData information
         console.log('=== FORMDATA DETAILS ===');
         console.log('FormData constructor:', formData.constructor.name);
         console.log('FormData entries count:', Array.from(formData.entries()).length);
-        
+
         // Log each field separately
         console.log('=== FIELD BY FIELD ===');
         console.log('isbn:', formData.get('isbn'));
@@ -616,7 +622,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         console.log('pageCount:', formData.get('pageCount'));
         console.log('stock:', formData.get('stock'));
         console.log('authorIds:', formData.get('authorIds'));
-        
+
         var imageFile = formData.get('imageFile');
         if (imageFile) {
             console.log('imageFile:', {
@@ -629,16 +635,16 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         } else {
             console.log('imageFile: null');
         }
-        
+
         // Use fetch API for FormData to ensure proper multipart/form-data
         var token = AuthService.getToken();
-        
+
         console.log('=== SENDING FETCH REQUEST ===');
         console.log('URL:', baseUrl + '/book');
         console.log('Method: POST');
         console.log('Headers:', { 'Authorization': 'Bearer ' + token });
         console.log('Body type:', formData.constructor.name);
-        
+
         // Log raw FormData as string (for debugging)
         console.log('=== RAW FORMDATA DEBUG ===');
         try {
@@ -655,7 +661,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         } catch (e) {
             console.log('Cannot convert FormData to string:', e.message);
         }
-        
+
         return fetch(baseUrl + '/book', {
             method: 'POST',
             headers: {
@@ -664,33 +670,33 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
             },
             body: formData
         })
-        .then(function(response) {
-            console.log('Response status:', response.status);
-            console.log('Response headers:', response.headers);
-            
-            if (!response.ok) {
-                return response.json().then(function(errorData) {
-                    console.error('Error response:', errorData);
-                    throw new Error(errorData.message || 'Request failed');
-                });
-            }
-            return response.json();
-        })
-        .then(function(data) {
-            console.log('Success response:', data);
-            return { data: data };
-        })
-        .catch(function(error) {
-            console.error('Fetch error:', error);
-            throw { data: { message: error.message } };
-        });
+            .then(function (response) {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+
+                if (!response.ok) {
+                    return response.json().then(function (errorData) {
+                        console.error('Error response:', errorData);
+                        throw new Error(errorData.message || 'Request failed');
+                    });
+                }
+                return response.json();
+            })
+            .then(function (data) {
+                console.log('Success response:', data);
+                return { data: data };
+            })
+            .catch(function (error) {
+                console.error('Fetch error:', error);
+                throw { data: { message: error.message } };
+            });
     };
 
     // Cập nhật sách
-    this.updateBook = function(isbn, bookData) {
+    this.updateBook = function (isbn, bookData) {
         // Always use FormData for multipart form data
         var formData = new FormData();
-        
+
         // Ensure all required fields are properly formatted
         formData.append('isbn', String(bookData.isbn || ''));
         formData.append('title', String(bookData.title || ''));
@@ -700,40 +706,40 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         formData.append('publishYear', String(Number(bookData.publishYear) || new Date().getFullYear()));
         formData.append('pageCount', String(Number(bookData.pageCount) || 1));
         formData.append('stock', String(Number(bookData.stock) || 0));
-        
+
         // Add authors as comma-separated string (authorIds)
         if (bookData.authors && bookData.authors.length > 0) {
-            var authorIds = bookData.authors.map(function(author) {
+            var authorIds = bookData.authors.map(function (author) {
                 return author.authorId;
             }).join(',');
             formData.append('authorIds', authorIds);
         }
-        
+
         // Add image file if exists
         console.log('=== DEBUG IMAGE FILE (UPDATE) ===');
         console.log('bookData.imageFile:', bookData.imageFile);
         console.log('bookData.imageFile type:', typeof bookData.imageFile);
         console.log('bookData.imageFile instanceof File:', bookData.imageFile instanceof File);
-        
+
         if (bookData.imageFile) {
             formData.append('imageFile', bookData.imageFile);
             console.log('✅ Image file added to FormData');
         } else {
             console.log('❌ No image file to add');
         }
-        
+
         // Debug: Log form data
         console.log('=== SENDING FORMDATA TO /api/book/' + isbn + ' ===');
         console.log('FormData contents:');
         for (var pair of formData.entries()) {
             console.log(pair[0] + ': ' + (pair[1] instanceof File ? '[FILE: ' + pair[1].name + ']' : pair[1]));
         }
-        
+
         // Log detailed FormData information
         console.log('=== FORMDATA DETAILS (UPDATE) ===');
         console.log('FormData constructor:', formData.constructor.name);
         console.log('FormData entries count:', Array.from(formData.entries()).length);
-        
+
         // Log each field separately
         console.log('=== FIELD BY FIELD (UPDATE) ===');
         console.log('isbn:', formData.get('isbn'));
@@ -745,7 +751,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         console.log('pageCount:', formData.get('pageCount'));
         console.log('stock:', formData.get('stock'));
         console.log('authorIds:', formData.get('authorIds'));
-        
+
         var imageFile = formData.get('imageFile');
         if (imageFile) {
             console.log('imageFile:', {
@@ -758,16 +764,16 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         } else {
             console.log('imageFile: null');
         }
-        
+
         // Use fetch API for FormData to ensure proper multipart/form-data
         var token = AuthService.getToken();
-        
+
         console.log('=== SENDING FETCH REQUEST (UPDATE) ===');
         console.log('URL:', baseUrl + '/book/' + isbn);
         console.log('Method: PUT');
         console.log('Headers:', { 'Authorization': 'Bearer ' + token });
         console.log('Body type:', formData.constructor.name);
-        
+
         // Log raw FormData as string (for debugging)
         console.log('=== RAW FORMDATA DEBUG (UPDATE) ===');
         try {
@@ -784,7 +790,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         } catch (e) {
             console.log('Cannot convert FormData to string:', e.message);
         }
-        
+
         return fetch(baseUrl + '/book/' + isbn, {
             method: 'PUT',
             headers: {
@@ -793,30 +799,30 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
             },
             body: formData
         })
-        .then(function(response) {
-            console.log('Response status:', response.status);
-            console.log('Response headers:', response.headers);
-            
-            if (!response.ok) {
-                return response.json().then(function(errorData) {
-                    console.error('Error response:', errorData);
-                    throw new Error(errorData.message || 'Request failed');
-                });
-            }
-            return response.json();
-        })
-        .then(function(data) {
-            console.log('Success response:', data);
-            return { data: data };
-        })
-        .catch(function(error) {
-            console.error('Fetch error:', error);
-            throw { data: { message: error.message } };
-        });
+            .then(function (response) {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+
+                if (!response.ok) {
+                    return response.json().then(function (errorData) {
+                        console.error('Error response:', errorData);
+                        throw new Error(errorData.message || 'Request failed');
+                    });
+                }
+                return response.json();
+            })
+            .then(function (data) {
+                console.log('Success response:', data);
+                return { data: data };
+            })
+            .catch(function (error) {
+                console.error('Fetch error:', error);
+                throw { data: { message: error.message } };
+            });
     };
 
     // Xóa sách
-    this.deleteBook = function(isbn) {
+    this.deleteBook = function (isbn) {
         return $http({
             method: 'DELETE',
             url: baseUrl + '/book/' + isbn,
@@ -825,7 +831,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Kích hoạt sách (status = 1)
-    this.activateBook = function(isbn) {
+    this.activateBook = function (isbn) {
         return $http({
             method: 'POST',
             url: baseUrl + '/book/' + encodeURIComponent(isbn) + '/activate',
@@ -834,7 +840,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Vô hiệu hóa sách (status = 0)
-    this.deactivateBook = function(isbn) {
+    this.deactivateBook = function (isbn) {
         return $http({
             method: 'POST',
             url: baseUrl + '/book/' + encodeURIComponent(isbn) + '/deactivate',
@@ -844,7 +850,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
 
     // ==================== STOREFRONT APIs ====================
     // Bestsellers in last N days
-    this.getBestSellers = function(days, top) {
+    this.getBestSellers = function (days, top) {
         return $http({
             method: 'GET',
             url: baseUrl + '/storefront/bestsellers',
@@ -853,7 +859,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // New books in last N days
-    this.getNewBooks = function(days, top) {
+    this.getNewBooks = function (days, top) {
         return $http({
             method: 'GET',
             url: baseUrl + '/storefront/new-books',
@@ -862,9 +868,9 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // ==================== BOOK APIs (NEW) ====================
-    
+
     // Tìm kiếm sách với các filter
-    this.searchBooks = function(params) {
+    this.searchBooks = function (params) {
         var queryParams = {
             searchTerm: params.searchTerm || '',
             categoryId: params.categoryId || '',
@@ -875,7 +881,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
             pageNumber: params.pageNumber || 1,
             pageSize: params.pageSize || 10
         };
-        
+
         return $http({
             method: 'GET',
             url: baseUrl + '/book/search',
@@ -884,7 +890,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Sách có khuyến mãi
-    this.getPromotionBooks = function(limit) {
+    this.getPromotionBooks = function (limit) {
         var queryParams = { limit: Math.min(Math.max(parseInt(limit) || 10, 1), 50) };
         return $http({
             method: 'GET',
@@ -894,7 +900,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Sách bán chạy nhất
-    this.getBestsellerBooks = function(limit) {
+    this.getBestsellerBooks = function (limit) {
         var queryParams = { limit: Math.min(Math.max(parseInt(limit) || 10, 1), 50) };
         return $http({
             method: 'GET',
@@ -904,7 +910,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Sách mới nhất
-    this.getLatestBooks = function(limit) {
+    this.getLatestBooks = function (limit) {
         var queryParams = { limit: Math.min(Math.max(parseInt(limit) || 10, 1), 50) };
         return $http({
             method: 'GET',
@@ -914,7 +920,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Chi tiết sách theo ISBN
-    this.getBookDetail = function(isbn) {
+    this.getBookDetail = function (isbn) {
         return $http({
             method: 'GET',
             url: baseUrl + '/book/' + encodeURIComponent(isbn)
@@ -922,7 +928,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Danh sách tác giả
-    this.getBookAuthors = function() {
+    this.getBookAuthors = function () {
         return $http({
             method: 'GET',
             url: baseUrl + '/book/authors'
@@ -930,13 +936,13 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Sách theo nhà xuất bản
-    this.getBooksByPublisherId = function(publisherId, params) {
+    this.getBooksByPublisherId = function (publisherId, params) {
         var queryParams = {
             pageNumber: params.pageNumber || 1,
             pageSize: params.pageSize || 10,
             searchTerm: params.searchTerm || ''
         };
-        
+
         return $http({
             method: 'GET',
             url: baseUrl + '/book/by-publisher/' + publisherId,
@@ -945,7 +951,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Search by title
-    this.searchBooksByTitle = function(title, page, pageSize) {
+    this.searchBooksByTitle = function (title, page, pageSize) {
         return $http({
             method: 'GET',
             url: baseUrl + '/storefront/search',
@@ -954,7 +960,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Get effective price for a book by ISBN
-    this.getEffectivePrice = function(isbn) {
+    this.getEffectivePrice = function (isbn) {
         if (!isbn) {
             return $q.reject('ISBN is required');
         }
@@ -965,9 +971,9 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // ==================== PURCHASE ORDER APIs ====================
-    
+
     // Lấy danh sách đơn đặt mua (hỗ trợ lọc theo từ khóa, NXB, ngày)
-    this.getPurchaseOrders = function(params) {
+    this.getPurchaseOrders = function (params) {
         params = params || {};
         var queryParams = {
             pageNumber: params.pageNumber || 1,
@@ -978,7 +984,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         if (params.publisherId) queryParams.publisherId = params.publisherId;
         if (params.fromDate) queryParams.fromDate = params.fromDate;
         if (params.toDate) queryParams.toDate = params.toDate;
-        
+
         return $http({
             method: 'GET',
             url: baseUrl + '/purchaseorder',
@@ -988,7 +994,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Tạo đơn đặt mua mới
-    this.createPurchaseOrder = function(purchaseOrderData) {
+    this.createPurchaseOrder = function (purchaseOrderData) {
         return $http({
             method: 'POST',
             url: baseUrl + '/purchaseorder',
@@ -998,7 +1004,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Cập nhật đơn đặt mua
-    this.updatePurchaseOrder = function(id, purchaseOrderData) {
+    this.updatePurchaseOrder = function (id, purchaseOrderData) {
         return $http({
             method: 'PUT',
             url: baseUrl + '/purchaseorder/' + id,
@@ -1008,7 +1014,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Thay đổi trạng thái đơn đặt mua
-    this.changePurchaseOrderStatus = function(poId, newStatusId, note) {
+    this.changePurchaseOrderStatus = function (poId, newStatusId, note) {
         return $http({
             method: 'POST',
             url: baseUrl + '/purchaseorder/' + poId + '/change-status',
@@ -1021,7 +1027,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Xóa đơn đặt mua
-    this.deletePurchaseOrder = function(id) {
+    this.deletePurchaseOrder = function (id) {
         return $http({
             method: 'DELETE',
             url: baseUrl + '/purchaseorder/' + id,
@@ -1030,9 +1036,9 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // ==================== GOODS RECEIPT APIs ====================
-    
+
     // Lấy danh sách phiếu nhập (hỗ trợ lọc theo từ khóa, NXB, ngày)
-    this.getGoodsReceipts = function(params) {
+    this.getGoodsReceipts = function (params) {
         params = params || {};
         var queryParams = {
             pageNumber: params.pageNumber || 1,
@@ -1042,7 +1048,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         if (params.publisherId) queryParams.publisherId = params.publisherId;
         if (params.fromDate) queryParams.fromDate = params.fromDate;
         if (params.toDate) queryParams.toDate = params.toDate;
-        
+
         return $http({
             method: 'GET',
             url: baseUrl + '/goodsreceipt',
@@ -1052,9 +1058,9 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // ==================== PROMOTION APIs ====================
-    
+
     // Lấy danh sách khuyến mãi
-    this.getPromotions = function(params) {
+    this.getPromotions = function (params) {
         params = params || {};
         // Backend requires SortBy and SortOrder; provide sensible defaults when missing
         var sortBy = params.SortBy || params.sortBy || 'StartDate';
@@ -1082,7 +1088,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Lấy chi tiết khuyến mãi
-    this.getPromotionById = function(promotionId) {
+    this.getPromotionById = function (promotionId) {
         return $http({
             method: 'GET',
             url: baseUrl + '/promotion/' + promotionId,
@@ -1091,7 +1097,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Tạo khuyến mãi
-    this.createPromotion = function(promotionData) {
+    this.createPromotion = function (promotionData) {
         return $http({
             method: 'POST',
             url: baseUrl + '/promotion',
@@ -1101,7 +1107,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Cập nhật khuyến mãi
-    this.updatePromotion = function(promotionId, promotionData) {
+    this.updatePromotion = function (promotionId, promotionData) {
         return $http({
             method: 'PUT',
             url: baseUrl + '/promotion/' + promotionId,
@@ -1111,7 +1117,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Xóa khuyến mãi
-    this.deletePromotion = function(promotionId) {
+    this.deletePromotion = function (promotionId) {
         return $http({
             method: 'DELETE',
             url: baseUrl + '/promotion/' + promotionId,
@@ -1120,7 +1126,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Thống kê khuyến mãi
-    this.getPromotionStats = function() {
+    this.getPromotionStats = function () {
         return $http({
             method: 'GET',
             url: baseUrl + '/promotion/stats',
@@ -1129,7 +1135,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Danh sách sách đang có khuyến mãi (Public)
-    this.getActivePromotionBooks = function() {
+    this.getActivePromotionBooks = function () {
         return $http({
             method: 'GET',
             url: baseUrl + '/promotion/active-books'
@@ -1137,7 +1143,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Danh sách khuyến mãi theo ISBN (Public)
-    this.getPromotionsByBook = function(isbn) {
+    this.getPromotionsByBook = function (isbn) {
         return $http({
             method: 'GET',
             url: baseUrl + '/promotion/book/' + encodeURIComponent(isbn)
@@ -1147,7 +1153,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     // ==================== CUSTOMER ORDER APIs ====================
 
     // Tạo đơn hàng (Customer)
-    this.createOrder = function(orderPayload) {
+    this.createOrder = function (orderPayload) {
         return $http({
             method: 'POST',
             url: baseUrl + '/order',
@@ -1157,7 +1163,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Lấy danh sách đơn hàng (Admin/Employee)
-    this.getOrders = function(params) {
+    this.getOrders = function (params) {
         params = params || {};
         var queryParams = {
             pageNumber: params.pageNumber || 1,
@@ -1179,7 +1185,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Lấy đơn hàng của khách hàng
-    this.getMyOrders = function(params) {
+    this.getMyOrders = function (params) {
         params = params || {};
         var queryParams = {
             pageNumber: params.pageNumber || 1,
@@ -1197,7 +1203,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Lấy danh sách đơn được phân công cho nhân viên giao hàng (DELIVERY)
-    this.getMyAssignedOrders = function(params) {
+    this.getMyAssignedOrders = function (params) {
         params = params || {};
         var queryParams = {
             pageNumber: params.pageNumber || 1,
@@ -1212,7 +1218,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Lấy chi tiết đơn hàng
-    this.getOrderById = function(orderId) {
+    this.getOrderById = function (orderId) {
         return $http({
             method: 'GET',
             url: baseUrl + '/order/' + orderId,
@@ -1221,7 +1227,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Gợi ý nhân viên giao hàng cho đơn
-    this.getOrderDeliveryCandidates = function(orderId) {
+    this.getOrderDeliveryCandidates = function (orderId) {
         return $http({
             method: 'GET',
             url: baseUrl + '/order/' + orderId + '/delivery-candidates',
@@ -1230,7 +1236,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Duyệt/Không duyệt đơn
-    this.approveOrder = function(orderId, payload) {
+    this.approveOrder = function (orderId, payload) {
         return $http({
             method: 'POST',
             url: baseUrl + '/order/' + orderId + '/approve',
@@ -1240,7 +1246,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Phân công giao hàng
-    this.assignOrderDelivery = function(orderId, payload) {
+    this.assignOrderDelivery = function (orderId, payload) {
         return $http({
             method: 'POST',
             url: baseUrl + '/order/' + orderId + '/assign-delivery',
@@ -1250,7 +1256,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Xác nhận giao hàng thành công
-    this.confirmOrderDelivered = function(orderId, payload) {
+    this.confirmOrderDelivered = function (orderId, payload) {
         return $http({
             method: 'POST',
             url: baseUrl + '/order/' + orderId + '/confirm-delivered',
@@ -1260,7 +1266,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Hủy đơn hàng
-    this.cancelOrder = function(orderId, payload) {
+    this.cancelOrder = function (orderId, payload) {
         return $http({
             method: 'POST',
             url: baseUrl + '/order/' + orderId + '/cancel',
@@ -1270,7 +1276,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // ==================== PAYMENT APIs ====================
-    this.createPaymentLink = function(payload) {
+    this.createPaymentLink = function (payload) {
         return $http({
             method: 'POST',
             url: baseUrl + '/payment/create-link',
@@ -1281,7 +1287,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
 
     // ==================== INVOICE APIs ====================
     // Danh sách hóa đơn (filter, phân trang)
-    this.getInvoices = function(params) {
+    this.getInvoices = function (params) {
         params = params || {};
         var queryParams = {
             invoiceNumber: params.invoiceNumber || '',
@@ -1301,7 +1307,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Danh sách hóa đơn kèm thông tin đơn hàng
-    this.getInvoicesWithOrders = function(params) {
+    this.getInvoicesWithOrders = function (params) {
         params = params || {};
         var queryParams = {
             invoiceNumber: params.invoiceNumber || '',
@@ -1321,7 +1327,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Trả hàng (Return order)
-    this.returnOrder = function(orderId, payload) {
+    this.returnOrder = function (orderId, payload) {
         return $http({
             method: 'POST',
             url: baseUrl + '/order/' + orderId + '/return',
@@ -1331,7 +1337,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Lập phiếu trả (API mới)
-    this.createReturn = function(returnRequest) {
+    this.createReturn = function (returnRequest) {
         return $http({
             method: 'POST',
             url: baseUrl + '/return',
@@ -1343,7 +1349,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     // ==================== CUSTOMER RETURN APIs ====================
 
     // Tạo yêu cầu trả hàng cho customer
-    this.createCustomerReturn = function(returnRequest) {
+    this.createCustomerReturn = function (returnRequest) {
         return $http({
             method: 'POST',
             url: baseUrl + '/customer/return',
@@ -1353,7 +1359,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Lấy danh sách yêu cầu trả hàng của customer
-    this.getCustomerReturns = function(params) {
+    this.getCustomerReturns = function (params) {
         params = params || {};
         var queryParams = {
             pageNumber: params.pageNumber || 1,
@@ -1362,12 +1368,12 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
             fromDate: params.fromDate || '',
             toDate: params.toDate || ''
         };
-        
+
         var queryString = Object.keys(queryParams)
             .filter(key => queryParams[key] !== '')
             .map(key => key + '=' + encodeURIComponent(queryParams[key]))
             .join('&');
-        
+
         return $http({
             method: 'GET',
             url: baseUrl + '/customer/return?' + queryString,
@@ -1376,7 +1382,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Lấy chi tiết yêu cầu trả hàng của customer
-    this.getCustomerReturnDetail = function(returnId) {
+    this.getCustomerReturnDetail = function (returnId) {
         return $http({
             method: 'GET',
             url: baseUrl + '/customer/return/' + returnId,
@@ -1385,7 +1391,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Hủy yêu cầu trả hàng của customer
-    this.cancelCustomerReturn = function(returnId) {
+    this.cancelCustomerReturn = function (returnId) {
         return $http({
             method: 'PUT',
             url: baseUrl + '/customer/return/' + returnId + '/cancel',
@@ -1396,7 +1402,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     // ==================== RETURN MANAGEMENT APIs ====================
 
     // Danh sách phiếu trả (có filter và phân trang)
-    this.getReturns = function(params) {
+    this.getReturns = function (params) {
         params = params || {};
         var queryParams = {
             invoiceId: params.invoiceId || '',
@@ -1414,7 +1420,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Chi tiết phiếu trả
-    this.getReturnById = function(returnId) {
+    this.getReturnById = function (returnId) {
         return $http({
             method: 'GET',
             url: baseUrl + '/return/' + returnId,
@@ -1423,7 +1429,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Cập nhật trạng thái phiếu trả
-    this.updateReturnStatus = function(returnId, data) {
+    this.updateReturnStatus = function (returnId, data) {
         return $http({
             method: 'PUT',
             url: baseUrl + '/return/' + returnId + '/status',
@@ -1433,7 +1439,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Lấy danh sách đơn đặt mua có thể tạo phiếu nhập
-    this.getAvailablePurchaseOrders = function() {
+    this.getAvailablePurchaseOrders = function () {
         return $http({
             method: 'GET',
             url: baseUrl + '/goodsreceipt/available-purchase-orders',
@@ -1442,7 +1448,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Tạo phiếu nhập mới
-    this.createGoodsReceipt = function(goodsReceiptData) {
+    this.createGoodsReceipt = function (goodsReceiptData) {
         return $http({
             method: 'POST',
             url: baseUrl + '/goodsreceipt',
@@ -1452,7 +1458,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Cập nhật phiếu nhập
-    this.updateGoodsReceipt = function(id, goodsReceiptData) {
+    this.updateGoodsReceipt = function (id, goodsReceiptData) {
         return $http({
             method: 'PUT',
             url: baseUrl + '/goodsreceipt/' + id,
@@ -1462,7 +1468,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Xóa phiếu nhập
-    this.deleteGoodsReceipt = function(id) {
+    this.deleteGoodsReceipt = function (id) {
         return $http({
             method: 'DELETE',
             url: baseUrl + '/goodsreceipt/' + id,
@@ -1471,29 +1477,29 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // ==================== HEALTH CHECK APIs ====================
-    
+
     // Health check
-    this.healthCheck = function() {
+    this.healthCheck = function () {
         return $http.get(baseUrl.replace('/api', '') + '/health');
     };
 
-    this.healthReady = function() {
+    this.healthReady = function () {
         return $http.get(baseUrl.replace('/api', '') + '/health/ready');
     };
 
-    this.healthLive = function() {
+    this.healthLive = function () {
         return $http.get(baseUrl.replace('/api', '') + '/health/live');
     };
 
     // ==================== TEST APIs ====================
-    
+
     // Test public endpoint
-    this.testPublic = function() {
+    this.testPublic = function () {
         return $http.get(baseUrl + '/test');
     };
 
     // Test protected endpoint
-    this.testProtected = function() {
+    this.testProtected = function () {
         return $http({
             method: 'GET',
             url: baseUrl + '/test/protected',
@@ -1502,7 +1508,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Test admin only endpoint
-    this.testAdminOnly = function() {
+    this.testAdminOnly = function () {
         return $http({
             method: 'GET',
             url: baseUrl + '/test/admin-only',
@@ -1511,7 +1517,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Test sales only endpoint
-    this.testSalesOnly = function() {
+    this.testSalesOnly = function () {
         return $http({
             method: 'GET',
             url: baseUrl + '/test/sales-only',
@@ -1520,7 +1526,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Test delivery only endpoint
-    this.testDeliveryOnly = function() {
+    this.testDeliveryOnly = function () {
         return $http({
             method: 'GET',
             url: baseUrl + '/test/delivery-only',
@@ -1530,7 +1536,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
 
     // ==================== RATINGS APIs ====================
     // Get ratings list for an ISBN (public)
-    this.getRatings = function(isbn, page, pageSize) {
+    this.getRatings = function (isbn, page, pageSize) {
         var p = Math.max(parseInt(page) || 1, 1);
         var ps = Math.min(Math.max(parseInt(pageSize) || 10, 1), 50);
         return $http({
@@ -1541,7 +1547,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Get ratings stats for an ISBN (public)
-    this.getRatingsStats = function(isbn) {
+    this.getRatingsStats = function (isbn) {
         return $http({
             method: 'GET',
             url: baseUrl + '/ratings/' + encodeURIComponent(isbn) + '/stats'
@@ -1549,7 +1555,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Create or update rating (authorized)
-    this.createOrUpdateRating = function(payload) {
+    this.createOrUpdateRating = function (payload) {
         return $http({
             method: 'POST',
             url: baseUrl + '/ratings',
@@ -1559,7 +1565,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Test staff only endpoint
-    this.testStaffOnly = function() {
+    this.testStaffOnly = function () {
         return $http({
             method: 'GET',
             url: baseUrl + '/test/staff-only',
@@ -1568,9 +1574,9 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // ==================== UTILITY FUNCTIONS ====================
-    
+
     // Format currency
-    this.formatCurrency = function(amount) {
+    this.formatCurrency = function (amount) {
         return new Intl.NumberFormat('vi-VN', {
             style: 'currency',
             currency: 'VND'
@@ -1578,19 +1584,19 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Format date
-    this.formatDate = function(dateString) {
+    this.formatDate = function (dateString) {
         var date = new Date(dateString);
         return date.toLocaleDateString('vi-VN');
     };
 
     // Format datetime
-    this.formatDateTime = function(dateString) {
+    this.formatDateTime = function (dateString) {
         var date = new Date(dateString);
         return date.toLocaleString('vi-VN');
     };
 
     // Get role name by ID
-    this.getRoleName = function(roleId) {
+    this.getRoleName = function (roleId) {
         var roles = {
             1: 'CUSTOMER',
             2: 'SALES_EMPLOYEE',
@@ -1601,7 +1607,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Get role display name by ID
-    this.getRoleDisplayName = function(roleId) {
+    this.getRoleDisplayName = function (roleId) {
         var roles = {
             1: 'Khách hàng',
             2: 'Nhân viên bán hàng',
@@ -1611,9 +1617,9 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         return roles[roleId] || 'Không xác định';
     };
     // ==================== PRICE CHANGE APIs ====================
-    
+
     // Lấy danh sách thay đổi giá
-    this.getPriceChanges = function(params) {
+    this.getPriceChanges = function (params) {
         var queryParams = {
             isbn: params.isbn || '',
             employeeId: params.employeeId || '',
@@ -1623,7 +1629,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
             pageNumber: params.pageNumber || 1,
             pageSize: params.pageSize || 10
         };
-        
+
         return $http({
             method: 'GET',
             url: baseUrl + '/pricechange',
@@ -1633,7 +1639,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Lấy chi tiết thay đổi giá
-    this.getPriceChangeDetail = function(priceChangeId) {
+    this.getPriceChangeDetail = function (priceChangeId) {
         return $http({
             method: 'GET',
             url: baseUrl + '/pricechange/' + priceChangeId,
@@ -1642,7 +1648,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Tạo thay đổi giá mới
-    this.createPriceChange = function(priceChangeData) {
+    this.createPriceChange = function (priceChangeData) {
         return $http({
             method: 'POST',
             url: baseUrl + '/pricechange',
@@ -1652,12 +1658,12 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Lấy giá hiện tại của sách (PUBLIC)
-    this.getCurrentPrice = function(isbn, asOfDate) {
+    this.getCurrentPrice = function (isbn, asOfDate) {
         var queryParams = {};
         if (asOfDate) {
             queryParams.asOfDate = asOfDate;
         }
-        
+
         return $http({
             method: 'GET',
             url: baseUrl + '/pricechange/current-price/' + isbn,
@@ -1666,7 +1672,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Lấy lịch sử giá của sách (PUBLIC)
-    this.getPriceHistory = function(isbn) {
+    this.getPriceHistory = function (isbn) {
         return $http({
             method: 'GET',
             url: baseUrl + '/pricechange/history/' + isbn
@@ -1674,15 +1680,15 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // ==================== ADMIN PRICE CHANGE APIs ====================
-    
+
     // Danh sách thay đổi giá (Admin)
-    this.getAdminPriceChanges = function(params) {
+    this.getAdminPriceChanges = function (params) {
         var queryParams = {
             isbn: params.isbn || '',
             page: params.page || 1,
             pageSize: params.pageSize || 20
         };
-        
+
         return $http({
             method: 'GET',
             url: baseUrl + '/admin/price-changes',
@@ -1692,7 +1698,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Tạo thay đổi giá (Admin)
-    this.createAdminPriceChange = function(priceChangeData) {
+    this.createAdminPriceChange = function (priceChangeData) {
         return $http({
             method: 'POST',
             url: baseUrl + '/admin/price-changes',
@@ -1702,7 +1708,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Cập nhật thay đổi giá (Admin)
-    this.updateAdminPriceChange = function(isbn, changedAt, priceChangeData) {
+    this.updateAdminPriceChange = function (isbn, changedAt, priceChangeData) {
         return $http({
             method: 'PUT',
             url: baseUrl + '/admin/price-changes/' + isbn + '/' + changedAt,
@@ -1712,7 +1718,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Xóa thay đổi giá (Admin)
-    this.deleteAdminPriceChange = function(isbn, changedAt) {
+    this.deleteAdminPriceChange = function (isbn, changedAt) {
         return $http({
             method: 'DELETE',
             url: baseUrl + '/admin/price-changes/' + isbn + '/' + changedAt,
@@ -1722,7 +1728,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
 
     // ==================== EMPLOYEE MANAGEMENT APIs ====================
     // Employees
-    this.getEmployees = function(params) {
+    this.getEmployees = function (params) {
         params = params || {};
         var queryParams = {
             pageNumber: params.pageNumber || 1,
@@ -1738,7 +1744,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
-    this.getEmployeeById = function(employeeId) {
+    this.getEmployeeById = function (employeeId) {
         return $http({
             method: 'GET',
             url: baseUrl + '/employee/' + employeeId,
@@ -1746,7 +1752,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
-    this.createEmployeeWithAccount = function(payload) {
+    this.createEmployeeWithAccount = function (payload) {
         return $http({
             method: 'POST',
             url: baseUrl + '/employee/create-with-account',
@@ -1755,7 +1761,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
-    this.updateEmployee = function(employeeId, payload) {
+    this.updateEmployee = function (employeeId, payload) {
         return $http({
             method: 'PUT',
             url: baseUrl + '/employee/' + employeeId,
@@ -1764,7 +1770,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
-    this.deleteEmployee = function(employeeId) {
+    this.deleteEmployee = function (employeeId) {
         return $http({
             method: 'DELETE',
             url: baseUrl + '/employee/' + employeeId,
@@ -1773,7 +1779,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Departments
-    this.getDepartments = function(params) {
+    this.getDepartments = function (params) {
         params = params || {};
         var queryParams = {
             pageNumber: params.pageNumber || 1,
@@ -1788,15 +1794,15 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
-    this.getDepartmentById = function(departmentId) {
+    this.getDepartmentById = function (departmentId) {
         return $http({
             method: 'GET',
             url: baseUrl + '/department/' + departmentId,
             headers: getAuthHeaders()
         });
-        };
+    };
 
-    this.createDepartment = function(payload) {
+    this.createDepartment = function (payload) {
         return $http({
             method: 'POST',
             url: baseUrl + '/department',
@@ -1805,7 +1811,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
-    this.updateDepartment = function(departmentId, payload) {
+    this.updateDepartment = function (departmentId, payload) {
         return $http({
             method: 'PUT',
             url: baseUrl + '/department/' + departmentId,
@@ -1814,7 +1820,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         });
     };
 
-    this.deleteDepartment = function(departmentId) {
+    this.deleteDepartment = function (departmentId) {
         return $http({
             method: 'DELETE',
             url: baseUrl + '/department/' + departmentId,
@@ -1825,7 +1831,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     // ==================== CUSTOMER PROFILE APIs ====================
 
     // Lấy thông tin cá nhân của khách hàng hiện tại
-    this.getMyProfile = function() {
+    this.getMyProfile = function () {
         return $http({
             method: 'GET',
             url: baseUrl + '/customer/me',
@@ -1834,7 +1840,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Cập nhật thông tin cá nhân của khách hàng hiện tại
-    this.updateMyProfile = function(profile) {
+    this.updateMyProfile = function (profile) {
         var payload = {
             firstName: (profile.firstName || '').trim(),
             lastName: (profile.lastName || '').trim(),

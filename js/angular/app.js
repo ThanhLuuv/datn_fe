@@ -1,9 +1,9 @@
 // AngularJS Application Module
-var app = angular.module('myApp', ['ngRoute', 'ngAnimate']);
+var app = angular.module('myApp', ['ngRoute', 'ngAnimate', 'ngSanitize']);
 
 // Add numberFormatted filter directly to app.js to ensure it's available
-app.filter('numberFormatted', function() {
-    return function(amount) {
+app.filter('numberFormatted', function () {
+    return function (amount) {
         if (amount == null || amount === '') return '';
         var num = parseFloat(amount);
         if (isNaN(num)) return '';
@@ -12,7 +12,7 @@ app.filter('numberFormatted', function() {
 });
 
 // Global controller for navbar visibility
-app.controller('AppController', ['$scope', '$location', '$injector', 'AuthService', function($scope, $location, $injector, AuthService) {
+app.controller('AppController', ['$scope', '$location', '$injector', 'AuthService', function ($scope, $location, $injector, AuthService) {
     var CartService = null;
     try { CartService = $injector.get('CartService'); } catch (e) { console.warn('CartService not available yet:', e && e.message ? e.message : e); }
     $scope.isAdminPage = false;
@@ -21,22 +21,22 @@ app.controller('AppController', ['$scope', '$location', '$injector', 'AuthServic
     $scope.cartCount = 0;
     $scope.isAuthenticated = AuthService.isAuthenticated();
 
-    $scope.goSearch = function() {
+    $scope.goSearch = function () {
         var q = ($scope.searchQuery || '').trim();
         $location.path('/search').search({ q: q, page: 1, pageSize: 12 });
     };
 
     // Handle smooth scroll for menu items
-    $scope.scrollToSection = function(sectionId, event) {
+    $scope.scrollToSection = function (sectionId, event) {
         if (event) {
             event.preventDefault();
         }
-        
+
         // If not on home page, navigate to home first
         if ($location.path() !== '/home' && $location.path() !== '/') {
             $location.path('/home').search({});
             // Wait for route to load, then scroll
-            setTimeout(function() {
+            setTimeout(function () {
                 scrollToSectionId(sectionId);
             }, 500);
         } else {
@@ -54,13 +54,13 @@ app.controller('AppController', ['$scope', '$location', '$injector', 'AuthServic
     };
 
     function scrollToSectionId(sectionId) {
-        setTimeout(function() {
+        setTimeout(function () {
             var element = document.getElementById(sectionId);
             if (element) {
                 var headerOffset = 250; // Account for sticky header
                 var elementPosition = element.getBoundingClientRect().top;
                 var offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-                
+
                 window.scrollTo({
                     top: offsetPosition,
                     behavior: 'smooth'
@@ -70,7 +70,7 @@ app.controller('AppController', ['$scope', '$location', '$injector', 'AuthServic
     }
 
     // Load cart count from API
-    $scope.loadCartCount = function() {
+    $scope.loadCartCount = function () {
         if (!$scope.isAuthenticated) {
             $scope.cartCount = 0;
             return;
@@ -78,29 +78,29 @@ app.controller('AppController', ['$scope', '$location', '$injector', 'AuthServic
 
         if (!CartService || !CartService.getCartSummary) { $scope.cartCount = 0; return; }
         CartService.getCartSummary()
-            .then(function(response) {
+            .then(function (response) {
                 if (response && response.data && response.data.success) {
                     $scope.cartCount = response.data.data.totalItems || 0;
                 } else {
                     $scope.cartCount = 0;
                 }
             })
-            .catch(function(error) {
+            .catch(function (error) {
                 console.error('Error loading cart count:', error);
                 // Fallback to local storage
-                try { $scope.cartCount = CartService.getTotalQuantity ? CartService.getTotalQuantity() : 0; } catch(_) { $scope.cartCount = 0; }
+                try { $scope.cartCount = CartService.getTotalQuantity ? CartService.getTotalQuantity() : 0; } catch (_) { $scope.cartCount = 0; }
             });
     };
 
-    $scope.$on('$routeChangeSuccess', function() {
+    $scope.$on('$routeChangeSuccess', function () {
         var path = $location.path();
         $scope.isAdminPage = path.indexOf('/admin') === 0;
         $scope.isAuthPage = (path === '/login' || path === '/register');
         $scope.isEmployeePage = (path === '/employee' || path.indexOf('/delivery') === 0);
-        
+
         // Update authentication status
         $scope.isAuthenticated = AuthService.isAuthenticated();
-        
+
         // Load cart count if authenticated
         if ($scope.isAuthenticated) {
             $scope.loadCartCount();
@@ -111,13 +111,13 @@ app.controller('AppController', ['$scope', '$location', '$injector', 'AuthServic
         // Handle hash in URL for smooth scroll
         var hash = $location.hash();
         if (hash && (path === '/home' || path === '/')) {
-            setTimeout(function() {
+            setTimeout(function () {
                 scrollToSectionId(hash);
             }, 500);
         }
     });
 
-    $scope.$on('cart:changed', function() {
+    $scope.$on('cart:changed', function () {
         $scope.loadCartCount();
     });
 
@@ -128,7 +128,7 @@ app.controller('AppController', ['$scope', '$location', '$injector', 'AuthServic
 }]);
 
 // Route Configuration
-app.config(['$routeProvider', function($routeProvider) {
+app.config(['$routeProvider', function ($routeProvider) {
     $routeProvider
         .when('/', {
             templateUrl: 'app/views/home.html',
@@ -146,6 +146,14 @@ app.config(['$routeProvider', function($routeProvider) {
             templateUrl: 'app/views/register.html',
             controller: 'RegisterController'
         })
+        .when('/forgot-password', {
+            templateUrl: 'app/views/forgot-password.html',
+            controller: 'ForgotPasswordController'
+        })
+        .when('/reset-password', {
+            templateUrl: 'app/views/reset-password.html',
+            controller: 'ResetPasswordController'
+        })
         .when('/logout', {
             templateUrl: 'app/views/login.html',
             controller: 'LogoutController'
@@ -154,7 +162,7 @@ app.config(['$routeProvider', function($routeProvider) {
             templateUrl: 'app/views/admin.html',
             controller: 'AdminController',
             resolve: {
-                checkAuth: ['AuthService', '$location', function(AuthService, $location) {
+                checkAuth: ['AuthService', '$location', function (AuthService, $location) {
                     if (!AuthService.isAdminOrTeacher()) {
                         $location.path('/home');
                         return false;
@@ -199,7 +207,7 @@ app.config(['$routeProvider', function($routeProvider) {
             templateUrl: 'app/views/profile.html',
             controller: 'ProfileController',
             resolve: {
-                checkAuth: ['AuthService', '$location', function(AuthService, $location) {
+                checkAuth: ['AuthService', '$location', function (AuthService, $location) {
                     if (!AuthService.isAuthenticated() || !AuthService.isCustomer()) {
                         $location.path('/login');
                         return false;
@@ -228,7 +236,7 @@ app.config(['$routeProvider', function($routeProvider) {
             templateUrl: 'app/views/admin-categories.html',
             controller: 'AdminCategoriesController',
             resolve: {
-                checkAuth: ['AuthService', '$location', function(AuthService, $location) {
+                checkAuth: ['AuthService', '$location', function (AuthService, $location) {
                     if (!AuthService.isAdminOrTeacher()) {
                         $location.path('/home');
                         return false;
@@ -245,7 +253,7 @@ app.config(['$routeProvider', function($routeProvider) {
             templateUrl: 'app/views/admin-books.html',
             controller: 'AdminBooksController',
             resolve: {
-                checkAuth: ['AuthService', '$location', function(AuthService, $location) {
+                checkAuth: ['AuthService', '$location', function (AuthService, $location) {
                     if (!AuthService.isAdminOrTeacher()) {
                         $location.path('/home');
                         return false;
@@ -258,7 +266,7 @@ app.config(['$routeProvider', function($routeProvider) {
             templateUrl: 'app/views/admin-promotions.html',
             controller: 'AdminPromotionsController',
             resolve: {
-                checkAuth: ['AuthService', '$location', function(AuthService, $location) {
+                checkAuth: ['AuthService', '$location', function (AuthService, $location) {
                     if (!AuthService.isAdminOrTeacher()) {
                         $location.path('/home');
                         return false;
@@ -271,7 +279,7 @@ app.config(['$routeProvider', function($routeProvider) {
             templateUrl: 'app/views/admin-orders.html',
             controller: 'AdminOrdersController',
             resolve: {
-                checkAuth: ['AuthService', '$location', function(AuthService, $location) {
+                checkAuth: ['AuthService', '$location', function (AuthService, $location) {
                     if (!AuthService.isAdminOrTeacher()) {
                         $location.path('/home');
                         return false;
@@ -284,7 +292,7 @@ app.config(['$routeProvider', function($routeProvider) {
             templateUrl: 'app/views/delivery-orders.html',
             controller: 'DeliveryOrdersController',
             resolve: {
-                checkAuth: ['AuthService', '$location', function(AuthService, $location) {
+                checkAuth: ['AuthService', '$location', function (AuthService, $location) {
                     if (!AuthService.isDeliveryEmployee() && !AuthService.isAdmin()) {
                         $location.path('/home');
                         return false;
@@ -297,7 +305,7 @@ app.config(['$routeProvider', function($routeProvider) {
             templateUrl: 'app/views/admin-purchase-orders.html',
             controller: 'AdminPurchaseOrdersController',
             resolve: {
-                checkAuth: ['AuthService', '$location', function(AuthService, $location) {
+                checkAuth: ['AuthService', '$location', function (AuthService, $location) {
                     if (!AuthService.isAdminOrTeacher()) {
                         $location.path('/home');
                         return false;
@@ -310,7 +318,7 @@ app.config(['$routeProvider', function($routeProvider) {
             templateUrl: 'app/views/admin-goods-receipts.html',
             controller: 'AdminGoodsReceiptsController',
             resolve: {
-                checkAuth: ['AuthService', '$location', function(AuthService, $location) {
+                checkAuth: ['AuthService', '$location', function (AuthService, $location) {
                     if (!AuthService.isAdminOrTeacher()) {
                         $location.path('/home');
                         return false;
@@ -323,7 +331,7 @@ app.config(['$routeProvider', function($routeProvider) {
             templateUrl: 'app/views/admin-returns.html',
             controller: 'AdminReturnsController',
             resolve: {
-                checkAuth: ['AuthService', '$location', function(AuthService, $location) {
+                checkAuth: ['AuthService', '$location', function (AuthService, $location) {
                     if (!AuthService.isAdminOrTeacher()) {
                         $location.path('/home');
                         return false;
@@ -336,7 +344,7 @@ app.config(['$routeProvider', function($routeProvider) {
             templateUrl: 'app/views/admin-roles.html',
             controller: 'AdminRolesController',
             resolve: {
-                checkAuth: ['AuthService', '$location', function(AuthService, $location) {
+                checkAuth: ['AuthService', '$location', function (AuthService, $location) {
                     if (!AuthService.isAdmin()) {
                         $location.path('/home');
                         return false;
@@ -349,7 +357,7 @@ app.config(['$routeProvider', function($routeProvider) {
             templateUrl: 'app/views/admin-report-revenue.html',
             controller: 'AdminRevenueReportController',
             resolve: {
-                checkAuth: ['AuthService', '$location', function(AuthService, $location) {
+                checkAuth: ['AuthService', '$location', function (AuthService, $location) {
                     if (!AuthService.isAdminOrTeacher()) {
                         $location.path('/home');
                         return false;
@@ -362,7 +370,7 @@ app.config(['$routeProvider', function($routeProvider) {
             templateUrl: 'app/views/admin-inventory-report.html',
             controller: 'AdminInventoryReportController',
             resolve: {
-                checkAuth: ['AuthService', '$location', function(AuthService, $location) {
+                checkAuth: ['AuthService', '$location', function (AuthService, $location) {
                     if (!AuthService.isAdminOrTeacher()) {
                         $location.path('/home');
                         return false;
@@ -375,7 +383,7 @@ app.config(['$routeProvider', function($routeProvider) {
             templateUrl: 'app/views/admin-employees.html',
             controller: 'AdminEmployeesController',
             resolve: {
-                checkAuth: ['AuthService', '$location', function(AuthService, $location) {
+                checkAuth: ['AuthService', '$location', function (AuthService, $location) {
                     if (!AuthService.isAdmin()) {
                         $location.path('/home');
                         return false;
@@ -390,42 +398,42 @@ app.config(['$routeProvider', function($routeProvider) {
 }]);
 
 // Global Configuration
-app.config(['$locationProvider', function($locationProvider) {
+app.config(['$locationProvider', function ($locationProvider) {
     $locationProvider.hashPrefix('!');
     // Use hash routing for better compatibility
     $locationProvider.html5Mode(false);
 }]);
 
 // Run Block
-app.run(['$rootScope', 'AuthService', function($rootScope, AuthService) {
+app.run(['$rootScope', 'AuthService', function ($rootScope, AuthService) {
     $rootScope.appName = 'BookStore';
     $rootScope.version = '1.0.0';
-    
+
     // Global loading state
     $rootScope.loading = false;
-    
+
     // Authentication state
     $rootScope.isAuthenticated = AuthService.isAuthenticated();
     $rootScope.currentUser = AuthService.getCurrentUser();
-    
+
     // Update auth state when user logs in/out
-    $rootScope.$on('auth:login', function() {
+    $rootScope.$on('auth:login', function () {
         $rootScope.isAuthenticated = true;
         $rootScope.currentUser = AuthService.getCurrentUser();
     });
-    
-    $rootScope.$on('auth:logout', function() {
+
+    $rootScope.$on('auth:logout', function () {
         $rootScope.isAuthenticated = false;
         $rootScope.currentUser = null;
     });
-    
+
     // Global error handler
-    $rootScope.$on('$routeChangeError', function(event, current, previous, rejection) {
+    $rootScope.$on('$routeChangeError', function (event, current, previous, rejection) {
         console.error('Route change error:', rejection);
     });
-    
+
     // Logout function
-    $rootScope.logout = function() {
+    $rootScope.logout = function () {
         AuthService.logout();
         $rootScope.$broadcast('auth:logout');
         window.location.href = '#!/login';

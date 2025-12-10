@@ -41,7 +41,8 @@
                                     !value.includes('code.jquery.com') &&
                                     !value.includes('ajax.googleapis.com')) {
                                     var url = value.split('?')[0];
-                                    var newValue = url + '?v=' + cacheBuster + '&_=' + Date.now();
+                                    // FIXED: Remove Date.now() to prevent 4x loads
+                                    var newValue = url + '?v=' + cacheBuster;
                                     return originalSetAttribute.call(this, name, newValue);
                                 }
                             }
@@ -60,8 +61,9 @@
                         var href = link.getAttribute('href');
                         if (href && !href.includes('cdn.jsdelivr.net') && !href.includes('googleapis.com')) {
                             var url = href.split('?')[0];
-                            var newHref = url + '?v=' + cacheBuster + '&_=' + Date.now();
-                            if (link.href !== newHref) {
+                            // FIXED: Use only stable cacheBuster
+                            var newHref = url + '?v=' + cacheBuster;
+                            if (link.href !== newHref && !link.href.endsWith(newHref)) {
                                 link.href = newHref;
                             }
                         }
@@ -76,8 +78,9 @@
                             !src.includes('code.jquery.com') &&
                             !src.includes('googleapis.com')) {
                             var url = src.split('?')[0];
-                            var newSrc = url + '?v=' + cacheBuster + '&_=' + Date.now();
-                            if (script.src !== newSrc) {
+                            // FIXED: Use only stable cacheBuster
+                            var newSrc = url + '?v=' + cacheBuster;
+                            if (script.src !== newSrc && !script.src.endsWith(newSrc)) {
                                 script.src = newSrc;
                             }
                         }
@@ -506,7 +509,7 @@
         }
 
         /* Tăng khoảng cách giữa các message (answer trước và câu hỏi mới sau) */
-        .ai-chat-message + .ai-chat-message {
+        .ai-chat-message+.ai-chat-message {
             margin-top: 0.75rem;
         }
 
@@ -530,7 +533,8 @@
             max-width: 90%;
             word-wrap: break-word;
             align-self: flex-start;
-            margin-top: 0.6rem; /* khoảng cách rõ ràng giữa câu hỏi và câu trả lời */
+            margin-top: 0.6rem;
+            /* khoảng cách rõ ràng giữa câu hỏi và câu trả lời */
         }
 
         .ai-chat-answer strong {
@@ -692,6 +696,7 @@
     <script defer src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
     <script defer src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-route.min.js"></script>
     <script defer src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-animate.min.js"></script>
+    <script defer src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-sanitize.min.js"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <!-- SheetJS for Excel parsing -->
@@ -1015,7 +1020,7 @@
     <script defer src="/js/angular/controllers/authController.js?v=1.6"></script>
     <script defer src="/js/angular/controllers/adminController.js?v=1.6"></script>
     <script defer src="/js/angular/controllers/aiChatWidgetController.js?v=1.6"></script>
-    <script defer src="/js/angular/controllers/adminAiAssistantController.js?v=1.0"></script>
+
     <script defer src="/js/angular/controllers/employeeController.js?v=1.6"></script>
     <script defer src="/js/angular/controllers/apiTestController.js?v=1.6"></script>
     <script defer src="/js/angular/controllers/categoryController.js?v=1.6"></script>

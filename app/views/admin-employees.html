@@ -18,195 +18,301 @@
     <div class="card-header border-bottom-0 pb-0">
       <ul class="nav nav-tabs card-header-tabs" id="empDeptTabs" role="tablist">
         <li class="nav-item" role="presentation">
-          <button class="nav-link active" id="employees-tab" data-bs-toggle="tab" data-bs-target="#employees" type="button" role="tab">Nhân viên</button>
+          <button class="nav-link active" id="employees-tab" data-bs-toggle="tab" data-bs-target="#employees"
+            type="button" role="tab">Nhân viên</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link" id="departments-tab" data-bs-toggle="tab" data-bs-target="#departments" type="button" role="tab">Phòng ban</button>
+          <button class="nav-link" id="departments-tab" data-bs-toggle="tab" data-bs-target="#departments" type="button"
+            role="tab">Phòng ban</button>
         </li>
       </ul>
     </div>
 
     <div class="card-body">
-  <div class="tab-content">
-    <div class="tab-pane fade show active" id="employees" role="tabpanel">
-      <div class="row g-3">
-        <div class="col-lg-4">
-          <div class="card">
-            <div class="card-header">Tạo nhân viên mới</div>
-            <div class="card-body">
-              <div class="mb-2">
-                <label class="form-label">Email đăng nhập</label>
-                <input type="email" class="form-control" ng-model="newEmployee.accountEmail" placeholder="employee@example.com">
+      <div class="tab-content">
+        <div class="tab-pane fade show active" id="employees" role="tabpanel">
+          <div class="row g-3">
+            <div class="col-lg-4">
+              <div class="card sticky-top" style="top: 1rem; z-index: 1;">
+                <div class="card-header bg-light">
+                  <i class="bi" ng-class="isEditMode ? 'bi-pencil-square' : 'bi-person-plus'"></i>
+                  {{isEditMode ? 'Cập nhật nhân viên' : 'Tạo nhân viên mới'}}
+                </div>
+                <div class="card-body">
+                  <form name="employeeForm" novalidate>
+                    <div class="mb-2">
+                      <label class="form-label">Email đăng nhập <span class="text-danger">*</span></label>
+                      <input type="email" class="form-control" name="accountEmail" ng-model="newEmployee.accountEmail"
+                        placeholder="employee@example.com" ng-disabled="isEditMode" required
+                        ng-pattern="/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/"
+                        ng-class="{'is-invalid': (employeeForm.$submitted || employeeForm.accountEmail.$touched) && employeeForm.accountEmail.$invalid}">
+                      <div class="invalid-feedback" ng-if="employeeForm.accountEmail.$error.required">Vui lòng nhập
+                        email đăng nhập.</div>
+                      <div class="invalid-feedback"
+                        ng-if="employeeForm.accountEmail.$error.pattern || employeeForm.accountEmail.$error.email">Email
+                        không hợp lệ.</div>
+                      <div class="form-text small" ng-if="isEditMode">Email đăng nhập không thể thay đổi.</div>
+                    </div>
+                    <div class="mb-2">
+                      <label class="form-label">Mật khẩu <span class="text-danger" ng-if="!isEditMode">*</span></label>
+                      <input type="text" class="form-control" name="password" ng-model="newEmployee.password"
+                        placeholder="{{isEditMode ? 'Bỏ trống nếu không đổi' : 'Mật khẩu'}}" ng-required="!isEditMode"
+                        ng-minlength="6"
+                        ng-class="{'is-invalid': (employeeForm.$submitted || employeeForm.password.$touched) && employeeForm.password.$invalid}">
+                      <div class="invalid-feedback" ng-if="employeeForm.password.$error.required">Vui lòng nhập mật
+                        khẩu.</div>
+                      <div class="invalid-feedback" ng-if="employeeForm.password.$error.minlength">Mật khẩu phải có ít
+                        nhất 6 ký tự.</div>
+                    </div>
+                    <div class="mb-2">
+                      <label class="form-label">Role <span class="text-danger">*</span></label>
+                      <select class="form-select" name="roleId" ng-model="newEmployee.roleId"
+                        ng-options="r.id as r.display for r in roles" required
+                        ng-class="{'is-invalid': (employeeForm.$submitted || employeeForm.roleId.$touched) && employeeForm.roleId.$invalid}"></select>
+                      <div class="invalid-feedback">Vui lòng chọn Role.</div>
+                    </div>
+                    <div class="mb-2">
+                      <label class="form-label">Phòng ban <span class="text-danger">*</span></label>
+                      <select class="form-select" name="departmentId" ng-model="newEmployee.departmentId"
+                        ng-options="d.departmentId as d.name for d in departments" required
+                        ng-class="{'is-invalid': (employeeForm.$submitted || employeeForm.departmentId.$touched) && employeeForm.departmentId.$invalid}"></select>
+                      <div class="invalid-feedback">Vui lòng chọn phòng ban.</div>
+                    </div>
+                    <div class="mb-2">
+                      <label class="form-label">Khu vực (Delivery)</label>
+                      <select class="form-select" ng-model="newEmployee.selectedAreaId"
+                        ng-options="a.areaId as a.name for a in areas">
+                        <option value="">Chọn khu vực</option>
+                      </select>
+                      <button type="button" class="btn btn-sm btn-outline-primary mt-1" ng-click="addArea()"
+                        ng-disabled="!newEmployee.selectedAreaId">
+                        <i class="bi bi-plus"></i> Thêm khu vực
+                      </button>
+                      <div class="mt-2" ng-if="newEmployee.areaIds && newEmployee.areaIds.length > 0">
+                        <div ng-repeat="areaId in newEmployee.areaIds" class="badge bg-secondary me-1 mb-1">
+                          {{getAreaName(areaId)}}
+                          <button type="button" class="btn-close btn-close-white ms-1"
+                            ng-click="removeArea(areaId)"></button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-6 mb-2">
+                        <label class="form-label">Họ <span class="text-danger">*</span></label>
+                        <input class="form-control" name="firstName" ng-model="newEmployee.firstName"
+                          placeholder="Nguyễn" required
+                          ng-class="{'is-invalid': (employeeForm.$submitted || employeeForm.firstName.$touched) && employeeForm.firstName.$invalid}">
+                        <div class="invalid-feedback">Vui lòng nhập họ.</div>
+                      </div>
+                      <div class="col-6 mb-2">
+                        <label class="form-label">Tên <span class="text-danger">*</span></label>
+                        <input class="form-control" name="lastName" ng-model="newEmployee.lastName" placeholder="Văn A"
+                          required
+                          ng-class="{'is-invalid': (employeeForm.$submitted || employeeForm.lastName.$touched) && employeeForm.lastName.$invalid}">
+                        <div class="invalid-feedback">Vui lòng nhập tên.</div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-6 mb-2">
+                        <label class="form-label">Giới tính</label>
+                        <select class="form-select" ng-model="newEmployee.gender">
+                          <option value="Male">Nam</option>
+                          <option value="Female">Nữ</option>
+                          <option value="Other">Khác</option>
+                        </select>
+                      </div>
+                      <div class="col-6 mb-2">
+                        <label class="form-label">Ngày sinh</label>
+                        <input type="date" class="form-control" ng-model="newEmployee.dateOfBirth">
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-6 mb-2">
+                        <label class="form-label">Số điện thoại</label>
+                        <input class="form-control" name="phone" ng-model="newEmployee.phone" placeholder="090..."
+                          ng-pattern="/^[0-9]+$/"
+                          ng-class="{'is-invalid': (employeeForm.$submitted || employeeForm.phone.$touched) && employeeForm.phone.$invalid}">
+                        <div class="invalid-feedback">SĐT chỉ chứa số.</div>
+                      </div>
+                      <div class="col-6 mb-2">
+                        <label class="form-label">Email liên hệ</label>
+                        <input type="email" class="form-control" name="employeeEmail"
+                          ng-model="newEmployee.employeeEmail" placeholder="contact@store.com"
+                          ng-pattern="/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/"
+                          ng-class="{'is-invalid': (employeeForm.$submitted || employeeForm.employeeEmail.$touched) && employeeForm.employeeEmail.$invalid}">
+                        <div class="invalid-feedback">Email không hợp lệ.</div>
+                      </div>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Địa chỉ</label>
+                      <textarea class="form-control" ng-model="newEmployee.address" rows="2"></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                      <button type="submit" class="btn btn-primary" ng-click="submitEmployeeForm(employeeForm)"
+                        ng-disabled="loading">
+                        <span ng-if="loading" class="spinner-border spinner-border-sm me-1"></span>
+                        {{isEditMode ? 'Lưu cập nhật' : 'Tạo nhân viên'}}
+                      </button>
+                      <button type="button" class="btn btn-outline-secondary" ng-if="isEditMode"
+                        ng-click="cancelEditEmployee()" ng-disabled="loading">
+                        Hủy bỏ
+                      </button>
+                    </div>
+                  </form>
+                </div>
               </div>
-              <div class="mb-2">
-                <label class="form-label">Mật khẩu</label>
-                <input type="password" class="form-control" ng-model="newEmployee.password" placeholder="Mật khẩu">
+            </div>
+
+            <div class="col-lg-8">
+              <!-- Bộ lọc & tìm kiếm nhân viên -->
+              <div class="row g-2 mb-3 admin-filter-row">
+                <div class="col-md-6">
+                  <label class="form-label small text-muted mb-1">Tìm kiếm</label>
+                  <input class="form-control" placeholder="Tên, email, số điện thoại..." ng-model="empPage.searchTerm"
+                    ng-change="loadEmployees()">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label small text-muted mb-1">Phòng ban</label>
+                  <select class="form-select" ng-model="empPage.departmentId" ng-change="loadEmployees()">
+                    <option value="">Tất cả phòng ban</option>
+                    <option ng-repeat="d in departments" ng-value="d.departmentId">{{d.name}}</option>
+                  </select>
+                </div>
               </div>
-              <div class="mb-2">
-                <label class="form-label">Role</label>
-                <select class="form-select" ng-model="newEmployee.roleId" ng-options="r.id as r.display for r in roles"></select>
-              </div>
-              <div class="mb-2">
-                <label class="form-label">Phòng ban</label>
-                <select class="form-select" ng-model="newEmployee.departmentId" ng-options="d.departmentId as d.name for d in departments"></select>
-              </div>
-              <div class="mb-2">
-                <label class="form-label">Khu vực</label>
-                <select class="form-select" ng-model="newEmployee.selectedAreaId" ng-options="a.areaId as a.name for a in areas">
-                  <option value="">Chọn khu vực</option>
-                </select>
-                <button type="button" class="btn btn-sm btn-outline-primary mt-1" ng-click="addArea()" ng-disabled="!newEmployee.selectedAreaId">
-                  <i class="bi bi-plus"></i> Thêm khu vực
-                </button>
-                <div class="mt-2" ng-if="newEmployee.areaIds && newEmployee.areaIds.length > 0">
-                  <div ng-repeat="areaId in newEmployee.areaIds" class="badge bg-secondary me-1 mb-1">
-                    {{getAreaName(areaId)}}
-                    <button type="button" class="btn-close btn-close-white ms-1" ng-click="removeArea(areaId)"></button>
+
+              <!-- Danh sách nhân viên -->
+              <div class="card shadow-sm">
+                <div class="card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table table-striped align-middle mb-0">
+                      <thead class="table-light">
+                        <tr>
+                          <th>Họ tên</th>
+                          <th>Phòng ban</th>
+                          <th>Role</th>
+                          <th>Email đăng nhập</th>
+                          <th>Điện thoại</th>
+                          <th class="text-end">Thao tác</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr ng-repeat="e in employees">
+                          <td>
+                            <div class="fw-bold">{{e.firstName}} {{e.lastName}}</div>
+                            <div class="small text-muted" ng-if="e.employeeId === editingEmployeeId">
+                              <span class="badge bg-warning text-dark">Đang chỉnh sửa</span>
+                            </div>
+                          </td>
+                          <td>{{e.departmentName}}</td>
+                          <td>
+                            <span
+                              class="badge bg-light text-dark border">{{BookstoreService.getRoleDisplayName(e.roleId)}}</span>
+                          </td>
+                          <td>{{e.accountEmail}}</td>
+                          <td>{{e.phone}}</td>
+                          <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                              <button class="btn btn-outline-primary" ng-click="editEmployee(e)" title="Sửa">
+                                <i class="bi bi-pencil"></i>
+                              </button>
+                              <button class="btn btn-outline-danger" ng-click="confirmDeleteEmployee(e)" title="Xóa"
+                                ng-if="e.accountEmail !== 'admin@bookstore.com'">
+                                <i class="bi bi-trash"></i>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                        <tr ng-if="employees.length === 0">
+                          <td colspan="6" class="text-center text-muted py-5">
+                            <i class="bi bi-people display-4 text-secondary opacity-50"></i>
+                            <p class="mt-2">Không tìm thấy nhân viên nào</p>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
-              <div class="row">
-                <div class="col-6 mb-2">
-                  <label class="form-label">Họ</label>
-                  <input class="form-control" ng-model="newEmployee.firstName" placeholder="Nguyễn">
-                </div>
-                <div class="col-6 mb-2">
-                  <label class="form-label">Tên</label>
-                  <input class="form-control" ng-model="newEmployee.lastName" placeholder="Văn A">
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-6 mb-2">
-                  <label class="form-label">Giới tính</label>
-                  <select class="form-select" ng-model="newEmployee.gender">
-                    <option value="Male">Nam</option>
-                    <option value="Female">Nữ</option>
-                    <option value="Other">Khác</option>
-                  </select>
-                </div>
-                <div class="col-6 mb-2">
-                  <label class="form-label">Ngày sinh</label>
-                  <input type="date" class="form-control" ng-model="newEmployee.dateOfBirth">
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-6 mb-2">
-                  <label class="form-label">Số điện thoại</label>
-                  <input class="form-control" ng-model="newEmployee.phone" placeholder="090...">
-                </div>
-                <div class="col-6 mb-2">
-                  <label class="form-label">Email nhân viên</label>
-                  <input type="email" class="form-control" ng-model="newEmployee.employeeEmail" placeholder="optional">
-                </div>
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Địa chỉ</label>
-                <textarea class="form-control" ng-model="newEmployee.address" rows="2"></textarea>
-              </div>
-              <button class="btn btn-primary w-100" ng-click="createEmployee()" ng-disabled="loading">Tạo nhân viên</button>
             </div>
           </div>
         </div>
 
-        <div class="col-lg-8">
-          <!-- Bộ lọc & tìm kiếm nhân viên -->
-          <div class="row g-2 mb-3 admin-filter-row">
-            <div class="col-md-6">
-              <label class="form-label small text-muted mb-1">Tìm kiếm</label>
-              <input class="form-control" placeholder="Tên, email, số điện thoại..." ng-model="empPage.searchTerm" ng-change="loadEmployees()">
-            </div>
-            <div class="col-md-4">
-              <label class="form-label small text-muted mb-1">Phòng ban</label>
-              <select class="form-select" ng-model="empPage.departmentId" ng-change="loadEmployees()">
-                <option value="">Tất cả phòng ban</option>
-                <option ng-repeat="d in departments" ng-value="d.departmentId">{{d.name}}</option>
-              </select>
-            </div>
-          </div>
+        <!-- Departments Tab -->
+        <div class="tab-pane fade" id="departments" role="tabpanel">
+          <div class="row g-3">
+            <div class="col-lg-4">
+              <div class="card sticky-top" style="top: 1rem; z-index: 1;">
+                <div class="card-header bg-light">
+                  <i class="bi" ng-class="isEditDepMode ? 'bi-pencil-square' : 'bi-building-add'"></i>
+                  {{isEditDepMode ? 'Cập nhật phòng ban' : 'Tạo phòng ban'}}
+                </div>
+                <div class="card-body">
+                  <div class="mb-2">
+                    <label class="form-label">Tên phòng ban <span class="text-danger">*</span></label>
+                    <input class="form-control" ng-model="newDepartment.name" placeholder="Ví dụ: Phòng Kinh doanh">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Mô tả</label>
+                    <textarea class="form-control" rows="3" ng-model="newDepartment.description"
+                      placeholder="Mô tả chức năng nhiệm vụ..."></textarea>
+                  </div>
 
-          <!-- Danh sách nhân viên -->
-          <div class="card shadow-sm">
-            <div class="card-body p-0">
-              <div class="table-responsive">
-                <table class="table table-striped align-middle mb-0">
-                  <thead class="table-light">
-                    <tr>
-                      <th>Họ tên</th>
-                      <th>Phòng ban</th>
-                      <th>Role</th>
-                      <th>Email đăng nhập</th>
-                      <th>Điện thoại</th>
-                      <th class="text-end">Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr ng-repeat="e in employees">
-                      <td>{{e.firstName}} {{e.lastName}}</td>
-                      <td>{{e.departmentName}}</td>
-                      <td>{{BookstoreService.getRoleDisplayName(e.roleId)}}</td>
-                      <td>{{e.accountEmail}}</td>
-                      <td>{{e.phone}}</td>
-                      <td class="text-end">
-                        <button class="btn btn-sm btn-outline-danger" ng-click="deleteEmployee(e)">Xóa</button>
-                      </td>
-                    </tr>
-                    <tr ng-if="employees.length === 0">
-                      <td colspan="6" class="text-center text-muted py-3">Không có dữ liệu</td>
-                    </tr>
-                  </tbody>
-                </table>
+                  <div class="d-grid gap-2">
+                    <button class="btn btn-primary" ng-click="isEditDepMode ? updateDepartment() : createDepartment()">
+                      {{isEditDepMode ? 'Lưu cập nhật' : 'Tạo phòng ban'}}
+                    </button>
+                    <button class="btn btn-outline-secondary" ng-if="isEditDepMode" ng-click="cancelEditDepartment()">
+                      Hủy bỏ
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="tab-pane fade" id="departments" role="tabpanel">
-      <div class="row g-3">
-        <div class="col-lg-4">
-          <div class="card">
-            <div class="card-header">Tạo phòng ban</div>
-            <div class="card-body">
-              <div class="mb-2">
-                <label class="form-label">Tên phòng ban</label>
-                <input class="form-control" ng-model="newDepartment.name" placeholder="Phòng Kinh doanh">
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Mô tả</label>
-                <textarea class="form-control" rows="2" ng-model="newDepartment.description"></textarea>
-              </div>
-              <button class="btn btn-primary w-100" ng-click="createDepartment()">Tạo phòng ban</button>
-            </div>
-          </div>
-        </div>
-        <div class="col-lg-8">
-          <div class="card shadow-sm">
-            <div class="card-body p-0">
-              <div class="table-responsive">
-                <table class="table table-striped align-middle mb-0">
-                  <thead class="table-light">
-                    <tr>
-                      <th>Tên</th>
-                      <th>Mô tả</th>
-                      <th>Số NV</th>
-                      <th class="text-end">Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr ng-repeat="d in departments">
-                      <td>{{d.name}}</td>
-                      <td>{{d.description}}</td>
-                      <td>{{d.employeeCount}}</td>
-                      <td class="text-end">
-                        <button class="btn btn-sm btn-outline-danger" ng-click="deleteDepartment(d)">Xóa</button>
-                      </td>
-                    </tr>
-                    <tr ng-if="departments.length === 0">
-                      <td colspan="4" class="text-center text-muted py-3">Không có dữ liệu</td>
-                    </tr>
-                  </tbody>
-                </table>
+            <div class="col-lg-8">
+              <div class="card shadow-sm">
+                <div class="card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table table-striped align-middle mb-0">
+                      <thead class="table-light">
+                        <tr>
+                          <th style="width: 30%">Tên</th>
+                          <th style="width: 40%">Mô tả</th>
+                          <th style="width: 15%">Số NV</th>
+                          <th class="text-end" style="width: 15%">Thao tác</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr ng-repeat="d in departments">
+                          <td>
+                            <span class="fw-semibold">{{d.name}}</span>
+                            <div class="small text-muted" ng-if="d.departmentId === editingDepartmentId">
+                              <span class="badge bg-warning text-dark">Đang chỉnh sửa</span>
+                            </div>
+                          </td>
+                          <td>{{d.description}}</td>
+                          <td><span class="badge bg-secondary">{{d.employeeCount}}</span></td>
+                          <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                              <button class="btn btn-outline-primary" ng-click="editDepartment(d)" title="Sửa">
+                                <i class="bi bi-pencil"></i>
+                              </button>
+                              <button class="btn btn-outline-danger" ng-click="confirmDeleteDepartment(d)" title="Xóa">
+                                <i class="bi bi-trash"></i>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                        <tr ng-if="departments.length === 0">
+                          <td colspan="4" class="text-center text-muted py-5">
+                            <i class="bi bi-building display-4 text-secondary opacity-50"></i>
+                            <p class="mt-2">Chưa có phòng ban nào</p>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -214,5 +320,19 @@
       </div>
     </div>
   </div>
+
+  <!-- Confirm Dialog -->
+  <confirm-dialog show="showDeleteConfirm" title="Xác nhận xóa" message="{{deleteMessage}}"
+    on-confirm="confirmDeleteAction()">
+  </confirm-dialog>
+
+  <!-- Toasts -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000;">
+    <div class="toast align-items-center text-white bg-{{t.variant}} border-0 mb-2 show" role="alert"
+      aria-live="assertive" aria-atomic="true" ng-repeat="t in toasts">
+      <div class="d-flex">
+        <div class="toast-body">{{t.message}}</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" ng-click="toasts.splice($index,1)"></button>
+      </div>
+    </div>
   </div>
-</div>

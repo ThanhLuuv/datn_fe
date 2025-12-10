@@ -318,3 +318,97 @@ app.controller('LogoutController', ['$scope', '$location', 'AuthService', functi
     $location.path('/login');
 }]);
 
+// Forgot Password Controller
+app.controller('ForgotPasswordController', ['$scope', 'AuthService', function ($scope, AuthService) {
+    $scope.forgotData = {
+        email: ''
+    };
+    $scope.isLoading = false;
+    $scope.showError = false;
+    $scope.showSuccess = false;
+    $scope.errorMessage = '';
+    $scope.successMessage = '';
+
+    $scope.submitForgot = function (form) {
+        console.log('Forgot Password Submitted', $scope.forgotData.email);
+
+        var formToValidate = form || $scope.forgotForm;
+        if (!formToValidate) {
+            console.warn('Form not found');
+            // Try to proceed if we have email, or return
+            if (!$scope.forgotData.email) return;
+        } else if (!formToValidate.$valid) {
+            console.warn('Form Invalid', formToValidate.$error);
+            return;
+        }
+
+        $scope.isLoading = true;
+        $scope.showError = false;
+        $scope.showSuccess = false;
+
+        AuthService.forgotPassword($scope.forgotData.email).then(function (resp) {
+            console.log('Forgot Password Success', resp);
+            if (resp.data) {
+                $scope.showSuccess = true;
+                $scope.successMessage = resp.data.message || 'Vui lòng kiểm tra email để đặt lại mật khẩu.';
+            } else {
+                $scope.showError = true;
+                $scope.errorMessage = 'Không có phản hồi từ server.';
+            }
+        }).catch(function (err) {
+            console.error('Forgot Password Error', err);
+            $scope.showError = true;
+            $scope.errorMessage = (err.data && err.data.message) || 'Lỗi kết nối server hoặc email không tồn tại.';
+        }).finally(function () {
+            $scope.isLoading = false;
+        });
+    };
+}]);
+
+// Reset Password Controller
+app.controller('ResetPasswordController', ['$scope', '$location', 'AuthService', function ($scope, $location, AuthService) {
+    var search = $location.search();
+    var token = search.token;
+
+    if (!token) {
+        $scope.showError = true;
+        $scope.errorMessage = 'Link không hợp lệ hoặc thiếu token.';
+    }
+
+    $scope.resetData = {
+        token: token,
+        newPassword: '',
+        confirmPassword: ''
+    };
+
+    $scope.isLoading = false;
+    $scope.showError = false;
+    $scope.showSuccess = false;
+
+    $scope.submitReset = function () {
+        if (!$scope.resetData.token) {
+            $scope.showError = true;
+            $scope.errorMessage = 'Token không hợp lệ.';
+            return;
+        }
+
+        $scope.isLoading = true;
+        $scope.showError = false;
+
+        AuthService.resetPassword($scope.resetData.token, $scope.resetData.newPassword).then(function (resp) {
+            if (resp.data && resp.data.success) {
+                $scope.showSuccess = true;
+                $scope.successMessage = resp.data.message;
+            } else {
+                $scope.showError = true;
+                $scope.errorMessage = resp.data.message || 'Không thể đặt lại mật khẩu.';
+            }
+        }).catch(function (err) {
+            $scope.showError = true;
+            $scope.errorMessage = err.data?.message || 'Lỗi kết nối server.';
+        }).finally(function () {
+            $scope.isLoading = false;
+        });
+    };
+}]);
+

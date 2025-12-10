@@ -49,6 +49,26 @@ app.service('AuthService', ['$http', '$q', 'APP_CONFIG', function ($http, $q, AP
         });
     };
 
+    // Forgot Password
+    this.forgotPassword = function (email) {
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/auth/forgot-password',
+            data: { email: email },
+            headers: { 'Content-Type': 'application/json' }
+        });
+    };
+
+    // Reset Password
+    this.resetPassword = function (token, newPassword) {
+        return $http({
+            method: 'POST',
+            url: baseUrl + '/auth/reset-password',
+            data: { token: token, newPassword: newPassword },
+            headers: { 'Content-Type': 'application/json' }
+        });
+    };
+
     // Logout function
     this.logout = function () {
         // Clear local storage

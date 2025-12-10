@@ -32,14 +32,9 @@
         <!-- Search Results -->
         <div class="search-results" ng-if="!loading && filteredResults.length > 0">
             <div class="books-grid">
-                <book-card 
-                    ng-repeat="book in filteredResults"
-                    book="book"
-                    on-add-to-cart="addToCart(book)"
-                    is-authenticated="isAuthenticated()"
-                    get-final-price="getFinalPrice(book)"
-                    has-promo="hasPromo(book)"
-                    calculate-discount-percent="calculateDiscountPercent(book)"
+                <book-card ng-repeat="book in filteredResults" book="book" on-add-to-cart="addToCart(book)"
+                    is-authenticated="isAuthenticated()" get-final-price="getFinalPrice(book)"
+                    has-promo="hasPromo(book)" calculate-discount-percent="calculateDiscountPercent(book)"
                     show-badge="{{hasPromo(book) ? 'sale' : ''}}"
                     show-discount-tag="{{hasPromo(book) ? 'true' : 'false'}}">
                 </book-card>
@@ -47,13 +42,14 @@
         </div>
 
         <!-- No Results -->
-        <div class="no-results" ng-if="filteredResults.length === 0 && loaded && query">
+        <div class="no-results" ng-if="filteredResults.length === 0 && loaded">
             <div class="text-center py-5">
                 <div class="no-results-icon mb-4">
                     <i class="bi bi-search text-muted" style="font-size: 4rem;"></i>
                 </div>
                 <h4 class="text-muted mb-3">Không tìm thấy kết quả</h4>
-                <p class="text-muted mb-4">Không có sách nào phù hợp với từ khóa "{{ query }}"</p>
+                <p class="text-muted mb-4" ng-if="query">Không có sách nào phù hợp với từ khóa "{{ query }}"</p>
+                <p class="text-muted mb-4" ng-if="!query">Không có sách nào trong danh sách này</p>
                 <div class="suggestions">
                     <p class="text-muted mb-2">Gợi ý:</p>
                     <ul class="list-unstyled text-muted">
@@ -74,22 +70,23 @@
                             <i class="bi bi-chevron-left"></i> Trước
                         </button>
                     </li>
-                    
+
                     <li class="page-item" ng-repeat="p in getPageNumbers()" ng-class="{active: p === page}">
                         <button class="page-link" ng-click="goPage(p)">{{ p }}</button>
                     </li>
-                    
+
                     <li class="page-item" ng-class="{disabled: page >= Math.ceil(total / pageSize)}">
-                        <button class="page-link" ng-click="goPage(page + 1)" ng-disabled="page >= Math.ceil(total / pageSize)">
+                        <button class="page-link" ng-click="goPage(page + 1)"
+                            ng-disabled="page >= Math.ceil(total / pageSize)">
                             Sau <i class="bi bi-chevron-right"></i>
                         </button>
                     </li>
                 </ul>
             </nav>
-            
+
             <div class="pagination-info text-center mt-3">
                 <small class="text-muted">
-                    Hiển thị {{ (page - 1) * pageSize + 1 }} - {{ Math.min(page * pageSize, total) }} 
+                    Hiển thị {{ (page - 1) * pageSize + 1 }} - {{ Math.min(page * pageSize, total) }}
                     trong tổng số {{ total }} kết quả
                 </small>
             </div>
@@ -98,412 +95,412 @@
 </div>
 
 <style>
-/* Modern Search Page Styles - Đồng bộ với Home */
-.search-page {
-    font-family: 'Inter', 'Segoe UI', sans-serif;
-    background-color: #f8fafc;
-    min-height: calc(100vh - 60px);
-}
+    /* Modern Search Page Styles - Đồng bộ với Home */
+    .search-page {
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        background-color: #f8fafc;
+        min-height: calc(100vh - 60px);
+    }
 
-.search-page .container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 2rem;
-}
+    .search-page .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
 
-.search-header {
-    background: white;
-    border-radius: 20px;
-    padding: 2rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-    margin-bottom: 2rem;
-}
-
-.search-title {
-    color: #0f172a;
-    font-weight: 800;
-    font-size: 2.5rem;
-    margin: 0;
-}
-
-.search-title i {
-    color: #f59e0b;
-}
-
-.search-stats .badge {
-    background: #0f172a;
-    border-radius: 15px;
-    padding: 0.75rem 1.5rem;
-    font-weight: 600;
-    font-size: 1rem;
-}
-
-.search-form .card {
-    border: none;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-}
-
-.search-input-group {
-    display: flex;
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
-
-.search-input-group .form-control {
-    border-radius: 15px 0 0 15px;
-    border: 2px solid #e2e8f0;
-    border-right: none;
-    padding: 1rem 1.5rem;
-    font-size: 1rem;
-}
-
-.search-input-group .form-control:focus {
-    box-shadow: none;
-    border-color: #f59e0b;
-}
-
-.search-input-group .btn {
-    border-radius: 0 15px 15px 0;
-    border-left: none;
-    padding: 1rem 2rem;
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-    border: none;
-    color: white;
-    font-weight: 700;
-    transition: all 0.3s;
-}
-
-.search-input-group .btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 5px 20px rgba(245, 158, 11, 0.4);
-}
-
-.search-filters .form-select {
-    border-radius: 15px;
-    border: 2px solid #e2e8f0;
-    padding: 0.75rem 1rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s;
-}
-
-.search-filters .form-select:focus {
-    border-color: #f59e0b;
-    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
-}
-
-.search-results .book-card {
-    background: white;
-    border: 1px solid #f1f5f9;
-    border-radius: 15px;
-    overflow: hidden;
-    transition: all 0.4s;
-    cursor: pointer;
-    position: relative;
-    height: 100%;
-    min-height: 600px;
-    display: flex;
-    flex-direction: column;
-}
-
-.search-results .book-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
-    border-color: #f59e0b;
-}
-
-.book-image {
-    width: 100%;
-    height: 350px;
-    min-height: 350px;
-    background: #f8fafc;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-    flex-shrink: 0;
-}
-
-.book-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.book-image::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 100px;
-    background: linear-gradient(to top, rgba(0,0,0,0.1), transparent);
-}
-
-.badge {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    padding: 0.5rem 1rem;
-    color: white;
-    font-size: 0.75rem;
-    font-weight: 700;
-    border-radius: 25px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    z-index: 1;
-}
-
-.badge-sale {
-    background: #ef4444;
-}
-
-.badge-new {
-    background: #10b981;
-}
-
-.badge-hot {
-    background: #f59e0b;
-}
-
-.book-info {
-    padding: 1.5rem;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.book-title {
-    font-size: 1.1rem;
-    color: #0f172a;
-    margin-bottom: 0.5rem;
-    font-weight: 700;
-    min-height: 3rem;
-    line-height: 1.3;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.book-title a {
-    color: #0f172a;
-    text-decoration: none;
-}
-
-.book-title a:hover {
-    color: #f59e0b;
-}
-
-.book-author {
-    color: #64748b;
-    font-size: 0.9rem;
-    margin-bottom: 0.5rem;
-    min-height: 1.5rem;
-}
-
-.book-meta {
-    color: #64748b;
-    font-size: 0.85rem;
-    margin-bottom: 1rem;
-}
-
-.book-meta small {
-    color: #94a3b8;
-}
-
-.rating {
-    display: flex;
-    gap: 0.3rem;
-    margin-bottom: 1rem;
-}
-
-.star {
-    color: #fbbf24;
-    font-size: 0.9rem;
-}
-
-.book-price {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.3rem;
-    margin-bottom: 1rem;
-    text-align: left;
-}
-
-.price-row {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    flex-wrap: wrap;
-}
-
-.price-current {
-    font-size: 1.5rem;
-    color: #ef4444;
-    font-weight: 800;
-}
-
-.price-old {
-    text-decoration: line-through;
-    color: #94a3b8;
-    font-size: 1rem;
-}
-
-.discount-tag {
-    background: #fee2e2;
-    color: #ef4444;
-    padding: 0.2rem 0.5rem;
-    border-radius: 5px;
-    font-size: 0.75rem;
-    font-weight: 700;
-}
-
-.add-to-cart-icon {
-    position: absolute;
-    bottom: 15px;
-    right: 15px;
-    width: 50px;
-    height: 50px;
-    background: #0f172a;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 1.2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    z-index: 10;
-}
-
-.add-to-cart-icon:hover:not(:disabled) {
-    background: #f59e0b;
-    transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
-}
-
-.add-to-cart-icon:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.add-to-cart-icon:active:not(:disabled) {
-    transform: scale(0.95);
-}
-
-.no-results {
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-    padding: 3rem;
-}
-
-.no-results-icon {
-    opacity: 0.5;
-    color: #f59e0b;
-}
-
-.no-results h4 {
-    color: #0f172a;
-    font-weight: 700;
-    font-size: 1.5rem;
-}
-
-.suggestions {
-    background: #f8fafc;
-    border-radius: 15px;
-    padding: 1.5rem;
-    margin-top: 1.5rem;
-    border: 2px solid #f1f5f9;
-}
-
-.suggestions ul {
-    margin: 0;
-    padding-left: 1.5rem;
-}
-
-.suggestions li {
-    color: #64748b;
-    margin-bottom: 0.5rem;
-}
-
-.pagination-section {
-    background: white;
-    border-radius: 20px;
-    padding: 2rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-}
-
-.pagination .page-link {
-    border-radius: 10px;
-    margin: 0 3px;
-    border: 2px solid #e2e8f0;
-    color: #64748b;
-    font-weight: 600;
-    padding: 0.75rem 1rem;
-    transition: all 0.3s;
-}
-
-.pagination .page-link:hover {
-    background: #0f172a;
-    border-color: #0f172a;
-    color: white;
-    transform: translateY(-2px);
-}
-
-.pagination .page-item.active .page-link {
-    background: #0f172a;
-    border-color: #0f172a;
-    color: white;
-}
-
-.pagination .page-item.disabled .page-link {
-    color: #cbd5e1;
-    background-color: #f1f5f9;
-    border-color: #e2e8f0;
-    cursor: not-allowed;
-}
-
-.pagination-info {
-    color: #64748b;
-    font-weight: 500;
-}
-
-@media (max-width: 768px) {
     .search-header {
-        padding: 1.5rem;
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
     }
-    
+
     .search-title {
-        font-size: 1.8rem;
+        color: #0f172a;
+        font-weight: 800;
+        font-size: 2.5rem;
+        margin: 0;
     }
-    
+
+    .search-title i {
+        color: #f59e0b;
+    }
+
+    .search-stats .badge {
+        background: #0f172a;
+        border-radius: 15px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .search-form .card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    }
+
     .search-input-group {
+        display: flex;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .search-input-group .form-control {
+        border-radius: 15px 0 0 15px;
+        border: 2px solid #e2e8f0;
+        border-right: none;
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    .search-input-group .form-control:focus {
+        box-shadow: none;
+        border-color: #f59e0b;
+    }
+
+    .search-input-group .btn {
+        border-radius: 0 15px 15px 0;
+        border-left: none;
+        padding: 1rem 2rem;
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        border: none;
+        color: white;
+        font-weight: 700;
+        transition: all 0.3s;
+    }
+
+    .search-input-group .btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 20px rgba(245, 158, 11, 0.4);
+    }
+
+    .search-filters .form-select {
+        border-radius: 15px;
+        border: 2px solid #e2e8f0;
+        padding: 0.75rem 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s;
+    }
+
+    .search-filters .form-select:focus {
+        border-color: #f59e0b;
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+    }
+
+    .search-results .book-card {
+        background: white;
+        border: 1px solid #f1f5f9;
+        border-radius: 15px;
+        overflow: hidden;
+        transition: all 0.4s;
+        cursor: pointer;
+        position: relative;
+        height: 100%;
+        min-height: 600px;
+        display: flex;
         flex-direction: column;
     }
-    
-    .search-input-group .form-control,
-    .search-input-group .btn {
+
+    .search-results .book-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+        border-color: #f59e0b;
+    }
+
+    .book-image {
+        width: 100%;
+        height: 350px;
+        min-height: 350px;
+        background: #f8fafc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .book-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .book-image::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 100px;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.1), transparent);
+    }
+
+    .badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        padding: 0.5rem 1rem;
+        color: white;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border-radius: 25px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        z-index: 1;
+    }
+
+    .badge-sale {
+        background: #ef4444;
+    }
+
+    .badge-new {
+        background: #10b981;
+    }
+
+    .badge-hot {
+        background: #f59e0b;
+    }
+
+    .book-info {
+        padding: 1.5rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .book-title {
+        font-size: 1.1rem;
+        color: #0f172a;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+        min-height: 3rem;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .book-title a {
+        color: #0f172a;
+        text-decoration: none;
+    }
+
+    .book-title a:hover {
+        color: #f59e0b;
+    }
+
+    .book-author {
+        color: #64748b;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        min-height: 1.5rem;
+    }
+
+    .book-meta {
+        color: #64748b;
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+    }
+
+    .book-meta small {
+        color: #94a3b8;
+    }
+
+    .rating {
+        display: flex;
+        gap: 0.3rem;
+        margin-bottom: 1rem;
+    }
+
+    .star {
+        color: #fbbf24;
+        font-size: 0.9rem;
+    }
+
+    .book-price {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.3rem;
+        margin-bottom: 1rem;
+        text-align: left;
+    }
+
+    .price-row {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+    }
+
+    .price-current {
+        font-size: 1.5rem;
+        color: #ef4444;
+        font-weight: 800;
+    }
+
+    .price-old {
+        text-decoration: line-through;
+        color: #94a3b8;
+        font-size: 1rem;
+    }
+
+    .discount-tag {
+        background: #fee2e2;
+        color: #ef4444;
+        padding: 0.2rem 0.5rem;
+        border-radius: 5px;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    .add-to-cart-icon {
+        position: absolute;
+        bottom: 15px;
+        right: 15px;
+        width: 50px;
+        height: 50px;
+        background: #0f172a;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 10;
+    }
+
+    .add-to-cart-icon:hover:not(:disabled) {
+        background: #f59e0b;
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+    }
+
+    .add-to-cart-icon:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .add-to-cart-icon:active:not(:disabled) {
+        transform: scale(0.95);
+    }
+
+    .no-results {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        padding: 3rem;
+    }
+
+    .no-results-icon {
+        opacity: 0.5;
+        color: #f59e0b;
+    }
+
+    .no-results h4 {
+        color: #0f172a;
+        font-weight: 700;
+        font-size: 1.5rem;
+    }
+
+    .suggestions {
+        background: #f8fafc;
         border-radius: 15px;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+        border: 2px solid #f1f5f9;
+    }
+
+    .suggestions ul {
+        margin: 0;
+        padding-left: 1.5rem;
+    }
+
+    .suggestions li {
+        color: #64748b;
         margin-bottom: 0.5rem;
     }
-    
-    .search-input-group .btn {
-        margin-bottom: 0;
-    }
-    
+
     .pagination-section {
-        padding: 1.5rem;
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
     }
-    
-    .search-page .container {
-        padding: 0 1rem;
+
+    .pagination .page-link {
+        border-radius: 10px;
+        margin: 0 3px;
+        border: 2px solid #e2e8f0;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s;
     }
-}
+
+    .pagination .page-link:hover {
+        background: #0f172a;
+        border-color: #0f172a;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .pagination .page-item.active .page-link {
+        background: #0f172a;
+        border-color: #0f172a;
+        color: white;
+    }
+
+    .pagination .page-item.disabled .page-link {
+        color: #cbd5e1;
+        background-color: #f1f5f9;
+        border-color: #e2e8f0;
+        cursor: not-allowed;
+    }
+
+    .pagination-info {
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+        .search-header {
+            padding: 1.5rem;
+        }
+
+        .search-title {
+            font-size: 1.8rem;
+        }
+
+        .search-input-group {
+            flex-direction: column;
+        }
+
+        .search-input-group .form-control,
+        .search-input-group .btn {
+            border-radius: 15px;
+            margin-bottom: 0.5rem;
+        }
+
+        .search-input-group .btn {
+            margin-bottom: 0;
+        }
+
+        .pagination-section {
+            padding: 1.5rem;
+        }
+
+        .search-page .container {
+            padding: 0 1rem;
+        }
+    }
 </style>

@@ -43,19 +43,24 @@
         <!-- Tabs -->
         <ul class="nav nav-tabs mb-3" role="tablist" ng-if="!loading && orders.length > 0">
             <li class="nav-item" role="presentation">
-                <button class="nav-link" ng-class="{active: selectedTab==='all'}" ng-click="setTab('all')">Tất cả</button>
+                <button class="nav-link" ng-class="{active: selectedTab==='all'}" ng-click="setTab('all')">Tất
+                    cả</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" ng-class="{active: selectedTab==='pending'}" ng-click="setTab('pending')">Chờ xác nhận</button>
+                <button class="nav-link" ng-class="{active: selectedTab==='pending'}" ng-click="setTab('pending')">Chờ
+                    xác nhận</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" ng-class="{active: selectedTab==='confirmed'}" ng-click="setTab('confirmed')">Đã xác nhận</button>
+                <button class="nav-link" ng-class="{active: selectedTab==='confirmed'}"
+                    ng-click="setTab('confirmed')">Đã xác nhận</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" ng-class="{active: selectedTab==='delivered'}" ng-click="setTab('delivered')">Đã giao</button>
+                <button class="nav-link" ng-class="{active: selectedTab==='delivered'}"
+                    ng-click="setTab('delivered')">Đã giao</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" ng-class="{active: selectedTab==='cancelled'}" ng-click="setTab('cancelled')">Đã hủy</button>
+                <button class="nav-link" ng-class="{active: selectedTab==='cancelled'}"
+                    ng-click="setTab('cancelled')">Đã hủy</button>
             </li>
         </ul>
 
@@ -85,7 +90,8 @@
                                             Đơn hàng #{{ order.orderId }}
                                         </h6>
                                         <small class="text-muted">
-                                            <i class="bi bi-calendar me-1"></i>{{ order.placedAt | date:'dd/MM/yyyy HH:mm' }}
+                                            <i class="bi bi-calendar me-1"></i>{{ order.placedAt | date:'dd/MM/yyyy
+                                            HH:mm' }}
                                         </small>
                                     </div>
                                 </div>
@@ -132,20 +138,18 @@
                                 </div>
                                 <div class="col-md-1">
                                     <div class="order-actions">
-                                        <button class="btn btn-outline-primary btn-sm" 
-                                                ng-click="viewOrderDetail(order)">
+                                        <button class="btn btn-outline-primary btn-sm"
+                                            ng-click="viewOrderDetail(order)">
                                             <i class="bi bi-eye me-1"></i>Xem chi tiết
                                         </button>
-                                        <button class="btn btn-outline-danger btn-sm mt-1" 
-                                                ng-if="getStatusText(order.status) === 'Chờ xác nhận'"
-                                                ng-click="cancelOrder(order)"
-                                                title="Hủy đơn hàng">
+                                        <button class="btn btn-outline-danger btn-sm mt-1"
+                                            ng-if="getStatusText(order.status) === 'Chờ xác nhận'"
+                                            ng-click="cancelOrder(order)" title="Hủy đơn hàng">
                                             <i class="bi bi-x-circle me-1"></i>Hủy đơn
                                         </button>
-                                        <button class="btn btn-outline-success btn-sm mt-1" 
-                                                ng-if="getStatusText(order.status) === 'Đã giao'"
-                                                ng-click="openReview(order)"
-                                                title="Đánh giá sản phẩm">
+                                        <button class="btn btn-outline-success btn-sm mt-1"
+                                            ng-if="getStatusText(order.status) === 'Đã giao'"
+                                            ng-click="openReview(order)" title="Đánh giá sản phẩm">
                                             <i class="bi bi-star me-1"></i>Đánh giá
                                         </button>
                                     </div>
@@ -167,7 +171,8 @@
                 <h5 class="modal-title d-flex align-items-center gap-2">
                     <i class="bi bi-bag me-2"></i>Chi tiết đơn hàng #{{ selectedOrder.orderId }}
                 </h5>
-                <button class="btn btn-outline-info btn-sm" ng-if="selectedOrder && selectedOrder.invoice" data-bs-toggle="modal" data-bs-target="#invoiceModal">
+                <button class="btn btn-outline-info btn-sm" ng-if="selectedOrder && selectedOrder.invoice"
+                    data-bs-toggle="modal" data-bs-target="#invoiceModal">
                     <i class="bi bi-receipt me-1"></i>Hóa đơn
                 </button>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -178,8 +183,9 @@
                     <div class="col-md-6">
                         <h6>Thông tin đơn hàng</h6>
                         <p class="mb-1"><strong>Mã đơn:</strong> #{{ selectedOrder.orderId }}</p>
-                        <p class="mb-1"><strong>Ngày đặt:</strong> {{ selectedOrder.placedAt | date:'dd/MM/yyyy HH:mm' }}</p>
-                        <p class="mb-1"><strong>Trạng thái:</strong> 
+                        <p class="mb-1"><strong>Ngày đặt:</strong> {{ selectedOrder.placedAt | date:'dd/MM/yyyy HH:mm'
+                            }}</p>
+                        <p class="mb-1"><strong>Trạng thái:</strong>
                             <span class="badge" ng-class="getStatusClass(selectedOrder.status)">
                                 {{ getStatusText(selectedOrder.status) }}
                             </span>
@@ -188,9 +194,10 @@
                             <strong>Ngày giao dự kiến:</strong>
                             {{ (selectedOrder.deliveryDate || selectedOrder.deliveryAt) | date:'dd/MM/yyyy HH:mm' }}
                         </p>
-                        <p class="mb-1"><strong>Thanh toán:</strong> 
+                        <p class="mb-1"><strong>Thanh toán:</strong>
                             <span class="badge" ng-class="getPaymentStatusClass(selectedOrder.invoice)">
-                                <span ng-if="selectedOrder.invoice && selectedOrder.invoice.paymentStatus === 'PENDING'">
+                                <span
+                                    ng-if="selectedOrder.invoice && selectedOrder.invoice.paymentStatus === 'PENDING'">
                                     <i class="bi bi-clock"></i> Chưa thanh toán
                                 </span>
                                 <span ng-if="selectedOrder.invoice && selectedOrder.invoice.paymentStatus === 'PAID'">
@@ -199,7 +206,8 @@
                                 <span ng-if="selectedOrder.invoice && selectedOrder.invoice.paymentStatus === 'FAILED'">
                                     <i class="bi bi-x-circle"></i> Thất bại
                                 </span>
-                                <span ng-if="selectedOrder.invoice && selectedOrder.invoice.paymentStatus === 'REFUNDED'">
+                                <span
+                                    ng-if="selectedOrder.invoice && selectedOrder.invoice.paymentStatus === 'REFUNDED'">
                                     <i class="bi bi-arrow-counterclockwise"></i> Hoàn tiền
                                 </span>
                                 <span ng-if="selectedOrder.invoice && !selectedOrder.invoice.paymentStatus">
@@ -237,11 +245,11 @@
                                     <td>
                                         <div class="product-cell d-flex align-items-center">
                                             <div class="me-3">
-                                                <img ng-src="{{ line.bookImageUrl || (line.book && line.book.imageUrl) || line.imageUrl || 'app/assets/images/book-placeholder.png' }}" 
-                                                     alt="{{ line.bookTitle || line.bookName || line.title }}" 
-                                                     class="rounded"
-                                                     style="width: 50px; height: 60px; object-fit: cover;"
-                                                     onerror="this.src='app/assets/images/book-placeholder.png'">
+                                                <img ng-src="{{ line.bookImageUrl || (line.book && line.book.imageUrl) || line.imageUrl || 'app/assets/images/book-placeholder.png' }}"
+                                                    alt="{{ line.bookTitle || line.bookName || line.title }}"
+                                                    class="rounded"
+                                                    style="width: 50px; height: 60px; object-fit: cover;"
+                                                    onerror="this.src='app/assets/images/book-placeholder.png'">
                                             </div>
                                             <div>
                                                 <h6 class="mb-0">{{ getLineTitle(line) }}</h6>
@@ -251,7 +259,8 @@
                                     </td>
                                     <td class="text-center">{{ line.qty }}</td>
                                     <td class="text-end">{{ line.unitPrice | numberFormatted }} ₫</td>
-                                    <td class="text-end fw-bold">{{ (line.totalPrice || line.lineTotal) | numberFormatted }} ₫</td>
+                                    <td class="text-end fw-bold">{{ (line.totalPrice || line.lineTotal) |
+                                        numberFormatted }} ₫</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -266,7 +275,8 @@
                             <hr>
                             <div class="d-flex justify-content-between">
                                 <strong>Tổng cộng:</strong>
-                                <strong class="text-primary">{{ selectedOrder.totalAmount | numberFormatted }} ₫</strong>
+                                <strong class="text-primary">{{ selectedOrder.totalAmount | numberFormatted }}
+                                    ₫</strong>
                             </div>
                         </div>
                     </div>
@@ -294,7 +304,7 @@
                             <div class="col-6">
                                 <h2 class="company-name">BOOKSTORE SYSTEM</h2>
                                 <div class="company-info">
-                                    <p><strong>Địa chỉ:</strong> 123 Đường ABC, Quận XYZ, TP.HCM</p>
+                                    <p><strong>Địa chỉ:</strong> 97 Man Thiện, Thủ Đức, Tp HCM</p>
                                     <p><strong>Điện thoại:</strong> (028) 1234-5678</p>
                                     <p><strong>Email:</strong> info@bookstore.com</p>
                                 </div>
@@ -302,8 +312,10 @@
                             <div class="col-6 text-end">
                                 <h1 class="invoice-title">HÓA ĐƠN BÁN HÀNG</h1>
                                 <div class="invoice-meta">
-                                    <p><strong>Số hóa đơn:</strong> {{ selectedOrder.invoice.invoiceNumber || ('HD-' + (selectedOrder.invoice.id || 'N/A')) }}</p>
-                                    <p><strong>Ngày xuất:</strong> {{ selectedOrder.invoice.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
+                                    <p><strong>Số hóa đơn:</strong> {{ selectedOrder.invoice.invoiceNumber || ('HD-' +
+                                        (selectedOrder.invoice.id || 'N/A')) }}</p>
+                                    <p><strong>Ngày xuất:</strong> {{ selectedOrder.invoice.createdAt | date:'dd/MM/yyyy
+                                        HH:mm' }}</p>
                                     <p><strong>Mã đơn hàng:</strong> OD-{{ selectedOrder.orderId }}</p>
                                 </div>
                             </div>
@@ -323,7 +335,8 @@
                             <div class="col-6">
                                 <h4>Thông tin giao hàng</h4>
                                 <div class="customer-info">
-                                    <p><strong>Ngày giao dự kiến:</strong> {{ (selectedOrder.deliveryDate || selectedOrder.deliveryAt) | date:'dd/MM/yyyy HH:mm' }}</p>
+                                    <p><strong>Ngày giao dự kiến:</strong> {{ (selectedOrder.deliveryDate ||
+                                        selectedOrder.deliveryAt) | date:'dd/MM/yyyy HH:mm' }}</p>
                                 </div>
                             </div>
                         </div>
@@ -348,7 +361,8 @@
                                         <td>{{item.bookTitle || item.title}}</td>
                                         <td class="text-center">{{item.quantity || item.qty}}</td>
                                         <td class="text-end">{{item.unitPrice | numberFormatted}} ₫</td>
-                                        <td class="text-end"><strong>{{((item.quantity || item.qty) * item.unitPrice) | numberFormatted}} ₫</strong></td>
+                                        <td class="text-end"><strong>{{((item.quantity || item.qty) * item.unitPrice) |
+                                                numberFormatted}} ₫</strong></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -361,11 +375,13 @@
                                     <table class="table table-sm">
                                         <tr>
                                             <td><strong>Tạm tính:</strong></td>
-                                            <td class="text-end">{{ selectedOrder.totalAmount | numberFormatted }} ₫</td>
+                                            <td class="text-end">{{ selectedOrder.totalAmount | numberFormatted }} ₫
+                                            </td>
                                         </tr>
                                         <tr class="total-row">
                                             <td><strong>TỔNG CỘNG:</strong></td>
-                                            <td class="text-end"><strong>{{ selectedOrder.totalAmount | numberFormatted }} ₫</strong></td>
+                                            <td class="text-end"><strong>{{ selectedOrder.totalAmount | numberFormatted
+                                                    }} ₫</strong></td>
                                         </tr>
                                     </table>
                                 </div>
@@ -380,15 +396,71 @@
         </div>
     </div>
     <style>
-    .invoice-container { background: #fff; padding: 30px; font-family: 'Times New Roman', serif; line-height: 1.4; border-top: 3px dashed #e74c3c; }
-    .invoice-header { border-bottom: 2px solid #333; padding-bottom: 16px; margin-bottom: 24px; }
-    .company-name { font-size: 28px; font-weight: bold; color: #2c3e50; margin-bottom: 10px; text-transform: uppercase; }
-    .invoice-title { font-size: 34px; font-weight: bold; color: #e74c3c; margin-bottom: 12px; text-transform: uppercase; }
-    .invoice-table { margin: 16px 0; border-collapse: collapse; border: 2px dashed #7f8c8d; border-radius: 10px; overflow: hidden; }
-    .invoice-table th { background-color: #f2f3f5; color: #2c3e50; font-weight: 700; padding: 10px 8px; font-size: 14px; border: 1px solid #bdc3c7; }
-    .invoice-table td { padding: 10px 8px; border: 1px solid #dfe3e6; font-size: 14px; }
-    .invoice-summary { margin-top: 20px; }
-    .invoice-container::after { content: 'Thank you'; display: block; text-align: center; font-style: italic; color: #2c3e50; margin-top: 12px; }
+        .invoice-container {
+            background: #fff;
+            padding: 30px;
+            font-family: 'Times New Roman', serif;
+            line-height: 1.4;
+            border-top: 3px dashed #e74c3c;
+        }
+
+        .invoice-header {
+            border-bottom: 2px solid #333;
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+        }
+
+        .company-name {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .invoice-title {
+            font-size: 34px;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .invoice-table {
+            margin: 16px 0;
+            border-collapse: collapse;
+            border: 2px dashed #7f8c8d;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .invoice-table th {
+            background-color: #f2f3f5;
+            color: #2c3e50;
+            font-weight: 700;
+            padding: 10px 8px;
+            font-size: 14px;
+            border: 1px solid #bdc3c7;
+        }
+
+        .invoice-table td {
+            padding: 10px 8px;
+            border: 1px solid #dfe3e6;
+            font-size: 14px;
+        }
+
+        .invoice-summary {
+            margin-top: 20px;
+        }
+
+        .invoice-container::after {
+            content: 'Thank you';
+            display: block;
+            text-align: center;
+            font-style: italic;
+            color: #2c3e50;
+            margin-top: 12px;
+        }
     </style>
 </div>
 
@@ -403,12 +475,14 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label">Chọn sản phẩm</label>
-                    <select class="form-select" ng-model="reviewModel.isbn" ng-options="l.isbn as (l.bookTitle || ('ISBN ' + l.isbn)) for l in reviewLines"></select>
+                    <select class="form-select" ng-model="reviewModel.isbn"
+                        ng-options="l.isbn as (l.bookTitle || ('ISBN ' + l.isbn)) for l in reviewLines"></select>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Số sao</label>
                     <div class="d-flex gap-1 align-items-center">
-                        <button type="button" class="btn btn-outline-warning btn-sm" ng-repeat="s in [1,2,3,4,5]" ng-class="{'active': reviewModel.stars>=s}" ng-click="setStars(s)">
+                        <button type="button" class="btn btn-outline-warning btn-sm" ng-repeat="s in [1,2,3,4,5]"
+                            ng-class="{'active': reviewModel.stars>=s}" ng-click="setStars(s)">
                             <i class="bi" ng-class="reviewModel.stars>=s ? 'bi-star-fill' : 'bi-star'"></i>
                         </button>
                         <span class="ms-2">{{reviewModel.stars}}/5</span>
@@ -416,7 +490,8 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Nhận xét</label>
-                    <textarea class="form-control" rows="3" ng-model="reviewModel.comment" placeholder="Cảm nhận của bạn về sản phẩm..."></textarea>
+                    <textarea class="form-control" rows="3" ng-model="reviewModel.comment"
+                        placeholder="Cảm nhận của bạn về sản phẩm..."></textarea>
                 </div>
                 <div class="alert alert-info" ng-if="reviewHint">
                     <i class="bi bi-info-circle me-2"></i>{{reviewHint}}
@@ -424,7 +499,8 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary" ng-click="submitReview()" ng-disabled="!reviewModel.isbn || !reviewModel.stars || submittingReview">
+                <button type="button" class="btn btn-primary" ng-click="submitReview()"
+                    ng-disabled="!reviewModel.isbn || !reviewModel.stars || submittingReview">
                     <span ng-if="!submittingReview"><i class="bi bi-send me-1"></i>Gửi đánh giá</span>
                     <span ng-if="submittingReview"><i class="bi bi-hourglass-split me-1"></i>Đang gửi...</span>
                 </button>
@@ -432,7 +508,10 @@
         </div>
     </div>
     <style>
-    #reviewModal .btn-outline-warning.active { background-color: #ffc107; color: #000; }
+        #reviewModal .btn-outline-warning.active {
+            background-color: #ffc107;
+            color: #000;
+        }
     </style>
 </div>
 
@@ -447,9 +526,10 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label">Lý do trả hàng <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" ng-model="returnModel.reason" placeholder="Ví dụ: Sách bị hỏng, không đúng mô tả..." required />
+                    <input type="text" class="form-control" ng-model="returnModel.reason"
+                        placeholder="Ví dụ: Sách bị hỏng, không đúng mô tả..." required />
                 </div>
-                
+
                 <div class="mb-3">
                     <h6>Chọn sản phẩm cần trả</h6>
                     <div class="table-responsive" style="max-height: 400px; overflow:auto;">
@@ -472,15 +552,15 @@
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <div class="me-3">
-                                                <img ng-src="{{ line.bookImageUrl || 'app/assets/images/book-placeholder.png' }}" 
-                                                     alt="{{ line.bookTitle }}" 
-                                                     class="rounded"
-                                                     style="width: 50px; height: 60px; object-fit: cover;">
+                                                <img ng-src="{{ line.bookImageUrl || 'app/assets/images/book-placeholder.png' }}"
+                                                    alt="{{ line.bookTitle }}" class="rounded"
+                                                    style="width: 50px; height: 60px; object-fit: cover;">
                                             </div>
                                             <div>
                                                 <div class="fw-semibold">{{ line.bookTitle }}</div>
                                                 <div class="small text-muted">ISBN: {{ line.isbn }}</div>
-                                                <div class="small text-muted">Đơn giá: {{ line.unitPrice | numberFormatted }} ₫</div>
+                                                <div class="small text-muted">Đơn giá: {{ line.unitPrice |
+                                                    numberFormatted }} ₫</div>
                                             </div>
                                         </div>
                                     </td>
@@ -488,34 +568,29 @@
                                         <span class="badge bg-primary">{{ line.maxQty }}</span>
                                     </td>
                                     <td class="text-center">
-                                        <input type="number" 
-                                               class="form-control form-control-sm text-center" 
-                                               min="0" 
-                                               max="{{ line.maxQty }}" 
-                                               ng-model="line.qtyReturned"
-                                               placeholder="0" />
+                                        <input type="number" class="form-control form-control-sm text-center" min="0"
+                                            max="{{ line.maxQty }}" ng-model="line.qtyReturned" placeholder="0" />
                                     </td>
                                 </tr>
                                 <tr ng-if="!returnLoading && (!returnModel.lines || returnModel.lines.length === 0)">
-                                    <td colspan="3" class="text-center text-muted py-3">Không có sản phẩm nào để trả.</td>
+                                    <td colspan="3" class="text-center text-muted py-3">Không có sản phẩm nào để trả.
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
-                
+
                 <div class="alert alert-info" ng-if="returnModel.lines && returnModel.lines.length > 0">
                     <i class="bi bi-info-circle me-2"></i>
-                    <strong>Lưu ý:</strong> Bạn chỉ có thể trả hàng trong vòng 7 ngày kể từ ngày nhận hàng. 
+                    <strong>Lưu ý:</strong> Bạn chỉ có thể trả hàng trong vòng 7 ngày kể từ ngày nhận hàng.
                     Sản phẩm phải còn nguyên vẹn và có hóa đơn.
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" 
-                        class="btn btn-warning" 
-                        ng-click="submitReturn()"
-                        ng-disabled="!returnModel.reason || !hasReturnItems()">
+                <button type="button" class="btn btn-warning" ng-click="submitReturn()"
+                    ng-disabled="!returnModel.reason || !hasReturnItems()">
                     <i class="bi bi-arrow-counterclockwise me-2"></i>Tạo yêu cầu trả hàng
                 </button>
             </div>
@@ -525,335 +600,348 @@
 
 <!-- Toast Notifications -->
 <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000;">
-    <div class="toast align-items-center text-white bg-{{t.variant}} border-0 mb-2 show" role="alert" aria-live="assertive" aria-atomic="true" ng-repeat="t in toasts">
+    <div class="toast align-items-center text-white bg-{{t.variant}} border-0 mb-2 show" role="alert"
+        aria-live="assertive" aria-atomic="true" ng-repeat="t in toasts">
         <div class="d-flex">
             <div class="toast-body">{{t.message}}</div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" ng-click="toasts.splice($index,1)"></button>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                ng-click="toasts.splice($index,1)"></button>
         </div>
     </div>
 </div>
 
 <style>
-/* Modern Customer Orders Page Styles - Đồng bộ với Home */
-.customer-orders-page {
-    font-family: 'Inter', 'Segoe UI', sans-serif;
-    background-color: #f8fafc;
-    min-height: calc(100vh - 60px);
-}
+    /* Modern Customer Orders Page Styles - Đồng bộ với Home */
+    .customer-orders-page {
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        background-color: #f8fafc;
+        min-height: calc(100vh - 60px);
+    }
 
-.customer-orders-page .container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 2rem;
-}
+    .customer-orders-page .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
 
-.orders-header {
-    background: white;
-    border-radius: 20px;
-    padding: 2rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-    margin-bottom: 2rem;
-}
-
-.orders-title {
-    color: #0f172a;
-    font-weight: 800;
-    font-size: 2.5rem;
-    margin: 0;
-}
-
-.orders-title i {
-    color: #f59e0b;
-}
-
-.btn-outline-primary {
-    border: 2px solid #0f172a;
-    color: #0f172a;
-    border-radius: 15px;
-    padding: 0.75rem 1.5rem;
-    font-weight: 600;
-    transition: all 0.3s;
-}
-
-.btn-outline-primary:hover {
-    background: #0f172a;
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(15, 23, 42, 0.3);
-}
-
-.empty-orders {
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-    padding: 3rem;
-}
-
-.empty-orders-icon {
-    opacity: 0.5;
-    color: #f59e0b;
-}
-
-.empty-orders h4, .empty-orders h5 {
-    color: #0f172a;
-    font-weight: 700;
-    font-size: 1.5rem;
-}
-
-.btn-primary {
-    background: #0f172a;
-    border: none;
-    border-radius: 15px;
-    padding: 1rem 2.5rem;
-    font-weight: 700;
-    font-size: 1.1rem;
-    transition: all 0.3s;
-    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.3);
-}
-
-.btn-primary:hover {
-    background: #1e293b;
-    transform: translateY(-3px);
-    box-shadow: 0 15px 40px rgba(15, 23, 42, 0.4);
-}
-
-.nav-tabs {
-    border-bottom: 2px solid #f1f5f9;
-    margin-bottom: 2rem;
-}
-
-.nav-tabs .nav-link {
-    border: none;
-    border-radius: 10px 10px 0 0;
-    color: #64748b;
-    font-weight: 600;
-    padding: 0.75rem 1.5rem;
-    transition: all 0.3s;
-    margin-right: 0.5rem;
-}
-
-.nav-tabs .nav-link:hover {
-    color: #0f172a;
-    background: #f8fafc;
-}
-
-.nav-tabs .nav-link.active {
-    color: #0f172a;
-    background: white;
-    border-bottom: 3px solid #f59e0b;
-}
-
-.orders-list .card {
-    border: 1px solid #f1f5f9;
-    border-radius: 20px;
-    transition: all 0.4s;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-    margin-bottom: 1.5rem;
-}
-
-.orders-list .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
-    border-color: #f59e0b;
-}
-
-.card-body {
-    padding: 1.5rem;
-}
-
-.order-id {
-    color: #0f172a;
-    font-weight: 700;
-    font-size: 1.1rem;
-}
-
-.order-info small {
-    color: #64748b;
-    font-size: 0.9rem;
-}
-
-.order-info small i {
-    color: #f59e0b;
-    margin-right: 0.25rem;
-}
-
-.badge {
-    font-size: 0.85rem;
-    padding: 0.5rem 1rem;
-    border-radius: 10px;
-    font-weight: 600;
-}
-
-.badge.bg-warning {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
-    color: white !important;
-}
-
-.badge.bg-success {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-    color: white !important;
-}
-
-.badge.bg-danger {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
-    color: white !important;
-}
-
-.badge.bg-info {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
-    color: white !important;
-}
-
-.badge.bg-secondary {
-    background: linear-gradient(135deg, #64748b 0%, #475569 100%) !important;
-    color: white !important;
-}
-
-.btn-sm {
-    border-radius: 10px;
-    padding: 0.5rem 1rem;
-    font-weight: 600;
-    transition: all 0.3s;
-}
-
-.btn-outline-primary {
-    border: 2px solid #0f172a;
-    color: #0f172a;
-}
-
-.btn-outline-primary:hover {
-    background: #0f172a;
-    color: white;
-    transform: translateY(-2px);
-}
-
-.btn-outline-danger {
-    border: 2px solid #ef4444;
-    color: #ef4444;
-}
-
-.btn-outline-danger:hover {
-    background: #ef4444;
-    color: white;
-    transform: translateY(-2px);
-}
-
-.modal-content {
-    border-radius: 20px;
-    border: none;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-}
-
-.modal-header {
-    border-bottom: 2px solid #f1f5f9;
-    padding: 1.5rem;
-}
-
-.modal-title {
-    font-weight: 700;
-    color: #0f172a;
-    font-size: 1.5rem;
-}
-
-.modal-title i {
-    color: #f59e0b;
-    margin-right: 0.5rem;
-}
-
-.modal-body {
-    padding: 1.5rem;
-}
-
-.modal-footer {
-    border-top: 2px solid #f1f5f9;
-    padding: 1.5rem;
-}
-
-.btn-secondary {
-    background: #64748b;
-    border: none;
-    border-radius: 10px;
-    padding: 0.75rem 1.5rem;
-    font-weight: 600;
-    transition: all 0.3s;
-}
-
-.btn-secondary:hover {
-    background: #475569;
-    transform: translateY(-2px);
-}
-
-.btn-warning {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-    border: none;
-    border-radius: 10px;
-    padding: 0.75rem 1.5rem;
-    font-weight: 600;
-    color: white;
-    transition: all 0.3s;
-}
-
-.btn-warning:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(245, 158, 11, 0.3);
-}
-
-@media (max-width: 768px) {
     .orders-header {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+    }
+
+    .orders-title {
+        color: #0f172a;
+        font-weight: 800;
+        font-size: 2.5rem;
+        margin: 0;
+    }
+
+    .orders-title i {
+        color: #f59e0b;
+    }
+
+    .btn-outline-primary {
+        border: 2px solid #0f172a;
+        color: #0f172a;
+        border-radius: 15px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .btn-outline-primary:hover {
+        background: #0f172a;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(15, 23, 42, 0.3);
+    }
+
+    .empty-orders {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        padding: 3rem;
+    }
+
+    .empty-orders-icon {
+        opacity: 0.5;
+        color: #f59e0b;
+    }
+
+    .empty-orders h4,
+    .empty-orders h5 {
+        color: #0f172a;
+        font-weight: 700;
+        font-size: 1.5rem;
+    }
+
+    .btn-primary {
+        background: #0f172a;
+        border: none;
+        border-radius: 15px;
+        padding: 1rem 2.5rem;
+        font-weight: 700;
+        font-size: 1.1rem;
+        transition: all 0.3s;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.3);
+    }
+
+    .btn-primary:hover {
+        background: #1e293b;
+        transform: translateY(-3px);
+        box-shadow: 0 15px 40px rgba(15, 23, 42, 0.4);
+    }
+
+    .nav-tabs {
+        border-bottom: 2px solid #f1f5f9;
+        margin-bottom: 2rem;
+    }
+
+    .nav-tabs .nav-link {
+        border: none;
+        border-radius: 10px 10px 0 0;
+        color: #64748b;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        transition: all 0.3s;
+        margin-right: 0.5rem;
+    }
+
+    .nav-tabs .nav-link:hover {
+        color: #0f172a;
+        background: #f8fafc;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: #0f172a;
+        background: white;
+        border-bottom: 3px solid #f59e0b;
+    }
+
+    .orders-list .card {
+        border: 1px solid #f1f5f9;
+        border-radius: 20px;
+        transition: all 0.4s;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+    }
+
+    .orders-list .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+        border-color: #f59e0b;
+    }
+
+    .card-body {
         padding: 1.5rem;
     }
-    
-    .orders-title {
-        font-size: 1.8rem;
+
+    .order-id {
+        color: #0f172a;
+        font-weight: 700;
+        font-size: 1.1rem;
     }
-    
-    .orders-list .card-body .row > div {
-        margin-bottom: 1rem;
-    }
-    
-    .orders-list .card-body .row > div:last-child {
-        margin-bottom: 0;
-    }
-    
-    .customer-orders-page .container {
-        padding: 0 1rem;
-    }
-    
-    .nav-tabs .nav-link {
-        padding: 0.5rem 1rem;
+
+    .order-info small {
+        color: #64748b;
         font-size: 0.9rem;
     }
-}
+
+    .order-info small i {
+        color: #f59e0b;
+        margin-right: 0.25rem;
+    }
+
+    .badge {
+        font-size: 0.85rem;
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+
+    .badge.bg-warning {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+        color: white !important;
+    }
+
+    .badge.bg-success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+        color: white !important;
+    }
+
+    .badge.bg-danger {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+        color: white !important;
+    }
+
+    .badge.bg-info {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+        color: white !important;
+    }
+
+    .badge.bg-secondary {
+        background: linear-gradient(135deg, #64748b 0%, #475569 100%) !important;
+        color: white !important;
+    }
+
+    .btn-sm {
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .btn-outline-primary {
+        border: 2px solid #0f172a;
+        color: #0f172a;
+    }
+
+    .btn-outline-primary:hover {
+        background: #0f172a;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-outline-danger {
+        border: 2px solid #ef4444;
+        color: #ef4444;
+    }
+
+    .btn-outline-danger:hover {
+        background: #ef4444;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .modal-content {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header {
+        border-bottom: 2px solid #f1f5f9;
+        padding: 1.5rem;
+    }
+
+    .modal-title {
+        font-weight: 700;
+        color: #0f172a;
+        font-size: 1.5rem;
+    }
+
+    .modal-title i {
+        color: #f59e0b;
+        margin-right: 0.5rem;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .modal-footer {
+        border-top: 2px solid #f1f5f9;
+        padding: 1.5rem;
+    }
+
+    .btn-secondary {
+        background: #64748b;
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .btn-secondary:hover {
+        background: #475569;
+        transform: translateY(-2px);
+    }
+
+    .btn-warning {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s;
+    }
+
+    .btn-warning:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(245, 158, 11, 0.3);
+    }
+
+    @media (max-width: 768px) {
+        .orders-header {
+            padding: 1.5rem;
+        }
+
+        .orders-title {
+            font-size: 1.8rem;
+        }
+
+        .orders-list .card-body .row>div {
+            margin-bottom: 1rem;
+        }
+
+        .orders-list .card-body .row>div:last-child {
+            margin-bottom: 0;
+        }
+
+        .customer-orders-page .container {
+            padding: 0 1rem;
+        }
+
+        .nav-tabs .nav-link {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+    }
 </style>
 
 <style>
-/* Order detail modal alignment */
-.order-detail-table th,
-.order-detail-table td {
-    vertical-align: middle;
-}
+    /* Order detail modal alignment */
+    .order-detail-table th,
+    .order-detail-table td {
+        vertical-align: middle;
+    }
 
-.order-detail-table th:first-child,
-.order-detail-table td:first-child {
-    width: 55%;
-}
+    .order-detail-table th:first-child,
+    .order-detail-table td:first-child {
+        width: 55%;
+    }
 
-.order-detail-table th:nth-child(2),
-.order-detail-table td:nth-child(2) {
-    width: 15%;
-    text-align: center;
-}
+    .order-detail-table th:nth-child(2),
+    .order-detail-table td:nth-child(2) {
+        width: 15%;
+        text-align: center;
+    }
 
-.order-detail-table th:nth-child(3),
-.order-detail-table td:nth-child(3),
-.order-detail-table th:nth-child(4),
-.order-detail-table td:nth-child(4) {
-    width: 15%;
-    text-align: right;
-    white-space: nowrap;
-}
+    .order-detail-table th:nth-child(3),
+    .order-detail-table td:nth-child(3),
+    .order-detail-table th:nth-child(4),
+    .order-detail-table td:nth-child(4) {
+        width: 15%;
+        text-align: right;
+        white-space: nowrap;
+    }
 
-.order-detail-table .product-cell img { flex-shrink: 0; }
-.order-detail-table .product-cell h6 { font-weight: 600; margin-bottom: 2px; color: var(--gray-800); }
-.order-detail-table .product-cell small { display: block; }
+    .order-detail-table .product-cell img {
+        flex-shrink: 0;
+    }
+
+    .order-detail-table .product-cell h6 {
+        font-weight: 600;
+        margin-bottom: 2px;
+        color: var(--gray-800);
+    }
+
+    .order-detail-table .product-cell small {
+        display: block;
+    }
 </style>
