@@ -1,0 +1,49 @@
+=== HƯỚNG DẪN SỬA FILE checkout.html - VALIDATE SỐ ĐIỆN THOẠI ===
+
+Mở file: t:\DNTN\DATN_FE\app\views\checkout.html
+
+Tìm dòng 84-98 (phần input số điện thoại):
+```html
+\u003cdiv class="col-md-6">
+    \u003clabel class="form-label fw-semibold">
+        \u003ci class="bi bi-telephone me-1">\u003c/i>Số điện thoại \u003cspan class="text-danger">*\u003c/span>
+    \u003c/label>
+    \u003cinput type="tel" 
+           class="form-control form-control-lg" 
+           ng-model="form.phone" 
+           name="phone"
+           ng-class="{'is-invalid': checkoutForm.phone.$invalid && checkoutForm.phone.$touched}"
+           placeholder="Nhập số điện thoại"
+           required>
+    \u003cdiv class="invalid-feedback" ng-show="checkoutForm.phone.$invalid && checkoutForm.phone.$touched">
+        Vui lòng nhập số điện thoại
+    \u003c/div>
+\u003c/div>
+```
+
+THAY THẾ bằng:
+
+```html
+\u003cdiv class="col-md-6">
+    \u003clabel class="form-label fw-semibold">
+        \u003ci class="bi bi-telephone me-1">\u003c/i>Số điện thoại \u003cspan class="text-danger">*\u003c/span>
+    \u003c/label>
+    \u003cinput type="tel" 
+           class="form-control form-control-lg" 
+           ng-model="form.phone" 
+           name="phone"
+           ng-class="{'is-invalid': checkoutForm.phone.$invalid && checkoutForm.phone.$touched}"
+           ng-pattern="/^0[0-9]{9}$/"
+           placeholder="Nhập số điện thoại (10 số)"
+           maxlength="10"
+           required>
+    \u003cdiv class="invalid-feedback" ng-show="checkoutForm.phone.$error.required && checkoutForm.phone.$touched">
+        Vui lòng nhập số điện thoại
+    \u003c/div>
+    \u003cdiv class="invalid-feedback" ng-show="checkoutForm.phone.$error.pattern && checkoutForm.phone.$touched">
+        Số điện thoại phải có 10 số và bắt đầu bằng số 0
+    \u003c/div>
+\u003c/div>
+```
+
+Lưu file lại.

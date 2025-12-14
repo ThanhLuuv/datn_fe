@@ -1,5 +1,5 @@
 // Customer Orders Controller
-app.controller('CustomerOrdersController', ['$scope', '$rootScope', 'BookstoreService', 'AuthService', '$location', function($scope, $rootScope, BookstoreService, AuthService, $location) {
+app.controller('CustomerOrdersController', ['$scope', '$rootScope', 'BookstoreService', 'AuthService', '$location', function ($scope, $rootScope, BookstoreService, AuthService, $location) {
     // Check authentication
     if (!AuthService.isAuthenticated()) {
         $location.path('/login');
@@ -11,8 +11,8 @@ app.controller('CustomerOrdersController', ['$scope', '$rootScope', 'BookstoreSe
     $scope.orders = [];
     // Tabs state
     $scope.selectedTab = 'all'; // all | pending | confirmed | delivered | cancelled
-    $scope.setTab = function(tab) { $scope.selectedTab = tab; };
-    $scope.tabFilter = function(order) {
+    $scope.setTab = function (tab) { $scope.selectedTab = tab; };
+    $scope.tabFilter = function (order) {
         if (!$scope.selectedTab || $scope.selectedTab === 'all') return true;
         var text = $scope.getStatusText(order.status);
         if ($scope.selectedTab === 'pending') return text === 'Chờ xác nhận';
@@ -34,12 +34,12 @@ app.controller('CustomerOrdersController', ['$scope', '$rootScope', 'BookstoreSe
     $scope.reviewHint = 'Mỗi đơn chỉ có thể đánh giá những sách đã mua và giao thành công.';
 
     // Load customer orders
-    $scope.loadOrders = function() {
+    $scope.loadOrders = function () {
         $scope.loading = true;
         BookstoreService.getMyOrders({
             pageNumber: 1,
             pageSize: 50
-        }).then(function(response) {
+        }).then(function (response) {
             var payload = response && response.data ? response.data : null;
             var list = [];
             if (payload && payload.data && Array.isArray(payload.data.orders)) {
@@ -47,7 +47,7 @@ app.controller('CustomerOrdersController', ['$scope', '$rootScope', 'BookstoreSe
             }
             $scope.orders = list;
             $scope.loading = false;
-        }).catch(function(error) {
+        }).catch(function (error) {
             $scope.loading = false;
             console.error('Error loading orders:', error);
             $scope.addToast('danger', 'Không thể tải danh sách đơn hàng');
@@ -55,30 +55,30 @@ app.controller('CustomerOrdersController', ['$scope', '$rootScope', 'BookstoreSe
     };
 
     // Add toast notification
-    $scope.addToast = function(variant, message) {
+    $scope.addToast = function (variant, message) {
         $scope.toasts.push({
             variant: variant,
             message: message
         });
         // Auto remove after 5 seconds
-        setTimeout(function() {
+        setTimeout(function () {
             $scope.toasts.shift();
             $scope.$apply();
         }, 5000);
     };
 
     // Get payment status class for badge
-    $scope.getPaymentStatusClass = function(invoice) {
+    $scope.getPaymentStatusClass = function (invoice) {
         if (!invoice) {
             return 'bg-secondary'; // Chưa có hóa đơn
         }
-        
+
         // Nếu có invoice nhưng không có paymentStatus, coi như chưa thanh toán
         if (!invoice.paymentStatus) {
             return 'bg-danger'; // Chưa thanh toán (có hóa đơn nhưng chưa có trạng thái thanh toán)
         }
-        
-        switch(invoice.paymentStatus) {
+
+        switch (invoice.paymentStatus) {
             case 'PENDING':
                 return 'bg-danger'; // Chưa thanh toán
             case 'PAID':
@@ -93,10 +93,10 @@ app.controller('CustomerOrdersController', ['$scope', '$rootScope', 'BookstoreSe
     };
 
     // Get status class for badge
-    $scope.getStatusClass = function(status) {
+    $scope.getStatusClass = function (status) {
         // Handle both string and numeric status
         var statusValue = typeof status === 'number' ? status : status;
-        switch(statusValue) {
+        switch (statusValue) {
             case 0:
             case 'PendingConfirmation':
                 return 'bg-warning';
@@ -115,10 +115,10 @@ app.controller('CustomerOrdersController', ['$scope', '$rootScope', 'BookstoreSe
     };
 
     // Get status text
-    $scope.getStatusText = function(status) {
+    $scope.getStatusText = function (status) {
         // Handle both string and numeric status
         var statusValue = typeof status === 'number' ? status : status;
-        switch(statusValue) {
+        switch (statusValue) {
             case 0:
             case 'PendingConfirmation':
                 return 'Chờ xác nhận';
@@ -137,16 +137,16 @@ app.controller('CustomerOrdersController', ['$scope', '$rootScope', 'BookstoreSe
     };
 
     // View order detail
-    $scope.viewOrderDetail = function(order) {
+    $scope.viewOrderDetail = function (order) {
         $scope.selectedOrder = angular.copy(order);
-        
+
         // Ensure lines array exists
         if (!$scope.selectedOrder.lines || !Array.isArray($scope.selectedOrder.lines)) {
             $scope.selectedOrder.lines = [];
         }
 
         // Show modal
-        setTimeout(function() {
+        setTimeout(function () {
             var el = document.getElementById('orderDetailModal');
             if (!el) return;
             try {
@@ -159,7 +159,7 @@ app.controller('CustomerOrdersController', ['$scope', '$rootScope', 'BookstoreSe
     };
 
     // Resolve line title robustly
-    $scope.getLineTitle = function(line) {
+    $scope.getLineTitle = function (line) {
         if (!line) return '';
         return (
             line.bookTitle ||
@@ -171,13 +171,13 @@ app.controller('CustomerOrdersController', ['$scope', '$rootScope', 'BookstoreSe
     };
 
     // Open review modal for delivered order
-    $scope.openReview = function(order) {
+    $scope.openReview = function (order) {
         if ($scope.getStatusText(order.status) !== 'Đã giao') {
             $scope.addToast('warning', 'Chỉ đánh giá đơn đã giao thành công');
             return;
         }
         $scope.selectedOrder = angular.copy(order);
-        $scope.reviewLines = (order.lines || []).map(function(line){
+        $scope.reviewLines = (order.lines || []).map(function (line) {
             return {
                 isbn: line.isbn,
                 bookTitle: line.bookTitle || line.title || ('ISBN ' + line.isbn)
@@ -188,17 +188,17 @@ app.controller('CustomerOrdersController', ['$scope', '$rootScope', 'BookstoreSe
         }
         $scope.reviewModel.stars = 5;
         $scope.reviewModel.comment = '';
-        setTimeout(function(){
+        setTimeout(function () {
             var el = document.getElementById('reviewModal');
             if (!el) return;
-            try { var modal = bootstrap && bootstrap.Modal ? bootstrap.Modal.getOrCreateInstance(el) : null; if (modal) modal.show(); } catch(e) { if (el.showModal) el.showModal(); }
-        },0);
+            try { var modal = bootstrap && bootstrap.Modal ? bootstrap.Modal.getOrCreateInstance(el) : null; if (modal) modal.show(); } catch (e) { if (el.showModal) el.showModal(); }
+        }, 0);
     };
 
-    $scope.setStars = function(s) { $scope.reviewModel.stars = s; };
+    $scope.setStars = function (s) { $scope.reviewModel.stars = s; };
 
     // Submit review
-    $scope.submitReview = function() {
+    $scope.submitReview = function () {
         if (!$scope.reviewModel.isbn || !$scope.reviewModel.stars) {
             $scope.addToast('warning', 'Vui lòng chọn sản phẩm và số sao');
             return;
@@ -209,41 +209,55 @@ app.controller('CustomerOrdersController', ['$scope', '$rootScope', 'BookstoreSe
             comment: ($scope.reviewModel.comment || '').trim()
         };
         $scope.submittingReview = true;
-        BookstoreService.createOrUpdateRating(payload).then(function(){
+        BookstoreService.createOrUpdateRating(payload).then(function () {
             $scope.addToast('success', 'Đã gửi đánh giá thành công');
-            setTimeout(function(){
+            setTimeout(function () {
                 var el = document.getElementById('reviewModal');
-                if (!el) return; try { var modal = bootstrap && bootstrap.Modal ? bootstrap.Modal.getInstance(el) : null; if (modal) modal.hide(); } catch(e) { if (el.close) el.close(); }
-            },0);
-        }).catch(function(err){
+                if (!el) return; try { var modal = bootstrap && bootstrap.Modal ? bootstrap.Modal.getInstance(el) : null; if (modal) modal.hide(); } catch (e) { if (el.close) el.close(); }
+            }, 0);
+        }).catch(function (err) {
             var msg = (err && err.data && err.data.message) || 'Không thể gửi đánh giá';
             $scope.addToast('danger', msg);
-        }).finally(function(){ $scope.submittingReview = false; $scope.$applyAsync(); });
+        }).finally(function () { $scope.submittingReview = false; $scope.$applyAsync(); });
     };
 
     // Customer cancel pending order
-    $scope.cancelOrder = function(order) {
+    $scope.cancelOrder = function (order) {
         if (!order || !order.orderId) return;
         if ($scope.getStatusText(order.status) !== 'Chờ xác nhận') {
             $scope.addToast('warning', 'Chỉ có thể hủy đơn đang chờ xác nhận');
             return;
         }
-        var ok = confirm('Bạn có chắc muốn hủy đơn #' + order.orderId + ' ?');
-        if (!ok) return;
+
+        // Store order to cancel and show modal
+        $scope.orderToCancel = order;
+        var cancelModal = new bootstrap.Modal(document.getElementById('cancelOrderModal'));
+        cancelModal.show();
+    };
+
+    // Confirm cancel order from modal
+    $scope.confirmCancelOrder = function () {
+        if (!$scope.orderToCancel) return;
+
         var payload = { reason: 'Khách hàng hủy đơn', note: '' };
-        BookstoreService.cancelOrder(order.orderId, payload)
-            .then(function(){
+        BookstoreService.cancelOrder($scope.orderToCancel.orderId, payload)
+            .then(function () {
                 $scope.addToast('success', 'Đã hủy đơn hàng thành công');
                 $scope.loadOrders();
+
+                // Hide modal
+                var cancelModal = bootstrap.Modal.getInstance(document.getElementById('cancelOrderModal'));
+                if (cancelModal) cancelModal.hide();
+                $scope.orderToCancel = null;
             })
-            .catch(function(err){
+            .catch(function (err) {
                 var msg = (err && err.data && err.data.message) || 'Không thể hủy đơn';
                 $scope.addToast('danger', msg);
             });
     };
 
     // Return order function
-    $scope.returnOrder = function(order) {
+    $scope.returnOrder = function (order) {
         if (!order || !order.orderId) {
             $scope.addToast('danger', 'Không tìm thấy thông tin đơn hàng');
             return;
@@ -266,10 +280,10 @@ app.controller('CustomerOrdersController', ['$scope', '$rootScope', 'BookstoreSe
 
         // Load order details for return
         $scope.returnLoading = true;
-        BookstoreService.getOrderDetail(order.orderId).then(function(response) {
+        BookstoreService.getOrderDetail(order.orderId).then(function (response) {
             var orderDetail = response.data;
             if (orderDetail && orderDetail.lines) {
-                $scope.returnModel.lines = orderDetail.lines.map(function(line) {
+                $scope.returnModel.lines = orderDetail.lines.map(function (line) {
                     return {
                         orderLineId: line.orderLineId,
                         bookTitle: line.bookTitle,
@@ -282,9 +296,9 @@ app.controller('CustomerOrdersController', ['$scope', '$rootScope', 'BookstoreSe
                 });
             }
             $scope.returnLoading = false;
-            
+
             // Show modal
-            setTimeout(function() {
+            setTimeout(function () {
                 var el = document.getElementById('returnModal');
                 if (!el) return;
                 try {
@@ -294,7 +308,7 @@ app.controller('CustomerOrdersController', ['$scope', '$rootScope', 'BookstoreSe
                     if (el.showModal) el.showModal();
                 }
             }, 0);
-        }).catch(function(error) {
+        }).catch(function (error) {
             $scope.returnLoading = false;
             console.error('Error loading order detail:', error);
             $scope.addToast('danger', 'Không thể tải thông tin đơn hàng');
@@ -302,24 +316,24 @@ app.controller('CustomerOrdersController', ['$scope', '$rootScope', 'BookstoreSe
     };
 
     // Check if has return items
-    $scope.hasReturnItems = function() {
+    $scope.hasReturnItems = function () {
         if (!$scope.returnModel.lines || $scope.returnModel.lines.length === 0) {
             return false;
         }
-        return $scope.returnModel.lines.some(function(line) {
+        return $scope.returnModel.lines.some(function (line) {
             return line.qtyReturned > 0;
         });
     };
 
     // Submit return request
-    $scope.submitReturn = function() {
+    $scope.submitReturn = function () {
         if (!$scope.returnModel.reason || !$scope.hasReturnItems()) {
             $scope.addToast('warning', 'Vui lòng nhập lý do và chọn sản phẩm cần trả');
             return;
         }
 
         // Validate return quantities
-        var returnLines = $scope.returnModel.lines.filter(function(line) {
+        var returnLines = $scope.returnModel.lines.filter(function (line) {
             return line.qtyReturned > 0;
         });
 
@@ -335,7 +349,7 @@ app.controller('CustomerOrdersController', ['$scope', '$rootScope', 'BookstoreSe
         var payload = {
             orderId: $scope.selectedOrder ? $scope.selectedOrder.orderId : null,
             reason: $scope.returnModel.reason,
-            returnLines: returnLines.map(function(line) {
+            returnLines: returnLines.map(function (line) {
                 return {
                     isbn: line.isbn,
                     quantity: parseInt(line.qtyReturned),
@@ -345,11 +359,11 @@ app.controller('CustomerOrdersController', ['$scope', '$rootScope', 'BookstoreSe
         };
 
         // Submit return request using new customer API
-        BookstoreService.createCustomerReturn(payload).then(function(response) {
+        BookstoreService.createCustomerReturn(payload).then(function (response) {
             $scope.addToast('success', 'Yêu cầu trả hàng đã được gửi thành công');
-            
+
             // Close modal
-            setTimeout(function() {
+            setTimeout(function () {
                 var el = document.getElementById('returnModal');
                 if (!el) return;
                 try {
@@ -359,16 +373,16 @@ app.controller('CustomerOrdersController', ['$scope', '$rootScope', 'BookstoreSe
                     if (el.close) el.close();
                 }
             }, 0);
-            
+
             // Reset form
             $scope.returnModel = {
                 reason: '',
                 lines: []
             };
-            
+
             // Reload orders
             $scope.loadOrders();
-        }).catch(function(error) {
+        }).catch(function (error) {
             console.error('Error creating return:', error);
             var errorMsg = 'Không thể tạo yêu cầu trả hàng';
             if (error.data && error.data.message) {

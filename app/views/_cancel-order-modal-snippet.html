@@ -1,0 +1,27 @@
+\u003c!-- Cancel Order Confirmation Modal --\u003e
+\u003cdiv class="modal fade" id="cancelOrderModal" tabindex="-1"\u003e
+\u003cdiv class="modal-dialog"\u003e
+\u003cdiv class="modal-content"\u003e
+\u003cdiv class="modal-header"\u003e
+\u003ch5 class="modal-title"\u003e
+\u003ci class="bi bi-exclamation-triangle text-warning me-2"\u003e\u003c/i\u003eXác nhận hủy đơn hàng
+\u003c/h5\u003e
+\u003cbutton type="button" class="btn-close" data-bs-dismiss="modal"\u003e\u003c/button\u003e
+\u003c/div\u003e
+\u003cdiv class="modal-body" ng-if="orderToCancel"\u003e
+\u003cp class="mb-3"\u003eBạn có chắc chắn muốn hủy đơn hàng \u003cstrong\u003e#{{ orderToCancel.orderId
+}}\u003c/strong\u003e?\u003c/p\u003e
+\u003cdiv class="alert alert-warning"\u003e
+\u003ci class="bi bi-info-circle me-2"\u003e\u003c/i\u003e
+Đơn hàng sẽ được hủy và không thể khôi phục lại.
+\u003c/div\u003e
+\u003c/div\u003e
+\u003cdiv class="modal-footer"\u003e
+\u003cbutton type="button" class="btn btn-secondary" data-bs-dismiss="modal"\u003eQuay lại\u003c/button\u003e
+\u003cbutton type="button" class="btn btn-danger" ng-click="confirmCancelOrder()"\u003e
+\u003ci class="bi bi-x-circle me-1"\u003e\u003c/i\u003eXác nhận hủy
+\u003c/button\u003e
+\u003c/div\u003e
+\u003c/div\u003e
+\u003c/div\u003e
+\u003c/div\u003e
