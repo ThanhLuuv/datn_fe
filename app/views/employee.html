@@ -162,10 +162,7 @@
                                                     ng-if="(order.deliveryStatus === 'Confirmed' || order.deliveryStatus === 1) || (order.status === 'Confirmed' || order.status === 1)">
                                                     <i class="bi bi-check-circle"></i> Giao
                                                 </button>
-                                                <button class="btn btn-sm btn-danger" ng-click="cancelOrder(order)"
-                                                    ng-if="(order.deliveryStatus === 'Confirmed' || order.deliveryStatus === 1) || (order.status === 'Confirmed' || order.status === 1)">
-                                                    <i class="bi bi-x-circle"></i> Hủy
-                                                </button>
+                                                <!-- Cancel order button removed as per requirement -->
                                             </div>
                                         </td>
                                     </tr>
@@ -290,6 +287,29 @@
                             </tfoot>
                         </table>
                     </div>
+
+                    <!-- Delivery Proof Image -->
+                    <div class="row mt-4"
+                        ng-if="(selectedOrder.status === 'Delivered' || selectedOrder.status === 2 || selectedOrder.deliveryStatus === 'Delivered' || selectedOrder.deliveryStatus === 2) && selectedOrder.deliveryProofImageUrl">
+                        <div class="col-12">
+                            <hr>
+                            <h6><i class="bi bi-image text-success"></i> Ảnh minh chứng giao hàng:</h6>
+                            <div class="delivery-proof-container text-center mt-3">
+                                <a ng-href="{{selectedOrder.deliveryProofImageUrl}}" target="_blank"
+                                    title="Click để xem ảnh full size">
+                                    <img ng-src="{{selectedOrder.deliveryProofImageUrl}}" alt="Delivery Proof"
+                                        class="img-fluid"
+                                        style="max-height: 400px; border: 3px solid #28a745; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2); transition: transform 0.2s;"
+                                        onmouseover="this.style.transform='scale(1.02)'"
+                                        onmouseout="this.style.transform='scale(1)'">
+                                </a>
+                                <p class="text-success mt-3 mb-0 fw-bold">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    Đơn hàng đã được giao thành công
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -299,63 +319,87 @@
                     data-bs-dismiss="modal">
                     <i class="bi bi-check-circle"></i> Xác nhận đã giao
                 </button>
-                <button type="button" class="btn btn-danger" ng-click="cancelOrder(selectedOrder)"
-                    ng-if="(selectedOrder.deliveryStatus === 'Confirmed' || selectedOrder.deliveryStatus === 1) || (selectedOrder.status === 'Confirmed' || selectedOrder.status === 1)"
-                    data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle"></i> Hủy đơn hàng
-                </button>
+                <!-- Cancel order button removed from modal as per requirement -->
             </div>
         </div>
     </div>
 </div>
+</div>
 
-<!-- Cancel Order Modal -->
-<div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-labelledby="cancelOrderModalLabel" aria-hidden="true">
+<!-- Confirm Delivery Modal -->
+<div class="modal fade" id="confirmDeliveryModal" tabindex="-1" aria-labelledby="confirmDeliveryModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="cancelOrderModalLabel">
-                    <i class="bi bi-x-circle text-danger"></i> Hủy đơn hàng
+                <h5 class="modal-title" id="confirmDeliveryModalLabel">
+                    <i class="bi bi-check-circle"></i> Xác nhận giao hàng
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="alert alert-warning">
-                    <i class="bi bi-exclamation-triangle"></i>
-                    <strong>Chú ý:</strong> Hành động này không thể hoàn tác. Đơn hàng sẽ được chuyển sang trạng thái
-                    "Đã hủy".
+                <div ng-if="confirmingOrder">
+                    <p class="mb-3">
+                        <strong>Đơn hàng:</strong> #{{confirmingOrder.orderId}}<br>
+                        <strong>Khách hàng:</strong> {{confirmingOrder.receiverName}}<br>
+                        <strong>SĐT:</strong> {{confirmingOrder.receiverPhone}}
+                    </p>
+
+                    <!-- Note -->
+                    <div class="mb-3">
+                        <label class="form-label">Ghi chú:</label>
+                        <textarea class="form-control" ng-model="deliveryNote" rows="2"
+                            placeholder="Nhập ghi chú về việc giao hàng..."></textarea>
+                    </div>
+
+                    <!-- Upload Delivery Proof Image -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Ảnh minh chứng giao hàng <span class="text-danger">*</span>
+                        </label>
+                        <input type="file" id="deliveryProofImageInput" class="form-control" accept="image/*"
+                            onchange="angular.element(this).scope().onDeliveryProofFileSelected(this.files)"
+                            ng-disabled="submittingDelivery">
+                        <small class="text-muted">
+                            Chọn ảnh chứng minh đã giao hàng thành công (tối đa 10MB)
+                        </small>
+                    </div>
+
+                    <!-- Preview uploaded image -->
+                    <div class="mb-3" ng-if="deliveryProofImagePreview">
+                        <label class="form-label">Ảnh đã chọn:</label>
+                        <div>
+                            <img ng-src="{{deliveryProofImagePreview}}" alt="Delivery Proof"
+                                style="max-width: 100%; max-height: 300px; border: 2px solid #28a745; border-radius: 8px;">
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-danger mt-2"
+                            ng-click="removeDeliveryProofImage()" ng-disabled="submittingDelivery">
+                            <i class="bi bi-x-circle"></i> Xóa ảnh
+                        </button>
+                    </div>
                 </div>
-
-                <form>
-                    <div class="mb-2">
-                        <label for="cancelReason" class="form-label">
-                            <strong>Lý do hủy đơn hàng <span class="text-danger">*</span></strong>
-                        </label>
-                        <textarea class="form-control" id="cancelReason" rows="3" ng-model="cancelOrderData.reason"
-                            placeholder="Vui lòng nhập lý do hủy đơn hàng..." required></textarea>
-                        <div class="form-text">Tối đa 500 ký tự</div>
-                    </div>
-
-                    <div class="mb-2">
-                        <label for="cancelNote" class="form-label">
-                            <strong>Ghi chú bổ sung</strong>
-                        </label>
-                        <textarea class="form-control" id="cancelNote" rows="2" ng-model="cancelOrderData.note"
-                            placeholder="Ghi chú bổ sung (tùy chọn)..."></textarea>
-                    </div>
-                </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x"></i> Hủy bỏ
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                    ng-disabled="submittingDelivery">
+                    Hủy
                 </button>
-                <button type="button" class="btn btn-danger" ng-click="confirmCancelOrder()">
-                    <i class="bi bi-x-circle"></i> Xác nhận hủy đơn
+                <button type="button" class="btn btn-success" ng-click="submitConfirmDelivery()"
+                    ng-disabled="!deliveryProofImageFile || submittingDelivery">
+                    <span ng-if="!submittingDelivery">
+                        <i class="bi bi-check-circle"></i> Xác nhận giao hàng
+                    </span>
+                    <span ng-if="submittingDelivery">
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                        Đang xử lý...
+                    </span>
                 </button>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Cancel Order Modal - REMOVED as per requirement to disable order cancellation -->
 
 <style>
     .employee-dashboard {

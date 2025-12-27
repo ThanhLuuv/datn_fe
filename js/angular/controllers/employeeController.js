@@ -153,7 +153,8 @@ app.controller('EmployeeController', ['$scope', 'AuthService', 'BookstoreService
                         shippingAddress: order.shippingAddress,
                         deliveryDate: order.deliveryDate,
                         lines: order.lines || [],
-                        cancelReason: (normalizedStatus === 'Cancelled' || normalizedStatus === 3) ? order.note : null
+                        cancelReason: (normalizedStatus === 'Cancelled' || normalizedStatus === 3) ? order.note : null,
+                        deliveryProofImageUrl: order.deliveryProofImageUrl // Ảnh minh chứng giao hàng
                     };
 
                     // Log ra để debug nếu cần
@@ -227,7 +228,8 @@ app.controller('EmployeeController', ['$scope', 'AuthService', 'BookstoreService
                     lines: orderData.lines || [],
                     invoice: orderData.invoice,
                     paymentUrl: orderData.paymentUrl,
-                    cancelReason: (detailStatus === 'Cancelled' || detailStatus === 3) ? orderData.note : null
+                    cancelReason: (detailStatus === 'Cancelled' || detailStatus === 3) ? orderData.note : null,
+                    deliveryProofImageUrl: orderData.deliveryProofImageUrl // Ảnh minh chứng giao hàng
                 };
 
                 console.log('Loaded order details:', $scope.selectedOrder);
@@ -293,69 +295,168 @@ app.controller('EmployeeController', ['$scope', 'AuthService', 'BookstoreService
     };
 
     // Confirm delivery - Chuyển từ Confirmed (1) → Delivered (2)
+    $scope.confirmingOrder = null;
+    $scope.deliveryNote = '';
+    $scope.deliveryProofImageFile = null;
+    $scope.deliveryProofImagePreview = null;
+    $scope.submittingDelivery = false;
+
     $scope.confirmDelivery = function (order) {
-        BookstoreService.confirmOrderDelivered(order.orderId, {
-            success: true,
-            note: 'Đã giao hàng thành công cho khách hàng'
-        }).then(function (response) {
-            if (response.data && response.data.success) {
-                showNotification('Đã xác nhận giao hàng thành công: ' + order.orderId, 'success');
+        $scope.confirmingOrder = order;
+        $scope.deliveryNote = 'Đã giao hàng thành công cho khách hàng';
+        $scope.deliveryProofImageFile = null;
+        $scope.deliveryProofImagePreview = null;
 
-                // Reload orders to get updated data
-                $scope.loadRecentOrders();
-                $scope.updateFilteredOrders();
-            } else {
-                showNotification('Không thể xác nhận giao hàng: ' + (response.data.message || 'Lỗi không xác định'), 'danger');
+        // Show modal
+        var modalEl = document.getElementById('confirmDeliveryModal');
+        if (modalEl) {
+            var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
+    };
+
+    // Handle file selection
+    $scope.onDeliveryProofFileSelected = function (files) {
+        if (files && files.length > 0) {
+            var file = files[0];
+
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                showNotification('Vui lòng chọn file ảnh', 'warning');
+                return;
             }
-        }).catch(function (error) {
-            console.error('Error confirming delivery:', error);
-            showNotification('Có lỗi xảy ra khi xác nhận giao hàng', 'danger');
-        });
+
+            // Validate file size (max 10MB)
+            var maxSize = 10 * 1024 * 1024;
+            if (file.size > maxSize) {
+                showNotification('Kích thước ảnh không được vượt quá 10MB', 'warning');
+                return;
+            }
+
+            $scope.deliveryProofImageFile = file;
+
+            // Create preview
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                $scope.$apply(function () {
+                    $scope.deliveryProofImagePreview = e.target.result;
+                });
+            };
+            reader.readAsDataURL(file);
+        }
     };
 
-    // Cancel order - Chuyển sang Cancelled (3)
-    $scope.cancelOrder = function (order) {
-        // Show modal for cancel reason
-        $scope.cancelOrderData = {
-            orderId: order.orderId,
-            reason: '',
-            note: ''
-        };
+    // Remove selected image
+    $scope.removeDeliveryProofImage = function () {
+        $scope.deliveryProofImageFile = null;
+        $scope.deliveryProofImagePreview = null;
 
-        // Show cancel modal
-        var cancelModal = new bootstrap.Modal(document.getElementById('cancelOrderModal'));
-        cancelModal.show();
+        // Clear file input
+        var fileInput = document.getElementById('deliveryProofImageInput');
+        if (fileInput) {
+            fileInput.value = '';
+        }
     };
 
-    // Confirm cancel order
-    $scope.confirmCancelOrder = function () {
-        if (!$scope.cancelOrderData.reason.trim()) {
-            showNotification('Vui lòng nhập lý do hủy đơn hàng', 'warning');
+    // Submit confirm delivery with proof image
+    $scope.submitConfirmDelivery = function () {
+        if (!$scope.deliveryProofImageFile) {
+            showNotification('Vui lòng chọn ảnh minh chứng giao hàng', 'warning');
             return;
         }
 
-        BookstoreService.cancelOrder($scope.cancelOrderData.orderId, {
-            reason: $scope.cancelOrderData.reason,
-            note: $scope.cancelOrderData.note || ''
-        }).then(function (response) {
-            if (response.data && response.data.success) {
-                showNotification('Đã hủy đơn hàng thành công: ' + $scope.cancelOrderData.orderId, 'success');
+        if (!$scope.confirmingOrder) {
+            showNotification('Không tìm thấy thông tin đơn hàng', 'danger');
+            return;
+        }
 
-                // Hide modal
-                var cancelModal = bootstrap.Modal.getInstance(document.getElementById('cancelOrderModal'));
-                cancelModal.hide();
+        $scope.submittingDelivery = true;
 
-                // Reload orders to get updated data
-                $scope.loadRecentOrders();
-                $scope.updateFilteredOrders();
-            } else {
-                showNotification('Không thể hủy đơn hàng: ' + (response.data.message || 'Lỗi không xác định'), 'danger');
-            }
-        }).catch(function (error) {
-            console.error('Error cancelling order:', error);
-            showNotification('Có lỗi xảy ra khi hủy đơn hàng', 'danger');
-        });
+        // Create FormData
+        var formData = new FormData();
+        formData.append('success', 'true');
+        formData.append('note', $scope.deliveryNote || 'Đã giao hàng thành công');
+        formData.append('deliveryProofImageFile', $scope.deliveryProofImageFile);
+
+        // Call service with FormData
+        BookstoreService.confirmOrderDelivered($scope.confirmingOrder.orderId, formData)
+            .then(function (response) {
+                if (response.data && response.data.success) {
+                    showNotification('Đã xác nhận giao hàng thành công!', 'success');
+
+                    // Hide modal
+                    var modalEl = document.getElementById('confirmDeliveryModal');
+                    if (modalEl) {
+                        var modal = bootstrap.Modal.getInstance(modalEl);
+                        if (modal) modal.hide();
+                    }
+
+                    // Reset
+                    $scope.confirmingOrder = null;
+                    $scope.deliveryNote = '';
+                    $scope.deliveryProofImageFile = null;
+                    $scope.deliveryProofImagePreview = null;
+
+                    // Reload orders
+                    $scope.loadRecentOrders();
+                    $scope.updateFilteredOrders();
+                } else {
+                    showNotification('Không thể xác nhận giao hàng: ' + (response.data.message || 'Lỗi không xác định'), 'danger');
+                }
+            })
+            .catch(function (error) {
+                console.error('Error confirming delivery:', error);
+                showNotification('Có lỗi xảy ra khi xác nhận giao hàng', 'danger');
+            })
+            .finally(function () {
+                $scope.submittingDelivery = false;
+            });
     };
+
+
+    // Cancel order - DISABLED as per requirement
+    // $scope.cancelOrder = function (order) {
+    //     // Show modal for cancel reason
+    //     $scope.cancelOrderData = {
+    //         orderId: order.orderId,
+    //         reason: '',
+    //         note: ''
+    //     };
+
+    //     // Show cancel modal
+    //     var cancelModal = new bootstrap.Modal(document.getElementById('cancelOrderModal'));
+    //     cancelModal.show();
+    // };
+
+    // Confirm cancel order - DISABLED as per requirement
+    // $scope.confirmCancelOrder = function () {
+    //     if (!$scope.cancelOrderData.reason.trim()) {
+    //         showNotification('Vui lòng nhập lý do hủy đơn hàng', 'warning');
+    //         return;
+    //     }
+
+    //     BookstoreService.cancelOrder($scope.cancelOrderData.orderId, {
+    //         reason: $scope.cancelOrderData.reason,
+    //         note: $scope.cancelOrderData.note || ''
+    //     }).then(function (response) {
+    //         if (response.data && response.data.success) {
+    //             showNotification('Đã hủy đơn hàng thành công: ' + $scope.cancelOrderData.orderId, 'success');
+
+    //             // Hide modal
+    //             var cancelModal = bootstrap.Modal.getInstance(document.getElementById('cancelOrderModal'));
+    //             cancelModal.hide();
+
+    //             // Reload orders to get updated data
+    //             $scope.loadRecentOrders();
+    //             $scope.updateFilteredOrders();
+    //         } else {
+    //             showNotification('Không thể hủy đơn hàng: ' + (response.data.message || 'Lỗi không xác định'), 'danger');
+    //         }
+    //     }).catch(function (error) {
+    //         console.error('Error cancelling order:', error);
+    //         showNotification('Có lỗi xảy ra khi hủy đơn hàng', 'danger');
+    //     });
+    // };
 
     // Test API endpoints
     $scope.testStaffAPI = function () {

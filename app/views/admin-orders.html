@@ -139,11 +139,7 @@
 												title="Phân công giao hàng">
 												<i class="bi bi-truck"></i>
 											</button>
-											<button class="btn btn-outline-danger" ng-click="cancelOrder(o)"
-												ng-if="getOrderStatus(o)==='PendingConfirmation'" title="Hủy đơn">
-												<i class="bi bi-x-circle"></i>
-											</button>
-
+											<!-- Cancel order button removed -->
 											<!-- Trạng thái 1 (Đã xác nhận): Xác nhận đã giao -->
 											<button class="btn btn-outline-success" ng-click="confirmDelivered(o)"
 												ng-if="getOrderStatus(o)==='Confirmed'" title="Xác nhận đã giao">
@@ -415,6 +411,29 @@
 							</tr>
 						</tbody>
 					</table>
+
+					<!-- Delivery Proof Image -->
+					<div class="row mt-4"
+						ng-if="($root.selectedOrder.status === 'Delivered' || $root.selectedOrder.status === 2 || $root.selectedOrder.status === 'Đã giao') && $root.selectedOrder.deliveryProofImageUrl">
+						<div class="col-12">
+							<hr>
+							<h6><i class="bi bi-image text-success"></i> Ảnh minh chứng giao hàng:</h6>
+							<div class="delivery-proof-container text-center mt-3">
+								<a ng-href="{{$root.selectedOrder.deliveryProofImageUrl}}" target="_blank"
+									title="Click để xem ảnh full size">
+									<img ng-src="{{$root.selectedOrder.deliveryProofImageUrl}}" alt="Delivery Proof"
+										class="img-fluid"
+										style="max-height: 400px; border: 3px solid #28a745; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2); transition: transform 0.2s;"
+										onmouseover="this.style.transform='scale(1.02)'"
+										onmouseout="this.style.transform='scale(1)'">
+								</a>
+								<p class="text-success mt-3 mb-0 fw-bold">
+									<i class="bi bi-check-circle-fill"></i>
+									Đơn hàng đã được giao thành công
+								</p>
+							</div>
+						</div>
+					</div>
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>

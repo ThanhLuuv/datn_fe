@@ -142,11 +142,8 @@
                                             ng-click="viewOrderDetail(order)">
                                             <i class="bi bi-eye me-1"></i>Xem chi tiết
                                         </button>
-                                        <button class="btn btn-outline-danger btn-sm mt-1"
-                                            ng-if="getStatusText(order.status) === 'Chờ xác nhận'"
-                                            ng-click="cancelOrder(order)" title="Hủy đơn hàng">
-                                            <i class="bi bi-x-circle me-1"></i>Hủy đơn
-                                        </button>
+                                        <!-- Cancel order button removed as per requirement -->
+
                                         <button class="btn btn-outline-success btn-sm mt-1"
                                             ng-if="getStatusText(order.status) === 'Đã giao'"
                                             ng-click="openReview(order)" title="Đánh giá sản phẩm">
@@ -278,6 +275,29 @@
                                 <strong class="text-primary">{{ selectedOrder.totalAmount | numberFormatted }}
                                     ₫</strong>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delivery Proof Image -->
+                <div class="row mt-4"
+                    ng-if="(selectedOrder.status === 'Đã giao' || selectedOrder.status === 'Delivered' || selectedOrder.status === 2) && selectedOrder.deliveryProofImageUrl">
+                    <div class="col-12">
+                        <hr>
+                        <h6><i class="bi bi-image text-success"></i> Ảnh minh chứng giao hàng:</h6>
+                        <div class="delivery-proof-container text-center mt-3">
+                            <a ng-href="{{selectedOrder.deliveryProofImageUrl}}" target="_blank"
+                                title="Click để xem ảnh full size">
+                                <img ng-src="{{selectedOrder.deliveryProofImageUrl}}" alt="Delivery Proof"
+                                    class="img-fluid"
+                                    style="max-height: 400px; border: 3px solid #28a745; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2); transition: transform 0.2s;"
+                                    onmouseover="this.style.transform='scale(1.02)'"
+                                    onmouseout="this.style.transform='scale(1)'">
+                            </a>
+                            <p class="text-success mt-3 mb-0 fw-bold">
+                                <i class="bi bi-check-circle-fill"></i>
+                                Đơn hàng đã được giao thành công
+                            </p>
                         </div>
                     </div>
                 </div>

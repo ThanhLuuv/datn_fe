@@ -3,7 +3,7 @@ app.controller('OrdersTextToSqlAiController', [
     '$scope',
     'BookstoreService',
     '$sce',
-    function($scope, BookstoreService, $sce) {
+    function ($scope, BookstoreService, $sce) {
         $scope.aiChatOpen = false;
         $scope.sqlAi = {
             question: '',
@@ -12,17 +12,17 @@ app.controller('OrdersTextToSqlAiController', [
             error: null
         };
 
-        $scope.toggleAiChat = function() {
+        $scope.toggleAiChat = function () {
             $scope.aiChatOpen = !$scope.aiChatOpen;
             if ($scope.aiChatOpen) {
-                setTimeout(function() {
+                setTimeout(function () {
                     $scope.scrollChatToBottom();
                 }, 100);
             }
         };
 
-        $scope.scrollChatToBottom = function() {
-            setTimeout(function() {
+        $scope.scrollChatToBottom = function () {
+            setTimeout(function () {
                 var messagesEl = document.getElementById('aiChatMessages');
                 if (messagesEl) {
                     messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -30,7 +30,7 @@ app.controller('OrdersTextToSqlAiController', [
             }, 50);
         };
 
-        $scope.renderSqlAiAnswerText = function(text) {
+        $scope.renderSqlAiAnswerText = function (text) {
             if (!text) {
                 return $sce.trustAsHtml('<em>Chưa có câu trả lời</em>');
             }
@@ -52,7 +52,7 @@ app.controller('OrdersTextToSqlAiController', [
             return $sce.trustAsHtml(html);
         };
 
-        $scope.handleAiChatSubmit = function(event) {
+        $scope.handleAiChatSubmit = function (event) {
             if (event) {
                 event.preventDefault();
                 event.stopPropagation();
@@ -61,16 +61,17 @@ app.controller('OrdersTextToSqlAiController', [
             return false;
         };
 
-        // Build recent messages context (3-5 message gần nhất) để gửi lên backend
+        // Build recent messages context (5 message gần nhất từ lịch sử) để gửi lên backend
         function buildRecentMessages(questionText) {
             var history = $scope.sqlAi.history || [];
             var msgs = [];
 
-            // Lấy tối đa 2 phiên gần nhất (mỗi phiên có question/answer) -> khoảng 3–4 message
-            var maxPairs = 2;
-            var start = Math.max(0, history.length - maxPairs);
-            for (var i = start; i < history.length; i++) {
-                var h = history[i];
+            // Lấy tối đa 5 tin nhắn gần nhất từ lịch sử (KHÔNG bao gồm câu hỏi hiện tại)
+            // Backend sẽ tự động xử lý câu hỏi hiện tại
+            var recentHistory = history.slice(-3); // Lấy 3 cặp hỏi-đáp gần nhất
+
+            for (var i = 0; i < recentHistory.length; i++) {
+                var h = recentHistory[i];
                 if (!h) continue;
                 if (h.question) {
                     msgs.push({ role: 'user', content: String(h.question) });
@@ -80,12 +81,7 @@ app.controller('OrdersTextToSqlAiController', [
                 }
             }
 
-            // Thêm câu hỏi hiện tại vào cuối context
-            if (questionText) {
-                msgs.push({ role: 'user', content: String(questionText) });
-            }
-
-            // Chỉ giữ tối đa 5 message gần nhất
+            // Chỉ giữ tối đa 5 message gần nhất từ lịch sử
             var maxMessages = 5;
             if (msgs.length > maxMessages) {
                 msgs = msgs.slice(msgs.length - maxMessages);
@@ -94,7 +90,7 @@ app.controller('OrdersTextToSqlAiController', [
             return msgs;
         }
 
-        $scope.runSqlAi = function() {
+        $scope.runSqlAi = function () {
             var question = ($scope.sqlAi.question || '').trim();
             if (!question || $scope.sqlAi.loading) {
                 return;
@@ -131,7 +127,7 @@ app.controller('OrdersTextToSqlAiController', [
                 maxRows: 50,
                 recentMessages: recentMessages
             })
-                .then(function(res) {
+                .then(function (res) {
                     var data = res && res.data && res.data.data;
                     if (!data) {
                         throw new Error((res && res.data && res.data.message) || 'AI không trả về dữ liệu');
@@ -144,7 +140,7 @@ app.controller('OrdersTextToSqlAiController', [
 
                     $scope.scrollChatToBottom();
                 })
-                .catch(function(err) {
+                .catch(function (err) {
                     console.error('AI text-to-sql failed', err);
                     var message =
                         (err && err.data && err.data.message) ||
@@ -156,9 +152,9 @@ app.controller('OrdersTextToSqlAiController', [
                     $scope.sqlAi.error = message;
                     $scope.scrollChatToBottom();
                 })
-                .finally(function() {
+                .finally(function () {
                     $scope.sqlAi.loading = false;
-                    try { $scope.$applyAsync(); } catch (e) {}
+                    try { $scope.$applyAsync(); } catch (e) { }
                 });
         };
     }

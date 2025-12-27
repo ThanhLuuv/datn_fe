@@ -1256,13 +1256,32 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
     };
 
     // Xác nhận giao hàng thành công
-    this.confirmOrderDelivered = function (orderId, payload) {
-        return $http({
+    this.confirmOrderDelivered = function (orderId, formData) {
+        var token = AuthService.getToken();
+
+        return fetch(baseUrl + '/order/' + orderId + '/confirm-delivered', {
             method: 'POST',
-            url: baseUrl + '/order/' + orderId + '/confirm-delivered',
-            data: payload,
-            headers: getAuthHeaders()
-        });
+            headers: {
+                'Authorization': 'Bearer ' + token
+                // Don't set Content-Type - browser will set it automatically with boundary
+            },
+            body: formData
+        })
+            .then(function (response) {
+                if (!response.ok) {
+                    return response.json().then(function (errorData) {
+                        throw new Error(errorData.message || 'Request failed');
+                    });
+                }
+                return response.json();
+            })
+            .then(function (data) {
+                return { data: data };
+            })
+            .catch(function (error) {
+                console.error('Confirm delivery error:', error);
+                throw { data: { message: error.message } };
+            });
     };
 
     // Hủy đơn hàng

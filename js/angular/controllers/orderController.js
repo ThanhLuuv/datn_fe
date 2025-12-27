@@ -417,41 +417,42 @@ app.controller('AdminOrdersController', ['$scope', '$rootScope', 'BookstoreServi
         $scope.hideConfirmModal();
     };
 
-    $scope.cancelOrder = function (order) {
-        var orderStatus = $scope.getOrderStatus(order);
-        if (orderStatus !== 'PendingConfirmation') {
-            $scope.showConfirmModal(
-                'Không thể hủy đơn',
-                'Chỉ có thể hủy đơn hàng ở trạng thái <strong>Chờ xác nhận</strong>.',
-                'warning',
-                null,
-                null
-            );
-            return;
-        }
+    // Cancel order function - DISABLED as per requirement
+    // $scope.cancelOrder = function (order) {
+    //     var orderStatus = $scope.getOrderStatus(order);
+    //     if (orderStatus !== 'PendingConfirmation') {
+    //         $scope.showConfirmModal(
+    //             'Không thể hủy đơn',
+    //             'Chỉ có thể hủy đơn hàng ở trạng thái <strong>Chờ xác nhận</strong>.',
+    //             'warning',
+    //             null,
+    //             null
+    //         );
+    //         return;
+    //     }
 
-        $scope.showConfirmModal(
-            'Xác nhận hủy đơn hàng',
-            'Bạn có chắc chắn muốn hủy đơn hàng <strong>OD-' + (order.orderId || order.id) + '</strong>?<br><small class="text-muted">Hành động này không thể hoàn tác.</small>',
-            'danger',
-            function (selectedOrder, modalData) {
-                var id = selectedOrder.orderId || selectedOrder.id;
-                var payload = {
-                    reason: modalData.cancelReason || 'Hủy đơn hàng',
-                    note: modalData.cancelNote || 'Admin/Employee hủy'
-                };
-                BookstoreService.cancelOrder(id, payload)
-                    .then(function () {
-                        $scope.addToast('success', 'Đã hủy đơn hàng');
-                        $scope.loadOrders();
-                    })
-                    .catch(function () {
-                        $scope.addToast('danger', 'Không thể hủy đơn hàng');
-                    });
-            },
-            order
-        );
-    };
+    //     $scope.showConfirmModal(
+    //         'Xác nhận hủy đơn hàng',
+    //         'Bạn có chắc chắn muốn hủy đơn hàng <strong>OD-' + (order.orderId || order.id) + '</strong>?<br><small class="text-muted">Hành động này không thể hoàn tác.</small>',
+    //         'danger',
+    //         function (selectedOrder, modalData) {
+    //             var id = selectedOrder.orderId || selectedOrder.id;
+    //             var payload = {
+    //                 reason: modalData.cancelReason || 'Hủy đơn hàng',
+    //                 note: modalData.cancelNote || 'Admin/Employee hủy'
+    //             };
+    //             BookstoreService.cancelOrder(id, payload)
+    //                 .then(function () {
+    //                     $scope.addToast('success', 'Đã hủy đơn hàng');
+    //                     $scope.loadOrders();
+    //                 })
+    //                 .catch(function () {
+    //                     $scope.addToast('danger', 'Không thể hủy đơn hàng');
+    //                 });
+    //         },
+    //         order
+    //     );
+    // };
 
     $scope.assignDelivery = function (order) {
         console.log('Assign delivery clicked for order:', order);
