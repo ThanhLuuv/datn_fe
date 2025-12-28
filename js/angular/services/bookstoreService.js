@@ -48,9 +48,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         return $http({
             method: 'GET',
             url: baseUrl + '/area',
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            headers: getAuthHeaders()
         });
     };
 
@@ -59,9 +57,7 @@ app.service('BookstoreService', ['$http', '$q', 'APP_CONFIG', 'AuthService', fun
         return $http({
             method: 'GET',
             url: baseUrl + '/area/' + areaId,
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            headers: getAuthHeaders()
         });
     };
 
