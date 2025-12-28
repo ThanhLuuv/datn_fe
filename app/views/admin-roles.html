@@ -26,7 +26,9 @@
                         <div class="card-header">Roles</div>
                         <div class="card-body p-0">
                             <ul class="list-group list-group-flush">
-                                <li class="list-group-item" ng-repeat="r in roles" ng-class="{active: selectedRole && selectedRole.roleId === r.roleId}" style="cursor:pointer" ng-click="selectRole(r)">
+                                <li class="list-group-item" ng-repeat="r in roles"
+                                    ng-class="{active: selectedRole && selectedRole.roleId === r.roleId}"
+                                    style="cursor:pointer" ng-click="selectRole(r)">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div>
                                             <strong>{{r.name}}</strong>
@@ -41,12 +43,17 @@
                 </div>
                 <div class="col-md-8">
                     <div class="card h-100">
-                        <div class="card-header">Quyền của role: <strong>{{selectedRole && selectedRole.name || 'Chưa chọn'}}</strong></div>
+                        <div class="card-header">Quyền của role: <strong>{{selectedRole && selectedRole.name || 'Chưa
+                                chọn'}}</strong></div>
                         <div class="card-body">
                             <div class="row g-2">
                                 <div class="col-md-6" ng-repeat="p in permissions">
                                     <div class="form-check border rounded p-2">
-                                        <input class="form-check-input" type="checkbox" id="perm-{{p.permissionId}}" ng-checked="hasPermission(p.permissionId)" ng-click="togglePermission(p)">
+                                        <input class="form-check-input" type="checkbox" id="perm-{{p.permissionId}}"
+                                            ng-checked="hasPermission(p.permissionId) && p.code !== 'READ_BOOK' && p.code !== 'READ_CATEGORY' && p.code !== 'READ_PROMOTION'"
+                                            ng-click="togglePermission(p)"
+                                            ng-disabled="p.code === 'READ_BOOK' || p.code === 'READ_CATEGORY' || p.code === 'READ_PROMOTION'"
+                                            title="{{(p.code === 'READ_BOOK' || p.code === 'READ_CATEGORY' || p.code === 'READ_PROMOTION') ? 'Quyền này đã được mở công khai' : ''}}">
                                         <label class="form-check-label" for="perm-{{p.permissionId}}">
                                             <strong>{{p.code}}</strong>
                                             <div class="small text-muted">{{p.name}}</div>
@@ -64,12 +71,12 @@
 
 <!-- Toasts -->
 <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000;">
-    <div class="toast align-items-center text-white bg-{{t.variant}} border-0 mb-2 show" role="alert" aria-live="assertive" aria-atomic="true" ng-repeat="t in toasts">
+    <div class="toast align-items-center text-white bg-{{t.variant}} border-0 mb-2 show" role="alert"
+        aria-live="assertive" aria-atomic="true" ng-repeat="t in toasts">
         <div class="d-flex">
             <div class="toast-body">{{t.message}}</div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" ng-click="toasts.splice($index,1)"></button>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                ng-click="toasts.splice($index,1)"></button>
         </div>
     </div>
-    </div>
-
-
+</div>
